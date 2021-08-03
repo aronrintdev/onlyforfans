@@ -20,7 +20,7 @@
             <!-- empty placeholder to preserve justify arrangment in flex area -->
           </article>
           <article class="d-md-block">
-            <div v-if="!is_homefeed" @click="renderTip" class="btn">
+            <!-- <div v-if="!is_homefeed" @click="renderTip" class="btn">
               <fa-icon icon="dollar-sign" class="tag-ctrl text-primary" />
             </div>
             <div v-if="!is_homefeed" class="btn">
@@ -29,10 +29,10 @@
             <div v-if="!is_homefeed" @click="renderFollow" class="btn">
               <fa-icon :icon="timeline.is_following ? 'eye' : ['far', 'eye']" class="tag-ctrl text-primary" /> 
             </div>
-            <div v-if="!is_homefeed" @click="toggleFavorite"class="btn">
+            <div v-if="!is_homefeed" @click="toggleFavorite" class="btn">
                 <fa-icon v-if="isFavoritedByMe" fixed-width :icon="['fas', 'star']" class="clickable text-primary" />
                 <fa-icon v-else fixed-width :icon="['far', 'star']" class="clickable text-primary" />
-            </div>
+            </div> -->
             <div @click="toggleGridLayout" class="btn">
               <fa-icon :icon="['far', 'grip-horizontal']" class="text-primary" />
             </div>
@@ -94,7 +94,7 @@
 
 <script>
 import Vuex from 'vuex'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import PostDisplay from '@components/posts/Display'
 import ImageDisplay from '@components/timelines/elements/ImageDisplay'
 
@@ -109,6 +109,8 @@ export default {
     is_schedulefeed: null,
     session_user: null,
     timeline: null,
+    currentFeedType: null,
+    setCurrentFeedType: { type: Function },
   },
 
   computed: {
@@ -175,6 +177,7 @@ export default {
   }),
 
   mounted() {
+    this.isFavoritedByMe = this.timeline.is_favorited;
     // window.addEventListener('scroll', this.onScroll)
   },
   beforeDestroy() {
@@ -226,6 +229,7 @@ export default {
       }
       eventBus.$emit('set-feed-layout', this.isGridLayout )
       this.reloadFromFirstPage()
+      this.setCurrentFeedType(feedType)
     },
 
     renderTip() {
@@ -407,6 +411,10 @@ export default {
         this.moreLoading = false
       }
     },
+
+    currentFeedType(newVal) {
+      if (newVal === 'photos') this.setFeedType('photos')
+    }
   },
 }
 </script>
@@ -414,7 +422,7 @@ export default {
 <style scoped>
 .feed-ctrl {
   background: #fff;
-  border: solid #a5a5a5 1px;
+  border: solid #dfdfdf 1px;
   border-radius: 3px;
 }
 .feed-ctrl .btn {

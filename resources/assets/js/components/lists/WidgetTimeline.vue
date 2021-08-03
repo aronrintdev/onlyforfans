@@ -5,7 +5,7 @@
 
     <b-card-body class="py-1">
 
-      <div class="last-seen">Last seen TBD</div>
+      <div class="last-seen">Last seen {{ moment(timeline.updated_at).format('MMM D') }}</div>
 
       <div class="banner-ctrl ">
         <b-dropdown no-caret right ref="bannerCtrls" variant="transparent" id="banner-ctrl-dropdown" class="tag-ctrl"> 
@@ -14,7 +14,7 @@
           </template>
           <b-dropdown-item v-clipboard="getTimelineUrl(timeline)">Copy link to profile</b-dropdown-item>
           <b-dropdown-divider></b-dropdown-divider>
-          <b-dropdown-item @click="doReport(timeline)">Report</b-dropdown-item>
+          <b-dropdown-item disabled @click="doReport(timeline)">Report</b-dropdown-item>
         </b-dropdown>
       </div>
       <div class="avatar-img">
@@ -24,9 +24,13 @@
       </div>
 
       <div class="shareable-id">
-        <b-card-title class="mb-1">
+        <b-card-title class="mb-1 subscriber-card">
           <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">{{ timeline.name }}</router-link>
-          <fa-icon v-if="access_level==='premium'" fixed-width :icon="['fas', 'rss-square']" style="color:#138496; font-size: 16px;" />
+          <span v-if="access_level==='premium'" class="subscriber">
+            <b-badge variant='info'>
+              Subscriber
+            </b-badge>
+          </span>
         </b-card-title>
         <b-card-sub-title class="mb-1">
           <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">@{{ timeline.slug }}</router-link>
@@ -35,9 +39,9 @@
 
       <slot></slot>
 
-      <div>
-        <small v-if="access_level==='premium'" class="text-muted">subscribed since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
-        <small v-else class="text-muted">following for free since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
+      <div class="mt-2 mb-2">
+        <small v-if="access_level==='premium'" class="text-muted">Subscribed since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
+        <small v-else class="text-muted">Following for free since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
       </div>
 
     </b-card-body>
@@ -46,7 +50,7 @@
 </template>
 
 <script>
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 //import { DateTime } from 'luxon'
 import moment from 'moment'
 
@@ -92,6 +96,15 @@ export default {
 <style lang="scss" scoped>
 .clickable {
   cursor: pointer;
+}
+.subscriber {
+  margin-left: 15px;
+  font-size: 18px;
+}
+.subscriber-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
 }
 </style>
 

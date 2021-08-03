@@ -74,7 +74,8 @@ class UsersTableSeeder extends Seeder
                     'real_firstname' => 'Matt',
                     'real_lastname' => 'M',
                     'username' => 'mattm',
-                    'email' => 'matt@mjmwebdesign.com',
+                    //'email' => 'matt@mjmwebdesign.com',
+                    'email' => 'matt@allfans.com',
                     'gender' => 'male',
                     'city' => 'Las Vegas',
                     'country' => 'US',
@@ -87,7 +88,8 @@ class UsersTableSeeder extends Seeder
                     'real_firstname' => 'Chad',
                     'real_lastname' => 'J',
                     'username' => 'chadj',
-                    'email' => 'realchadjohnson@gmail.com',
+                    //'email' => 'realchadjohnson@gmail.com',
+                    'email' => 'chad@allfans.com',
                     'gender' => 'male',
                     'city' => 'Las Vegas',
                     'country' => 'US',
@@ -117,6 +119,7 @@ class UsersTableSeeder extends Seeder
                 }
                 $user = FactoryHelpers::createUser($u);
                 $user->assignRole('super-admin');
+                $user->assignRole('admin');
                 unset($user);
             }
         } // testing

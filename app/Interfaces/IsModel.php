@@ -23,4 +23,6 @@ interface IsModel
     public function withoutRelations();
 
     public function refresh();
+
+    public function getTable();
 }

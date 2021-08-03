@@ -9,7 +9,24 @@
             v-for="(media, index) in files"
             :key="index"
           >
-            <img v-preview:scope-a class="swiper-lazy" :src="media.filepath || media.src" />
+            <img
+              v-if="media.is_image && media.access"
+              class="swiper-lazy"
+              :src="media.filepath || media.src"
+              @click="openPhotoSwipe(index)"
+            />
+            <img
+              v-if="media.is_image && !media.access"
+              class="swiper-lazy"
+              :src="media.blurFilepath"
+              @click="openPhotoSwipe(index)"
+            />
+            <div v-if="media.is_video" class="swiper-lazy video" @click="openPhotoSwipe(index)">
+              <video>
+                <source :src="media.filepath" :type=" media.mimetype || media.type" />
+              </video>
+              <fa-icon :icon="['far', 'play-circle']" class="text-white icon-play" />
+            </div>
           </div>
           <div v-observe-visibility="onLastVisible"> </div>
         </div>
@@ -25,18 +42,30 @@
         <fa-icon icon="chevron-right" />
       </div>
     </transition>
+    <div class="audio" v-for="(audio, index) in audioFiles" :key="index">
+      <vue-plyr>
+        <audio controls playsinline>
+          <source :src="audio.filepath" type="audio/webm" />
+          <source :src="audio.filepath" type="audio/mp3" />
+          <source :src="audio.filepath" type="audio/ogg" />
+        </audio>
+      </vue-plyr>
+    </div>
   </div>
 </template>
 
 <script>
 import _ from 'lodash'
 import Vue from 'vue'
-import PhotoSwipe from 'photoswipe/dist/photoswipe';
-import PhotoSwipeUI from 'photoswipe/dist/photoswipe-ui-default';
-import createPreviewDirective from 'vue-photoswipe-directive';
+import PhotoSwipe from 'photoswipe/dist/photoswipe'
+import PhotoSwipeUI from 'photoswipe/dist/photoswipe-ui-default'
+import createPreviewDirective from 'vue-photoswipe-directive'
+
+import AudioPlayer from '@components/audioPlayer'
+import VideoPlayer from '@components/videoPlayer'
 
 export default {
-  name: "PreviewSlider",
+  name: 'PreviewSlider',
 
   props: {
     mediafiles: { type: Array, default: () => ([]) },
@@ -51,6 +80,7 @@ export default {
 
   data: () => ({
     files: [],
+    audioFiles: [],
     swiperOptions: {
       lazy: true,
       slidesPerView: 'auto',
@@ -76,7 +106,8 @@ export default {
 
   mounted() {
     if (this.mediafiles) {
-      this.files = [...this.mediafiles];
+      this.files = this.mediafiles.filter(file => file.is_image || file.is_video);
+      this.audioFiles = this.mediafiles.filter(file => file.is_audio);
       this.$nextTick(() => {
         this.swiper?.update()
       })
@@ -124,6 +155,42 @@ export default {
       this.files = temp;
       this.applyBtnEnabled = true;
     },
+
+    openPhotoSwipe(index) {
+      this.$Pswp.open({
+        items: this.files.map(file => {
+          if (file.mimetype.indexOf('video/') > -1) {
+            return ({
+              html: new Vue({
+                ...VideoPlayer,
+                propsData: {
+                  source: file
+                }
+              }).$mount().$el,
+            })
+          }
+          if (file.is_audio) {
+            return ({
+              html: new Vue({
+                ...AudioPlayer,
+                propsData: {
+                  source: file
+                }
+              }).$mount().$el,
+            })
+          }
+          return ({
+            src: file.filepath,
+          })
+        }),
+        options: {
+          index,
+          showAnimationDuration: 0,
+          bgOpacity: 0.75
+        },
+      })
+    },
+
   },
 }
 </script>
@@ -150,17 +217,49 @@ export default {
       opacity: 0.7;
     }
   }
+
   .swiper-lazy {
     height: 144px;
     border-radius: 10px;
     margin-right: 8px;
     width: auto;
+    overflow: hidden;
     object-fit: contain;
+    cursor: pointer;
+
+    &.video {
+      position: relative;
+
+      &::before {
+        content: "";
+        display: block;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.2);
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      video {
+        height: 100%;
+      }
+
+      .icon-play {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 34px;
+      }
+    }
   }
+
   audio.swiper-lazy {
     width: 300px;
     outline: none;
   }
+
   .swiper-image-wrapper {
     position: relative;
 
@@ -173,6 +272,34 @@ export default {
 
       svg {
         width: 1em;
+      }
+    }
+  }
+
+  .audio-file-viewer {
+    flex-flow: wrap;
+
+    .audio {
+      width: 100%;
+      margin-top: 10px;
+      position: relative;
+
+      audio {
+        width: 100%;
+      }
+
+      .icon-close {
+        position: absolute;
+        top: 0;
+        right: 10px;
+        transform: translate(50%, -50%);
+        line-height: 1;
+        padding: 3px;
+
+        svg {
+          width: 14px;
+          height: 14px;
+        }
       }
     }
   }

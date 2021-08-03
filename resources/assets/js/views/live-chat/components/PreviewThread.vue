@@ -1,11 +1,12 @@
 <template>
   <b-list-group-item
+    v-if="participant"
     :to="to"
     :active="active"
   >
 
     <section class="d-flex align-items-center">
-      <b-avatar :src="participant.avatar.filepath" size="3rem" :alt="participant.name" />
+      <AvatarWithStatus :user="participant" :thumbnail="false" imageOnly noLink />
       <div class="participant-info pl-2">
         <div class="d-flex my-0">
           <span class="msg-username" v-bind:class="{ 'tag-unread': chatthread.unread_count }">
@@ -26,7 +27,10 @@
 
           <VueMarkdown
             class="msg-snippet mb-0"
-            inline :breaks="false"
+            inline
+            :breaks="false"
+            :html="false"
+            :linkify="false"
             :source="chatthread.chatmessages[0].mcontent || ''"
           />
         </div>
@@ -48,7 +52,14 @@ import moment from 'moment'
 /** https://github.com/adapttive/vue-markdown/ */
 import VueMarkdown from '@adapttive/vue-markdown'
 
+import AvatarWithStatus from '@components/user/AvatarWithStatus'
+
 export default {
+
+  components: {
+    AvatarWithStatus,
+    VueMarkdown,
+  },
 
   props: {
     active: { type: Boolean, default: false },
@@ -83,10 +94,6 @@ export default {
 
   watch: {
   }, // watch
-
-  components: {
-    VueMarkdown,
-  },
 
 }
 </script>

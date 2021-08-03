@@ -62,12 +62,12 @@ export default {
         {
           label: 'Settings',
           icon: 'cog',
-          linkTo: { name: 'settings.general' }
+          linkTo: { name: 'settings.profile' }
         },
         {
           label: 'Lists',
           icon: 'cog',
-          linkTo: { name: 'lists.default' }
+          linkTo: { name: 'lists.favorites' }
         },
       ]
 

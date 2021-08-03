@@ -66,7 +66,8 @@ class LikeablesTableSeeder extends Seeder
                         'created_at' => $now,
                         'updated_at' => $now,
                     ]);
-                    $p->user->notify(new ResourceLiked($p, $f));
+                    // %PSG: Disable as this will trigger SendGrid emails
+                    //$p->user->notify(new ResourceLiked($p, $f));
                 });
             });
 

@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             UsernameRulesSeeder::class,
             RolesTableSeeder::class,
             UsersTableSeeder::class,
+
             PostsTableSeeder::class,
             PaymentMethodsSeeder::class,
             AchAccountSeeder::class,
@@ -34,6 +35,8 @@ class DatabaseSeeder extends Seeder
             RandomTimestampSeeder::class,
             ChatmessagesTableSeeder::class,
             MediafilesTableSeeder::class,
+            PermissionsTableSeeder::class,
+            StaffTableSeeder::class,
         ]);
     }
 

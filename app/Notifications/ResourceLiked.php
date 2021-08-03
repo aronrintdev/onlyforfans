@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 use App\Interfaces\Likeable;
 use App\Models\User;
 
@@ -47,7 +46,7 @@ class ResourceLiked extends Notification
     {
         return (new MailMessage)
                     ->line('You received a like from '.$this->actor->name)
-                    ->action('Notification Action', url('/'));
+                    ->action('View Like', url('/'));
     }
 
     public function toArray($notifiable)

@@ -2,21 +2,23 @@
   <div class="container" id="view-explore">
     <section class="row">
       <main class="col-12">
-        <PublicPostFeed :mediafiles="mediafiles" @loadMore="loadMore" />
-        <div class="text-center" v-if="loading">
-          <b-spinner class="loading"></b-spinner>
-        </div>
+        <PublicPostFeed :mediafiles="publicPosts" @loadMore="loadMore" :loading="loading" />
       </main>
     </section>
   </div>
 </template>
 
 <script>
+import Vuex from 'vuex'
 import PublicPostFeed from '@components/timelines/PublicPostFeed.vue';
 
 export default {
   components: {
     PublicPostFeed,
+  },
+
+  computed: {
+    ...Vuex.mapState('posts', [ 'publicPosts' ]),
   },
 
   data: () => ({
@@ -30,6 +32,7 @@ export default {
     this.fetchFeed(1);
   },
   methods: {
+    ...Vuex.mapMutations('posts', [ 'SET_PUBLIC_POSTS' ]),
     async fetchFeed(page) {
       this.loading = true;
       const response = await axios.get(route('timelines.publicfeed'), {
@@ -39,11 +42,12 @@ export default {
       });
       const posts = response.data.data.filter(dt => dt.mediafile_count > 0);
       const mediafiles = posts.map(post => ({
-        ...post.mediafiles[0],
+        ...post.mediafiles.filter(file => file.is_image || file.is_video)[0],
         mediaCount: post.mediafile_count,
         post,
       }));
       this.mediafiles = this.mediafiles.concat(mediafiles);
+      this.SET_PUBLIC_POSTS(this.mediafiles);
       this.loading = false;
     },
     loadMore() {
@@ -56,18 +60,13 @@ export default {
 
 <style lang="scss" scoped>
 .loading {
-  width: 2.5em;
-  height: 2.5em;
-  margin: 5em;
+  width: 1.5em;
+  height: 1.5em;
+  margin: 2.5em;
 }
 @media (max-width: 767px) {
   #view-explore .col-12 {
     padding: 5px;
-  }
-  .loading {
-    width: 2em;
-    height: 2em;
-    margin: 4em;
   }
 }
 </style>

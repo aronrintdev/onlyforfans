@@ -126,7 +126,7 @@
 /**
  * New ACH Account Form
  */
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import _ from 'lodash'
 import Vuex from 'vuex'
 import CountrySelectInput from '@components/forms/elements/CountrySelectInput'

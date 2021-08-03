@@ -11,6 +11,7 @@ use App\Interfaces\Blockable;
 use App\Interfaces\HasFinancialAccounts;
 use App\Interfaces\ShortUuid;
 use App\Models\Traits\UsesUuid;
+use App\Notifications\PasswordReset as PasswordResetNotification;
 
 use App\Interfaces\PaymentSendable;
 use App\Models\Financial\Account;
@@ -28,25 +29,27 @@ use InvalidArgumentException;
 use Laravel\Scout\Searchable;
 
 use App\Enums\VerifyStatusTypeEnum;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 /**
- * @property string      $id              `uuid` | `unique`
- * @property string      $email           email address | `unique`
- * @property string      $username        `unique`
- * @property string      $firstname       User defined First Name
- * @property string      $lastname        User defined Last Name
- * @property string      $password        Password Hash
- * @property string      $remember_token  Laravel remember token
- * @property bool        $email_verified  If email has been verified
- * @property bool        $is_online       If user is currently online
- * @property Carbon|null $last_logged     Last login time of user
+ * @property string      $id                 `uuid` | `unique`
+ * @property string      $email              email address | `unique`
+ * @property string      $username           `unique`
+ * @property string      $firstname          User defined First Name
+ * @property string      $lastname           User defined Last Name
+ * @property string      $password           Password Hash
+ * @property string      $remember_token     Laravel remember token
+ * @property bool        $email_verified     If email has been verified
+ * @property Carbon|null $email_verified_at  When the user's email was verified
+ * @property bool        $is_online          If user is currently online
+ * @property Carbon|null $last_logged        Last login time of user
  * @property Carbon      $created_at
  * @property Carbon      $updated_at
  * @property Carbon|null $deleted_at
  *
  * @package App\Models
  */
-class User extends Authenticatable implements Blockable, HasFinancialAccounts
+class User extends Authenticatable implements Blockable, HasFinancialAccounts, MustVerifyEmail
 {
     use HasRoles,
         HasFactory,
@@ -191,6 +194,11 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasMany(Favorite::class, 'user_id');
     }
 
+    public function referrals()
+    {
+        return $this->hasMany(Referral::class, 'user_id');
+    }
+
     public function timeline()
     {
         return $this->hasOne(Timeline::class);
@@ -323,6 +331,13 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->hasOne(Campaign::class);
     }
 
+    public function staffMembers()
+    {
+        return $this->hasMany(Staff::class, 'owner_id');
+    }
+
+
+
 //    public function lists()
 //    {
 //        return $this->belongsToMany(Lists::class, 'list_user', 'user_id', 'list_id')->withTimestamps();
@@ -360,11 +375,12 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
         return $this->verifyrequest->vstatus;
     }
 
+    // %NOTE: Use this as the 'display name'. 'Real name' fields will hold the real name
     public function getNameAttribute($value)
     {
         if ( $this->firstname && $this->lastname ) {
             return $this->firstname.' '.$this->lastname;
-        } else if ( $this->timeline->name ) {
+        } else if ( $this->timeline && $this->timeline->name ) {
             return $this->timeline->name;
         } else if ( $this->firstname ) {
             return $this->firstname;
@@ -377,7 +393,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     {
         return ($this->timeline && $this->timeline->avatar)
             ? $this->timeline->avatar
-            : (object) ['filepath' => url('/images/default_avatar.svg')];
+            : (object) ['filepath' => url('/images/default_avatar.png')];
             // : (object) ['filepath' => url('user/avatar/default-' . $this->gender . '-avatar.png')];
     }
 
@@ -550,6 +566,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
     public function getStats() : array
     {
         $timeline = $this->timeline;
+        $weblinks = json_decode($this->settings->weblinks, true);
         if ( !$timeline ) {
             return [];
         }
@@ -560,8 +577,8 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
             'following_count'  => $timeline->user->followedtimelines->count(),
             'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
             'earnings'         => '', // TODO: Hook up to earnings controller
-            'website'          => '', // %TODO
-            'instagram'        => '', // %TODO
+            'website'          => array_key_exists('website', $weblinks??[]) ? $weblinks['website'] : '', // %TODO
+            'instagram'        => array_key_exists('instagram', $weblinks??[]) ? $weblinks['instagram'] : '', // %TODO
             'city'             => (isset($this->settings)) ? $this->settings->city : null,
             'country'          => (isset($this->settings)) ? $this->settings->country : null,
         ];
@@ -614,6 +631,10 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts
 
     // %%% --- Misc. ---
 
+    // https://laravel.com/docs/8.x/passwords#reset-email-customization
+    public function sendPasswordResetNotification($token) {
+        $this->notify( new PasswordResetNotification($user, ['token'=>$token]) );
+    }
 
 }
 

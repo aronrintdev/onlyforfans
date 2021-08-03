@@ -14,4 +14,6 @@ interface Subscribable extends PaymentSendable, Shareable, CanFormatMoney
      * @return bool
      */
     public function verifyPrice($amount): bool;
+
+    public function getPrimaryOwner();
 }

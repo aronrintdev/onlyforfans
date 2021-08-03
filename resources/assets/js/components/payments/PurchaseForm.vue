@@ -1,6 +1,8 @@
 <template>
   <div>
-    <b-skeleton-wrapper :loading="loading">
+    <PaymentsDisabled v-if="paymentsDisabled" />
+
+    <b-skeleton-wrapper v-if="!paymentsDisabled" :loading="loading">
       <template #loading>
         <div class="w-100 my-5 d-flex align-items-center justify-content-center">
           <fa-icon icon="spinner" size="3x" spin />
@@ -25,8 +27,8 @@
           :payment-method="selectedPaymentMethod"
           :value="value"
           :item-type="itemType"
-          :price="price"
-          :currency="currency"
+          :price="typeof price === 'object' ? parseInt(price.amount) : price"
+          :currency="typeof price === 'object' ? price.currency : currency"
           :price-display="displayPrice"
           @processing="onProcessing"
           @stopProcessing="onStopProcessing"
@@ -42,16 +44,18 @@
 /**
  * Base purchase form, for when something is being purchased
  */
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import _ from 'lodash'
 import Vuex from 'vuex'
 import FormNew from './forms/New'
 import PaymentConfirmation from './forms/PaymentConfirmation'
-import PayWithForm from './PayWithForm'
+// import PayWithForm from './PayWithForm'
 import SavedPaymentMethodList from './SavedPaymentMethodsList'
 import LoadingOverlay from '@components/common/LoadingOverlay'
 import SubscriptionIFrame from './forms/SegpaySubscriptionIFrame'
 import LongRunningTransactionToast from './LongRunningTransactionToast'
+
+import PaymentsDisabled from './PaymentsDisabled'
 
 export default {
   name: 'PurchaseForm',
@@ -59,7 +63,8 @@ export default {
     FormNew,
     LongRunningTransactionToast,
     PaymentConfirmation,
-    PayWithForm,
+    PaymentsDisabled,
+    // PayWithForm,
     SavedPaymentMethodList,
     LoadingOverlay,
   },
@@ -70,7 +75,7 @@ export default {
     /** What type of item is being purchased, ( post, timeline ) */
     itemType: { type: String, default: ''},
     /** Price as integer */
-    price: { type: Number, default: 0 },
+    price: { type: [Number, Object], default: 0 },
     /** Price currency */
     currency: { type: String, default: 'USD' },
     /** Localized String of how to display currency to user */
@@ -98,6 +103,7 @@ export default {
     processing: false,
     maxProcessingWaitTime: 20 * 1000, // 20s
     waiting: null,
+    paymentsDisabled: false,
   }),
 
   methods: {
@@ -239,6 +245,9 @@ export default {
   mounted() {
     this.init()
     this.loadPaymentMethods()
+    if ( paymentsDisabled ) {
+      this.paymentsDisabled = true
+    }
   },
 
 }

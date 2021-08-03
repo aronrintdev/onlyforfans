@@ -21,6 +21,7 @@
               v-model="form.email"
               :placeholder="$t('email')"
               :state="verrors.email ? false : null"
+              :disabled="isEmailDisabled"
               @focus="clearVerrors"
             />
           </b-form-group>
@@ -99,6 +100,7 @@ export default {
       password: '',
       remember: false,
     },
+    isEmailDisabled: false,
   }),
   methods: {
     clearVerrors() {
@@ -119,7 +121,11 @@ export default {
           console.log('success', { 
             redirect: response.data 
           });
-          window.location = response.data.redirect;
+          if (this.$route.params.redirect) {
+            window.location.href = `${this.$route.params.redirect}&logged_in=true`;
+          } else {
+            window.location = response.data.redirect;
+          }
         } else {
           // %TODO
         }
@@ -136,6 +142,18 @@ export default {
       window.location.href = `/${path}`;
     }
   },
+  mounted() {
+    const { email: emailFromParams } = this.$route.params;
+    const { email: emailFromQuery } = this.$route.query;
+    const email = emailFromParams || emailFromQuery;
+    if (email) {
+      this.form = {
+        ...this.form,
+        email,
+      }
+      this.isEmailDisabled = true;
+    }
+  }
 }
 </script>
 

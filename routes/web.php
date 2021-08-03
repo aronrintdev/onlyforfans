@@ -3,6 +3,7 @@ use Pusher\Pusher;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\Finder\Finder;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 // Require all files in routes/web
 $files = Finder::create()
@@ -25,10 +26,21 @@ foreach ($files as $file) {
 Route::group(['middleware' => ['web']], function () {
     Auth::routes();
 
+    Route::post('/email/verification-notification', function (Request $request) {
+        $request->user()->sendEmailVerificationNotification();
+
+        return back()->with('message', 'Verification link sent!');
+    })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
+    Route::get('/email/verify/{id}/{hash}', 'Auth\RegisterController@verifyEmail')->name('verification.verify');
+    Route::post('/email/verify/resend', 'Auth\RegisterController@resendVerifyEmail')->name('verification.resend');
+
     // Skip these to spa controller
     Route::get('/login', 'SpaController@index');
-    Route::get('/register', 'SpaController@index');
+    Route::get('/register', 'SpaController@index')->name('register');
+    Route::get('/register/confirm-email', 'SpaController@index');
     Route::get('/forgot-password', 'SpaController@index');
+    Route::get('/email/verified', 'SpaController@index');
 
 });
 
@@ -70,7 +82,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/blockables/match', ['as'=>'blockables.match', 'uses' => 'BlockablesController@match']);
 
     // -- chatmessages --
-    Route::resource('chatmessages', 'ChatmessagesController', [
+    Route::get('/chatmessages/search', 'ChatmessagesController@search')
+        ->name('chatmessages.search');
+    Route::apiResource('chatmessages', 'ChatmessagesController', [
         'only' => [ 'index', ],
     ]);
 
@@ -128,12 +142,20 @@ Route::group(['middleware' => ['auth']], function () {
         'except' => [ 'create', 'edit', 'update', ],
     ]);
 
+    // -- referrals:  --
+    Route::resource('referrals', 'ReferralsController', [
+        'only' => ['index'],
+    ]);
+
     // -- mediafiles: likeable | shareable | commentable (?) | tippable | purchaseable --
     //Route::post('/mediafiles/{mediafile}/doClone', ['as'=>'mediafiles.doClone', 'uses' => 'MediafilesController@doClone']);
     Route::get('/mediafiles/match', ['as'=>'mediafiles.match', 'uses' => 'MediafilesController@match']);
     Route::get('/mediafiles/disk-stats/{mediafile}', ['as'=>'mediafiles.diskStats', 'uses' => 'MediafilesController@diskStats']);
     Route::post('/mediafiles/batch-destroy', ['as'=>'mediafiles.batchDestroy', 'uses' => 'MediafilesController@batchDestroy']);
     Route::resource('mediafiles', 'MediafilesController', [ 'except' => [ 'create', 'edit', ] ]);
+
+    Route::resource('diskmediafiles', 'DiskmediafilesController', [ 'only' => [ 'index', 'show', 'destroy'] ])->middleware(['role:admin|super-admin']);
+    //Route::resource('diskmediafiles', 'DiskmediafilesController', [ 'only' => [ 'index', 'show', 'destroy'] ]);
 
     Route::resource('notifications', 'NotificationsController', [ 'only' => [ 'index', ] ]);
 
@@ -166,7 +188,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/campaigns/stop', ['as'=>'campaigns.stop', 'uses' => 'CampaignsController@stop']);
     Route::resource('campaigns', 'CampaignsController', [ 'only' => [ 'store' ] ]);
 
-    // -- stories:  --
+    /* ------------------------------ Stories ------------------------------ */
     Route::get('/stories/player', ['as' => 'stories.player', 'uses' => 'SpaController@index']);
     Route::get('/stories/match', ['as'=>'stories.match', 'uses' => 'StoriesController@match']);
     Route::get('/stories/getSlides', ['as'=>'stories.getSlides', 'uses' => 'StoriesController@getSlides']);
@@ -178,13 +200,15 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
     Route::resource('stories', 'StoriesController', [ 'except' => [ 'create', 'edit', ] ]);
 
-    // -- shareables:  --
+    /* ------------------------------ Shareables ------------------------------ */
     Route::get('/shareables/indexFollowers', ['as' => 'shareables.indexFollowers', 'uses' => 'ShareablesController@indexFollowers']);
     Route::get('/shareables/indexFollowing', ['as' => 'shareables.indexFollowing', 'uses' => 'ShareablesController@indexFollowing']);
+    Route::put('/shareables/{shareable}/clearnotes', ['as' => 'shareables.clearnotes', 'uses' => 'ShareablesController@clearnotes']);
     Route::resource('shareables', 'ShareablesController', [
-        'only' => [ 'index', ],
+        'only' => [ 'index', 'update'],
     ]);
 
+    /* ------------------------------ Timelines ------------------------------ */
     // -- timelines: tippable | subscribeable | followable --
     #region Timelines
     Route::get('/timelines-suggested', ['as'=>'timelines.suggested', 'uses' => 'TimelinesController@suggested']); // %FIXME: refactor: use index(?)
@@ -212,12 +236,14 @@ Route::group(['middleware' => ['auth']], function () {
 
     #endregion Timelines
 
+    /* ------------------------------ Users ------------------------------ */
     // -- users: messageable --
     //Route::get('/users-suggested', ['as'=>'users.suggested', 'uses' => 'UsersController@suggested']);
     Route::get('/users/me', ['as' => 'users.me', 'uses' => 'UsersController@me']);
     Route::get('/users/match', ['as'=>'users.match', 'uses' => 'UsersController@match']);
     Route::post('/users/request-verify', ['as'=>'users.requestVerify', 'uses' => 'UsersController@requestVerify']);
     Route::post('/users/check-verify-status', ['as'=>'users.checkVerifyStatus', 'uses' => 'UsersController@checkVerifyStatus']);
+    Route::get('/users/checkReferralCode', ['as' => 'users.checkReferralCode', 'uses' => 'UsersController@checkReferralCode']);
     Route::patch('/users/{user}/settings/enable/{group}', ['as'=>'users.enableSetting', 'uses' => 'UsersController@enableSetting']); // turn on a single update within a group
     Route::patch('/users/{user}/settings/disable/{group}', ['as'=>'users.disableSetting', 'uses' => 'UsersController@disableSetting']); // turn off a single update within a group
     Route::patch('/users/{user}/settings', ['as'=>'users.updateSettingsBatch', 'uses' => 'UsersController@updateSettingsBatch']); // batch update one (or multiple) groups at a time
@@ -229,8 +255,10 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
     Route::post('/users/avatar', ['as' => 'users.updateAvatar', 'uses' => 'UsersController@updateAvatar']);
     Route::post('/users/cover', ['as' => 'users.updateCover', 'uses' => 'UsersController@updateCover']);
+    Route::post('/users/send-staff-invite', ['as'=>'users.sendStaffInvite', 'uses' => 'UsersController@sendStaffInvite']);
     Route::resource('users', 'UsersController', [ 'except' => [ 'create', 'edit', 'store' ] ]);
 
+    /* ------------------------------ Vault ------------------------------ */
     // -- vaults:  --
     Route::get('/my-vault', [
         'middleware' => 'spaMixedRoute',
@@ -256,39 +284,22 @@ Route::group(['middleware' => ['auth']], function () {
 
     // -- misc --
     Route::post('update-last-seen', 'UsersController@updateLastSeen')->name('update-user-status');
-    /*
-    Route::get('/saved/dashboard', ['as'=>'saved.dashboard', 'uses' => 'SaveditemsController@dashboard']);
-    Route::resource('saved', 'SaveditemsController', [
-        'only' => ['index', 'show', 'store'],
-    ]);
-     */
 
 });
 
-// DEPRECATED
-//  -- messages --
-//Route::get('/chat-messages/users', ['as'=>'messages.fetchusers', 'uses' => 'MessageController@fetchUsers']);
-//Route::get('/chat-messages/contacts', ['as'=>'messages.fetchcontacts', 'uses' => 'MessageController@fetchContacts']);
-//Route::get('/chat-messages/scheduled', ['as'=>'messages.fetchscheduled', 'uses' => 'MessageController@fetchScheduled']);
-//Route::delete('/chat-messages/scheduled/{threadId}', ['as'=>'messages.removeschedule', 'uses' => 'MessageController@removeScheduleThread']);
-//Route::patch('/chat-messages/scheduled/{threadId}', ['as'=>'messages.editschedule', 'uses' => 'MessageController@editScheduleThread']);
-//Route::get('/chat-messages/{id}', ['as'=>'messages.fetchcontact', 'uses' => 'MessageController@fetchcontact']);
-//Route::delete('/chat-messages/{id}', ['as'=>'messages.clearcontact', 'uses' => 'MessageController@clearUser']);
-//Route::post('/chat-messages/{id}/mark-as-read', ['as'=>'messages.markasread', 'uses' => 'MessageController@markAsRead']);
-//Route::post('/chat-messages/mark-all-as-read', ['as'=>'messages.markallasread', 'uses' => 'MessageController@markAllAsRead']);
-//Route::get('/chat-messages/{id}/search', ['as'=>'messages.filtermessages', 'uses' => 'MessageController@filterMessages']);
-//Route::patch('/chat-messages/{id}/mute', ['as'=>'messages.mute', 'uses' => 'MessageController@mute']);
-//Route::patch('/chat-messages/{id}/unmute', ['as'=>'messages.unmute', 'uses' => 'MessageController@unmute']);
-//Route::post('/chat-messages/{id}/custom-name', ['as'=>'messages.customname', 'uses' => 'MessageController@setCustomName']);
-//Route::get('/chat-messages/{id}/mediafiles', ['as'=>'messages.mediafiles', 'uses' => 'MessageController@listMediafiles']);
-//Route::delete('/chat-messages/{id}/threads/{threadId}', ['as'=>'messages.removethread', 'uses' => 'MessageController@removeThread']);
-//Route::post('/chat-messages/{id}/threads/{threadId}/like', ['as'=>'messages.setlike', 'uses' => 'MessageController@setLike']);
-//Route::post('/chat-messages/{id}/threads/{threadId}/unlike', ['as'=>'messages.setunlike', 'uses' => 'MessageController@setUnlike']);
-//
-//Route::resource('chat-messages', 'MessageController')->only([
-//    'index',
-//    'store'
-//]);
+/* ------------------------------ Financial Namespace ------------------------------ */
+// %NOTE: currently these are limited to super-admin roles
+Route::group(['middleware' => ['auth', 'role:admin|super-admin'], 'as'=>'financial.', 'prefix'=>'financial', 'namespace'=>'Financial'], function () {
+
+    Route::resource('accounts', 'AccountsController', [ 
+        'only' => [ 'index', 'show' ],
+    ]);
+
+    Route::get('/summary/transactions', 'TransactionsController@summary')->name('transactions.summary');
+    Route::resource('transactions', 'TransactionsController', [ 
+        'only' => [ 'index', 'show' ],
+    ]);
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -299,7 +310,7 @@ Route::group(['prefix' => '/username'], function() {
     Route::match(['get', 'post'], '/check/{username?}', 'UsernameRulesController@checkUsername')->name('usernameRules.check');
 
     // Admin Crud API //
-    Route::group(['middleware' => ['auth', 'role:admin']], function() {
+    Route::group(['middleware' => ['auth', 'role:admin|super-admin']], function() {
         Route::get('/rules', 'UsernameRulesController@index')->name('usernameRules.index');
         Route::get('/rules/{page}', 'UsernameRulesController@list')->name('usernameRules.list');
         Route::get('/rule/new', 'UsernameRulesController@create')->name('usernameRules.create');
@@ -359,8 +370,19 @@ Route::delete('/lists/{id}/users/{userId}', 'ListsController@removeUserFromList'
 Route::post('/lists/{id}/pin', 'ListsController@addToPin')->name('lists.addtopin');
 Route::delete('/lists/{id}/pin', 'ListsController@removeFromPin')->name('lists.removefrompin');
 
+/*
+  Staff
+ */
+Route::get('/staff-members/managers', ['as'=>'staff.indexManagers', 'uses' => 'StaffController@indexManagers']);
+Route::get('/staff-members/staff', ['as'=>'staff.indexStaffMembers', 'uses' => 'StaffController@indexStaffMembers']);
+Route::delete('/staff-members/{id}', ['as'=>'staff.remove', 'uses' => 'StaffController@remove']);
+Route::post('/staff-members/invitations/accept', ['as'=>'staff.acceptInvite', 'uses' => 'StaffController@acceptInvite']);
+Route::patch('/staff-members/{id}/status', ['as'=>'staff.changestatus', 'uses' => 'StaffController@changeStatus']);
+Route::get('/staff-members/permissions', ['as'=>'staff.permissions', 'uses' => 'StaffController@listPermissions']);
+
 /**
  * Single Page application catch all undefined routes
  * Laravel router will first try to match static resources, then specific routes, then finally this.
  */
+Route::get('/admin/{any}', 'SpaController@admin')->name('spa.admin')->where('any', '.*');
 Route::get('/{any}', 'SpaController@index')->name('spa.index')->where('any', '.*');

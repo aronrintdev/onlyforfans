@@ -12,14 +12,22 @@
       <!-- SignUp Form -->
       <b-form @submit.prevent="signup">
         <div class="signup-form p-3">
+          <div v-if="$route.query.beta">
+            <b-alert variant="primary" v-text="$t('betaMessage')" show />
+          </div>
+
           <div v-if="verrors && verrors.message">
             <b-alert variant="danger" v-text="verrors.message" show />
+          </div>
+          <div v-if="verrors && verrors.token">
+            <b-alert variant="danger" v-text="$t('betaFailedMessage')" show />
           </div>
           <b-form-group :invalid-feedback="verrors.email ? verrors.email[0] : null" :state="verrors.email ? false : null">
             <b-form-input
               id="input-email"
               v-model="form.email"
               :placeholder="$t('email')"
+              :disabled="isEmailDisabled"
               :state="verrors.email ? false : null"
               @focus="clearVerrors"
             />
@@ -48,6 +56,7 @@
             />
           </b-form-group>
           <b-form-group
+            v-if="usernameShown"
             :invalid-feedback="verrors.username ? verrors.username[0] : null"
             :state="verrors.username ? false : null"
           >
@@ -135,7 +144,10 @@ export default {
       username: '',
       tos: null,
     },
+    isEmailDisabled: false,
+    usernameShown: false,
   }),
+
   methods: {
     clearVerrors() {
       this.verrors = {}
@@ -147,11 +159,22 @@ export default {
       const token = await this.$recaptcha('register');
 
       this.state = 'loading'
-      this.axios.post('/register', { ...this.form, 'g-recaptcha-response': token }).then((response) => {
+
+      this.axios.post('/register', {
+        ...this.form,
+        // Include token if url has one
+        token: this.$route.query.token || null,
+        ref: this.$route.query.ref,
+        'g-recaptcha-response': token
+      }).then((response) => {
         if (response.data.err_result) {
           this.verrors = response.data.err_result;
         } else {
-          window.location.href = '/';
+          if (this.$route.params.redirect) {
+            window.location.href = `${this.$route.params.redirect}&logged_in=true`;
+          } else {
+            this.$router.push({ name: 'confirm-email' })
+          }
         }
         this.state = 'form'
       }).catch( e => {
@@ -166,6 +189,20 @@ export default {
       window.location.href = `/${path}`;
     }
   },
+
+  mounted() {
+    const { email } = this.$route.params;
+    if (email) {
+      this.form = {
+        ...this.form,
+        email,
+      }
+      this.isEmailDisabled = true;
+    }
+    if (this.$route.query.email) {
+      this.form.email = this.$route.query.email
+    }
+  }
 }
 </script>
 
@@ -211,7 +248,9 @@ export default {
     "or": "or",
     "continueWithFacebook": "Continue With Facebook",
     "continueWithGoogle": "Continue With Google",
-    "continueWithTwitter": "Continue With Twitter"
+    "continueWithTwitter": "Continue With Twitter",
+    "betaMessage": "Welcome to the Allfans.com closed beta. Please complete the form below to register your account",
+    "betaFailedMessage": "Allfans.com is currently in a closed beta, please use the link provided to you in your invitation email to register in the beta program"
   },
 }
 </i18n>

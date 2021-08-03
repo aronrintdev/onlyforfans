@@ -4,13 +4,15 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
+
+use App\Channels\SendgridChannel;
+
 use App\Models\User;
 use App\Models\Verifyrequest;
 
 class IdentityVerificationRejected extends Notification
 {
-    use Queueable;
+    use NotifyTraits, Queueable;
 
     public $vr;
     public $requester;
@@ -21,12 +23,31 @@ class IdentityVerificationRejected extends Notification
     }
 
     public function via($notifiable) {
-        return ['database', 'mail'];
+        $channels =  ['database'];
+        $channels[] = $this->getMailChannel(); // verification rejected should always be enabled!
+        return $channels;
     }
 
     public function toMail($notifiable) {
         return (new MailMessage)
                     ->line('Your identity verification could not be processed. Please contact AllFans support');
+    }
+
+    public function toSendgrid($notifiable) {
+        return [
+            'template_id' => 'id-verification-rejected',
+            'to' => [
+                'email' => $notifiable->email,
+                'name' => $notifiable->name, // 'display name'
+            ],
+            'dtdata' => [
+                'home_url' => $this->getUrl('home'),
+                'login_url' => $this->getUrl('login'),
+                'privacy_url' => $this->getUrl('privacy'),
+                'manage_preferences_url' => $this->getUrl('manage_preferences', ['username' => $notifiable->username]),
+                'unsubscribe_url' => $this->getUrl('unsubscribe', ['username' => $notifiable->username]),
+            ],
+        ];
     }
 
     public function toArray($notifiable) {

@@ -111,7 +111,7 @@
 /**
  * New Card Form
  */
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import Vuex from 'vuex'
 import CardBrandIcon from './CardBrandIcon'
 import Skeleton from './SegpayNewSkeleton'

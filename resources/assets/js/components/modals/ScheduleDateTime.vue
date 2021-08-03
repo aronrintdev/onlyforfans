@@ -36,7 +36,7 @@
 // event: @apply
 
 import moment from 'moment';
-import { eventBus } from '@/app';
+import { eventBus } from '@/eventBus'
 
 export default {
   props: {
@@ -70,13 +70,16 @@ export default {
     },
     closePicker() {
       this.$bvModal.hide('modal-schedule-datetime');
+      this.$emit('close')
     },
     apply() {
       const date = moment(`${this.selectedDateTime.date} ${this.selectedDateTime.time}`).utc();
       if (this.for_edit) {
         eventBus.$emit('edit-apply-schedule', date);
+        this.$emit('edit-apply-schedule', date);
       } else {
         eventBus.$emit('apply-schedule', date);
+        this.$emit('apply-schedule', date)
       }
       this.closePicker();
     }

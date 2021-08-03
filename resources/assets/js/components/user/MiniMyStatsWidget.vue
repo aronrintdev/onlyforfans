@@ -34,34 +34,34 @@
               <a :href="`/${timeline.slug}`">@{{ timeline.slug }}</a>
             </p>
           </div>
-          <div class="go-live">
+          <!-- <div class="go-live">
             <span>
               <fa-icon icon="podcast" class="text-primary" size="2x" />
             </span>
-          </div>
+          </div> -->
         </div>
 
         <ul class="activity-list list-group list-group-horizontal justify-content-center mt-3">
           <li class="list-group-item">
-            <router-link :to="{ name: 'timeline.posts', params: { slug: timeline.slug } }">
+            <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
               <div class="activity-name">Posts</div>
               <div class="activity-count">{{ stats.post_count }}</div>
             </router-link>
           </li>
           <li class="list-group-item">
-            <router-link :to="{ name: 'timeline.followers', params: { slug: timeline.slug } }">
+            <router-link :to="{ name: 'lists.followers', params: { slug: timeline.slug } }">
               <div class="activity-name">Fans</div>
               <div class="activity-count">{{ stats.follower_count }}</div>
             </router-link>
           </li>
           <li class="list-group-item">
-            <router-link :to="{ name: 'timeline.following', params: { slug: timeline.slug } }">
+            <router-link :to="{ name: 'lists.following', params: { slug: timeline.slug } }">
               <div class="activity-name">Subscribed</div>
               <div class="activity-count">{{ stats.following_count }}</div>
             </router-link>
           </li>
           <li class="list-group-item">
-            <router-link :to="{ name: 'timeline.earnings', params: { slug: timeline.slug } }">
+            <router-link :to="{ name: 'statements.dashboard', params: { slug: timeline.slug } }">
               <div class="activity-name">Earnings</div>
               <div class="activity-count">${{ (stats.earnings / 100).toFixed(2) }}</div>
             </router-link>

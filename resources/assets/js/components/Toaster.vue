@@ -3,7 +3,7 @@
  * Responsible for listening on event channels and popping toast to the user on Events.
  */
 import Vuex from 'vuex'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 
 export default {
   name: 'Toaster',

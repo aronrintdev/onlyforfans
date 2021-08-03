@@ -4,13 +4,12 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 use App\Models\User;
 use App\Models\Verifyrequest;
 
 class IdentityVerificationVerified extends Notification
 {
-    use Queueable;
+    use NotifyTraits, Queueable;
 
     public $vr;
     public $requester;
@@ -21,7 +20,9 @@ class IdentityVerificationVerified extends Notification
     }
 
     public function via($notifiable) {
-        return ['database', 'mail'];
+        $channels =  ['database'];
+        $channels[] = $this->getMailChannel(); // verification rejected should always be enabled!
+        return $channels;
     }
 
     public function toMail($notifiable) {
@@ -29,6 +30,24 @@ class IdentityVerificationVerified extends Notification
         return (new MailMessage)
                 ->line('Congratulations! Your identity verification is complete. Please follow the link below to continue setting up your account to receive payments!')
                 ->action('Get Paid!', $url);
+    }
+
+    public function toSendgrid($notifiable) {
+        return [
+            'template_id' => 'id-verification-approved',
+            'to' => [
+                'email' => $notifiable->email,
+                'name' => $notifiable->name, // 'display name'
+            ],
+            'dtdata' => [
+                'home_url' => $this->getUrl('home'),
+                'login_url' => $this->getUrl('login'),
+                'referral_url' => $this->getUrl('referrals'),
+                'privacy_url' => $this->getUrl('privacy'),
+                'manage_preferences_url' => $this->getUrl('manage_preferences', ['username' => $notifiable->username]),
+                'unsubscribe_url' => $this->getUrl('unsubscribe', ['username' => $notifiable->username]),
+            ],
+        ];
     }
 
     public function toArray($notifiable) {

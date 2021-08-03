@@ -9,5 +9,5 @@ namespace App\Interfaces;
  */
 interface Tippable extends PaymentSendable, CanFormatMoney
 {
-    //
+    public function getPrimaryOwner();
 }

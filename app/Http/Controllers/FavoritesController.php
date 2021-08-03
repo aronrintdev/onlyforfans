@@ -75,7 +75,7 @@ class FavoritesController extends AppBaseController
     {
         $request->validate([
             'favoritable_id' => 'required|uuid',
-            'favoritable_type' => 'required|string|alpha-dash|in:posts,mediafiles,timelines,stories',
+            'favoritable_type' => 'required|string|alpha-dash|in:posts,mediafiles,timelines,stories,chatthreads',
             //'user_id' => 'required|uuid|exists:users,id',
         ]);
 
@@ -101,7 +101,7 @@ class FavoritesController extends AppBaseController
     {
         $request->validate([
             'favoritable_id' => 'required|uuid',
-            'favoritable_type' => 'required|string|alpha-dash|in:posts,mediafiles,timelines,stories',
+            'favoritable_type' => 'required|string|alpha-dash|in:posts,mediafiles,timelines,stories,chatthreads',
         ]);
         $favorite = Favorite::where('favoritable_id', $request->favoritable_id)
                             ->where('favoritable_type', $request->favoritable_type)

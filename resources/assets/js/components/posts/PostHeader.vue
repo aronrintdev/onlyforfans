@@ -19,6 +19,7 @@
             data-placement="top"
             class="username"
             v-text="post.timeline.name"
+            @click.native="hidePostModal"
           />
           <span v-if="post.user.verified" class="verified-badge">
             <fa-icon icon="check-circle" class="text-primary" />
@@ -51,7 +52,7 @@
 </template>
 
 <script>
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import moment from 'moment';
 
 export default {
@@ -89,6 +90,11 @@ export default {
   },
   beforeDestroy() {
     clearInterval(this.scheduleDatetimeTimer);
+  },
+  methods: {
+    hidePostModal() {
+      this.$bvModal.hide('modal-post');
+    }
   }
 }
 

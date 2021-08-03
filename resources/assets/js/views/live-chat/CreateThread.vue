@@ -1,173 +1,164 @@
 <template>
-  <div v-if="!isLoading" class="container-fluid px-3 py-3" id="view-create-thread">
+  <WithSidebar v-if="!isLoading" id="view-create-thread">
+    <template #sidebar>
+      <article class="top-bar d-flex justify-content-between align-items-center">
+        <div class="h4" v-text="$t('title')" />
+        <b-btn variant="link" :to="{ name: 'chatthreads.dashboard' }">
+          <fa-icon icon="arrow-left" fixed-width size="lg" />
+          <span v-text="$t('nav.return')" />
+        </b-btn>
+      </article>
 
-    <section class="row h-100">
+      <article class="mycontacts-sort pt-3 d-flex flex-column justify-content-between align-items-center">
+        <Search v-model="searchQuery" :label="$t('search.label')" />
 
-      <aside class="col-md-5 col-lg-4" :class="mobile ? '' : 'panel'">
-
-        <article class="top-bar d-flex justify-content-between align-items-center">
-          <div class="h4" v-text="$t('title')" />
-          <b-btn variant="link" :to="{ name: 'chatthreads.dashboard' }">
-            <fa-icon icon="arrow-left" fixed-width size="lg" />
-            <span v-text="$t('nav.return')" />
-          </b-btn>
-        </article>
-
-        <article class="mycontacts-sort pt-3 d-flex flex-column justify-content-between align-items-center">
-          <Search v-model="searchQuery" :label="$t('search.label')" />
-
-          <div class="d-flex pt-3 pb-2 w-100">
-            <!-- Quick Filters Buttons -->
-            <article class="d-flex flex-wrap align-items-center flex-grow-1">
-              <FilterSelect
-                v-for="filter in quickAccessFiltersList"
-                :key="filter.key"
-                :label="filtersLabel(filter.key)"
-                :selected="selectedFilter === filter.key"
-                selectedVariant="secondary"
-                variant="light"
-                @selected=" selectedFilter = filter.key"
-                class="mx-1 my-1"
-              />
-              <FilterSelect
-                v-if="showAddFilter"
-                no-selected-icon
-                variant="light"
-                selectedVariant="secondary"
-                @selected="filterAdd"
-              >
-                <fa-icon :icon="['fas', 'plus']" />
-              </FilterSelect>
-            </article>
-
-            <!-- Filters Dropdown -->
-            <b-dropdown
-              ref="filterControls"
-              class="filter-controls"
-              variant="link"
-              size="sm"
-              right
-              no-caret
+        <div class="d-flex pt-3 pb-2 w-100">
+          <!-- Quick Filters Buttons -->
+          <article class="d-flex flex-wrap align-items-center flex-grow-1">
+            <FilterSelect
+              v-for="filter in quickAccessFiltersList"
+              :key="filter.key"
+              :label="filtersLabel(filter.key)"
+              :selected="selectedFilter === filter.key"
+              selectedVariant="secondary"
+              variant="light"
+              @selected=" selectedFilter = filter.key"
+              class="mx-1 my-1"
+            />
+            <FilterSelect
+              v-if="showAddFilter"
+              no-selected-icon
+              variant="light"
+              selectedVariant="secondary"
+              @selected="filterAdd"
             >
-              <template #button-content>
-                <b-badge show class="alert-primary" :style="{ fontSize: '100%' }">
-                  <span class="mr-2" v-text="$t('filter.label')" /> <fa-icon icon="filter" />
-                </b-badge>
-              </template>
+              <fa-icon :icon="['fas', 'plus']" />
+            </FilterSelect>
+          </article>
 
-              <b-dropdown-header>
-                Apply Filter
-              </b-dropdown-header>
+          <!-- Filters Dropdown -->
+          <b-dropdown
+            ref="filterControls"
+            class="filter-controls"
+            variant="link"
+            size="sm"
+            right
+            no-caret
+          >
+            <template #button-content>
+              <b-badge show class="alert-primary" :style="{ fontSize: '100%' }">
+                <span class="mr-2" v-text="$t('filter.label')" /> <fa-icon icon="filter" />
+              </b-badge>
+            </template>
 
-              <b-dropdown-item
-                v-for="filter in filters"
-                :key="filter.key"
-                :active="filter.key === selectedFilter"
-                @click="selectedFilter = filter.key"
-              >
-                <fa-icon
-                  :style="{ opacity: inQuickAccessFilters(filter) ? '100%': '0' }"
-                  icon="thumbtack"
-                  class="mx-2"
-                  size="lg"
-                  fixed-width
-                />
-                {{ filtersLabel(filter.key) }}
-              </b-dropdown-item>
-              <b-dropdown-divider v-if="showAddFilter" />
-              <b-dropdown-item v-if="showAddFilter">
-                <fa-icon icon="plus" class="text-success mx-2" size="lg" fixed-width />
-                {{ $t('filters.add') }}
-              </b-dropdown-item>
-            </b-dropdown>
+            <b-dropdown-header>
+              Apply Filter
+            </b-dropdown-header>
 
-            <!-- Sort Control Dropdown -->
-            <SortControl v-model="sortBy" />
-          </div>
+            <b-dropdown-item
+              v-for="filter in filters"
+              :key="filter.key"
+              :active="filter.key === selectedFilter"
+              @click="selectedFilter = filter.key"
+            >
+              <fa-icon
+                :style="{ opacity: inQuickAccessFilters(filter) ? '100%': '0' }"
+                icon="thumbtack"
+                class="mx-2"
+                size="lg"
+                fixed-width
+              />
+              {{ filtersLabel(filter.key) }}
+            </b-dropdown-item>
+            <b-dropdown-divider v-if="showAddFilter" />
+            <b-dropdown-item v-if="showAddFilter">
+              <fa-icon icon="plus" class="text-success mx-2" size="lg" fixed-width />
+              {{ $t('filters.add') }}
+            </b-dropdown-item>
+          </b-dropdown>
 
-          <!-- Extra Filters Collapse -->
-          <b-collapse :visible="!!extraFilters" class="w-100">
-            <div class="my-2 w-100 d-flex flex-column">
-              <div v-for="item in extraFilters" :key="item" class="w-100 d-flex">
-                <!-- TODO: hookup proper components for each extra filter -->
-                <div v-if="item === 'totalSpent'" class="w-100 d-flex align-items-center">
-                  <b-form-checkbox />
-                  <label for="total-spent" class="text-nowrap mb-0 mr-2">Total Spent:</label>
-                  <b-input-group prepend="$" size="sm" class="flex-grow-1">
-                    <b-form-input id="total-spent" size="sm" />
-                  </b-input-group>
-                </div>
+          <!-- Sort Control Dropdown -->
+          <SortControl v-model="sortBy" />
+        </div>
+
+        <!-- Extra Filters Collapse -->
+        <b-collapse :visible="!!extraFilters" class="w-100">
+          <div class="my-2 w-100 d-flex flex-column">
+            <div v-for="item in extraFilters" :key="item" class="w-100 d-flex">
+              <!-- TODO: hookup proper components for each extra filter -->
+              <div v-if="item === 'totalSpent'" class="w-100 d-flex align-items-center">
+                <b-form-checkbox />
+                <label for="total-spent" class="text-nowrap mb-0 mr-2">Total Spent:</label>
+                <b-input-group prepend="$" size="sm" class="flex-grow-1">
+                  <b-form-input id="total-spent" size="sm" />
+                </b-input-group>
               </div>
-              <b-btn variant="primary" size="sm" class="mt-2 ml-auto">
-                <fa-icon icon="filter" class="mr-1" /> Apply
-              </b-btn>
             </div>
-          </b-collapse>
-
-        </article>
-
-        <article class="contact-list position-relative">
-          <!-- Select All -->
-          <div class="mb-2 d-flex justify-content-end align-items-center">
-            <span
-              v-if="selectedContactsCount > 0"
-              class="text-muted mr-3 select-none"
-              v-text="$t('selectedCount', { count: selectedContactsCount })"
-            />
-
-            <label for="select-all" v-text="$t('selectAll')" class="cursor-pointer select-none mr-2 mb-0" />
-            <b-form-checkbox
-              id="select-all"
-              v-model="selectAll"
-              :value="true"
-              :indeterminate="selectIndeterminate"
-              inline
-              class="cursor-pointer mr-2 mb-1"
-              size="lg"
-            />
+            <b-btn variant="primary" size="sm" class="mt-2 ml-auto">
+              <fa-icon icon="filter" class="mr-1" /> Apply
+            </b-btn>
           </div>
+        </b-collapse>
 
-          <b-list-group>
-            <PreviewContact
-              v-for="contact in renderedItems"
-              :key="contact.id"
-              :data-ct_id="contact.id"
-              class="px-2"
-              :contact="contact"
-              @input="onContactInput"
-            />
-            <LoadingOverlay :loading="isLoadingContacts" />
-            <LoadingOverlay :loading="isSearching" :text="$t('search.searching')" />
-            <b-list-group-item v-if="showSearchResults && renderedItemsCount === 0" class="text-center">
-              {{ $t('search.no-results', { search: searchQuery }) }}
-            </b-list-group-item>
-            <b-list-group-item v-else-if="renderedItemsCount === 0" class="text-center">
-              {{ $t('no-results') }}
-            </b-list-group-item>
-          </b-list-group>
+      </article>
 
-          <b-pagination
-            v-model="currentPage"
-            :total-rows="contactsCount"
-            :per-page="perPage"
-            aria-controls="threads-list"
-            v-on:page-click="pageClickHandler"
-            class="mt-3"
-          ></b-pagination>
-        </article>
+      <article class="contact-list position-relative">
+        <!-- Select All -->
+        <div class="mb-2 d-flex justify-content-end align-items-center">
+          <span
+            v-if="selectedContactsCount > 0"
+            class="text-muted mr-3 select-none"
+            v-text="$t('selectedCount', { count: selectedContactsCount })"
+          />
 
-      </aside>
+          <label for="select-all" v-text="$t('selectAll')" class="cursor-pointer select-none mr-2 mb-0" />
+          <b-form-checkbox
+            id="select-all"
+            v-model="selectAll"
+            :value="true"
+            :indeterminate="selectIndeterminate"
+            inline
+            class="cursor-pointer mr-2 mb-1"
+            size="lg"
+          />
+        </div>
 
-      <main class="col-md-7 col-lg-8">
-        <CreateThreadForm
-          :session_user="session_user"
-          v-on:create-chatthread="createChatthread($event)"
-          class="h-100"
-        />
-      </main>
+        <b-list-group>
+          <PreviewContact
+            v-for="contact in renderedItems"
+            :key="contact.id"
+            :data-ct_id="contact.id"
+            class="px-2"
+            :contact="contact"
+            @input="onContactInput"
+          />
+          <LoadingOverlay :loading="isLoadingContacts" />
+          <LoadingOverlay :loading="isSearching" :text="$t('search.searching')" />
+          <b-list-group-item v-if="showSearchResults && renderedItemsCount === 0" class="text-center">
+            {{ $t('search.no-results', { search: searchQuery }) }}
+          </b-list-group-item>
+          <b-list-group-item v-else-if="renderedItemsCount === 0" class="text-center">
+            {{ $t('no-results') }}
+          </b-list-group-item>
+        </b-list-group>
 
-    </section>
-  </div>
+        <b-pagination
+          v-model="currentPage"
+          :total-rows="contactsCount"
+          :per-page="perPage"
+          aria-controls="threads-list"
+          v-on:page-click="pageClickHandler"
+          class="mt-3"
+        ></b-pagination>
+      </article>
+    </template>
+
+    <CreateThreadForm
+      :session_user="session_user"
+      v-on:create-chatthread="createChatthread($event)"
+      class="h-100"
+    />
+  </WithSidebar>
 </template>
 
 <script>
@@ -176,7 +167,9 @@
  */
 import Vuex from 'vuex'
 import _ from 'lodash'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
+
+import WithSidebar from '@views/layouts/WithSidebar'
 
 import CreateThreadForm from '@views/live-chat/components/CreateThreadForm'
 import FilterSelect from './components/FilterSelect.vue'
@@ -198,6 +191,7 @@ export default {
     PreviewContact,
     Search,
     SortControl,
+    WithSidebar,
   },
 
   /* ------------------------------------------------------------------------ */
@@ -236,6 +230,9 @@ export default {
     },
 
     extraFilters() {
+      if (!this.filters[this.selectedFilter]) {
+        return []
+      }
       return this.filters[this.selectedFilter].extraFilters
     },
 

@@ -2,7 +2,7 @@
   <div class="card card-default">
     <div class="card-header">Preview</div>
     <div v-bind:style="{ backgroundColor: attrs.color }" class="card-body">
-      <VueMarkdown :source="attrs.contents || ''" />
+      <VueMarkdown :html="false" :source="attrs.contents || ''" />
       <see-more v-if="linkValid" :link="attrs.link"></see-more>
     </div>
   </div>

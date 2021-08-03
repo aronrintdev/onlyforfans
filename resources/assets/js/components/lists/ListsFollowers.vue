@@ -4,7 +4,7 @@
 
       <b-row>
         <b-col>
-          <h2 class="card-title mb-1"><span class="tag-title">Followers</span> ({{ totalRows }})</h2>
+          <h4 class="card-title mt-3 mb-1"><span class="tag-title">Fans</span> ({{ totalRows }})</h4>
           <small class="text-muted">Fans who are following or subscribed to my feed</small>
         </b-col>
       </b-row>
@@ -15,8 +15,8 @@
 
       <b-row class="mt-2">
         <b-col lg="4" v-for="(s,idx) in shareables" :key="s.id" > 
-          <WidgetUser :session_user="session_user" :user="s.sharee" :access_level="s.access_level" :created_at="s.created_at" />
-          <!-- <pre> Access Level: {{ s.access_level }} {{ JSON.stringify(s, null, "\t") }} </pre> -->
+          <!-- %NOTE: we're using WidgetUser here because users, not the timelines are following me -->
+          <WidgetUser :session_user="session_user" :user="s.sharee" :timeline_id="s.sharee_timeline_id" :slug="s.sharee_timeline_slug" :access_level="s.access_level" :created_at="s.created_at" :is_favorited="s.is_favorited" :shareable_id="s.id" :current_notes="s.notes" />
         </b-col>
       </b-row>
 
@@ -35,7 +35,7 @@
 
 <script>
 //import Vuex from 'vuex';
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
   //import { DateTime } from 'luxon'
 import moment from 'moment'
 import CtrlBar from '@components/lists/CtrlBar'
@@ -97,6 +97,7 @@ export default {
       if (this.sort.dir) {
         params.sortDir = this.sort.dir
       }
+      params.isFollowers = true;
 
       axios.get( route('shareables.indexFollowers'), { params } ).then( response => {
         this.shareables = response.data.data

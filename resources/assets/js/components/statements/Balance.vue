@@ -15,7 +15,7 @@
       </b-list-group-item>
     </b-list-group>
     <div class="d-flex">
-      <b-btn variant="primary" class="ml-auto">
+      <b-btn variant="primary" class="ml-auto" :disabled="!balances.available || balances.available.amount <= 0">
         {{ $t('request') }}
       </b-btn>
     </div>

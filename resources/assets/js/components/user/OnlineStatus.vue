@@ -1,12 +1,18 @@
 <template>
-  <span v-if="!loading" class="status" :class="[`status-holder-${user.id}`, textVariant]">
-    {{ message }}
-  </span>
+  <div class="onlineStatus">
+    <slot :loading="loading" :status="status" :textVariant="textVariant" :message="message" :lastSeen="lastSeen">
+      <div class="status-indicator" :class="{'online-status': status === 'online'}" />
+      <span v-if="!loading" class="status" :class="[`status-holder-${user.id}`, textVariant]">
+      {{ message }}
+      </span>
+    </slot>
+  </div>
 </template>
 
 <script>
 import _ from 'lodash'
 import { DateTime } from 'luxon'
+import { faUserAltSlash, faUserAstronaut } from '@fortawesome/free-solid-svg-icons'
 export default {
   name: 'OnlineStatus',
   props: {
@@ -25,7 +31,7 @@ export default {
     refreshSpeed: 30 * 1000, // 30 seconds
     refreshLock: false,
     lastSeen: '',
-    loading: true,
+    loading: false,
     /**
      * offline | online | away | doNotDisturb
      */
@@ -55,13 +61,7 @@ export default {
       this.channel = this.$echo.join(`user.status.${this.user.id}`)
         .here(users => {
           this.$log.debug(`user.status.${this.user.id}.here`, { users })
-          const userIndex = _.findIndex(users, u => ( u.id == this.user.id ))
-          if (userIndex != -1) {
-            this.pendingOffline = false
-            this.status = users[userIndex].status || 'online'
-          } else {
-            setTimeout(this.updateLastSeen, this.refreshSpeed)
-          }
+          this.checkStatus(users)
           this.loading = false
         })
         .joining(user => {
@@ -81,7 +81,30 @@ export default {
           this.$log.debug(`user.status.${this.user.id}.listen('statusUpdate')`, { $e })
           this.status = $e.status
         })
+      if (this.channel.subscription && this.channel.subscription.members) {
+        // members structure from echo/pusher:
+        // this.channel.subscription.members == {
+        //  count,   // Number of connected user
+        //  me,      // my id object
+        //  members, // connected users objects keyed by id
+        //  myID,    // my id
+        // }
+        this.checkStatus(this.channel.subscription.members.members)
+        this.loading = false
+      }
     },
+
+    checkStatus(members) {
+      this.$log.debug('OnlineStatus checkStatus', { members })
+      const user = _.find(members, u => ( u.id == this.user.id ))
+      if (user) {
+        this.pendingOffline = false
+        this.status = user.status || 'online'
+      } else {
+        setTimeout(this.updateLastSeen, this.refreshSpeed)
+      }
+    },
+
     _pendingOffline() {
       this.pendingOffline = true
       setTimeout(() => {
@@ -106,7 +129,7 @@ export default {
       setTimeout(() => this.updateLastSeen(false), this.refreshSpeed)
     },
   },
-  mounted() {
+  created() {
     if (this.user.last_logged && this.user.last_logged !== '') {
       this.lastSeen = DateTime.fromISO(this.user.last_logged, { zone: 'utc' }).setZone('local').toString()
     }
@@ -127,3 +150,20 @@ export default {
   }
 }
 </i18n>
+
+<style scoped>
+.onlineStatus {
+  display: flex;
+}
+.status-indicator {
+  width: 10px;
+  height: 10px;
+  margin-top: 6px;
+  margin-right: 5px;
+  border-radius: 100%;
+  background: gray;
+}
+.status-indicator .online-status {
+  background: green;
+}
+</style>

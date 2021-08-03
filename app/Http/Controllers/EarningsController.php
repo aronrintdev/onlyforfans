@@ -27,7 +27,8 @@ class EarningsController extends Controller
             'to' => 'date',
         ]);
 
-        $from = $request->has('from') ? new Carbon($request->from) : Carbon::now()->subDays(30);
+        $DAYS_BACK = 3000;
+        $from = $request->has('from') ? new Carbon($request->from) : Carbon::now()->subDays($DAYS_BACK);
         $to   = $request->has('to')   ? new Carbon($request->to)   : Carbon::now();
 
         // Get summary items

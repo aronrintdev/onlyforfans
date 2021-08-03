@@ -3,11 +3,12 @@ namespace App\Http\Controllers;
 
 use Exception;
 use App\Models\User;
+use App\Models\Favorite;
 use App\Models\Mediafile;
 use App\Models\Mycontact;
 use App\Models\Chatthread;
-use App\Models\Chatmessage;
 //use App\Http\Resources\ChatmessageCollection;
+use App\Models\Chatmessage;
 use Illuminate\Http\Request;
 use App\Events\MessageSentEvent;
 use Illuminate\Support\Collection;
@@ -266,14 +267,6 @@ class ChatthreadsController extends AppBaseController
      */
     public function show(Request $request, Chatthread $chatthread)
     {
-        /*
-        $sessionUser = $request->user();
-        dd( 'ctrl', 
-            $chatthread->participants->pluck('username'), 
-            $sessionUser->username, 
-            $chatthread->participants->contains($sessionUser->id) ? 'yes' : 'no'
-        );
-         */
         $this->authorize('view', $chatthread);
         return new ChatthreadResource($chatthread);
     }
@@ -292,8 +285,10 @@ class ChatthreadsController extends AppBaseController
             'participants'   => 'required|array', // %FIXME: rename to 'recipients' for clairty
             'participants.*' => 'uuid|exists:users,id',
             'mcontent'       => 'string',  // optional first message content
-            'attachments'    => 'array',   // optional first message attachments
             'deliver_at'     => 'numeric', // optional to pre-schedule delivery of message if present
+            'price'          => 'numeric',
+            'currency'       => 'required_with:price|size:3',
+            'attachments'    => 'required_with:price|array',   // optional first message attachments
         ]);
         $originator = User::find($request->originator_id);
 
@@ -324,7 +319,6 @@ class ChatthreadsController extends AppBaseController
                 } else {
                     $message = $ct->sendMessage($request->user(), $request->mcontent ?? '', new Collection());
                 }
-                \Log::debug('ChatthreadsController store new message loop', [ 'has attachments' => $request->has('attachments') ]);
                 $this->addAttachments($request, $message);
             }
             $ct->refresh();
@@ -345,12 +339,17 @@ class ChatthreadsController extends AppBaseController
     public function sendMessage(Request $request, Chatthread $chatthread)
     {
         $request->validate([
-            'mcontent' => 'required_without:attachments',
-            'attachments' => 'array',
-            'files' => 'array',
+            'mcontent'    => 'required_without:attachments',
+            'price'       => 'numeric',
+            'currency'    => 'required_with:price|size:3',
+            'attachments' => 'required_with:price|array',
         ]);
         // Create new chat message
         $chatmessage = $chatthread->sendMessage($request->user(), $request->mcontent ?? '', new Collection());
+
+        if ($request->has('price')) {
+            $chatmessage->setPurchaseOnly($request->price, $request->currency);
+        }
 
         $this->addAttachments($request, $chatmessage);
 
@@ -406,6 +405,20 @@ class ChatthreadsController extends AppBaseController
     public function draft(Request $request, Chatthread $chatthread)
     {
         //
+    }
+
+    public function favorite(Request $request, Chatthread $chatthread)
+    {
+        $this->authorize('favorite', $chatthread);
+
+        $favorite = Favorite::create([
+            'user_id' => $request->user()->id,
+            'favoritable_type' => $chatthread->getMorphString(),
+            'favoritable_id' => $chatthread->id,
+        ]);
+
+        $chatthread->refresh();
+        return new ChatthreadResource($chatthread);
     }
 
     private function addAttachments(Request $request, Chatmessage $chatmessage)

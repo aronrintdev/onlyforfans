@@ -32,11 +32,13 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Spatie\Referer\CaptureReferer::class,
+            \App\Http\Middleware\TrustedProxies::class,
         ],
 
         'api' => [
             'throttle:60,1',
             'bindings',
+            \App\Http\Middleware\TrustedProxies::class,
         ],
 
         'webhook' => [

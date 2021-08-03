@@ -66,7 +66,7 @@
  * Details of a subscription
  */
 import Vuex from 'vuex'
-import { eventBus } from '@/app'
+import { eventBus } from '@/eventBus'
 import SavedPaymentMethod from '@components/payments/SavedPaymentMethod'
 
 export default {
