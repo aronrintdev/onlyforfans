@@ -22,8 +22,9 @@
               <div v-if="p.access" @click="renderPost(p)" :style="backgroundImg(p)" class="tag-thumb"></div>
             </article>
           </b-col>
+          <div v-if="previewposts.length === 0" class="p text-center w-100">No photos available</div>
         </b-row>
-        <div class="view-more-photos text-primary text-right" @click="viewMorePhotos('photos')">View more photos</div>
+        <div v-if="previewposts.length > 5" class="view-more-photos text-primary text-right" @click="viewMorePhotos('photos')">View more photos</div>
       </b-card-text>
     </b-card>
   </div>

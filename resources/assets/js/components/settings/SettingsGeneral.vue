@@ -9,7 +9,7 @@
                 <FormTextInput ikey="username" v-model="formGeneral.username" label="Username" :verrors="verrors" :disabled="true"/>
               </b-col>
               <b-col>
-                <FormTextInput ikey="email" v-model="formGeneral.email" label="E-mail" :verrors="verrors" />
+                <FormTextInput ikey="email" v-model="formGeneral.email" label="E-mail" :verrors="verrors" :disabled="true" />
               </b-col>
             </b-row>
           </fieldset>

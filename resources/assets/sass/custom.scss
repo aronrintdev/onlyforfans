@@ -508,6 +508,16 @@ body .feed-crate.tag-grid-layout .superbox-post .media-slider {
   }
 }
 
+.auth-slider-swiper {
+  margin-top: 40px;
+  padding-bottom: 20px !important;
+  color: #fff;
+
+  .swiper-pagination-bullet {
+    background: #fff;
+  }
+}
+
 // Hide Google Recaptcha Badge
 .grecaptcha-badge { visibility: hidden !important; }
 

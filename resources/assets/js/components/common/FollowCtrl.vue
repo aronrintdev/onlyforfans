@@ -26,14 +26,14 @@
         <div :class="{ 'normal-view': !isFullVisiable }">
           <VueMarkdown :html="false" :source="timeline.about || ''" />
         </div>
-        <div v-if="!isFullVisiable" class="toggle-read-more text-primary text-right mr-3 mt-1" @click="isFullVisiable = !isFullVisiable">Read more</div>
+        <div v-if="!isFullVisiable && timeline.about" class="toggle-read-more text-primary text-right mr-3 mt-1" @click="isFullVisiable = !isFullVisiable">Read more</div>
         <ul class="list-unstyled">
-          <li>Website: <a :href="timeline.userstats.website" class="tag-website">{{ timeline.userstats.website }}</a></li>
-          <li>Instagram: <a :href="timeline.userstats.instagram" class="tag-instagram">{{ timeline.userstats.instagram }}</a></li>
+          <li v-if="timeline.userstats.website">Website: <a :href="timeline.userstats.website" class="tag-website">{{ timeline.userstats.website }}</a></li>
+          <li v-if="timeline.userstats.instagram">Instagram: <a :href="timeline.userstats.instagram" class="tag-instagram">{{ timeline.userstats.instagram }}</a></li>
         </ul>
         <ul class="list-unstyled list-details">
-          <li><span><fa-icon icon="map-pin" class="map-pin-icon" /> {{ timeline.userstats.city }}</span></li>
-          <li><span><fa-icon icon="globe" /> {{ timeline.userstats.country }}</span></li>
+          <li v-if="timeline.userstats.city"><span><fa-icon icon="map-pin" class="map-pin-icon" /> {{ timeline.userstats.city }}</span></li>
+          <li v-if="timeline.userstats.country"><span><fa-icon icon="globe" /> {{ timeline.userstats.country }}</span></li>
         </ul>
       </b-card-text>
     </b-card>
