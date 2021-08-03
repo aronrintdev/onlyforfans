@@ -137,7 +137,7 @@ export default {
   }),
 
   created() {
-    if ( paymentsDisabled ) {
+    if ( paymentsDisabled || window.paymentsDisabled ) {
       this.paymentsDisabled = true
     }
   },
