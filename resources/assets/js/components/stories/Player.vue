@@ -44,7 +44,12 @@
               <div class="tag-creator d-flex align-items-center">
                 <b-avatar v-if="avatar" :src="avatar.filepath" class="mr-2" size="2.5rem" />
                 <div>
+                  <!--
                   <h6 class="m-0">{{ storyteller }}</h6>
+                  -->
+                  <h6 class="m-0">
+                    <router-link :to="timelineRoute" v-text="storyteller" />
+                  </h6>
                   <small class="text-muted m-0"><timeago :datetime="s.created_at" /></small>
                 </div>
               </div>
@@ -135,7 +140,14 @@ export default {
 
     currentSlideId() {
       return (this.slides && this.slides.length && (this.slideIndex!==null)) ? this.slides[this.slideIndex].id : null
-    }
+    },
+
+    timelineRoute() {
+      return {
+        name: 'timeline.show',
+        params: { slug: this.timeline.slug }
+      }
+    },
 
   },
 
@@ -234,6 +246,23 @@ export default {
       this.$router.push({ name: 'index' }) // return to home feed/storybar (close player)
     },
 
+    handleKeyup(e) {
+      console.log('handleKeyup', {
+        keyCode: e.keyCode,
+      })
+      switch (e.keyCode) {
+        case 32: // space up
+          this.isAutoplay = !this.isAutoplay
+          break
+        case 37: // left arrow
+          this.doNav('previous')
+          break
+        case 39: // right arrow
+          this.doNav('next')
+          break
+      }
+    },
+
   },
 
   watch: {
@@ -244,6 +273,10 @@ export default {
         this.stopPlayback()
       }
     },
+  },
+
+  created() {
+    window.addEventListener('keyup', this.handleKeyup)
   },
 
   mounted() {
@@ -258,6 +291,7 @@ export default {
 
   beforeDestroy() {
     this.stopPlayback()
+    window.removeEventListener('keyup', this.handleKeyup);
   },
 
   components: {
@@ -279,6 +313,10 @@ export default {
     top: 1.5rem;
     left: 1rem;
     z-index: 200;
+  }
+  .tag-creator a {
+    color: #fff;
+    text-decoration: none;
   }
 
   .crate-content {
