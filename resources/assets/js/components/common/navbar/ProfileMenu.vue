@@ -1,5 +1,15 @@
 <template>
   <div>
+
+    <component
+      v-if="uiFlags.isAdmin"
+      :is="dropdown ? 'b-dropdown-item' : 'b-nav-item'"
+      href="/n0g1cg9sbx"
+    >
+      <fa-icon icon="user-shield" fixed-width class="mr-3" />
+      <span v-text="$t('Admin Dashboard')" />
+    </component>
+
     <component
       :is="dropdown ? 'b-dropdown-item' : 'b-nav-item'"
       v-for="(item, i) in menuItems"
@@ -10,6 +20,7 @@
       <fa-icon :icon="item.icon" fixed-width class="mr-3" />
       <span v-text="$t(item.label)" />
     </component>
+
   </div>
 </template>
 
@@ -39,14 +50,6 @@ export default {
     ]),
     menuItems() {
       var items = []
-
-      if (this.uiFlags.isAdmin) {
-        items.push({
-          label: 'Admin Dashboard',
-          icon: 'user-shield',
-          linkTo: { name: 'index' }, // TODO: Add link to admin dashboard
-        })
-      }
 
       items = [ ...items,
         {

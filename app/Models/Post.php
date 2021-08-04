@@ -4,7 +4,6 @@ namespace App\Models;
 use DB;
 use Auth;
 use Exception;
-use App\Models\Fanledger;
 use App\Interfaces\UuidId;
 use App\Interfaces\Ownable;
 use App\Interfaces\Likeable;
@@ -162,9 +161,9 @@ class Post extends Model
         return $this->morphMany(Mediafile::class, 'resource');
     }
 
-    public function ledgersales()
+    public function transactions()
     {
-        return $this->morphMany(Fanledger::class, 'purchaseable');
+        return $this->morphMany(Transaction::class, 'resource');
     }
 
     // owner of the post
@@ -204,6 +203,11 @@ class Post extends Model
     public function pricePoints(): MorphMany
     {
         return $this->morphMany(PurchasablePricePoint::class, 'purchasable');
+    }
+
+    public function contentflags()
+    {
+        return $this->morphMany(Contentflag::class, 'flaggable');
     }
 
     //--------------------------------------------
@@ -311,54 +315,6 @@ class Post extends Model
     // %%% --- Implement Purchaseable Interface ---
     #region Purchaseable
 
-    public function receivePayment(
-        string $fltype, // PaymentTypeEnum
-        User $sender,
-        int $amountInCents,
-        array $cattrs = []
-    ): ?Fanledger {
-        $result = DB::transaction(function () use ($fltype, $amountInCents, $cattrs, &$sender) {
-
-            switch ($fltype) {
-                case PaymentTypeEnum::TIP:
-                    $result = Fanledger::create([
-                        'fltype' => $fltype,
-                        'seller_id' => $this->user->id,
-                        'purchaser_id' => $sender->id,
-                        'purchaseable_type' => 'posts',
-                        'purchaseable_id' => $this->id,
-                        'qty' => 1,
-                        'base_unit_cost_in_cents' => $amountInCents,
-                        'cattrs' => json_encode($cattrs ?? []),
-                    ]);
-                    break;
-                case PaymentTypeEnum::PURCHASE:
-                    $result = Fanledger::create([
-                        'fltype' => $fltype,
-                        'seller_id' => $this->user->id,
-                        'purchaser_id' => $sender->id,
-                        'purchaseable_type' => 'posts',
-                        'purchaseable_id' => $this->id,
-                        'qty' => 1,
-                        'base_unit_cost_in_cents' => $amountInCents,
-                        'cattrs' => json_encode($cattrs ?? []),
-                    ]);
-                    /*
-                    $sender->sharedposts()->attach($this->id, [
-                        'cattrs' => json_encode($cattrs ?? []),
-                    ]);
-                     */
-                    break;
-                default:
-                    throw new Exception('Unrecognized payment type : ' . $fltype);
-            }
-
-            return $result;
-        });
-
-        return $result ?? null;
-    }
-
     /**
      * Required by Purchaseable, Checks if price if valid
      *
@@ -415,6 +371,6 @@ class Post extends Model
 
     public function canBeDeleted(): bool
     {
-        return !($this->ledgersales->count() > 0);
+        return !($this->transactions->count() > 0);
     }
 }

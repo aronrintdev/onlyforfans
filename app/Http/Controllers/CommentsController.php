@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use DB;
 use Exception;
 use Throwable;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Notifications\CommentReceived;
@@ -49,7 +50,7 @@ class CommentsController extends AppBaseController
             }
         }
 
-        $data = $query->paginate( $request->input('take', env('MAX_COMMENTS_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.max.comments', 10)) );
         return new CommentCollection($data);
     }
 

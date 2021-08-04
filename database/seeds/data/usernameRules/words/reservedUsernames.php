@@ -20,6 +20,7 @@ return [
     'admin',
     'administration',
     'administrator',
+    'n0g1cg9sbx',
     'ads',
     'adult',
     'advertising',

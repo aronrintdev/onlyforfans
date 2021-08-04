@@ -10,6 +10,7 @@ use Throwable;
 use App\Models\Referral;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Config;
 use App\Http\Resources\ReferralCollection;
 // use App\Http\Resources\Referral as ReferralResource;
 
@@ -27,7 +28,7 @@ class ReferralsController extends AppBaseController
 
         $query->with(['referral.cover', 'referral.avatar']);
 
-        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
         return new ReferralCollection($data);
     }
 

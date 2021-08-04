@@ -61,6 +61,7 @@
       <b-nav-item>Tips</b-nav-item>
       <b-nav-item>Likes</b-nav-item>
       <b-nav-item>Favorites</b-nav-item>
+      <b-nav-item><router-link :to="{ name: 'content-management', params: {} }">Reported</router-link></b-nav-item>
     </b-nav>
 
 

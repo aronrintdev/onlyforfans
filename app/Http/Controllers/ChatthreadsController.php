@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use Illuminate\Support\Facades\Config;
 use App\Models\User;
 use App\Models\Favorite;
 use App\Models\Mediafile;
@@ -127,7 +128,7 @@ class ChatthreadsController extends AppBaseController
             //$query->latest();
         }
 
-        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.defaultMax', 10)));
         return new ChatthreadCollection($data);
     }
 
@@ -142,7 +143,7 @@ class ChatthreadsController extends AppBaseController
         $searchQuery = $request->input('query') ?? $request->input('q');
 
         $data = Chatthread::search($searchQuery)->where('participants', $request->user()->getKey())
-            ->paginate($request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)));
+            ->paginate($request->input('take', Config::get('collections.defaultMax', 10)));
 
         return new ChatthreadCollection($data);
     }

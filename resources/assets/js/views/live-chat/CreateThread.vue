@@ -143,6 +143,7 @@
         </b-list-group>
 
         <b-pagination
+          v-if="showPagination"
           v-model="currentPage"
           :total-rows="contactsCount"
           :per-page="perPage"
@@ -262,6 +263,8 @@ export default {
   /*                                   DATA                                   */
   /* ------------------------------------------------------------------------ */
   data: () => ({
+    showPagination: false,
+
     // Content Switches
     showAddFilter: false,
 

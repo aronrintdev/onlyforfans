@@ -17,11 +17,11 @@
           </div>
           <div class="post-ctrl mr-2">
             <b-dropdown right text="" class="m-md-2 post-header-menu" variant="outline-dark">
-              <b-dropdown-item v-if="session_user.id === post.user.id" @click="showEditPost">
+              <b-dropdown-item v-if="isPostOwnedBySessionUser" @click="showEditPost">
                 <fa-icon icon="edit" fixed-width class="mr-2" />
                 Edit
               </b-dropdown-item>
-              <b-dropdown-item v-if="session_user.id === post.user.id" @click="showDeleteConfirmation = true">
+              <b-dropdown-item v-if="isPostOwnedBySessionUser" @click="showDeleteConfirmation = true">
                 <fa-icon icon="trash" fixed-width class="mr-2" />
                 Delete
               </b-dropdown-item>
@@ -51,6 +51,16 @@
                   Twitter Share
                 </ShareNetwork>
               </b-dropdown-item>
+
+              <template v-if="!isPostOwnedBySessionUser">
+                <b-dropdown-divider />
+
+                <b-dropdown-item @click="reportContent">
+                  <fa-icon :icon="['fa', 'flag']" fixed-width class="mr-2" />
+                  Report Content
+                </b-dropdown-item>
+              </template>
+
             </b-dropdown>
           </div>
           <!-- <div @click="renderFull" v-if="is_feed" class="p-2 btn">
@@ -176,7 +186,10 @@ export default {
     },
     postFullUrl() {
       return `${window.location.origin}/posts/${this.post.slug}/details`;
-    }
+    },
+    isPostOwnedBySessionUser() {
+      return this.session_user.id === this.post.user.id
+    },
   },
 
   data: () => ({
@@ -206,7 +219,7 @@ export default {
     },
 
     deletePost() {
-      const is = this.session_user.id === this.post.user.id // Check permissions
+      const is = this.isPostOwnedBySessionUser // Check permissions
       if (!is) {
         return
       }
@@ -219,7 +232,11 @@ export default {
     onCopyError() {
       this.showCopyToClipboardModal = false;
       alert("Copy to Clipboard has been failed. Please try again later.");
-    }
+    },
+
+    reportContent() {
+      eventBus.$emit('open-modal', { key: 'report-post', data: { post: this.post } })
+    },
   },
 
   watch: { },

@@ -63,7 +63,7 @@
           <b-img fluid :src="modalSelection.render_urls.full"></b-img>
         </div>
         <div class="box-details">
-          <p>Flag Count: {{ 6 || modalSelection.flag_count }}</p>
+          <p>Flag Count: {{ modalSelection.flag_count }}</p>
           <!--
           <p># Pending: 3</p>
           <p># In Review: 2</p>

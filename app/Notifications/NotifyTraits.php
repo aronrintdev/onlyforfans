@@ -1,6 +1,7 @@
 <?php
 namespace App\Notifications;
 
+use Illuminate\Support\Facades\Config;
 use App\Channels\SendgridChannel;
 
 trait NotifyTraits {
@@ -32,7 +33,7 @@ trait NotifyTraits {
 
     protected function getMailChannel()
     {
-        if ( env('DEBUG_BYPASS_SENDGRID_MAIL_NOTIFY', false) ) {
+        if ( Config('sendgrid.debug.bypass_sendgrid_mail_notify', false) ) {
             // uses MAIL_DRIVER instead of SendGrid API for notify emails
             return 'mail';
         } else {
@@ -42,7 +43,7 @@ trait NotifyTraits {
 
     protected function isMailChannelEnabled(string $notifySlug, $settings) : bool
     {
-        if ( env('DEBUG_FORCE_ENABLE_MAIL_NOTIFY', false) ) {
+        if ( Config('sendgrid.debug.force_email_notify', false) ) {
             // overrides any user settings to always send email
             return true; // DEBUG ONLY!
         }

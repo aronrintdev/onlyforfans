@@ -103,6 +103,9 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => [ 'index', 'show', 'store' ],
     ]);
 
+    // -- contentflags --
+    Route::resource('contentflags', 'ContentflagsController', [ 'except' => [ 'create', 'edit' ] ]);
+
     // -- mycontacts --
     // apiResource Routes:
     // https://laravel.com/docs/8.x/controllers#actions-handled-by-resource-controller
@@ -114,12 +117,6 @@ Route::group(['middleware' => ['auth']], function () {
     // -- comments: likeable --
     Route::get('/comments/match', ['as'=>'comments.match', 'uses' => 'CommentsController@match']);
     Route::resource('comments', 'CommentsController', [ 'except' => ['create','edit'] ]);
-
-    Route::get('/fanledgers/{user}/earnings', ['as'=>'fanledgers.showEarnings', 'uses' => 'FanledgersController@showEarnings']);
-    Route::get('/fanledgers/{user}/debits', ['as'=>'fanledgers.showDebits', 'uses' => 'FanledgersController@showDebits']);
-    Route::resource('fanledgers', 'FanledgersController', [
-        'only' => [ 'index', ],
-    ]);
 
     Route::post('/invites/{vaultfolder}/share', ['as'=>'invites.shareVaultResources', 'uses' => 'InvitesController@shareVaultResources']);
     Route::resource('invites', 'InvitesController', [ 
@@ -384,5 +381,5 @@ Route::get('/staff-members/permissions', ['as'=>'staff.permissions', 'uses' => '
  * Single Page application catch all undefined routes
  * Laravel router will first try to match static resources, then specific routes, then finally this.
  */
-Route::get('/admin/{any}', 'SpaController@admin')->name('spa.admin')->where('any', '.*');
+Route::get('/n0g1cg9sbx/{any}', 'SpaController@admin')->name('spa.admin')->where('any', '.*');
 Route::get('/{any}', 'SpaController@index')->name('spa.index')->where('any', '.*');

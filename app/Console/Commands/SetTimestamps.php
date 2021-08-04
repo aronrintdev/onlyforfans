@@ -9,6 +9,7 @@ use DB;
 use Exception;
 use App\Models\Timeline;
 use App\Models\Story;
+use Illuminate\Support\Facades\Config;
 
 class SetTimestamps extends Command
 {
@@ -27,7 +28,7 @@ class SetTimestamps extends Command
     {
         $isEnvLocal = App::environment(['local']);
         $isEnvTesting = App::environment(['testing']);
-        $dbName = env('DB_DATABASE');
+        $dbName = Config::get('database.connections.primary.database');
         $this->info( '%%% DB Name: '.$dbName);
         $this->info( '%%% Is env local?: '.($isEnvLocal?'true':'false') );
         $this->info( '%%% Is env testing?: '.($isEnvTesting?'true':'false') );

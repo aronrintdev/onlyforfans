@@ -1,7 +1,10 @@
 .env
+.env.production
 .env.testing
-/config
-/config/*
+
+# Want config files to update. Updated configs will only take effect when php artisan config:cache is run on server
+# /config
+# /config/*
 storage
 storage/*
 node_modules/

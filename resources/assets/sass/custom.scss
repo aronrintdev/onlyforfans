@@ -79,7 +79,9 @@ body .feed-crate.tag-grid-layout .superbox-post .text-wrap {
 body .feed-crate.tag-grid-layout .superbox-post .text-wrap.tag-has-mediafiles {
   display: none; /* hide the text when in grid mode unless post is text-only */
 }
-
+body .tag-has-mediafiles p:last-child {
+  margin: 0;
+}
 /* In 'grid' view, normalize the height so that we don't get a variation messing up row alignment */
 body .feed-crate.tag-grid-layout .superbox-post .media-slider,
 body .feed-crate.tag-grid-layout .superbox-post .locked-content {

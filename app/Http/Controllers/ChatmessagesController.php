@@ -74,7 +74,7 @@ class ChatmessagesController extends AppBaseController
             }
         }
 
-        $data = $query->latest()->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        $data = $query->latest()->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
         return new ChatmessageCollection($data);
     }
 

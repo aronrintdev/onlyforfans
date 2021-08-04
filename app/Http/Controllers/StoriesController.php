@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Validator;
 
 use Carbon\Carbon;
@@ -84,7 +85,7 @@ class StoriesController extends AppBaseController
             }
         }
 
-        $data = $query->paginate( $request->input('take', env('MAX_STORIES_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.max.stories', 10)) );
         return new StoryCollection($data);
     }
 
@@ -246,7 +247,7 @@ class StoriesController extends AppBaseController
         ];
         $this->validate($request, $vrules);
 
-        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        $daysWindow = Config::get('stories.window_days', 1);
         $sessionUser = $request->user();
 
         if ( $request->timeline_id === $sessionUser->timeline->id ) {

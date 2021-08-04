@@ -1,14 +1,15 @@
 <?php
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
-use App;
 use DB;
+use App;
 use Exception;
-use App\Models\Mediafile;
 use App\Models\User;
 use App\Models\Timeline;
+use App\Models\Mediafile;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Storage;
 
 class UpdateMediafilesNullResource extends Command
 {
@@ -25,7 +26,7 @@ class UpdateMediafilesNullResource extends Command
     {
         $isEnvLocal = App::environment(['local']);
         $isEnvTesting = App::environment(['testing']);
-        $dbName = env('DB_DATABASE');
+        $dbName = Config::get('database.connections.primary.database');
         $this->info( '%%% DB Name: '.$dbName);
         $this->info( '%%% Is env local?: '.($isEnvLocal?'true':'false') );
         $this->info( '%%% Is env testing?: '.($isEnvTesting?'true':'false') );

@@ -9,6 +9,7 @@ use Throwable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Validation\UnauthorizedException;
 
 use Carbon\Carbon;
@@ -73,7 +74,7 @@ class TimelinesController extends AppBaseController
             }
         }
 
-        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
         return new TimelineCollection($data);
     }
 
@@ -117,7 +118,7 @@ class TimelinesController extends AppBaseController
         }
         if ( $request->boolean('hidePromotions') ) {
         }
-        $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
         return new PostCollection($data);
     }
 
@@ -140,7 +141,7 @@ class TimelinesController extends AppBaseController
                               ->orWhere('expire_at', null);
                     });
         $query->byTimeline($timeline->id)->sort( $request->input('sortBy', 'default') );
-        $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.max.posts', 10)) );
         return new PostCollection($data);
     }
 
@@ -155,7 +156,7 @@ class TimelinesController extends AppBaseController
         $query->whereHasMorph( 'resource', [Post::class], function($q1) use(&$timeline) {
             $q1->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
         });
-        $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.max.posts', 10)) );
         return new MediafileCollection($data);
     }
 
@@ -169,7 +170,7 @@ class TimelinesController extends AppBaseController
         $query->whereHasMorph( 'resource', [Post::class], function($q1) use(&$timeline) {
             $q1->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
         });
-        $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.max.posts', 10)) );
         return new MediafileCollection($data);
     }
 
@@ -192,7 +193,6 @@ class TimelinesController extends AppBaseController
             $query->where('is_follow_for_free', true);
         }
 
-        //$data = $query->paginate( $request->input('take', env('MAX_SUGGESTED_TIMELINES_PER_REQUEST', 6)) );
         $data = $query->get();
         return new TimelineCollection($data);
     }
@@ -402,7 +402,7 @@ class TimelinesController extends AppBaseController
         }
 
         // %NOTE: we could also just remove post-query, as the feed will auto-update to fill length of page (?)
-        $data = $query->paginate( $request->input('take', env('MAX_POSTS_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.max.posts', 10)) );
         return new PostCollection($data);
     }
 

@@ -96,6 +96,7 @@ if (mix.inProduction()) {
     openAnalyzer: false,
     generateStatsFile: true,
   });
+  mix.version();
 }
 
 if (!mix.inProduction()) {
