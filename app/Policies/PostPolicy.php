@@ -81,7 +81,7 @@ class PostPolicy extends BasePolicy
         case PostTypeEnum::SUBSCRIBER:
             return true; // %TODO
         case PostTypeEnum::PRICED:
-            return !($post->ledgersales->count() > 0);
+            return !($post->transaction->count() > 0);
         }
     }
 
@@ -93,7 +93,6 @@ class PostPolicy extends BasePolicy
         case PostTypeEnum::SUBSCRIBER:
             return true; // %TODO
         case PostTypeEnum::PRICED:
-            //return !($post->fanledgers->count() > 0);
             return $post->canBeDeleted();
         }
     }

@@ -32,9 +32,9 @@
             class="w-100 mx-auto tag-tip_amount"
             v-model="formPayload.amount"
             :formatter-fn="$options.filters.niceCurrency"
-            min="500"
-            max="10000"
-            :step="LEDGER_CONFIG.TIP_STEP_DELTA"
+            :min="config.min"
+            :max="config.max"
+            :step="config.step"
           />
 
           <p class="text-center"><small><span v-if="renderDetails">{{ renderDetails }}</span></small></p>
@@ -75,7 +75,6 @@
  * Send Tip Modal Content
  */
 import { eventBus } from '@/eventBus'
-import LEDGER_CONFIG from "@/components/constants"
 import PurchaseForm from '@components/payments/PurchaseForm'
 
 import PaymentsDisabled from '@components/payments/PaymentsDisabled'
@@ -125,12 +124,17 @@ export default {
 
   data: () => ({
     paymentsDisabled: false,
-
     /** 'initial' | 'payment' */
     step: 'initial',
-    LEDGER_CONFIG,
+
+    config: {
+      min: 500,   // $  5.00
+      max: 10000, // $100.00
+      step: 500,  // $  5.00
+    },
+
     formPayload: {
-      amount: LEDGER_CONFIG.MIN_TIP_IN_CENTS,
+      amount: 500, // $5.00
       currency: 'USD',
       message: '',
     },

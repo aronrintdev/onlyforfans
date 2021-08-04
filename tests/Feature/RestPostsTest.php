@@ -10,7 +10,6 @@ use App\Models\Comment;
 use App\Models\Likeable;
 use App\Models\Timeline;
 use App\Events\TipFailed;
-use App\Models\Fanledger;
 
 use App\Models\Mediafile;
 use Illuminate\Http\File;

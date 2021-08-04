@@ -118,12 +118,6 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/comments/match', ['as'=>'comments.match', 'uses' => 'CommentsController@match']);
     Route::resource('comments', 'CommentsController', [ 'except' => ['create','edit'] ]);
 
-    Route::get('/fanledgers/{user}/earnings', ['as'=>'fanledgers.showEarnings', 'uses' => 'FanledgersController@showEarnings']);
-    Route::get('/fanledgers/{user}/debits', ['as'=>'fanledgers.showDebits', 'uses' => 'FanledgersController@showDebits']);
-    Route::resource('fanledgers', 'FanledgersController', [
-        'only' => [ 'index', ],
-    ]);
-
     Route::post('/invites/{vaultfolder}/share', ['as'=>'invites.shareVaultResources', 'uses' => 'InvitesController@shareVaultResources']);
     Route::resource('invites', 'InvitesController', [ 
         'only' => ['index', 'show', 'store'],

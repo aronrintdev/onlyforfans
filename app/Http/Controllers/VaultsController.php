@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use App\Enums\InviteTypeEnum;
 //use App\Jobs\ProcessVaultInvites;
 use App\Mail\ShareableInvited;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -85,7 +86,7 @@ class VaultsController extends AppBaseController
             }
         }
 
-        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.size.default', 10)));
         return new VaultCollection($data);
     }
 

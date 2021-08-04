@@ -152,8 +152,8 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         return $this->morphMany(Subscription::class, 'subscribable');
     }
 
-    public function ledgersales() {
-        return $this->morphMany(Fanledger::class, 'purchaseable');
+    public function transactions() {
+        return $this->morphMany(Transaction::class, 'resource');
     }
 
     public function posts() {
@@ -202,46 +202,6 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     // %%% --- Implement Purchaseable Interface ---
     #region Purchasable
 
-    public function receivePayment(
-        string $fltype, // PaymentTypeEnum
-        User $sender,
-        int $amountInCents,
-        array $customAttributes = []
-    ): ?Fanledger {
-
-        $result = null;
-
-        switch ($fltype) {
-            case PaymentTypeEnum::TIP:
-                $result = Fanledger::create([
-                    'fltype' => $fltype,
-                    'seller_id' => $this->user->id,
-                    'purchaser_id' => $sender->id,
-                    'purchaseable_type' => 'timelines',
-                    'purchaseable_id' => $this->id,
-                    'qty' => 1,
-                    'base_unit_cost_in_cents' => $amountInCents,
-                    'cattrs' => json_encode($customAttributes ?? []),
-                ]);
-                break;
-            case PaymentTypeEnum::SUBSCRIPTION:
-                $result = Fanledger::create([
-                    'fltype' => $fltype,
-                    'seller_id' => $this->user->id,
-                    'purchaser_id' => $sender->id,
-                    'purchaseable_type' => 'timelines', // basically a subscription
-                    'purchaseable_id' => $this->id,
-                    'qty' => 1,
-                    'base_unit_cost_in_cents' => $amountInCents,
-                    'cattrs' => json_encode($customAttributes ?? []),
-                ]);
-                break;
-            default:
-                throw new Exception('Unrecognized payment type : ' . $fltype);
-        }
-
-        return $result ?? null;
-    }
 
     #endregion Purchasable
 
