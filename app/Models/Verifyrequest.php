@@ -62,6 +62,7 @@ class Verifyrequest extends Model
             ->orderBy('created_at', 'desc')
             ->get();
         try { 
+            $json = null; // default
             if ( $pending->count() > 0 ) {
                 throw new Exception('verifyUser() - User has verification request currently pending :', $pending[0]->id);
             }
@@ -122,7 +123,7 @@ class Verifyrequest extends Model
                 'message' => $e->getMessage(),
                 'userId' => $userId,
                 'userAttrs' => $userAttrs ?? 'not-set',
-                'json' => $json,
+                'json' => $json ?? [],
             ]) );
             throw $e;
         }
