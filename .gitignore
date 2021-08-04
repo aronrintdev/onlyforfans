@@ -139,3 +139,7 @@ dot-npmrc--hide
 
 database/template.sqlite--bak
 dot-npmrc-save--0607
+
+
+# Deployment Scripts
+*deploy.sh
