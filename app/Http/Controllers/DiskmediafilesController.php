@@ -5,6 +5,7 @@ use DB;
 use Auth;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -50,7 +51,7 @@ class DiskmediafilesController extends AppBaseController
             }
         }
 
-        $data = $query->paginate( $request->input('take', env('MAX_MEDIAFILES_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.max.mediafiles', 10)) );
         return new DiskmediafileCollection($data);
     }
 

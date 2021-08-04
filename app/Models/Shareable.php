@@ -4,6 +4,7 @@ namespace App\Models;
 use DB;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Config;
 
 class Shareable extends Model 
 {
@@ -22,7 +23,7 @@ class Shareable extends Model
             case 'timelines':
                 // create [storyqueuelogs] records for the new follower (sharee)
                 //$stories = $model->shareable->stories;
-                $daysWindow = env('STORY_WINDOW_DAYS', 10000);
+                $daysWindow = Config::get('stories.window_days', 1);
                 $stories = Story::where('timeline_id', $model->shareable_id)
                     ->where('created_at', '>=', Carbon::now()->subDays($daysWindow))
                     ->get(); // get all stories for the shared timeline created in the last day or equiv

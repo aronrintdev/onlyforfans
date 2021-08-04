@@ -206,6 +206,11 @@ class Post extends Model
         return $this->morphMany(PurchasablePricePoint::class, 'purchasable');
     }
 
+    public function contentflags()
+    {
+        return $this->morphMany(Contentflag::class, 'flaggable');
+    }
+
     //--------------------------------------------
     // %%% Scopes
     //--------------------------------------------

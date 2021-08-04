@@ -5,6 +5,7 @@ use App;
 use Auth;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
@@ -38,7 +39,7 @@ class UsersController extends AppBaseController
     {
         $query = User::query();
         // Apply filters %TODO
-        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
         return new UserCollection($data);
     }
 

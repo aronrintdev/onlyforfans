@@ -5,6 +5,7 @@ use DB;
 use Auth;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Models\Shareable as ShareableModel;
@@ -78,9 +79,7 @@ class ShareablesController extends AppBaseController
             }
         }
 
-        //$query->sort( $sortBy, ($sortDir==='asc' ?? 'desc') );
-
-        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
         return new ShareableCollection($data);
     }
 
@@ -128,7 +127,7 @@ class ShareablesController extends AppBaseController
             break;
         }
 
-        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
         return new ShareableCollection($data);
     }
 
@@ -173,7 +172,7 @@ class ShareablesController extends AppBaseController
         }
 
         //return new ShareableCollection($query->get()); // %DEBUG
-        $data = $query->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
         return new ShareableCollection($data);
     }
 

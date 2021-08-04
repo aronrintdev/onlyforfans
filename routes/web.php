@@ -103,6 +103,9 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => [ 'index', 'show', 'store' ],
     ]);
 
+    // -- contentflags --
+    Route::resource('contentflags', 'ContentflagsController', [ 'except' => [ 'create', 'edit' ] ]);
+
     // -- mycontacts --
     // apiResource Routes:
     // https://laravel.com/docs/8.x/controllers#actions-handled-by-resource-controller
@@ -384,5 +387,5 @@ Route::get('/staff-members/permissions', ['as'=>'staff.permissions', 'uses' => '
  * Single Page application catch all undefined routes
  * Laravel router will first try to match static resources, then specific routes, then finally this.
  */
-Route::get('/admin/{any}', 'SpaController@admin')->name('spa.admin')->where('any', '.*');
+Route::get('/n0g1cg9sbx/{any}', 'SpaController@admin')->name('spa.admin')->where('any', '.*');
 Route::get('/{any}', 'SpaController@index')->name('spa.index')->where('any', '.*');

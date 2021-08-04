@@ -9,6 +9,8 @@ $ php artisan serve
 $ php artisan queue:work 
 
 # Laravel Websockets server
+# https://beyondco.de/docs/laravel-websockets/getting-started/introduction
+# https://freek.dev/1228-introducing-laravel-websockets-an-easy-to-use-websocket-server-implemented-in-php
 $ php artisan websocket:serve 
 
 # webpack service

@@ -5,6 +5,7 @@ use DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
 
 class Storyqueue extends Model
@@ -40,7 +41,7 @@ class Storyqueue extends Model
     public static function viewableQueue(User $viewer) : Collection
     {
         // (1) get storyqueues for this user as viewer latest to oldest (whether viewed or not !)
-        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        $daysWindow = Config::get('stories.window_days', 1);
         $storyqueues = Storyqueue::with('timeline', 'story')
             ->where('viewer_id', $viewer->id)
             ->where('created_at','>=',Carbon::now()->subDays($daysWindow))

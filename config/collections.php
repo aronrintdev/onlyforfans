@@ -23,7 +23,11 @@ return [
         'accounts'      => env('MAX_ACCOUNTS_PER_REQUEST' , $mid  ),
         'ach_accounts'  => env('MAX_ACH_ACCOUNTS_PER_REQUEST' , $mid  ),
         'posts'         => env('MAX_POSTS_PER_REQUEST'        , $small),
+        'comments'      => env('MAX_COMMENTS_PER_REQUEST'        , $small),
         'subscriptions' => env('MAX_SUBSCRIPTIONS_PER_REQUEST', $large),
         'transactions'  => env('MAX_TRANSACTIONS_PER_REQUEST' , $mid  ),
+        'stories'       => env('MAX_STORIES_PER_REQUEST' , $mid  ),
+        'mediafiles'    => env('MAX_MEDIAFILES_PER_REQUEST' , $mid  ),
+        'vaultfolders'  => env('MAX_VAULTFOLDERS_PER_REQUEST' , $mid  ),
     ],
 ];

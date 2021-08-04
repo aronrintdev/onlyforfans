@@ -1,16 +1,6 @@
 <template>
   <div>
     <h1>Transaction Management</h1>
-    <!--
-    <b-row>
-      <b-col lg="4">
-        <Balance />
-      </b-col>
-      <b-col lg="4">
-        <Statistics />
-      </b-col>
-    </b-row>
-    -->
     <section v-if="summary">
       <div class="mt-3 px-5">
         <b-card-group deck class="mb-3">
@@ -80,6 +70,7 @@
 
     <b-card>
       <b-card-title :title="`Transactions (${tobj.totalRows})`" />
+
       <b-pagination
         v-model="tobj.currentPage"
         :total-rows="tobj.totalRows"
@@ -122,6 +113,15 @@
           <span class="">{{ data.item.created_at | niceDate }}</span>
         </template>
       </b-table>
+
+      <b-pagination
+        v-model="tobj.currentPage"
+        :total-rows="tobj.totalRows"
+        :per-page="tobj.perPage"
+        v-on:page-click="pageClickHandler"
+        aria-controls="txns-table"
+      ></b-pagination>
+
     </b-card>
   </div>
 </template>
@@ -169,7 +169,7 @@ export default {
     tobj: { // table object
       data: [],
       currentPage: 1,
-      perPage: 20,
+      perPage: 50,
       totalRows: null,
       isBusy: false, // to prevent multiple api calls per page event, etc
       sortBy: 'created_at',
@@ -243,15 +243,17 @@ export default {
       }
     },
 
-    toggleFilter(filterType, fObj) {
-      console.log('toggleFilter()', {
-        filterType, fObj
-      })
-      if ( !Array.isArray(this.txnFilters[filterType]) ) {
+    toggleFilter(filterGroup, fObj) {
+      if ( !Array.isArray(this.txnFilters[filterGroup]) ) {
         return
       }
       // %TODO: clean up this line
-      this.txnFilters[ filterType ][ this.txnFilters[filterType].findIndex(iter => iter.key===fObj.key) ] = { ...fObj, is_active: !fObj.is_active }
+      const _pop = { ...this.txnFilters } // make a copy
+      const _idx = _pop[filterGroup].findIndex(iter => iter.key===fObj.key)
+      if ( _idx >= 0 ) {
+        _pop[ filterGroup ][_idx] = { ...fObj, is_active: !fObj.is_active }
+        this.txnFilters = _pop
+      }
 
       this.tobj.currentPage = 1
       this.getTransactions()
