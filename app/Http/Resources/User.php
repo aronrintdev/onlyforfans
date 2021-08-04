@@ -16,6 +16,8 @@ class User extends JsonResource
             'firstname' => $this->firstname,
             'lastname' => $this->lastname,
             'is_verified' => $this->is_verified,
+            'email_verified_at' => $this->email_verified_at,
+            'last_logged' => $this->last_logged,
             'verified_status' => $this->verified_status,
             'created_at' => $this->created_at,
             'timeline' => $this->timeline,
