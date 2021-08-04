@@ -14,7 +14,7 @@
       <swiper ref="mySwiper" :options="swiperOptions" class="">
         <swiper-slide v-for="tl in timelines" :key="tl.id" class="story slide tag-followed_timeline">
           <router-link :to="isMyTimeline(tl) ? '' : { name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story" @click.native="isSelectFileModalVisible=true">
-            <div class="avatar-container" :class="{ 'my-story-avatar': isMyTimeline(tl) && stories.length !== 0, 'my-story-avatar-no-story': isMyTimeline(tl) && stories.length === 0, 'all-viewed': tl.allViewed }">
+            <div class="avatar-container" :class="{ 'my-story-avatar': isMyTimeline(tl) && sessionUserHasActiveStories, 'my-story-avatar-no-story': isMyTimeline(tl) && !sessionUserHasActiveStories, 'all-viewed': tl.allViewed }">
               <b-img
                 rounded="circle" 
                 :src="tl.avatar.filepath"
@@ -93,7 +93,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState(['stories']),
+    //...Vuex.mapState(['stories']),
 
     isLoading() {
       return !this.session_user || !this.timeline || !this.timelines
@@ -101,7 +101,11 @@ export default {
 
     urlState() {
       return this.storyAttrs.link ? validateUrl(this.storyAttrs.link) : null
-    }
+    },
+
+    sessionUserHasActiveStories() {
+      return !(this.timeline.is_storyqueue_empty && true)
+    },
 
   },
 
