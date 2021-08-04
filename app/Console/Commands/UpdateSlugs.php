@@ -1,11 +1,12 @@
 <?php
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
-use App;
 use DB;
+use App;
 use Exception;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Storage;
 
 class UpdateSlugs extends Command
 {
@@ -22,7 +23,7 @@ class UpdateSlugs extends Command
     {
         $isEnvLocal = App::environment(['local']);
         $isEnvTesting = App::environment(['testing']);
-        $dbName = env('DB_DATABASE');
+        $dbName = Config::get('database.connections.primary.database');
         $this->info( '%%% DB Name: '.$dbName);
         $this->info( '%%% Is env local?: '.($isEnvLocal?'true':'false') );
         $this->info( '%%% Is env testing?: '.($isEnvTesting?'true':'false') );

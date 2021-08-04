@@ -231,7 +231,7 @@ class MycontactsController extends AppBaseController
         $searchQuery = $request->input('query') ?? $request->input('q');
 
         $data = Mycontact::search($searchQuery)->where('owner_id', $request->user()->getKey())
-            ->paginate($request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)));
+            ->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
 
         return new MycontactCollection($data);
     }

@@ -7,6 +7,7 @@ use Exception;
 use App\Models\Mediafile;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 
 class TruncateData extends Command
@@ -27,7 +28,7 @@ class TruncateData extends Command
 
         $whitelistedEnvs = ['testing', 'local',];
         $thisEnv = App::environment();
-        $dbName = env('DB_DATABASE');
+        $dbName = Config::get('database.connections.primary.database');
 
         $this->info( '%%% DB Name: ' . $dbName);
         $this->info( '%%% Env: ' . $thisEnv);
@@ -121,7 +122,6 @@ class TruncateData extends Command
             'links',
             'locations',
             'blockables',
-            'fanledgers',
             'shareables',
             'likeables',
             'comments',

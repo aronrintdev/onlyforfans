@@ -375,7 +375,7 @@ nav {
     }
 
     .tag-target.playing {
-      background: pink;
+      background: #fff;
       width: var(--current-progress);
     }
   }

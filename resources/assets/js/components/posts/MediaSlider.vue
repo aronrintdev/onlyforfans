@@ -1,6 +1,6 @@
 <template>
   <div class="media-slider">
-    <div v-if="!hasMultipleImages">
+    <div class="single" v-if="!hasMultipleImages">
       <video v-if="mediafiles[0].is_video" controls="controls" poster="poster.png" class="d-block">
         <source :src="mediafiles[0].filepath" type="video/webm" />
         <source :src="mediafiles[0].filepath" type="video/mp4" />
@@ -12,6 +12,12 @@
         :src="use_mid && mediafiles[0].has_mid ? mediafiles[0].midFilepath : mediafiles[0].filepath"
         :alt="mediafiles[0].mfname"
       />
+      <div class="background-preview" v-if="mediafiles[0].is_image">
+        <img
+          class="d-block"
+          :src="use_mid && mediafiles[0].has_mid ? mediafiles[0].midFilepath : mediafiles[0].filepath"
+        />
+      </div>
       <vue-plyr v-if="mediafiles[0].is_audio">
         <audio controls playsinline>
           <source :src="mediafiles[0].filepath" type="audio/webm" />
@@ -20,8 +26,8 @@
         </audio>
       </vue-plyr>
     </div>
-    <div class="position-relative">
-      <swiper v-if="hasMultipleImages" class="media-slider-swiper" :options="swiperOptions">
+    <div class="multiple position-relative" v-if="hasMultipleImages">
+      <swiper class="media-slider-swiper" :options="swiperOptions">
         <swiper-slide class="slide" v-for="mf in visualMediafiles" :key="mf.id">
           <video v-if="mf.is_video" controls="controls" poster="poster.png" class="d-block">
             <source :src="mf.filepath" type="video/webm" />
@@ -34,6 +40,12 @@
             :src="use_mid && mf.has_mid ? mf.midFilepath : mf.filepath"
             :alt="mf.mfname"
           />
+          <div class="background-preview" v-if="mf.is_image">
+            <img
+              class="d-block"
+              :src="use_mid && mf.has_mid ? mf.midFilepath : mf.filepath"
+            />
+          </div>
         </swiper-slide>
         <div class="swiper-button-prev" slot="button-prev">
           <fa-icon icon="chevron-circle-left" size="2x" color="text-primary" />
@@ -136,6 +148,9 @@ $media-height: calc(100vh - 300px);
     height: $media-height;
     object-fit: cover;
     width: 100%;
+  }
+  .background-preview {
+    display: none;
   }
 
   video {

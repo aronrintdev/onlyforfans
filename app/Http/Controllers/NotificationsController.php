@@ -5,6 +5,7 @@ use DB;
 use Auth;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Models\Notification as NotificationModel;
@@ -49,7 +50,7 @@ class NotificationsController extends AppBaseController
             $query->where('type', 'App\\Notifications\\'.$request->type);
         }
 
-        $data = $query->latest()->paginate( $request->input('take', env('MAX_DEFAULT_PER_REQUEST', 10)) );
+        $data = $query->latest()->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
         return new NotificationCollection($data);
     }
 

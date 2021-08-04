@@ -14,7 +14,7 @@ class AddCreatorIdToStaffTable extends Migration
     public function up()
     {
         Schema::table('staff', function (Blueprint $table) {
-            $table->uuid('creator_id');
+            $table->uuid('creator_id')->nullable(); // workaround for sqlite
         });
     }
 

@@ -14,7 +14,7 @@ class AddUserIdToStaffTable extends Migration
     public function up()
     {
         Schema::table('staff', function (Blueprint $table) {
-            $table->uuid('user_id');
+            $table->uuid('user_id')->nullable(); // workaround for sqlite
         });
     }
 

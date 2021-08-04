@@ -1,6 +1,7 @@
 <template>
   <div>
     <h1>User List</h1>
+
     <b-pagination
       v-model="currentPage"
       :total-rows="rows"
@@ -26,6 +27,14 @@
         <span class="">{{ data.item.created_at | niceDate }}</span>
       </template>
     </b-table>
+
+    <b-pagination
+      v-model="currentPage"
+      :total-rows="rows"
+      :per-page="perPage"
+      aria-controls="users-table"
+    ></b-pagination>
+
   </div>
 </template>
 
@@ -45,7 +54,7 @@ export default {
     //items: [],
     currentPage: 1,
     rows: null,
-    perPage: 10,
+    perPage: 50,
     fields: [
       { key: 'id', label: 'id', },
       { key: 'email', label: 'email', },

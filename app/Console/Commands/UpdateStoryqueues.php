@@ -1,15 +1,16 @@
 <?php
 namespace App\Console\Commands;
 
+use DB;
+use App;
+use Exception;
+use App\Models\Story;
+use App\Models\Timeline;
+use App\Models\Storyqueue;
 use Faker\Factory as Faker;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
-use App;
-use DB;
-use Exception;
-use App\Models\Timeline;
-use App\Models\Story;
-use App\Models\Storyqueue;
 
 class UpdateStoryqueues extends Command
 {
@@ -28,7 +29,7 @@ class UpdateStoryqueues extends Command
     {
         $isEnvLocal = App::environment(['local']);
         $isEnvTesting = App::environment(['testing']);
-        $dbName = env('DB_DATABASE');
+        $dbName = Config::get('database.connections.primary.database');
         $this->info( '%%% DB Name: '.$dbName);
         $this->info( '%%% Is env local?: '.($isEnvLocal?'true':'false') );
         $this->info( '%%% Is env testing?: '.($isEnvTesting?'true':'false') );

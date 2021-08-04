@@ -134,7 +134,7 @@ export default {
         this.state = 'busy'
       }
       this.axios
-        .get(`/admin/role?page=${this.currentPage}&perPage=${this.perPage}`)
+        .get(`/n0g1cg9sbx/role?page=${this.currentPage}&perPage=${this.perPage}`)
         .then((result) => {
           if (result.statusText === 'OK') {
             this.roles = result.data.data

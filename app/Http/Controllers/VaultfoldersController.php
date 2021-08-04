@@ -19,6 +19,7 @@ use App\Models\Mediafilesharelog;
 use Illuminate\Support\Facades\Log;
 
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use App\Notifications\VaultfileShareSent;
 use App\Enums\MediafilesharelogStatusEnum;
@@ -66,7 +67,7 @@ class VaultfoldersController extends AppBaseController
                 $query->where($k, $f);
             }
         }
-        $data = $query->paginate( $request->input('take', env('MAX_VAULTFOLDERS_PER_REQUEST', 10)) );
+        $data = $query->paginate( $request->input('take', Config::get('collections.max.vaultfolders', 10)) );
         return new VaultfolderCollection($data);
     }
 

@@ -7,6 +7,7 @@ use App\Interfaces\ShortUuid;
 use App\Enums\PaymentTypeEnum;
 use App\Interfaces\Reportable;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 
 use App\Models\Traits\UsesUuid;
 use App\Interfaces\Purchaseable;
@@ -151,8 +152,8 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         return $this->morphMany(Subscription::class, 'subscribable');
     }
 
-    public function ledgersales() {
-        return $this->morphMany(Fanledger::class, 'purchaseable');
+    public function transactions() {
+        return $this->morphMany(Transaction::class, 'resource');
     }
 
     public function posts() {
@@ -201,46 +202,6 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     // %%% --- Implement Purchaseable Interface ---
     #region Purchasable
 
-    public function receivePayment(
-        string $fltype, // PaymentTypeEnum
-        User $sender,
-        int $amountInCents,
-        array $customAttributes = []
-    ): ?Fanledger {
-
-        $result = null;
-
-        switch ($fltype) {
-            case PaymentTypeEnum::TIP:
-                $result = Fanledger::create([
-                    'fltype' => $fltype,
-                    'seller_id' => $this->user->id,
-                    'purchaser_id' => $sender->id,
-                    'purchaseable_type' => 'timelines',
-                    'purchaseable_id' => $this->id,
-                    'qty' => 1,
-                    'base_unit_cost_in_cents' => $amountInCents,
-                    'cattrs' => json_encode($customAttributes ?? []),
-                ]);
-                break;
-            case PaymentTypeEnum::SUBSCRIPTION:
-                $result = Fanledger::create([
-                    'fltype' => $fltype,
-                    'seller_id' => $this->user->id,
-                    'purchaser_id' => $sender->id,
-                    'purchaseable_type' => 'timelines', // basically a subscription
-                    'purchaseable_id' => $this->id,
-                    'qty' => 1,
-                    'base_unit_cost_in_cents' => $amountInCents,
-                    'cattrs' => json_encode($customAttributes ?? []),
-                ]);
-                break;
-            default:
-                throw new Exception('Unrecognized payment type : ' . $fltype);
-        }
-
-        return $result ?? null;
-    }
 
     #endregion Purchasable
 
@@ -348,7 +309,6 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     public function getLatestStory(User $viewer) : ?Storyqueue
     {
         //$stories = Story::select(['id','slug','created_at'])->where('timeline_id', $this->id)->orderBy('created_at', 'desc')->get();
-        //$daysWindow = env('STORY_WINDOW_DAYS', 10000);
         $stories = Storyqueue::select(['id','created_at'])
             ->where('timeline_id', $this->id)
             //->where('viewer_id', $viewer->id)
@@ -359,7 +319,7 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     // Has the viewer seen all 'active' slides in this timeline's story (?)
     public function isEntireStoryViewedByUser($viewerId) : bool
     {
-        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        $daysWindow = Config::get('stories.window_days');
         $notViewedCount = Storyqueue::where('timeline_id', $this->id)
             ->where('viewer_id', $viewerId)
             ->whereNull('viewed_at')
@@ -371,7 +331,7 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     // No viewable stories within last time period 'window'
     public function isStoryqueueEmpty() : bool
     {
-        $daysWindow = env('STORY_WINDOW_DAYS', 10000);
+        $daysWindow = Config::get('stories.window_days');
         $activeCount = Story::where('timeline_id', $this->id)
             ->where('created_at','>=',Carbon::now()->subDays($daysWindow))
             ->count();
