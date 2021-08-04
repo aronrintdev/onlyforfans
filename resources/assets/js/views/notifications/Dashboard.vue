@@ -55,7 +55,7 @@
               <!--
               <template #title> <fa-icon fixed-width icon="lock-open-alt" /> Subscribers</template>
               -->
-              <template #title> <fa-icon fixed-width icon="lock-open" /> Subscribers</template>
+              <template #title> <fa-icon fixed-width :icon="['fas', 'user-plus']" /> Subscribed</template>
               <b-card-text>
                 <NotifyList filter="subscribers" :session_user="session_user" />
               </b-card-text>

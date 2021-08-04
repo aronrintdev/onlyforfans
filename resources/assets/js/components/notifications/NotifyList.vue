@@ -6,9 +6,18 @@
     <ul class="list-unstyled">
       <b-media v-for="n in notifications" :key="n.id" tag="li" class="mb-0">
         <template #aside>
-          <b-img width="48" height="48" rounded="circle" :src="n.data.actor.avatar" :alt="n.data.actor.slug" :title="n.data.actor.name" />
+          <router-link :to="{ name: 'timeline.show', params: { slug: n.data.actor.slug ? n.data.actor.slug : n.data.actor.username } }">
+            <b-img width="48" height="48" rounded="circle" :src="n.data.actor.avatar" :alt="n.data.actor.slug" :title="n.data.actor.name" />
+          </router-link>
         </template>
-        <h6 class="mt-0 mb-1">{{ n.data.actor.name }}  <small class="text-muted">@{{ n.data.actor.username}}</small></h6>
+        <h6 class="mt-0 mb-1">
+          <router-link :to="{ name: 'timeline.show', params: { slug: n.data.actor.slug ? n.data.actor.slug : n.data.actor.username } }">
+            <span>{{n.data.actor.name}}</span>
+          </router-link>
+          <router-link :to="{ name: 'timeline.show', params: { slug: n.data.actor.slug ? n.data.actor.slug : n.data.actor.username } }">
+            <small class="text-muted">@{{ n.data.actor.username}}</small>
+          </router-link>
+        </h6>
         <p class="mb-0 notify-message">
           <template v-if="n.type==='App\\Notifications\\TimelineFollowed'">followed you</template>
           <template v-if="n.type==='App\\Notifications\\TimelineSubscribed'">subcribed for {{ n.data.amount }}</template>
@@ -110,7 +119,7 @@ export default {
         case 'followers':
           return 'Followers'
         case 'subscribers':
-          return 'Subscribers'
+          return 'Subscribed'
         case 'tips':
           return 'Tips'
         case 'comments':
