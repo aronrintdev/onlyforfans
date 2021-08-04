@@ -3,7 +3,7 @@
 
     <section class="row">
 
-      <main class="col-md-9 col-lg-9 mx-auto">
+      <main class="col-md-12 mx-auto py-3 py-md-0">
         <b-card >
 
           <h4>Notifications</h4>
@@ -18,7 +18,7 @@
             </b-tab>
 
             <b-tab data-filter="liked">
-              <template #title> <fa-icon fixed-width icon="heart" /> Liked</template>
+              <template #title> <fa-icon fixed-width icon="heart" /><span> Liked</span></template>
               <b-card-text>
                 <NotifyList filter="liked" :session_user="session_user" />
               </b-card-text>
@@ -28,7 +28,7 @@
               <!--
               <template #title> <fa-icon fixed-width icon="usd-circle" /> Tips</template>
               -->
-              <template #title> <fa-icon fixed-width icon="dollar-sign" /> Tips</template>
+              <template #title> <fa-icon fixed-width icon="dollar-sign" /><span> Tips</span></template>
               <b-card-text>
                 <NotifyList filter="tips" :session_user="session_user" />
               </b-card-text>
@@ -38,14 +38,14 @@
               <!--
               <template #title> <fa-icon fixed-width icon="usd-square" /> Purchases</template>
               -->
-              <template #title> <fa-icon fixed-width icon="file-invoice-dollar" /> Purchases</template>
+              <template #title> <fa-icon fixed-width icon="file-invoice-dollar" /><span> Purchases</span></template>
               <b-card-text>
                 <NotifyList filter="purchases" :session_user="session_user" />
               </b-card-text>
             </b-tab>
 
             <b-tab data-filter="Followers">
-              <template #title> <fa-icon fixed-width icon="walking" /> Followers</template>
+              <template #title> <fa-icon fixed-width icon="walking" /><span> Followers</span></template>
               <b-card-text>
                 <NotifyList filter="followers" :session_user="session_user" />
               </b-card-text>
@@ -55,21 +55,21 @@
               <!--
               <template #title> <fa-icon fixed-width icon="lock-open-alt" /> Subscribers</template>
               -->
-              <template #title> <fa-icon fixed-width :icon="['fas', 'user-plus']" /> Subscribed</template>
+              <template #title> <fa-icon fixed-width :icon="['fas', 'user-plus']" /><span> Subscribed</span></template>
               <b-card-text>
                 <NotifyList filter="subscribers" :session_user="session_user" />
               </b-card-text>
             </b-tab>
 
             <b-tab data-filter="comments">
-              <template #title> <fa-icon fixed-width icon="comments" /> Comments</template>
+              <template #title> <fa-icon fixed-width icon="comments" /><span> Comments</span></template>
               <b-card-text>
                 <NotifyList filter="comments" :session_user="session_user" />
               </b-card-text>
             </b-tab>
 
             <b-tab data-filter="messages">
-              <template #title> <fa-icon fixed-width icon="envelope" /> Messages</template>
+              <template #title> <fa-icon fixed-width icon="envelope" /><span> Messages</span></template>
               <b-card-text>
                 <NotifyList filter="messages" :session_user="session_user" />
               </b-card-text>
@@ -138,6 +138,72 @@ export default {
 
 }
 </script>
+
+<style lang="scss">
+@media (max-width: 768px) {
+  #view-notifications {
+    .card-body {
+      padding: 1em;
+    }
+    #notification-tabs {
+      .card-title {
+        font-size: 1.2rem;
+      }
+      .card-header {
+        width: 100%;
+        background: none;
+        padding-left: 0.6em;
+        padding-right: 0.6em;
+
+        .nav-tabs {
+          flex-flow: row nowrap;
+          justify-content: space-between;
+
+          .nav-link {
+            white-space: nowrap;
+            padding: 0.1em 1em;
+
+            span {
+              display: none;
+            }
+          }
+        }
+      }
+      .tab-content {
+        .tab-pane {
+          padding: 1em 0.5em;
+        }
+      }
+    }
+  }
+}
+@media (max-width: 600px) {
+  #view-notifications {
+    #notification-tabs {
+      .card-header {
+        .nav-tabs {
+          .nav-link {
+            padding: 0.1em 0.8em;
+          }
+        }
+      }
+    }
+  }
+}
+@media (max-width: 480px) {
+  #view-notifications {
+    #notification-tabs {
+      .card-header {
+        .nav-tabs {
+          .nav-link {
+            padding: 0.1em 0.6em;
+          }
+        }
+      }
+    }
+  }
+}
+</style>
 
 <i18n lang="json5" scoped>
   {

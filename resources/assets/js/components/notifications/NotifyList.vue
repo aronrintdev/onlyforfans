@@ -13,7 +13,7 @@
         <h6 class="mt-0 mb-1">
           <router-link :to="{ name: 'timeline.show', params: { slug: n.data.actor.slug ? n.data.actor.slug : n.data.actor.username } }">
             <span>{{n.data.actor.name}}</span>
-          </router-link>
+          </router-link>&nbsp;
           <router-link :to="{ name: 'timeline.show', params: { slug: n.data.actor.slug ? n.data.actor.slug : n.data.actor.username } }">
             <small class="text-muted">@{{ n.data.actor.username}}</small>
           </router-link>
