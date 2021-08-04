@@ -122,7 +122,6 @@ class TruncateData extends Command
             'links',
             'locations',
             'blockables',
-            'fanledgers',
             'shareables',
             'likeables',
             'comments',

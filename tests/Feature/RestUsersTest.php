@@ -176,7 +176,6 @@ class RestUsersTest extends TestCase
         $this->assertObjectNotHasAttribute('user', $content->timeline);
         $this->assertObjectNotHasAttribute('followers', $content->timeline);
         $this->assertObjectNotHasAttribute('subscribers', $content->timeline);
-        $this->assertObjectNotHasAttribute('ledgersales', $content->timeline);
         $this->assertObjectNotHasAttribute('stories', $content->timeline);
     }
 

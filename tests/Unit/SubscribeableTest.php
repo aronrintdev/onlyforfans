@@ -100,8 +100,6 @@ class SubscribeableTest extends TestCase
                 }
                 if ( $obj instanceof User ) {
                      $obj->followedtimelines()->detach();
-                     $obj->ledgersales->each( function($o) { $o->forceDelete(); } );
-                     $obj->ledgerpurchases->each( function($o) { $o->forceDelete(); } );
                      $obj->posts->each( function($o) { $o->forceDelete(); } );
                      $obj->timeline->followers()->detach();
                      $obj->timeline->forceDelete();

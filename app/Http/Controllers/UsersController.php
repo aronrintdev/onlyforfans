@@ -21,7 +21,6 @@ use App\Http\Resources\User as UserResource;
 use App\Http\Resources\UserCollection;
 use App\Models\User;
 use App\Models\UserSetting;
-use App\Models\Fanledger;
 use App\Models\Country;
 use App\Models\Timeline;
 use App\Rules\MatchOldPassword;

@@ -8,7 +8,6 @@ use App\Models\Post;
 use App\Models\User;
 use App\Models\Timeline;
 use App\Events\TipFailed;
-use App\Models\Fanledger;
 use App\Models\Mediafile;
 use App\Events\ItemTipped;
 use App\Enums\PostTypeEnum;
@@ -448,7 +447,6 @@ class RestTimelinesTest extends TestCase
         $this->assertObjectNotHasAttribute('posts', $content->data);
         $this->assertObjectNotHasAttribute('followers', $content->data);
         $this->assertObjectNotHasAttribute('subscribers', $content->data);
-        $this->assertObjectNotHasAttribute('ledgersales', $content->data);
         //$this->assertObjectNotHasAttribute('stories', $content->data);
     }
 
@@ -491,7 +489,6 @@ class RestTimelinesTest extends TestCase
         $this->assertObjectNotHasAttribute('posts', $content->data);
         $this->assertObjectNotHasAttribute('followers', $content->data);
         $this->assertObjectNotHasAttribute('subscribers', $content->data);
-        $this->assertObjectNotHasAttribute('ledgersales', $content->data);
         //$this->assertObjectNotHasAttribute('stories', $content->data);
     }
 
