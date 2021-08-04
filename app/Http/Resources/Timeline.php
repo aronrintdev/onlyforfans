@@ -36,6 +36,7 @@ class Timeline extends JsonResource
             'is_following' => $this->followers->contains($sessionUser->id),
             'is_subscribed' => $this->subscribers->contains($sessionUser->id),
             'is_favorited' => count($this->favorites->where('user_id', $sessionUser->id)),
+            'is_storyqueue_empty' => $this->isStoryqueueEmpty(),
             // https://laravel.com/docs/8.x/eloquent-resources#conditional-relationships
             //'mediafiles' =>  $this->when( $hasAccess, MediafileResource::collection($this->whenLoaded('mediafiles')) ), // ??
             'created_at' => $this->created_at,

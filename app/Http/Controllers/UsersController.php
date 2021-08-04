@@ -287,6 +287,7 @@ class UsersController extends AppBaseController
             ->first();
 
         $timeline->userstats = $sessionUser->getStats();
+        $timeline->is_storyqueue_empty = $timeline->isStoryqueueEmpty();
 
         /** Flags for the common UI elements */
         $uiFlags = [
