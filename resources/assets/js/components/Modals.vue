@@ -57,9 +57,9 @@
 
     <b-modal
       id="modal-post"
-      size="xl"
-      title="Post"
+      size="lg"
       hide-footer
+      centered
       body-class="p-0"
       @hide="closeModal"
     >
@@ -306,10 +306,10 @@ export default {
 
 <style lang="scss" scoped>
 .post-nav-arrows {
-  position: absolute;
+  position: fixed;
   width: 30px;
   height: 30px;
-  top: calc(50vh - 90px);
+  top: 50vh;
   transform: translateY(-50%);
   border-radius: 50%;
   cursor: pointer;
@@ -321,10 +321,10 @@ export default {
   }
 
   &.left {
-    left: -100px;
+    left: calc(50vw - 500px);
   }
   &.right {
-    right: -100px;
+    right: calc(50vw - 500px);
   }
   svg {
     width: 100%;
@@ -333,3 +333,132 @@ export default {
 }
 </style>
 
+<style lang="scss">
+#modal-post {
+  
+  .modal-header {
+    height: 0;
+    padding: 0;
+    border: none;
+
+    .close {
+      position: absolute;
+      z-index: 10;
+      right: 18px;
+      top: 25px;
+      color: #343a40;
+      opacity: 1;
+    }
+  }
+  .superbox-post {
+    height: calc(100vh - 60px);
+
+    & > article {
+      flex: 1;
+      margin-bottom: 65px;
+
+      .media-slider {
+        height: 100%;
+
+        .v-photoswipe-thumbnail {
+          pointer-events: none;
+          height: 100%;
+          width: auto;
+          margin: auto;
+          max-width: 100%;
+          object-fit: contain;
+          position: relative;
+          z-index: 2;
+        }
+
+        .single {
+          height: 100%;
+          position: relative;
+
+          video {
+            height: 100%;
+          }
+
+          .background-preview {
+            background-color: rgba(0, 0, 0, 0.8);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            display: block;
+            overflow: hidden;
+
+            img {
+              object-fit: cover;
+              opacity: 0.4;
+              transform: scale(1.1);
+              height: 100%;
+            }
+          }
+        }
+
+        .multiple {
+          height: 100%;
+
+          .media-slider-swiper {
+            height: 100%;
+
+            .swiper-wrapper {
+              align-items: center;
+
+              video {
+                height: 100%;
+              }
+
+              .v-photoswipe-thumbnail {
+                pointer-events: none;
+                height: 100%;
+                width: auto;
+                margin: auto;
+                max-width: 100%;
+                object-fit: contain;
+                position: relative;
+                z-index: 2;
+              }
+
+              .background-preview {
+                background-color: rgba(0, 0, 0, 0.8);
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 0;
+                display: block;
+                overflow: hidden;
+
+                img {
+                  object-fit: cover;
+                  opacity: 0.4;
+                  transform: scale(1.1);
+                  height: 100%;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    .card-footer {
+      position: absolute;
+      bottom: 0;
+      background: #fff;
+      width: 100%;
+      min-height: 65px;
+      z-index: 10;
+      
+      .collapse {
+        max-height: 250px;
+        overflow: auto;
+      }
+    }
+  }
+}
+</style>

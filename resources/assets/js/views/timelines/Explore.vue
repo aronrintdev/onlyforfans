@@ -70,11 +70,3 @@ export default {
   }
 }
 </style>
-
-<style lang="scss">
-  #modal-post {
-    .media-slider .v-photoswipe-thumbnail {
-      pointer-events: none;
-    }
-  }
-</style>
