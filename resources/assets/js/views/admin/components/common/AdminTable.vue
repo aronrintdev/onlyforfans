@@ -71,7 +71,7 @@ export default {
     tobj: { // table object
       data: [],
       currentPage: 1,
-      perPage: 10,
+      perPage: 50,
       totalRows: 0,
       sortBy: 'created_at',
       sortDesc: false,

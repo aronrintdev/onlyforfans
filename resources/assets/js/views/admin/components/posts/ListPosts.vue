@@ -104,7 +104,6 @@ export default {
       if ( !Array.isArray(this.postFilters[filterGroup]) ) {
         return
       }
-      // %TODO: clean up this line
       const _pop = { ...this.postFilters } // make a copy
       const _idx = _pop[filterGroup].findIndex(iter => iter.key===fObj.key)
       if ( _idx >= 0 ) {
@@ -112,10 +111,7 @@ export default {
         _pop[ filterGroup ][_idx] = { ...fObj, is_active: !fObj.is_active }
         this.postFilters = _pop
         this.encodeQueryFilters()
-        //Vue.set( this.encodedQueryFilters, this.encodeQueryFilters(this.postFilters) )
       }
-      //this.tobj.currentPage = 1
-      //this.getTransactions()
     },
 
     encodeQueryFilters() {
@@ -128,12 +124,9 @@ export default {
         switch (s.key) {
           case 'is_flagged':
             Vue.set(this.encodedQueryFilters, 'is_flagged', s.is_active?1:0)
-            //params.is_flagged = s.is_active
             break
         }
       }
-      //this.encodedQueryFilters = { ...params }
-      //return params
     },
 
   },
