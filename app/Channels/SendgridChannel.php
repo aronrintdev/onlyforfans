@@ -6,6 +6,7 @@ use App\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 
 use App\Apis\Sendgrid\Api as SendgridApi;
+use Illuminate\Support\Facades\Config;
 
 // see: https://medium.com/@sirajul.anik/laravel-notifications-part-2-creating-a-custom-notification-channel-6b0eb0d81294
 class SendgridChannel
@@ -30,8 +31,8 @@ class SendgridChannel
             'dtdata' => $mdata['dtdata'] ?? [],
         ]);
 
-        $isSandbox = env('DEBUG_ENABLE_SENDGRID_SANDBOX_MODE', false);
-        if ( $response->statusCode() != ($isSandbox?200:202) ) {
+        $isSandbox = Config::get('sendgrid.enable_sandbox_mode', false);
+        if ( $response->statusCode() != ($isSandbox ? 200 : 202) ) {
             throw new Exception( 'SendgridChannel returned status code '.$response->statusCode().', ('.serialize($response).')' );
         }
 

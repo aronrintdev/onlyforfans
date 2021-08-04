@@ -174,7 +174,7 @@ class MediafilesController extends AppBaseController
 
         // Create sharable link
         //   ~ https://laravel.com/docs/5.5/filesystem#retrieving-files
-        if (env('APP_ENV') === 'testing') {
+        if (Config::get('app.env') === 'testing') {
             // %NOTE: workaround for S3 in testing env
             return $mediafile->filename;
         } else {

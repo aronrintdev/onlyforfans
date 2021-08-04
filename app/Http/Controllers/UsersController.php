@@ -78,7 +78,7 @@ class UsersController extends AppBaseController
         $this->authorize('update', $user); // %FIXME: should be update password?
         $request->validate([
             'oldPassword' => ['required', new MatchOldPassword],
-            'newPassword' => 'required|min:'.env('MIN_PASSWORD_CHAR_LENGTH', 8),
+            'newPassword' => 'required|min:' . Config::get('auth.passwords.user.minLength'),
             //'newPassword' => 'required|confirmed|min:8',
             //'newPasswordConfirm' => 'same:newPassword',
         ]);
