@@ -74,7 +74,7 @@
         </b-form-group>
       </b-form>
       <template #modal-footer>
-        <b-button variant="warning" @click="isPreviewModalVisible=false">Cancel</b-button>
+        <b-button variant="secondary" @click="isPreviewModalVisible=false">Cancel</b-button>
         <b-button variant="primary" @click="storeStory()">Save</b-button>
       </template>
     </b-modal>
