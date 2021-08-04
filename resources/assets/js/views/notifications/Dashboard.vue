@@ -6,12 +6,12 @@
       <main class="col-md-9 col-lg-9 mx-auto">
         <b-card >
 
-          <h1>Notifications</h1>
+          <h4>Notifications</h4>
 
           <b-tabs card lazy id="notification-tabs">
 
             <b-tab data-filter="none" active>
-              <template #title> <fa-icon fixed-width icon="folder-plus" /> All</template>
+              <template #title>All</template>
               <b-card-text>
                 <NotifyList filter="none" :session_user="session_user" />
               </b-card-text>
