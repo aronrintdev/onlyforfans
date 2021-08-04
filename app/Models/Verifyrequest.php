@@ -42,7 +42,7 @@ class Verifyrequest extends Model
     //--------------------------------------------
 
     public function requester() {
-        return $this->belongsTo(User::class, requester_id);
+        return $this->belongsTo(User::class, 'requester_id');
     }
 
     //--------------------------------------------

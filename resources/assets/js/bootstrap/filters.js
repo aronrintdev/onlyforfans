@@ -22,7 +22,11 @@ Vue.filter('niceCurrency', function (value, currency = 'USD') {
 })
 
 Vue.filter('niceGuid', function (v) {
-  return v ? v.slice(-12) : ''
+  if ( typeof v === 'string' ) {
+    return v ? v.slice(-12) : ''
+  } else {
+    return ''
+  }
 })
 
 Vue.filter('niceBool', function (v) {

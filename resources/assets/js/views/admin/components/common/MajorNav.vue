@@ -8,7 +8,7 @@
       <b-nav-item><router-link :to="{ name: 'user-management', params: {} }">Users</router-link></b-nav-item>
       <b-nav-item>User Settings</b-nav-item>
       <b-nav-item>User Moderation (Blocks, Restrictions, Reports)</b-nav-item>
-      <b-nav-item>Identity Verification</b-nav-item>
+      <b-nav-item><router-link :to="{ name: 'user-management', params: {} }">Identity Verification</router-link></b-nav-item>
       <b-nav-item>Roles</b-nav-item>
       <b-nav-item>Permissions</b-nav-item>
       <b-nav-item>Invites</b-nav-item>
