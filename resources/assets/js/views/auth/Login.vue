@@ -6,7 +6,7 @@
           <!-- Login Form -->
           <div class="login-form">
             <img src="/images/logos/allfans-logo-154x33.png" alt="All Fans Logo" class="signin-logo">
-            <div class="h1 mb-5" v-text="$t('signInHeader')"></div>
+            <div class="h1 mb-3" v-text="$t('signInHeader')"></div>
             <div v-if="verrors && verrors.message">
               <b-alert variant="danger" v-text="verrors.message" show />
             </div>
@@ -36,7 +36,7 @@
             </div>
           </div>
 
-          <div class="signin-button mb-5">
+          <div class="mt-3 mb-5">
             <b-btn type="submit" variant="primary" class="cta-btn" block :disabled="state === 'loading'">
               <span v-if="state === 'form'">{{ $t('signInButton') }}</span>
               <fa-icon v-else icon="spinner" spin />
@@ -198,7 +198,7 @@ export default {
     "signInHeader": "Sign In",
     "noAccountQuestion": "Don't have an account?",
     "signUpLink": "Sign Up",
-    "email": "Email",
+    "email": "Email or username",
     "password": "Password",
     "signInButton": "Sign In",
     "forgotPasswordLink": "Forgot Password?",
