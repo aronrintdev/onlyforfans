@@ -28,7 +28,7 @@ class PostsController extends AppBaseController
             'timeline_id' => 'uuid|exists:timelines,id', // if admin only
             'user_id' => 'uuid|exists:users,id', // if admin only
         ]);
-        $filters = $request->only(['timeline_id', 'user_id']) ?? [];
+        $filters = $request->only(['timeline_id', 'user_id', 'is_flagged']) ?? [];
 
         // Init query
         $query = Post::query(); 
@@ -43,6 +43,11 @@ class PostsController extends AppBaseController
         // Apply any filters
         foreach ($filters as $key => $f) {
             switch ($key) {
+            case 'is_flagged':
+                if ($f) {
+                    $query->has('contentflags', '>', 0);
+                }
+                break;
             default:
                 $query->where($key, $f);
                 break;

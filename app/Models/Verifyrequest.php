@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
 use Ramsey\Uuid\Uuid;
 
-use App\Apis\IdMerit\Api as IdMeritApi;
+use App\Apis\Idmerit\Api as IdMeritApi;
 use App\Enums\VerifyServiceTypeEnum;
 use App\Enums\VerifyStatusTypeEnum;
 

@@ -28,8 +28,10 @@
           <fa-icon @click="doEmit('render-ellipsis', data.item)" :icon="['fas', 'ellipsis-h']" class="clickable fa-sm" />
         </span>
         <span @click="doEmit('render-flag', data.item)" class="">
-          <fa-icon v-if="data.item.flag_count>0" :icon="['fas', 'flag']" class="clickable fa-sm text-danger" />
+          <fa-icon v-if="flagCount(data.item)>0" :icon="['fas', 'flag']" class="clickable fa-sm text-danger" />
+          <!--
           <fa-icon v-else :icon="['far', 'flag']" class="clickable fa-sm" />
+          -->
         </span>
       </template>
     </b-table>
@@ -56,6 +58,7 @@ export default {
     fields: { type: Array, default: [] },
     tblFilters: null,
     indexRouteName: { type: String, default: null },
+    encodedQueryFilters: null,
   },
 
   computed: {
@@ -68,7 +71,7 @@ export default {
     tobj: { // table object
       data: [],
       currentPage: 1,
-      perPage: 50,
+      perPage: 10,
       totalRows: 0,
       sortBy: 'created_at',
       sortDesc: false,
@@ -79,6 +82,10 @@ export default {
 
     doEmit(action, data) {
       this.$emit('table-event', { action, data } )
+    },
+
+    flagCount(item) {
+      return item.stats?.flagCount || 0 
     },
 
     /*
@@ -94,7 +101,7 @@ export default {
         take: this.tobj.perPage,
         sortBy: this.tobj.sortBy,
         sortDir: this.tobj.sortDesc ? 'desc' : 'asc',
-        //...this.encodeQueryFilters(),
+        ...this.encodedQueryFilters,
       }
       console.log('getData', { params })
       try {
@@ -125,7 +132,14 @@ export default {
 
   },
 
-  watchers: {},
+  watch: {
+    encodedQueryFilters: {
+      handler: function(v) {
+        this.getData()
+      },
+      deep: true,
+    }
+  },
 
   created() { 
     this.getData()

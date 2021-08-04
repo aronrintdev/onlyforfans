@@ -8,15 +8,12 @@
       </div>
     </section>
 
-    <div>DEBUG
-      <pre> {{ JSON.stringify(postFilters, null, 2) }} </pre>
-    </div>
-
     <AdminTable 
       :fields="fields" 
       :tblFilters="postFilters" 
       indexRouteName="posts.index" 
       @table-event=handleTableEvent 
+      :encodedQueryFilters="encodedQueryFilters"
     />
 
     <!-- Show Modal -->
@@ -65,6 +62,10 @@ export default {
       start_date: null,
       end_date: null,
     },
+
+    encodedQueryFilters: {
+      //is_flagged: false,
+    },
   }),
 
   methods: { 
@@ -107,12 +108,34 @@ export default {
       const _pop = { ...this.postFilters } // make a copy
       const _idx = _pop[filterGroup].findIndex(iter => iter.key===fObj.key)
       if ( _idx >= 0 ) {
+        console.log('updated...')
         _pop[ filterGroup ][_idx] = { ...fObj, is_active: !fObj.is_active }
         this.postFilters = _pop
+        this.encodeQueryFilters()
+        //Vue.set( this.encodedQueryFilters, this.encodeQueryFilters(this.postFilters) )
       }
       //this.tobj.currentPage = 1
       //this.getTransactions()
     },
+
+    encodeQueryFilters() {
+      const filters = this.postFilters
+      let params = {
+        is_flagged: 0,
+        //resource_type: [],
+      }
+      for ( let s of filters.booleans ) {
+        switch (s.key) {
+          case 'is_flagged':
+            Vue.set(this.encodedQueryFilters, 'is_flagged', s.is_active?1:0)
+            //params.is_flagged = s.is_active
+            break
+        }
+      }
+      //this.encodedQueryFilters = { ...params }
+      //return params
+    },
+
   },
 
   watchers: {},
