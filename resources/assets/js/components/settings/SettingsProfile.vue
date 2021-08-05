@@ -21,7 +21,7 @@
             <b-row>
               <b-col>
                 <b-form-group id="group-about" label="Bio" label-for="about">
-                  <b-form-textarea id="about" v-model="formProfile.about" placeholder="Talk about yourself.." rows="8"></b-form-textarea>
+                  <b-form-textarea id="about" v-model="formProfile.about" rows="3"></b-form-textarea>
                 </b-form-group>
               </b-col>
             </b-row>
