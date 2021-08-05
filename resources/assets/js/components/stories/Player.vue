@@ -70,7 +70,7 @@
                 <article v-if="s.stype==='text'" class="h-100 v-wrap">
                   <VueMarkdown :html="false" class="h4 text-center v-box text-white w-75" :source="s.content || ''" />
                 </article>
-                <article v-else-if="s.stype==='image' && s.mediafiles" class="h-100">
+                <article v-else-if="s.stype==='image' && s.mediafiles" :class="mobile ? 'subcrate-media-mobile' : 'subcrate-media-desktop'" class="h-100">
                   <img v-if="s.mediafiles[0].is_image" :src="s.mediafiles[0].filepath" />
                   <video v-if="s.mediafiles[0].is_video" autoplay="autoplay" class="OFF-d-block">
                     <source :src="s.mediafiles[0].filepath" type="video/webm" />
@@ -95,6 +95,7 @@
 // However 'story' should actually refer to the entire story timeline, composed
 // of multiple slides
 import _ from 'lodash'
+import Vuex from 'vuex'
 import SeeMore from './SeeMore.vue' // for swipe-up functionality
 import VueMarkdown from '@adapttive/vue-markdown'
 
@@ -110,6 +111,7 @@ export default {
   },
 
   data: () => ({
+
     INTERVAL_DELTA: 35, // milliseconds...smaller the number the faster the playback
     slideViewedDuration: 0, // interval counter, range 0 to 100; also used to fill in progress bar during auto-playback (could use a better name for this)
 
@@ -124,6 +126,8 @@ export default {
     isLoading() {
       return !this.timeline || !this.storyteller || !this.slides || !this.session_user || (this.slideIndexInit===null)
     },
+
+    ...Vuex.mapState([ 'mobile' ]),
 
     cssCurrentProgress() {
       return { '--current-progress': `${this.slideViewedDuration}%` }
@@ -326,18 +330,30 @@ export default {
     width: 100%;
     height: 100%;
 
+    .subcrate-media-mobile {
+      display: flex;
+      align-items: center !important;
+      justify-content: center;
+      img, video {
+        width: 100%;
+      }
+    }
+
+    .subcrate-media-desktop {
+      img, video {
+        max-width: 100%;
+        margin: auto;
+        object-fit: cover;
+        height: 100%;
+        display: block;
+      }
+    }
+
     p {
       margin: auto;
     }
 
-    img, video {
-      max-width: 100%;
-      height: 100%;
-      display: block;
-      margin: auto;
-      object-fit: cover;
-    }
-  }
+  } // .crate-content
 
   .bg-blur {
     opacity: 0.99;
