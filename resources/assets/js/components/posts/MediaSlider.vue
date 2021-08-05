@@ -10,7 +10,6 @@
         v-if="mediafiles[0].is_image"
         class="d-block"
         :src="use_mid && mediafiles[0].has_mid ? mediafiles[0].midFilepath : mediafiles[0].filepath"
-        :alt="mediafiles[0].mfname"
       />
       <div class="background-preview" v-if="mediafiles[0].is_image">
         <img
@@ -38,7 +37,6 @@
             v-if="mf.is_image"
             class="d-block"
             :src="use_mid && mf.has_mid ? mf.midFilepath : mf.filepath"
-            :alt="mf.mfname"
           />
           <div class="background-preview" v-if="mf.is_image">
             <img

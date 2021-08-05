@@ -7,6 +7,7 @@
       hide-footer
       body-class="p-0"
       @hide="closeModal"
+      :centered="mobile"
     >
       <SendTip ref="sendTip" :session_user="session_user" :payload="modalPayload" />
     </b-modal>
@@ -18,6 +19,7 @@
       hide-footer
       body-class="p-0"
       @hide="closeModal"
+      :centered="mobile"
     >
       <PurchasePost ref="purchasePost" :session_user="session_user" :post_id="selectedResourceId" />
     </b-modal>
@@ -29,6 +31,7 @@
       hide-footer
       body-class="p-0"
       @hide="closeModal"
+      :centered="mobile"
     >
       <PurchaseMessage ref="purchaseMessage" :message="selectedResource" />
     </b-modal>
@@ -40,6 +43,7 @@
       hide-footer
       body-class="p-0"
       @hide="closeModal"
+      :centered="mobile"
     >
       <FollowTimeline ref="followTimeline" :session_user="session_user" :timeline="selectedTimeline" :subscribe_only="subscribeOnly" />
     </b-modal>
@@ -51,6 +55,7 @@
       hide-footer
       body-class="p-0"
       @hide="closeModal"
+      :centered="mobile"
     >
       <CropImage ref="cropImage" :session_user="session_user" :url="selectedUrl" :timelineId="selectedTimelineId" />
     </b-modal>
@@ -87,6 +92,7 @@
       hide-footer
       body-class="p-0"
       @hide="closeModal"
+      :centered="mobile"
     >
       <ImageDisplay ref="ImageDisplay" :session_user="session_user" :mediafile="selectedResource" :is_feed="false" />
     </b-modal>
@@ -98,6 +104,7 @@
       hide-footer
       body-class="p-0"
       @hide="closeModal"
+      :centered="mobile"
     >
       <ScheduleDateTime ref="schedule_picker_modal" :scheduled_at="scheduled_at" :for_edit="is_for_edit" />
     </b-modal>
@@ -110,6 +117,7 @@
       body-class="p-0"
       no-close-on-backdrop
       @hide="closeModal"
+      :centered="mobile"
     >
       <EditPost ref="editPost" :post="selectedResource" />
     </b-modal>
@@ -122,6 +130,7 @@
       body-class="p-0"
       no-close-on-backdrop
       @hide="closeModal"
+      :centered="mobile"
     >
       <ReportPost ref="reportPost" :post="selectedResource" />
     </b-modal>
@@ -133,6 +142,7 @@
       size="md"
       body-class="p-0"
       @hide="closeModal"
+      :centered="mobile"
     >
       <ExpirationPeriod ref="expirationPeriod" />
     </b-modal>
@@ -144,6 +154,7 @@
       size="lg"
       body-class="p-0"
       @hide="closeModal"
+      :centered="mobile"
     >
       <PromotionCampaign ref="promotionCampaign" />
     </b-modal>
@@ -188,7 +199,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState([ 'session_user', 'timeline', ]) // %TODO: may be able to drop timeline here (?)
+    ...Vuex.mapState([ 'session_user', 'timeline', 'mobile' ]) // %TODO: may be able to drop timeline here (?)
   },
 
   data: () => ({

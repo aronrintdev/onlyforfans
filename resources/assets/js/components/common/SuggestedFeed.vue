@@ -6,7 +6,7 @@
       <span @click="getDataset" class="tag-clickable sync">
         <fa-icon icon="sync" class="text-primary" />
       </span>
-      <span @click="toggleFree" class="tag-clickable filter" :class="filters.freeOnly ? 'text-success' : 'text-primary'">
+      <span @click="toggleFree" class="tag-clickable filter" :class="filters.paidOnly ? 'text-success' : 'text-primary'">
         <fa-icon icon="dollar-sign" />
       </span>
       <b-pagination
@@ -70,7 +70,7 @@ export default {
     rendered: null, // paged (rendered) data subset
 
     filters: {
-      freeOnly: false,
+      paidOnly: false,
     },
 
     perPage: 5,
@@ -97,7 +97,7 @@ export default {
 
   methods: {
     toggleFree() {
-      this.filters.freeOnly = !this.filters.freeOnly
+      this.filters.paidOnly = !this.filters.paidOnly
       this.getDataset()
     },
 
@@ -105,7 +105,7 @@ export default {
     // suggested timelines from the server
     getDataset(type=null) {
       const params = {}
-      params.free_only = this.filters.freeOnly
+      params.paid_only = this.filters.paidOnly
       axios.get( route('timelines.suggested'), { params }).then( response => {
         this.timelines = response.data.data || [];
         this.setRendered()

@@ -18,7 +18,6 @@
               <b-img
                 rounded="circle" 
                 :src="tl.avatar.filepath"
-                alt="Story owner's avatar" 
               />
             </div>
           </router-link>

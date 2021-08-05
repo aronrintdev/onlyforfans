@@ -4,7 +4,6 @@
       <router-link :to="timelineRoute">
         <b-img
           :src="post.user.avatar.filepath"
-          :alt="post.user.name"
           :title="post.user.name"
         ></b-img>
       </router-link>
@@ -21,7 +20,7 @@
             v-text="post.timeline.name"
             @click.native="hidePostModal"
           />
-          <span v-if="post.user.verified" class="verified-badge">
+          <span v-if="post.timeline.verified" class="verified-badge">
             <fa-icon icon="check-circle" class="text-primary" />
           </span>
         </li>

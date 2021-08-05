@@ -189,8 +189,8 @@ class TimelinesController extends AppBaseController
         });
 
         // Apply filters
-        if ( $request->has('free_only') ) {
-            $query->where('is_follow_for_free', true);
+        if ( $request->boolean('paid_only') ) {
+            $query->where('is_follow_for_free', false);
         }
 
         $data = $query->get();
