@@ -1,8 +1,8 @@
 <template>
   <div>
-    <h1>Post Management</h1>
+    <h1>Feed Management</h1>
     <b-tabs>
-      <b-tab title="List" active>
+      <b-tab title="Posts" active>
         <ListPosts />
       </b-tab>
     </b-tabs>
@@ -16,7 +16,6 @@ import Vuex from 'vuex'
 import ListPosts from './ListPosts'
 
 export default {
-  name: 'PostManagement',
 
   props: {},
 
@@ -33,6 +32,8 @@ export default {
   components: {
     ListPosts,
   },
+
+  name: 'FeedManagement',
 }
 </script>
 

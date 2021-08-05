@@ -15,9 +15,9 @@ export const adminRoutes = [
     component: admin.FinancialManagement,
   },
   {
-    name: 'post-management',
-    path: '/n0g1cg9sbx/post-management',
-    component: admin.PostManagement,
+    name: 'feed-management',
+    path: '/n0g1cg9sbx/feed-management',
+    component: admin.FeedManagement,
   },
   {
     name: 'content-management',
@@ -25,22 +25,10 @@ export const adminRoutes = [
     component: admin.ContentManagement,
   },
   {
-    name: 'mediafile-management',
-    path: '/n0g1cg9sbx/mediafile-management',
-    component: admin.MediafileManagement,
+    name: 'media-management',
+    path: '/n0g1cg9sbx/media-management',
+    component: admin.MediaManagement,
   },
-  /*
-  {
-    name: 'account-management',
-    path: '/n0g1cg9sbx/account-management',
-    component: admin.AccountManagement,
-  },
-  {
-    name: 'txn-management',
-    path: '/n0g1cg9sbx/txn-management',
-    component: admin.TxnManagement,
-  },
-  */
   {
     name: 'beta-program',
     path: '/n0g1cg9sbx/beta-program',

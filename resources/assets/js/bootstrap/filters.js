@@ -87,3 +87,21 @@ Vue.filter('niceDateTimeShort', function (value) {
   }
   return moment(value).format('MMM Do, YYYY HH:mm:ss')
 })
+
+Vue.filter('niceFilesize', function (value) {
+  const K = 1000
+  const M = K * 1000
+  const G = M * 1000
+  if (typeof value === 'undefined' || value === null || value === '') {
+    return ''
+  }
+  if ( value >= G  ) {
+    return Math.floor(value/G)+' GB'
+  } else if ( value >= M ) {
+    return Math.floor(value/M)+' MB'
+  } else if (value >= K ) {
+    return Math.floor(value/K)+' KB'
+  } else {
+    return value
+  }
+})

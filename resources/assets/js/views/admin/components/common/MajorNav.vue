@@ -6,6 +6,9 @@
     <b-nav vertical class="">
       <b-nav-item :to="{ name: 'user-management', params: {} }" ><h6>User Management</h6></b-nav-item>
       <b-nav-item :to="{ name: 'financial-management', params: {} }" ><h6>Financial</h6></b-nav-item>
+      <b-nav-item :to="{ name: 'media-management', params: {} }" ><h6>Media</h6></b-nav-item>
+      <b-nav-item :to="{ name: 'feed-management', params: {} }" ><h6>Feeds</h6></b-nav-item>
+      <b-nav-item :to="{ name: 'content-management', params: {} }"><h6>Content</h6></b-nav-item>
     </b-nav>
 
     <hr />
@@ -27,7 +30,6 @@
       <b-nav-item><router-link :to="{ name: 'account-management', params: {} }">Accounts</router-link></b-nav-item>
       <b-nav-item>tbd</b-nav-item>
     </b-nav>
-      -->
 
 
     <h6>Messages</h6>
@@ -45,7 +47,6 @@
     <h6>Feeds</h6>
     <b-nav vertical class="">
       <b-nav-item>Timelines</b-nav-item>
-      <b-nav-item><router-link :to="{ name: 'post-management', params: {} }">Posts</router-link></b-nav-item>
       <b-nav-item>Comments</b-nav-item>
     </b-nav>
 
@@ -57,7 +58,6 @@
     <h6>Media</h6>
     <b-nav vertical class="">
       <b-nav-item>Vaults</b-nav-item>
-      <b-nav-item><router-link :to="{ name: 'mediafile-management', params: {} }">Files</router-link></b-nav-item>
       <b-nav-item>Share Logs</b-nav-item>
     </b-nav>
 
@@ -66,7 +66,6 @@
       <b-nav-item>Tips</b-nav-item>
       <b-nav-item>Likes</b-nav-item>
       <b-nav-item>Favorites</b-nav-item>
-      <b-nav-item><router-link :to="{ name: 'content-management', params: {} }">Reported</router-link></b-nav-item>
     </b-nav>
 
 
@@ -75,10 +74,6 @@
       <b-nav-item>General Settings</b-nav-item>
       <b-nav-item>Sessions</b-nav-item>
       <b-nav-item>Jobs/Queues</b-nav-item>
-      <!--
-      <b-nav-item>US States</b-nav-item>
-      <b-nav-item>Countries</b-nav-item>
-      -->
       <b-nav-item>Database (migrations, etc)</b-nav-item>
     </b-nav>
 
@@ -99,6 +94,7 @@
       <b-nav-item>Links</b-nav-item>
       <b-nav-item>Locations</b-nav-item>
     </b-nav>
+    -->
 
   </section>
 </template>
