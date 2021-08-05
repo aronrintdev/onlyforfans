@@ -1,6 +1,5 @@
 <template>
-  <div v-if="!isLoading">
-    <h1>File/Media Management</h1>
+  <div v-if="!isLoading" class="mt-3">
 
     <b-pagination
       v-model="tobj.currentPage"
@@ -26,7 +25,7 @@
       <template #cell(has_mid)="data"><span class="">{{ data.item.has_mid | niceBool }}</span></template>
       <template #cell(has_thumb)="data"><span class="">{{ data.item.has_thumb | niceBool }}</span></template>
       <template #cell(owner_id)="data"><span class="">{{ data.item.owner_id | niceGuid }}</span></template>
-      <template #cell(created_at)="data"><span class="">{{ data.item.created_at | niceDate }}</span></template>
+      <template #cell(created_at)="data"><span class="">{{ data.item.created_at | niceDate(true) }}</span></template>
       <template #cell(ctrls)="data">
         <span @click="renderFlag(data.item)" class="">
           <fa-icon v-if="data.item.flag_count>0" :icon="['fas', 'flag']" class="clickable fa-sm text-danger" />
@@ -90,8 +89,6 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 export default {
-  name: 'MediafileManagement',
-
   props: {},
 
   computed: {
@@ -106,10 +103,10 @@ export default {
       //{ key: 'slug', label: 'Slug', sortable: false, },
       { key: 'owner_id', label: 'Owner', sortable: false, },
       //{ key: 'filepath', label: 'Path', sortable: false, },
-      { key: 'mimetype', label: 'Mime Type', sortable: false, },
-      { key: 'orig_ext', label: 'Orig. Ext', sortable: false, },
-      { key: 'orig_filename', label: 'Orig. File', sortable: false, },
-      { key: 'orig_size', label: 'Orig. Size', sortable: false, },
+      { key: 'mimetype', label: 'Mime Type', sortable: true, },
+      { key: 'orig_ext', label: 'Orig. Ext', sortable: true, },
+      { key: 'orig_filename', label: 'Orig. File', sortable: true, },
+      { key: 'orig_size', label: 'Orig. Size', sortable: true, formatter:  (v, k, i) => Vue.options.filters.niceFilesize(v) },
       //{ key: 'basename', label: 'Base Name', sortable: false, },
       { key: 'has_blur', label: 'Blur?', sortable: false, },
       { key: 'has_mid', label: 'Mid?', sortable: false, },
@@ -207,6 +204,8 @@ export default {
   },
 
   components: {},
+
+  name: 'ListMediafiles',
 }
 </script>
 

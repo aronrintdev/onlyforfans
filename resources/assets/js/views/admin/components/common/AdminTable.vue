@@ -1,13 +1,16 @@
 <template>
-  <div v-if="!isLoading">
+  <div v-if="!isLoading" class="my-3">
 
-    <b-pagination
-      v-model="tobj.currentPage"
-      :total-rows="tobj.totalRows"
-      :per-page="tobj.perPage"
-      v-on:page-click="pageClickHandler"
-      aria-controls="admin-index-table"
-    ></b-pagination>
+    <section class="superbox-paging mb-3 d-flex align-items-center OFF-justify-content-between">
+      <b-pagination
+        v-model="tobj.currentPage"
+        :total-rows="tobj.totalRows"
+        :per-page="tobj.perPage"
+        v-on:page-click="pageClickHandler"
+        aria-controls="admin-index-table"
+      ></b-pagination>
+      <div class="ml-5">({{ tobj.totalRows }})</div>
+    </section>
 
     <b-table hover 
       :items="tobj.data"

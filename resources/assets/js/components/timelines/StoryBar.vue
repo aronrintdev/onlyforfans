@@ -54,6 +54,8 @@
         <b-button block variant="primary" class="" @click="selectFromFiles">Add from Device</b-button>
         <b-button block variant="primary" class="" :to="{ name: 'vault.dashboard', params: { context: 'storybar' } }">Add from Vault</b-button>
         <b-button block variant="primary" class="" @click="selectTextOnly">Add Text Only</b-button>
+        <hr />
+        <b-button block variant="primary" class="" :to="{ name: 'stories.player', params: { timeline_id: timeline.id } }">View My Stories</b-button>
       </div>
     </b-modal>
 
@@ -74,7 +76,7 @@
         </b-form-group>
       </b-form>
       <template #modal-footer>
-        <b-button variant="warning" @click="isPreviewModalVisible=false">Cancel</b-button>
+        <b-button variant="secondary" @click="isPreviewModalVisible=false">Cancel</b-button>
         <b-button variant="primary" @click="storeStory()">Save</b-button>
       </template>
     </b-modal>
@@ -152,7 +154,6 @@ export default {
     },
 
     handleDiskSelect(e) {
-      console.log('handleDiskSelect')
       const file = e.target.files[0]
       this.selectedFileUrl = URL.createObjectURL(file)
       //this.$bvModal.show('modal-select-file', { })
