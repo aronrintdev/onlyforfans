@@ -1,7 +1,7 @@
 <template>
   <b-navbar :toggleable="mobile" variant="light" sticky class="bg-white" :class="{ 'pb-0': mobile }" >
-    <b-navbar-brand :to="{ name: 'index' }" class="navbar-brand mr-5">
-      <Branding :type="mobile ? 'circle' : 'text'" :size="mobile ? '2x' : 'lg'" :variant="mobile ? 'gradient' : 'brand'" />
+    <b-navbar-brand :to="{ name: 'index' }" class="navbar-brand mr-5" :class="mobile ">
+      <Branding :type="mobile ? 'text' : 'text'" :size="mobile ? 'lg' : 'lg'" :variant="mobile ? 'brand' : 'brand'" />
     </b-navbar-brand>
     <b-navbar-toggle target="nav-collapse" class="mb-2">
       <ProfileButton />
