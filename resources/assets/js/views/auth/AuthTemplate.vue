@@ -13,16 +13,16 @@
           <Branding type="text" size="3x" class="mb-3 signin-logo" />
           <swiper class="auth-slider-swiper" :options="swiperOptions">
             <swiper-slide>
-              <h3 class="card-title">Create new events</h3>
-              <p>It is a long established fact that a reader will be distracted by the readable content.</p>
+              <h3 class="card-title">Subscribe and Tip</h3>
+              <p>Fans subscribe to profiles for access to premium content and can send tips.</p>
             </swiper-slide>
             <swiper-slide>
-              <h3 class="card-title">Create new events</h3>
-              <p>It is a long established fact that a reader will be distracted by the readable content.</p>
+              <h3 class="card-title">Message with Fans</h3>
+              <p>Instant messaging to share photos, videos, and to send or receive tips.</p>
             </swiper-slide>
             <swiper-slide>
-              <h3 class="card-title">Create new events</h3>
-              <p>It is a long established fact that a reader will be distracted by the readable content.</p>
+              <h3 class="card-title">Find Fans and Creators</h3>
+              <p>Explore to find fans and creators, then follow or subscribe.</p>
             </swiper-slide>
             <div class="swiper-pagination" slot="pagination"></div>
           </swiper>
