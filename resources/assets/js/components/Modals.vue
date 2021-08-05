@@ -356,6 +356,7 @@ export default {
     & > article {
       flex: 1;
       margin-bottom: 65px;
+      overflow: hidden;
 
       .media-slider {
         height: 100%;

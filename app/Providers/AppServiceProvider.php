@@ -43,7 +43,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
 
-        if (env('APP_ENV', 'local') !== 'local') {
+        if (Config::get('app.env', 'production') !== 'local') {
             DB::connection()->disableQueryLog();
         }
 

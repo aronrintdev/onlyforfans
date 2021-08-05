@@ -32,6 +32,8 @@
     <!-- Scripts -->
     @include('vendorjs')
     <script src="{{ mix('js/admin.app.js') }}"></script>
+
+    @include('svg')
 </body>
 </html>
 

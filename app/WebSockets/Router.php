@@ -2,15 +2,16 @@
 
 namespace App\WebSockets;
 
-use BeyondCode\LaravelWebSockets\Server\Router as ParentRouter;
-
-use BeyondCode\LaravelWebSockets\HttpApi\Controllers\FetchChannelController;
-use BeyondCode\LaravelWebSockets\HttpApi\Controllers\FetchChannelsController;
-use BeyondCode\LaravelWebSockets\HttpApi\Controllers\FetchUsersController;
-use BeyondCode\LaravelWebSockets\HttpApi\Controllers\TriggerEventController;
-use BeyondCode\LaravelWebSockets\Server\Logger\WebsocketsLogger;
-use BeyondCode\LaravelWebSockets\WebSockets\WebSocketHandler;
 use Ratchet\WebSocket\WsServer;
+
+use Illuminate\Support\Facades\Config;
+use BeyondCode\LaravelWebSockets\WebSockets\WebSocketHandler;
+use BeyondCode\LaravelWebSockets\Server\Router as ParentRouter;
+use BeyondCode\LaravelWebSockets\Server\Logger\WebsocketsLogger;
+use BeyondCode\LaravelWebSockets\HttpApi\Controllers\FetchUsersController;
+use BeyondCode\LaravelWebSockets\HttpApi\Controllers\FetchChannelController;
+use BeyondCode\LaravelWebSockets\HttpApi\Controllers\TriggerEventController;
+use BeyondCode\LaravelWebSockets\HttpApi\Controllers\FetchChannelsController;
 
 class Router extends ParentRouter {
 
@@ -35,7 +36,7 @@ class Router extends ParentRouter {
         $app = app($action);
 
         // if (WebsocketsLogger::isEnabled() && !$this->isCustomAction($action)) {
-        if(env('APP_DEBUG')) {
+        if(Config::get('app.debug')) {
             $app = WebsocketsLogger::decorate($app);
         }
         // }

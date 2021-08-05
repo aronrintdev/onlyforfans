@@ -41,5 +41,7 @@
         {{-- Application JS --}}
         @include('vendorjs')
         <script src="{{ mix('js/app.guest.js') }}"></script>
+
+        @include('svg')
     </body>
 </html>

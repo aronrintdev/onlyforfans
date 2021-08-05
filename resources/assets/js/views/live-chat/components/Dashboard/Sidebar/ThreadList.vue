@@ -17,6 +17,7 @@
     </b-list-group>
 
     <b-pagination
+      v-if="showPagination"
       :value="page"
       :total-rows="totalRows"
       :per-page="perPage"
@@ -26,7 +27,7 @@
       class="mt-3"
     />
 
-    <LoadingOverlay :loading="noThreads" />
+    <LoadingOverlay :loading="loading" />
   </article>
 </template>
 
@@ -48,6 +49,7 @@ export default {
   },
 
   props: {
+    loading: { type: Boolean, default: false },
     page: { type: Number, default: 1 },
     perPage: { type: Number, default: 10 },
     totalRows: { type: Number, default: 0 },
@@ -75,7 +77,9 @@ export default {
     },
   },
 
-  data: () => ({}),
+  data: () => ({
+    showPagination: false,
+  }),
 
   methods: {
 

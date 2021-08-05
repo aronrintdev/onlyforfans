@@ -15,7 +15,11 @@ import { fas as fasPro } from '@fortawesome/pro-solid-svg-icons'
 import { far as farPro } from '@fortawesome/pro-regular-svg-icons'
 import { fal } from '@fortawesome/pro-light-svg-icons'
 import { fad } from '@fortawesome/pro-duotone-svg-icons'
-library.add(fas, far, fab, fasPro, farPro, fal, fad)
+
+import { allfansCircle } from '@/icons/allfansCircle'
+import { allfansType } from '@/icons/allfansType'
+
+library.add(fas, far, fab, fasPro, farPro, fal, fad, allfansCircle, allfansType)
 
 // Optimization for live mode
 /*

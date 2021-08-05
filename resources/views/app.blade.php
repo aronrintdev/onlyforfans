@@ -16,8 +16,6 @@
     <!-- %NOTE: this is the *generated* CSS file -->
     <link href="{{ mix('/css/app.css') }}" rel="stylesheet">
 
-    <link rel="prefetch" as="image" href="/images/logos/allfans-logo-154x33.png" />
-
     <!-- Static Data -->
     <script>
         const myUserId = '{{ Auth::user()->id }}';
@@ -42,24 +40,11 @@
     @include('vendorjs')
     <script src="{{ mix('js/app.js') }}"></script>
 
+    @if (Config::get('intercom.enabled'))
     {{-- Intercom Code --}}
-    {{--
     <script>
         window.intercomSettings = {
-            app_id: "rio7vil9"
-        };
-    </script>
-
-    <script>
-        // We pre-filled your app ID in the widget URL: 'https://widget.intercom.io/widget/rio7vil9'
-        (function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',w.intercomSettings);}else{var d=document;var i=function(){i.c(arguments);};i.q=[];i.c=function(args){i.q.push(args);};w.Intercom=i;var l=function(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/rio7vil9';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);};if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();
-    </script>
-     --}}
-
-    {{-- Intercom Code for logged in users, needs verification hash to work --}}
-    <script>
-        window.intercomSettings = {
-            app_id: "rio7vil9",
+            app_id: "{{ Config::get('intercom.appId') }}",
             name: "{{ Auth::user()->username }}",  // Full name
             email: "{{ Auth::user()->email }}",  // Email address
             created_at: "{{ Auth::user()->created_at->timestamp; }}"  // Signup date as a Unix timestamp
@@ -67,8 +52,10 @@
     </script>
 
     <script>
-        // We pre-filled your app ID in the widget URL: 'https://widget.intercom.io/widget/rio7vil9'
-        (function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',w.intercomSettings);}else{var d=document;var i=function(){i.c(arguments);};i.q=[];i.c=function(args){i.q.push(args);};w.Intercom=i;var l=function(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/rio7vil9';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);};if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();
+        (function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',w.intercomSettings);}else{var d=document;var i=function(){i.c(arguments);};i.q=[];i.c=function(args){i.q.push(args);};w.Intercom=i;var l=function(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/{{ Config::get("intercom.appId") }}';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);};if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();
     </script>
+    @endif
+
+    @include('svg')
 </body>
 </html>

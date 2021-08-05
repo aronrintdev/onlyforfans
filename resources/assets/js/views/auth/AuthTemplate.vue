@@ -10,7 +10,7 @@
     <div class="auth-container position-absolute row no-gutters">
       <div class="col-md-6 text-center">
         <div class="auth-description">
-          <img src="/images/logos/allfans-logo-154x33.png" alt="All Fans Logo" class="logo-image">
+          <Branding type="text" size="3x" class="mb-3 signin-logo" />
           <swiper class="auth-slider-swiper" :options="swiperOptions">
             <swiper-slide>
               <h3 class="card-title">Subscribe and Tip</h3>
@@ -36,8 +36,14 @@
 </template>
 
 <script>
+import Branding from '@components/common/Branding'
+
 export default {
   name: 'AuthTemplate',
+
+  components: {
+    Branding,
+  },
 
   data:() => ({
     swiperOptions: {

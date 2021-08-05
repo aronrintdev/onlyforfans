@@ -4,7 +4,7 @@
     <div v-if="isVisible" class="header">
       <b-navbar variant="light" >
         <b-navbar-brand :to="{ name: 'index' }" class="navbar-brand mr-5">
-          <img src="/images/logos/allfans-logo-154x33.png" alt="All Fans Logo">
+          <Branding type="text" size="3x" class="mb-3" />
         </b-navbar-brand>
         <b-btn variant="dark" @click="$router.push({ name: 'login' })" class="ml-auto">{{ $t('login') }}</b-btn>
       </b-navbar>
@@ -28,9 +28,14 @@
  */
 import Vuex from 'vuex'
 import VueScreenSize from 'vue-screen-size'
+import Branding from '@components/common/Branding'
 
 export default {
   name: 'Guest',
+
+  components: {
+    Branding,
+  },
 
   mixins: [VueScreenSize.VueScreenSizeMixin],
 
@@ -62,7 +67,7 @@ export default {
   },
 
   mounted() {
-    if(this.$route && (this.$route.name === 'login' || this.$route.name === "register")) {
+    if(this.$route && (this.$route.name === 'login' || this.$route.name === "register" || this.$route.name === 'error-not-found')) {
       this.isVisible = false
     }
   },
