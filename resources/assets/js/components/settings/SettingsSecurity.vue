@@ -142,11 +142,7 @@ export default {
     }),
 
     pageClickHandler(e, page) {
-      this.getFanledgers({ 
-        seller_id: this.session_user.id,
-        page: page,
-        take: this.perPage,
-      })
+      //
     },
 
     async submitPassword(e) {

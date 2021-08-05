@@ -23,8 +23,7 @@ class Api
             $base = 'https://sandbox.idmvalidate.com';
         } else {
             // production!
-            throw new Exception('production endoints TBD!');
-            $base = '...';
+            $base = 'https://prod.idmvalidate.com';
         }
         $this->endpoints = [
             'token' => [

@@ -44,11 +44,6 @@ export default new Vuex.Store({
     feeddata: {},
     previewposts: null,
     stories: [], // Current open stories
-    earnings: null,
-    debits: null,
-    fanledgers: {},       // TODO: Deprecate
-    ledgercredits: null,  // TODO: Deprecate
-    ledgerdebits: null,   // TODO: Deprecate
     favorites: null,
     timeline: null,
     session_user: null,
@@ -105,22 +100,6 @@ export default new Vuex.Store({
     },
     UPDATE_STORIES(state, payload) {
       state.stories = propSelect(payload, 'stories')
-    },
-    UPDATE_FANLEDGERS(state, payload) {
-      //state.fanledgers = propSelect(payload, 'fanledgers')
-      state.fanledgers = payload.hasOwnProperty('data') ? payload.data : {}
-    },
-    UPDATE_LEDGERCREDITS(state, payload) {
-      state.ledgercredits = payload.hasOwnProperty('data') ? payload.data : {}
-    },
-    UPDATE_LEDGERDEBITS(state, payload) {
-      state.ledgerdebits = payload.hasOwnProperty('data') ? payload.data : {}
-    },
-    UPDATE_EARNINGS(state, payload) {
-      state.earnings = propSelect(payload, 'earnings')
-    },
-    UPDATE_DEBITS(state, payload) {
-      state.debits = propSelect(payload, 'debits')
     },
     UPDATE_FAVORITES(state, payload) {
       state.favorites = payload.hasOwnProperty('data') ? payload.data : {}
@@ -229,39 +208,6 @@ export default new Vuex.Store({
       });
     },
 
-    getFanledgers({ commit }, params ) {
-      const url = route(`fanledgers.index`);
-      axios.get(url, { params })
-        .then((response) => {
-          commit('UPDATE_FANLEDGERS', response)
-        })
-    },
-    getLedgercredits({ commit }, params ) {
-      const url = route(`fanledgers.index`);
-      axios.get(url, { params })
-        .then((response) => {
-          commit('UPDATE_LEDGERCREDITS', response)
-        })
-    },
-    getLedgerdebits({ commit }, params ) {
-      const url = route(`fanledgers.index`);
-      axios.get(url, { params })
-        .then((response) => {
-          commit('UPDATE_LEDGERDEBITS', response)
-        })
-    },
-
-    getEarnings({ commit }, { user_id }  ) {
-      axios.get(route('fanledgers.showEarnings', user_id)).then((response) => {
-        commit('UPDATE_EARNINGS', response.data)
-      })
-    },
-    getDebits({ commit }, { user_id }  ) {
-      axios.get(route('fanledgers.showDebits', user_id)).then((response) => {
-        commit('UPDATE_DEBITS', response.data)
-      })
-    },
-
     getFavorites({ commit }, params ) {
       const url = route(`favorites.index`);
       axios.get(url, { params })
@@ -347,11 +293,6 @@ export default new Vuex.Store({
     feeddata:                state => state.feeddata,
     previewposts:            state => state.previewposts,
     stories:                 state => state.stories,
-    fanledgers:              state => state.fanledgers,
-    ledgercredits:           state => state.ledgercredits,
-    ledgerdebits:            state => state.ledgerdebits,
-    earnings:                state => state.earnings,
-    debits:                  state => state.debits,
     favorites:               state => state.favorites,
     timeline:                state => state.timeline,
     unshifted_timeline_post: state => state.unshifted_timeline_post,

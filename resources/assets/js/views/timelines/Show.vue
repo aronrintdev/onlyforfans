@@ -10,7 +10,7 @@
     <section class="row">
       <aside v-if="!isGridLayout" class="col-md-5 col-lg-4">
         <FollowCtrl :session_user="session_user" :timeline="timeline" />
-        <PreviewUpgrade :session_user="session_user" :timeline="timeline" :viewMorePhotos="setCurrentFeedType" />
+        <PreviewUpgrade :session_user="session_user" :timeline="timeline" :viewMorePhotos="setCurrentFeedType" :key="timeline.id" />
       </aside>
       <main :class="mainClass">
         <PostFeed

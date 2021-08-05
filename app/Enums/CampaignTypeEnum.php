@@ -3,7 +3,6 @@ namespace App\Enums;
 
 use App\Interfaces\Selectable;
 
-// aka FanledgerTypeEnum
 class CampaignTypeEnum extends SmartEnum implements Selectable
 {
     const DISCOUNT = 'discount';
