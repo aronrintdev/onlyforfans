@@ -4,7 +4,7 @@
       <div class="login-card p-5">
         <!-- SignUp Form -->
         <b-form @submit.prevent="signup">
-          <img src="/images/logos/allfans-logo-154x33.png" alt="All Fans Logo" class="register-logo">
+          <Branding type="text" size="3x" class="mb-3 signin-logo" />
           <div class="h1 mb-5" v-text="$t('signUpLink')" />
           <div class="signup-form">
             <div v-if="$route.query.beta">
@@ -128,6 +128,7 @@
  */
 import LinkBar from '../../components/staticPages/LinkBar'
 import AuthTemplate from './AuthTemplate'
+import Branding from '@components/common/Branding'
 
 import '../../../static/images/g-login-btn.png'
 import '../../../static/images/facebook-login.png'
@@ -136,6 +137,7 @@ import '../../../static/images/twitter-login.png'
 export default {
   name: 'register',
   components: {
+    Branding,
     LinkBar,
     AuthTemplate,
   },

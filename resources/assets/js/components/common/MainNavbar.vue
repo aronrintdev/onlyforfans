@@ -1,7 +1,7 @@
 <template>
   <b-navbar :toggleable="mobile" variant="light" sticky class="bg-white" :class="{ 'pb-0': mobile }" >
     <b-navbar-brand :to="{ name: 'index' }" class="navbar-brand mr-5">
-      <img src="/images/logos/allfans-logo-154x33.png" alt="All Fans Logo">
+      <Branding :type="mobile ? 'circle' : 'text'" :size="mobile ? '2x' : 'lg'" :variant="mobile ? 'gradient' : 'brand'" />
     </b-navbar-brand>
     <b-navbar-toggle target="nav-collapse" class="mb-2">
       <ProfileButton />
@@ -43,6 +43,7 @@
 
 <script>
 import Vuex from 'vuex'
+import Branding from '@components/common/Branding'
 import NavButtons from './navbar/NavButtons'
 import ProfileButton from './navbar/ProfileButton'
 import ProfileMenu from './navbar/ProfileMenu'
@@ -52,6 +53,7 @@ import ScrollCollapse from '@components/common/ScrollCollapse'
 
 export default {
   components: {
+    Branding,
     NavButtons,
     ProfileButton,
     ProfileMenu,

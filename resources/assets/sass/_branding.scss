@@ -1,0 +1,17 @@
+/**
+ * resources/assets/sass/_branding.scss
+ */
+
+$brandGradient: linear-gradient(-45deg, $brand 0%, $brand 61.9741%, $brand-secondary 100%);
+.brand-gradient {
+  color: $brand;
+  background: $brandGradient !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -moz-background-clip: text !important;
+  -moz-text-fill-color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+svg.brand-gradient * {
+  fill: url(#brand-gradient-fill);
+}

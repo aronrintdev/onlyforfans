@@ -1,6 +1,6 @@
 <template>
   <div class="site-loading d-flex flex-column justify-content-center align-items-center text-brand">
-    <img src="/images/logos/allfans-logo-154x33.png" alt="All Fans Logo" class="mb-5">
+    <Branding type="text" size="3x" class="mb-5" />
     <fa-icon icon="spinner" size="3x" spin />
   </div>
 </template>
@@ -10,11 +10,14 @@
  * resources/assets/js/components/common/SiteLoading.vue
  */
 import Vuex from 'vuex'
+import Branding from '@components/common/Branding'
 
 export default {
   name: 'SiteLoading',
 
-  components: {},
+  components: {
+    Branding,
+  },
 
   props: {},
 

@@ -5,7 +5,7 @@
         <b-form @submit.prevent="login">
           <!-- Login Form -->
           <div class="login-form">
-            <img src="/images/logos/allfans-logo-154x33.png" alt="All Fans Logo" class="signin-logo">
+            <Branding type="text" size="3x" class="mb-3 signin-logo" />
             <div class="h1 mb-5" v-text="$t('signInHeader')"></div>
             <div v-if="verrors && verrors.message">
               <b-alert variant="danger" v-text="verrors.message" show />
@@ -85,9 +85,12 @@ import '../../../static/images/g-login-btn.png'
 import '../../../static/images/facebook-login.png'
 import '../../../static/images/twitter-login.png'
 
+import Branding from '@components/common/Branding'
+
 export default {
   name: 'login',
   components: {
+    Branding,
     LinkBar,
     AuthTemplate,
   },
