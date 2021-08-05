@@ -3,8 +3,14 @@
 
     <hr />
 
-    <h6>User Management</h6>
     <b-nav vertical class="">
+      <b-nav-item :to="{ name: 'user-management', params: {} }" ><h6>User Management</h6></b-nav-item>
+      <b-nav-item :to="{ name: 'financial-management', params: {} }" ><h6>Financial</h6></b-nav-item>
+    </b-nav>
+
+    <hr />
+
+  <!--
       <b-nav-item><router-link :to="{ name: 'user-management', params: {} }">Users</router-link></b-nav-item>
       <b-nav-item>User Settings</b-nav-item>
       <b-nav-item>User Moderation (Blocks, Restrictions, Reports)</b-nav-item>
@@ -15,12 +21,11 @@
       <b-nav-item>Notifications</b-nav-item>
       <b-nav-item>Ranking (weights for suggested, explore, etc)</b-nav-item>
       <b-nav-item :to="{ name: 'beta-program' }">Beta Program</b-nav-item>
-    </b-nav>
+      -->
 
     <h6>Financial</h6>
     <b-nav vertical class="">
       <b-nav-item><router-link :to="{ name: 'account-management', params: {} }">Accounts</router-link></b-nav-item>
-      <b-nav-item><router-link :to="{ name: 'txn-management', params: {} }">Txn</router-link></b-nav-item>
       <b-nav-item>tbd</b-nav-item>
     </b-nav>
 

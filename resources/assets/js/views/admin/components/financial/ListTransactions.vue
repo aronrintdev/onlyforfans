@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h1>Transaction Management</h1>
     <section v-if="summary">
       <div class="mt-3 px-5">
         <b-card-group deck class="mb-3">
@@ -133,7 +132,7 @@ import moment from 'moment'
 //import TransactionsTable from '@components/statements/transactions/Table'
 
 export default {
-  name: 'TxnManagement',
+  name: 'ListTransactions',
 
   props: {},
 

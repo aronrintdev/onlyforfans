@@ -10,6 +10,11 @@ export const adminRoutes = [
     component: admin.UserManagement,
   },
   {
+    name: 'financial-management',
+    path: '/n0g1cg9sbx/financial-management',
+    component: admin.FinancialManagement,
+  },
+  {
     name: 'post-management',
     path: '/n0g1cg9sbx/post-management',
     component: admin.PostManagement,
@@ -29,11 +34,13 @@ export const adminRoutes = [
     path: '/n0g1cg9sbx/account-management',
     component: admin.AccountManagement,
   },
+  /*
   {
     name: 'txn-management',
     path: '/n0g1cg9sbx/txn-management',
     component: admin.TxnManagement,
   },
+  */
   {
     name: 'beta-program',
     path: '/n0g1cg9sbx/beta-program',

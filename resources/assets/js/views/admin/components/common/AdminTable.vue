@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading">
+  <div v-if="!isLoading" class="my-3">
 
     <b-pagination
       v-model="tobj.currentPage"
