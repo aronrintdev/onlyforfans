@@ -67,8 +67,7 @@
       </div>
     </section>
 
-    <b-card>
-      <b-card-title :title="`Transactions (${tobj.totalRows})`" />
+    <section>
 
       <b-pagination
         v-model="tobj.currentPage"
@@ -106,10 +105,10 @@
           <span class="">{{ data.item.resource_id | niceGuid }}</span>
         </template>
         <template #cell(settled_at)="data">
-          <span class="">{{ data.item.settled_at | niceDate }}</span>
+          <span class="">{{ data.item.settled_at | niceDate(true) }}</span>
         </template>
         <template #cell(created_at)="data">
-          <span class="">{{ data.item.created_at | niceDate }}</span>
+          <span class="">{{ data.item.created_at | niceDate(true) }}</span>
         </template>
       </b-table>
 
@@ -121,7 +120,8 @@
         aria-controls="txns-table"
       ></b-pagination>
 
-    </b-card>
+    </section>
+
   </div>
 </template>
 

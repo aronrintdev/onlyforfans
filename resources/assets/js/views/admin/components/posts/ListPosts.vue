@@ -49,7 +49,7 @@ export default {
       { key: 'type', label: 'Type', sortable: true, },
       { key: 'price', label: 'Price', sortable: true, formatter: v => Vue.options.filters.niceCurrency(v) },
       { key: 'description', label: 'Content', tdClass: 'tag-desc', },
-      { key: 'created_at', label: 'Created', sortable: true, formatter: v => Vue.options.filters.niceDate(v) },
+      { key: 'created_at', label: 'Created', sortable: true, formatter: v => Vue.options.filters.niceDate(v, true) },
       { key: 'ctrls', label: '', sortable: false, },
     ],
     isShowModalVisible: false,

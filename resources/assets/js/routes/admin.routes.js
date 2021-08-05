@@ -29,12 +29,12 @@ export const adminRoutes = [
     path: '/n0g1cg9sbx/mediafile-management',
     component: admin.MediafileManagement,
   },
+  /*
   {
     name: 'account-management',
     path: '/n0g1cg9sbx/account-management',
     component: admin.AccountManagement,
   },
-  /*
   {
     name: 'txn-management',
     path: '/n0g1cg9sbx/txn-management',

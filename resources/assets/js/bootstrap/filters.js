@@ -63,11 +63,15 @@ Vue.filter('ucfirst', function(str) {
   return str.charAt(0).toUpperCase() + str.slice(1)
 })
 
-Vue.filter('niceDate', function (value) {
+Vue.filter('niceDate', function (value, isShort=false) {
   if (typeof value === 'undefined' || value === null || value === '') {
     return ''
   }
-  return moment(value).format('MMMM Do, YYYY')
+  if (isShort) {
+    return moment(value).format('M/D/YY')
+  } else {
+    return moment(value).format('MMMM Do, YYYY')
+  }
 })
 
 Vue.filter('niceDateTime', function (value) {

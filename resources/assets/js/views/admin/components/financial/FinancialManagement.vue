@@ -5,6 +5,9 @@
       <b-tab title="Transactions" lazy active>
         <ListTransactions />
       </b-tab>
+      <b-tab title="Accounts" lazy>
+        <ListAccounts />
+      </b-tab>
     </b-tabs>
   </div>
 </template>
@@ -13,6 +16,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
+import ListAccounts from './ListAccounts'
 import ListTransactions from './ListTransactions'
 
 export default {
@@ -30,6 +34,7 @@ export default {
   created() {},
 
   components: {
+    ListAccounts,
     ListTransactions,
   },
 

@@ -31,7 +31,7 @@ export default {
       { key: 'vservice', label: 'Service', sortable: true, },
       { key: 'service_guid', label: 'Service ID', formatter: (v, k, i) => Vue.options.filters.niceGuid(v) },
       { key: 'vstatus', label: 'Status', sortable: true, },
-      { key: 'last_checked_at', label: 'Last Checked', sortable: true, formatter: (v, k, i) => Vue.options.filters.niceDate(v) },
+      { key: 'last_checked_at', label: 'Last Checked', sortable: true, formatter: (v, k, i) => Vue.options.filters.niceDate(v, true) },
     ],
 
     isShowModalVisible: false,

@@ -21,13 +21,13 @@
       <b-nav-item>Notifications</b-nav-item>
       <b-nav-item>Ranking (weights for suggested, explore, etc)</b-nav-item>
       <b-nav-item :to="{ name: 'beta-program' }">Beta Program</b-nav-item>
-      -->
 
     <h6>Financial</h6>
     <b-nav vertical class="">
       <b-nav-item><router-link :to="{ name: 'account-management', params: {} }">Accounts</router-link></b-nav-item>
       <b-nav-item>tbd</b-nav-item>
     </b-nav>
+      -->
 
 
     <h6>Messages</h6>

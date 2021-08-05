@@ -35,13 +35,13 @@ export default {
         if ( v === null ) {
           return 'N'
         } else {
-          return 'Y @ '+Vue.options.filters.niceDate(v) 
+          return 'Y @ '+Vue.options.filters.niceDate(v, true) 
         }
       }},
       { key: 'is_verified', label: 'ID Verified?', sortable: true, formatter: (v, k, i) => Vue.options.filters.niceBool(v) },
       { key: 'timeline', label: 'Timeline Slug', sortable: true, formatter: (v, k, i) => v.slug },
-      { key: 'last_logged', label: 'Last Login', sortable: true, formatter: (v, k, i) => Vue.options.filters.niceDate(v) },
-      { key: 'created_at', label: 'Joined', sortable: true, formatter: (v, k, i) => Vue.options.filters.niceDate(v) },
+      { key: 'last_logged', label: 'Last Login', sortable: true, formatter: (v, k, i) => Vue.options.filters.niceDate(v, true) },
+      { key: 'created_at', label: 'Joined', sortable: true, formatter: (v, k, i) => Vue.options.filters.niceDate(v, true) },
       { key: 'ctrls', label: '', sortable: false, },
     ],
 
