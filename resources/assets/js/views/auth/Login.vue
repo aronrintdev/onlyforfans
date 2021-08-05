@@ -160,9 +160,6 @@ export default {
 .login-form-container {
   max-width: 600px;
 }
-.signin-button {
-  max-width: 150px;
-}
 .h-line {
   color: var('--gray');
 }
