@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <fa-icon :icon="icon" v-bind="$attrs" :class="variantClass" />
-  </div>
+  <fa-icon :icon="icon" v-bind="$attrs" :class="variantClass" />
 </template>
 
 <script>
