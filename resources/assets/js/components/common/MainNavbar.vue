@@ -1,6 +1,6 @@
 <template>
   <b-navbar :toggleable="mobile" variant="light" sticky class="bg-white" :class="{ 'pb-0': mobile }" >
-    <b-navbar-brand :to="{ name: 'index' }" class="navbar-brand mr-5" :class="mobile ">
+    <b-navbar-brand :to="{ name: 'index' }" class="navbar-brand" :class="mobile ? 'mr-2' : 'mr-5'">
       <Branding :type="mobile ? 'text' : 'text'" :size="mobile ? 'lg' : 'lg'" :variant="mobile ? 'brand' : 'brand'" />
     </b-navbar-brand>
     <b-navbar-toggle target="nav-collapse" class="mb-2">
