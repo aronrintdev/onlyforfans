@@ -1,6 +1,7 @@
 <template>
   <div>
-    <b-card title="Account Management">
+
+    <section class="mt-3">
       <b-pagination
         v-model="currentPage"
         :total-rows="rows"
@@ -38,26 +39,26 @@
           <span class="">{{ data.item.can_make_transactions | niceBool }}</span>
         </template>
         <template #cell(created_at)="data">
-          <span class="">{{ data.item.created_at | niceDate }}</span>
+          <span class="">{{ data.item.created_at | niceDate(true) }}</span>
         </template>
         <template #cell(balance_last_updated_at)="data">
-          <span class="">{{ data.item.balance_last_updated_at | niceDate }}</span>
+          <span class="">{{ data.item.balance_last_updated_at | niceDate(true) }}</span>
         </template>
         <template #cell(pending_last_updated_at)="data">
-          <span class="">{{ data.item.pending_last_updated_at | niceDate }}</span>
+          <span class="">{{ data.item.pending_last_updated_at | niceDate(true) }}</span>
         </template>
       </b-table>
-    </b-card>
+
+    </section>
+
   </div>
 </template>
 
 <script>
 import Vue from 'vue'
 import Vuex from 'vuex'
-//import TransactionsTable from '@components/statements/transactions/Table'
 
 export default {
-  name: 'AccountManagement',
 
   props: {},
 
@@ -65,7 +66,6 @@ export default {
   },
 
   data: () => ({
-    //items: [],
     currentPage: 1,
     rows: null,
     perPage: 20,
@@ -106,8 +106,9 @@ export default {
   created() { },
 
   components: {
-    //TransactionsTable,
   },
+
+  name: 'ListAccounts',
 
 }
 </script>

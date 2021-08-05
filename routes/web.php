@@ -279,6 +279,8 @@ Route::group(['middleware' => ['auth']], function () {
         ->name('vaultfolders.uploads-folder');
     Route::resource('vaultfolders', 'VaultfoldersController', [ ]);
 
+    Route::resource('verifyrequests', 'VerifyrequestsController', [ 'only' => [ 'index', 'show', ] ])->middleware(['role:admin|super-admin']);
+
     // -- misc --
     Route::post('update-last-seen', 'UsersController@updateLastSeen')->name('update-user-status');
 

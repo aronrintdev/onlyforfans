@@ -2,8 +2,8 @@
   <div>
     <AdminTable 
       :fields="fields" 
-      :tblFilters="userFilters" 
-      indexRouteName="users.index" 
+      :tblFilters="tblFilters" 
+      indexRouteName="verifyrequests.index" 
       @table-event=handleTableEvent 
       :encodedQueryFilters="encodedQueryFilters"
     />
@@ -17,7 +17,7 @@ import Vuex from 'vuex'
 import AdminTable from '@views/admin/components/common/AdminTable'
 
 export default {
-  name: 'ListUsers',
+  name: 'ListIdentityVerify',
 
   props: {},
 
@@ -26,31 +26,20 @@ export default {
 
   data: () => ({
     fields: [
-      { key: 'id', label: 'ID', formatter: (v, k, i) => Vue.options.filters.niceGuid(v) },
-      { key: 'email', label: 'Email', sortable: true, },
-      { key: 'username', label: 'Username', sortable: true, },
-      { key: 'firstname', label: 'First', sortable: true, },
-      { key: 'lastname', label: 'Last', sortable: true, },
-      { key: 'email_verified_at', label: 'Email Verified?', sortable: true, formatter: (v, k, i) => {
-        if ( v === null ) {
-          return 'N'
-        } else {
-          return 'Y @ '+Vue.options.filters.niceDate(v, true) 
-        }
-      }},
-      { key: 'is_verified', label: 'ID Verified?', sortable: true, formatter: (v, k, i) => Vue.options.filters.niceBool(v) },
-      { key: 'timeline', label: 'Timeline Slug', sortable: true, formatter: (v, k, i) => v.slug },
-      { key: 'last_logged', label: 'Last Login', sortable: true, formatter: (v, k, i) => Vue.options.filters.niceDate(v, true) },
-      { key: 'created_at', label: 'Joined', sortable: true, formatter: (v, k, i) => Vue.options.filters.niceDate(v, true) },
-      { key: 'ctrls', label: '', sortable: false, },
+      { key: 'guid', label: 'GUID', formatter: (v, k, i) => Vue.options.filters.niceGuid(v) },
+      { key: 'requester_username', label: 'Requested By', sortable: true, },
+      { key: 'vservice', label: 'Service', sortable: true, },
+      { key: 'service_guid', label: 'Service ID', formatter: (v, k, i) => Vue.options.filters.niceGuid(v) },
+      { key: 'vstatus', label: 'Status', sortable: true, },
+      { key: 'last_checked_at', label: 'Last Checked', sortable: true, formatter: (v, k, i) => Vue.options.filters.niceDate(v, true) },
     ],
 
     isShowModalVisible: false,
     modalSelection: null,
 
-    userFilters: {
+    tblFilters: {
       booleans: [
-        { key: 'is_verified', label: 'Verified', is_active: false, }, 
+        //{ key: 'is_verified', label: 'Verified', is_active: false, }, 
       ],
       start_date: null,
       end_date: null,
@@ -61,9 +50,6 @@ export default {
 
   methods: {
     handleTableEvent(payload) {
-      console.log('handleTableEvent()', {
-        payload,
-      })
       switch (payload.action) {
         case 'render-show':
           this.renderModal('show', payload.data)
@@ -107,14 +93,14 @@ export default {
     encodeQueryFilters() {
       const filters = this.postFilters
       let params = {
-        is_flagged: 0,
+        //is_flagged: 0,
         //resource_type: [],
       }
       for ( let s of filters.booleans ) {
         switch (s.key) {
-          case 'is_flagged':
-            Vue.set(this.encodedQueryFilters, 'is_flagged', s.is_active?1:0)
-            break
+          //case 'is_flagged':
+          //Vue.set(this.encodedQueryFilters, 'is_flagged', s.is_active?1:0)
+          //break
         }
       }
     },

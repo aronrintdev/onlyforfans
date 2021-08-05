@@ -555,10 +555,6 @@ textarea {
   margin: 0 !important;
 }
 
-
-</style>
-
-<style lang="scss">
 textarea.form-control {
   border: none;
   overflow-y: auto;

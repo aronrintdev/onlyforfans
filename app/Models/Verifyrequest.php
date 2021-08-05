@@ -42,7 +42,7 @@ class Verifyrequest extends Model
     //--------------------------------------------
 
     public function requester() {
-        return $this->belongsTo(User::class, requester_id);
+        return $this->belongsTo(User::class, 'requester_id');
     }
 
     //--------------------------------------------
@@ -142,6 +142,7 @@ class Verifyrequest extends Model
             ->orderBy('created_at', 'desc')
             ->get();
         try { 
+            $json = null; 
             if ( !$pending->count() ) {
                 throw new Exception('checkStatus() - User has no verification request currently pending');
             }
@@ -196,7 +197,7 @@ class Verifyrequest extends Model
                 'message' => $e->getMessage(),
                 'userId' => $userId,
                 'userAttrs' => $userAttrs ?? 'not-set',
-                'json' => $json,
+                'json' => $json || [],
             ]) );
             throw $e;
         }

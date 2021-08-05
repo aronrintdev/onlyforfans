@@ -377,6 +377,7 @@ class UsersController extends AppBaseController
     }
 
     // --- Identity Verification ---
+    // %TODO move to own controller
 
     // Send a request for identity verification (starts the process)
     public function requestVerify(Request $request)
