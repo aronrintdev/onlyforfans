@@ -62,7 +62,7 @@ export default {
   },
 
   mounted() {
-    if(this.$route && (this.$route.name === 'login' || this.$route.name === "register")) {
+    if(this.$route && (this.$route.name === 'login' || this.$route.name === "register" || this.$route.name === 'error-not-found')) {
       this.isVisible = false
     }
   },
