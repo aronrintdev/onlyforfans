@@ -178,7 +178,16 @@ class UsersController extends AppBaseController
             }
             $timeline->save();
 
-            $cattrsFields = [ 'subscriptions', 'localization', 'privacy', 'blocked', 'watermark', 'message_with_tip_only', 'enable_message_with_tip_only_pay' ];
+            $cattrsFields = [ 
+                'blocked', 
+                'enable_message_with_tip_only_pay',
+                'localization', 
+                'message_with_tip_only', 
+                'privacy', 
+                'subscriptions', 
+                'watermark', 
+                'weblinks', 
+            ];
             $attrs = $request->except($cattrsFields);
 
             $userSetting = $user->settings;

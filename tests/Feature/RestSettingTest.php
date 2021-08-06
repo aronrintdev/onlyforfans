@@ -224,6 +224,7 @@ class RestSettingTest extends TestCase
         $this->assertEquals($payload1['gender'], $settings->gender);
         $this->assertEquals($payload1['birthdate'], $settings->birthdate);
         //dd( json_encode($settings->cattrs, JSON_PRETTY_PRINT) );
+        //dd( '--- payload ---', $payload1, '--- settings.cattrs ---', $settings->cattrs);
         $this->assertEquals($payload1['weblinks']['instagram'], $settings->cattrs['weblinks']['instagram'] ?? '');
 
         $payload2 = [
