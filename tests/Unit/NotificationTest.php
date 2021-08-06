@@ -77,21 +77,23 @@ class NotificationTest extends TestCase
 
     /**
      * @group lib-notification-unit-fake
-     * @group regression
-     * @group regression-unit
+     * @group OFF-regression
+     * @group OFF-regression-unit
      */
     public function test_should_notify_new_referral_received()
     {
-        Notification::fake();
         $this->assertTrue(false, 'to-be-implemented');
-        //$result = Notification::send( $receiver, new NewReferralReceived($referral, $sender) );
-        //Notification::assertSentTo( [$receiver], NewReferralReceived::class );
+        /*
+        Notification::fake();
+        $result = Notification::send( $receiver, new NewReferralReceived($referral, $sender) );
+        Notification::assertSentTo( [$receiver], NewReferralReceived::class );
+         */
     }
 
     /**
      * @group lib-notification-unit-fake
-     * @group regression
-     * @group regression-unit
+     * @group OFF-regression
+     * @group OFF-regression-unit
      */
     public function test_should_notify_new_campaign_goal_reached()
     {
@@ -109,8 +111,8 @@ class NotificationTest extends TestCase
 
     /**
      * @group lib-notification-unit-fake
-     * @group regression
-     * @group regression-unit
+     * @group OFF-regression
+     * @group OFF-regression-unit
      */
     public function test_should_notify_new_campaign_contribution_received()
     {

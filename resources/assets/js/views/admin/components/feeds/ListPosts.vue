@@ -8,7 +8,7 @@
       </div>
       <div class="box-filter p-3">
         <h6>Search</h6>
-        <b-form-input v-model="postFilters.query" placeholder="Enter search text"></b-form-input>
+        <b-form-input v-model="postFilters.qsearch" placeholder="Enter search text"></b-form-input>
       </div>
     </section>
 
@@ -45,7 +45,8 @@ import AdminTable from '@views/admin/components/common/AdminTable'
 export default {
   props: {},
 
-  computed: { },
+  computed: { 
+  },
 
   data: () => ({
     fields: [
@@ -63,7 +64,7 @@ export default {
       booleans: [
         { key: 'is_flagged', label: 'Reported', is_active: false, }, 
       ],
-      query: '',
+      qsearch: '', // search query string
       start_date: null,
       end_date: null,
     },
@@ -121,10 +122,6 @@ export default {
 
     encodeQueryFilters() {
       const filters = this.postFilters
-      let params = {
-        is_flagged: 0,
-        //resource_type: [],
-      }
       for ( let s of filters.booleans ) {
         switch (s.key) {
           case 'is_flagged':
@@ -132,20 +129,26 @@ export default {
             break
         }
       }
+      if ( this.postFilters.qsearch === '' ) {
+        Vue.delete(this.encodedQueryFilters, 'qsearch')
+      } else {
+        Vue.set(this.encodedQueryFilters, 'qsearch', this.postFilters.qsearch) // %FIXME: combine into a single Vue.set (?)
+      }
     },
 
   },
 
   watch: {
-    'postFilters.query': function (n, o) {
-      if ( (typeof n !== 'string') || (n.length < 3) || (n === o) ) {
+    'postFilters.qsearch': function (n, o) {
+      if ( n === o ) {
         return
       }
       this.encodeQueryFilters()
     },
   },
 
-  created() {},
+  created() {
+  },
 
   components: {
     AdminTable,
