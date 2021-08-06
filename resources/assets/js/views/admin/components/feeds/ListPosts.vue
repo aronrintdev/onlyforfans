@@ -76,10 +76,6 @@ export default {
 
   methods: { 
 
-    hasQuery(qStr) {
-      return (typeof qStr === 'string') && (qStr.length >= 3)
-    },
-
     handleTableEvent(payload) {
       console.log('handleTableEvent()', {
         payload,
@@ -133,8 +129,10 @@ export default {
             break
         }
       }
-      if ( this.hasQuery(this.postFilters.qsearch) ) {
-        Vue.set(this.encodedQueryFilters, 'qsearch', this.postFilters.qsearch)
+      if ( this.postFilters.qsearch === '' ) {
+        Vue.delete(this.encodedQueryFilters, 'qsearch')
+      } else {
+        Vue.set(this.encodedQueryFilters, 'qsearch', this.postFilters.qsearch) // %FIXME: combine into a single Vue.set (?)
       }
     },
 
@@ -142,15 +140,15 @@ export default {
 
   watch: {
     'postFilters.qsearch': function (n, o) {
-      if ( !this.hasQuery(n) || (n === o) ) {
+      if ( n === o ) {
         return
       }
-      console.log('watch:postFilters.qsearch', { n })
       this.encodeQueryFilters()
     },
   },
 
-  created() {},
+  created() {
+  },
 
   components: {
     AdminTable,

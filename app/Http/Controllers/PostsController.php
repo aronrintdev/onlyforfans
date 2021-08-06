@@ -55,9 +55,11 @@ class PostsController extends AppBaseController
             }
         }
 
-        if ( $request->has('qsearch') && (strlen($request->qsearch)>=2) ) {
-            //$query->where('description', 'LIKE', '%'.$request->qsearch.'%');
-            $query->search($request->qsearch);
+        if ( $request->has('qsearch') && (strlen($request->qsearch)>2) ) {
+            $query->orWhere( function($q1) use(&$request) {
+                $q1->where('description', 'LIKE', '%'.$request->qsearch.'%');
+                $q1->orWhere('id', 'LIKE', $request->qsearch.'%');
+            });
         }
 
         // Sorting
