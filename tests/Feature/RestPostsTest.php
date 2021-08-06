@@ -1104,7 +1104,6 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      *  @group regression-base
-     *  @group erik
      */
     public function test_owner_can_not_edit_content_of_a_priced_post_that_others_have_purchased()
     {
