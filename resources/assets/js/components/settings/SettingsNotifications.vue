@@ -11,7 +11,7 @@
                   <section class="d-flex justify-content-between align-items-start">
                     <div>
                       <label for="is_email_enabled" class="ml-auto mb-0">Email Notifications</label>
-                      <p><small class="text-muted">Receive email notifications...</small></p>
+                      <p><small class="text-muted">Receive email notifications</small></p>
                     </div>
                     <div>
                       <b-form-checkbox id="is_email_enabled" v-model="thisForm.by_email.enabled" name="is_email_enabled" switch size="lg"></b-form-checkbox>
@@ -92,7 +92,7 @@
                   <section class="d-flex justify-content-between align-items-start">
                     <div>
                       <label for="is_site_enabled" class="ml-auto mb-0">Site Notifications</label>
-                      <p><small class="text-muted">Receive site notifications...</small></p>
+                      <p><small class="text-muted">Receive site notifications</small></p>
                     </div>
                     <div>
                       <b-form-checkbox id="is_site_enabled" v-model="thisForm.by_site.enabled" name="is_site_enabled" switch size="lg"></b-form-checkbox>
@@ -130,10 +130,10 @@
           </b-card-text>
         </b-tab>
 
-        <b-tab title="Push">
+        <!-- <b-tab title="Push">
           <b-card-text>
           </b-card-text>
-        </b-tab>
+        </b-tab> -->
       </b-tabs>
     </b-card>
   </div>
