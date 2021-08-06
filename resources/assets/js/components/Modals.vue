@@ -6,7 +6,7 @@
       title="Send a Tip"
       hide-footer
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('modal-tip')"
       :centered="mobile"
     >
       <SendTip ref="sendTip" :session_user="session_user" :payload="modalPayload" />
@@ -18,7 +18,7 @@
       title="Purchase Post"
       hide-footer
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('modal-purchase-post')"
       :centered="mobile"
     >
       <PurchasePost ref="purchasePost" :session_user="session_user" :post_id="selectedResourceId" />
@@ -30,7 +30,7 @@
       title="Purchase Message"
       hide-footer
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('modal-purchase-message')"
       :centered="mobile"
     >
       <PurchaseMessage ref="purchaseMessage" :message="selectedResource" />
@@ -38,11 +38,11 @@
 
     <b-modal
       id="modal-follow"
-      size="lg"
-      title="Follow"
+      size="md"
+      :title="selectedTimeline && selectedTimeline.is_following ? 'Unfollow' : 'Follow'"
       hide-footer
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('modal-follow')"
       :centered="mobile"
     >
       <FollowTimeline ref="followTimeline" :session_user="session_user" :timeline="selectedTimeline" :subscribe_only="subscribeOnly" />
@@ -54,7 +54,7 @@
       title="Upload Avatar"
       hide-footer
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('modal-crop')"
       :centered="mobile"
     >
       <CropImage ref="cropImage" :session_user="session_user" :url="selectedUrl" :timelineId="selectedTimelineId" />
@@ -66,7 +66,7 @@
       hide-footer
       centered
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('modal-post')"
     >
       <div
         class="post-nav-arrows left"
@@ -91,7 +91,7 @@
       title="Photo"
       hide-footer
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('modal-photo')"
       :centered="mobile"
     >
       <ImageDisplay ref="ImageDisplay" :session_user="session_user" :mediafile="selectedResource" :is_feed="false" />
@@ -103,7 +103,7 @@
       size="md"
       hide-footer
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('modal-schedule-datetime')"
       :centered="mobile"
     >
       <ScheduleDateTime ref="schedule_picker_modal" :scheduled_at="scheduled_at" :for_edit="is_for_edit" />
@@ -116,7 +116,7 @@
       hide-footer
       body-class="p-0"
       no-close-on-backdrop
-      @hide="closeModal"
+      @hide="closeModal('edit-post')"
       :centered="mobile"
     >
       <EditPost ref="editPost" :post="selectedResource" />
@@ -129,7 +129,7 @@
       hide-footer
       body-class="p-0"
       no-close-on-backdrop
-      @hide="closeModal"
+      @hide="closeModal('report-post')"
       :centered="mobile"
     >
       <ReportPost ref="reportPost" :post="selectedResource" />
@@ -141,7 +141,7 @@
       hide-footer
       size="md"
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('expiration-period')"
       :centered="mobile"
     >
       <ExpirationPeriod ref="expirationPeriod" />
@@ -153,7 +153,7 @@
       hide-footer
       size="lg"
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('modal-promotion-campaign')"
       :centered="mobile"
     >
       <PromotionCampaign ref="promotionCampaign" />
@@ -304,7 +304,8 @@ export default {
     postModalAction(action) {
       eventBus.$emit('post-modal-actions', action);
     },
-    closeModal() {
+    closeModal(modalId) {
+      this.$bvModal.hide(modalId)
       eventBus.$emit('close-modal');
     }
   },

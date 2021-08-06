@@ -24,10 +24,10 @@
               Add to favorites
             </b-card-text>
 
-            <b-button variant="primary">Message</b-button>
-            <b-button @click="renderTip(s.shareable, 'timelines')" variant="primary">Tip</b-button>
-            <b-button v-if="s.access_level==='default'" @click="renderSubscribe(s.shareable)" variant="primary">Subscribe</b-button>
-            <b-button @click="renderCancel(s.shareable, s.access_level)" variant="primary">Unfollow</b-button>
+            <b-button class="mb-1" variant="primary">Message</b-button>
+            <b-button class="mb-1" @click="renderTip(s.shareable, 'timelines')" variant="primary">Tip</b-button>
+            <b-button class="mb-1" v-if="s.access_level==='default'" @click="renderSubscribe(s.shareable)" variant="primary">Subscribe</b-button>
+            <b-button class="mb-1" @click="renderCancel(s.shareable, s.access_level)" variant="primary">Unfollow</b-button>
           </WidgetTimeline>
           <!-- <pre> Access Level: {{ s.access_level }} {{ JSON.stringify(s, null, "\t") }} </pre> -->
         </b-col>
