@@ -25,7 +25,7 @@
         <PostCta :post="mediafile.resource" :session_user="session_user" :primary_mediafile="mediafile" />
       </template>
 
-      <template footer>
+      <!-- <template footer>
         <div class="panel-footer fans">
 
           <div class="d-flex justify-content-between">
@@ -50,7 +50,7 @@
           </div>
 
         </div>
-      </template>
+      </template> -->
 
     </b-card>
   </div>

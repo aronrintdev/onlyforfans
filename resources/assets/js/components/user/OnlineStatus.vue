@@ -1,8 +1,8 @@
 <template>
   <div class="onlineStatus">
     <slot :loading="loading" :status="status" :textVariant="textVariant" :message="message" :lastSeen="lastSeen">
-      <div v-if="indicatorVisible" class="status-indicator" :class="{'online-status': status === 'online'}" />
-      <span v-if="!loading" class="status" :class="[`status-holder-${user.id}`, textVariant]">
+      <div v-if="indicatorVisible" class="status-indicator" :class="{'online-status': status === 'online'}" :style="{ height: s, width: s }" v-b-tooltip.hover.bottom :title="message" />
+      <span v-if="!loading && textInvisible" class="status" :class="[`status-holder-${user.id}`, textVariant]">
       {{ message }}
       </span>
     </slot>
@@ -23,6 +23,8 @@ export default {
     })},
     user: { type: Object, default: () => ({ id: '' }) },
     indicatorVisible: { default: true, type: Boolean },
+    textInvisible: { default: true, type: Boolean },
+    size: { type: String, default: 'sm' },
   },
   data: () => ({
     channel: null,
@@ -39,6 +41,12 @@ export default {
     status: 'offline',
   }),
   computed: {
+    s() {
+      switch (this.size) {
+        case 'sm': return '10px'
+        case 'lg': return '16px'
+      }
+    },
     textVariant() {
       if (this.statusTextVariant[this.status]) {
         return `text-${this.statusTextVariant[this.status]}`
@@ -157,10 +165,9 @@ export default {
   display: flex;
 }
 .status-indicator {
-  width: 10px;
-  height: 10px;
   margin-top: 6px;
   margin-right: 5px;
+  border: solid 1px #fff;
   border-radius: 100%;
   background: gray;
 }
