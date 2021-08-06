@@ -81,7 +81,7 @@ class PostPolicy extends BasePolicy
         case PostTypeEnum::SUBSCRIBER:
             return true; // %TODO
         case PostTypeEnum::PRICED:
-            return !($post->transaction->count() > 0);
+            return !($post->transactions->count() > 0);
         }
     }
 
