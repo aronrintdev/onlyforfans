@@ -88,7 +88,7 @@
                   <li @click="recordAudio()" class="selectable select-audio">
                     <fa-icon :icon="selectedMedia==='audio' ? ['fas', 'microphone'] : ['far', 'microphone']" size="lg" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li @click="uploadFromVault()" class="selectable select-audio">
+                  <li @click="renderVaultSelector()" class="selectable select-audio">
                     <fa-icon :icon="selectedMedia==='vault' ? ['fas', 'archive'] : ['far', 'archive']" size="lg" :class="selectedMedia==='vault' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
@@ -209,6 +209,8 @@ export default {
     showVideoRec: false,
     showAudioRec: false,
   }),
+
+
   methods: {
 
     resetForm() {
@@ -355,10 +357,21 @@ export default {
       this.showAudioRec = true
     },
 
-    uploadFromVault() {
-      this.selectedMedia = this.selectedMedia!=='vault' ? 'vault' : null
-      // %FIXME: should add full upload from vault feature instead of redirecting
-      this.$router.push({ name: 'vault.dashboard' })
+    // HERE
+    //uploadFromVault() {
+    //this.selectedMedia = this.selectedMedia!=='vault' ? 'vault' : null
+    //// %FIXME: should add full upload from vault feature instead of redirecting
+    //this.$router.push({ name: 'vault.dashboard' })
+    //},
+
+    renderVaultSelector() {
+      eventBus.$emit('open-modal', {
+        key: 'render-vault-selector',
+        data: { 
+          resource: this.timeline,
+          resource_type: 'timelines', 
+        },
+      })
     },
 
     showSchedulePicker() {
@@ -413,6 +426,7 @@ export default {
         this.$refs.myVueDropzone.addFile(file);
       }
     },
+
   },
 
   mounted() {
@@ -470,7 +484,6 @@ export default {
     })
   },
 
-
   components: {
     PriceSelector,
     vueDropzone: vue2Dropzone,
@@ -479,6 +492,7 @@ export default {
     VideoRecorder,
     AudioRecorder,
   },
+
 }
 </script>
 

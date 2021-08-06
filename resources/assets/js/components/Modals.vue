@@ -1,6 +1,17 @@
 <template>
   <div>
     <b-modal
+      id="modal-vault-selector"
+      size="lg"
+      hide-header
+      hide-footer
+      body-class="p-0"
+      @hide="closeModal"
+    >
+      <VaultSelectorModal ref="selectFromVault" :session_user="session_user" :payload="modalPayload" />
+    </b-modal>
+
+    <b-modal
       id="modal-tip"
       size="lg"
       title="Send a Tip"
@@ -160,6 +171,7 @@ import FollowTimeline from '@components/modals/FollowTimeline.vue'
 import CropImage from '@components/modals/CropImage.vue'
 import PurchasePost from '@components/modals/PurchasePost.vue'
 import SendTip from '@components/modals/SendTip.vue'
+import VaultSelectorModal from '@components/modals/VaultSelector.vue'
 import PostDisplay from '@components/posts/Display'
 import ImageDisplay from '@components/timelines/elements/ImageDisplay'
 import ScheduleDateTime from '@components/modals/ScheduleDateTime.vue'
@@ -178,6 +190,7 @@ export default {
     PurchasePost,
     PurchaseMessage,
     SendTip,
+    VaultSelectorModal,
     PostDisplay,
     ImageDisplay,
     ScheduleDateTime,
@@ -193,6 +206,7 @@ export default {
 
   data: () => ({
     references: {
+      'modal-vault-selector': 'selectFromVault',
       'modal-tip': 'sendTip',
       'modal-purchase-post': 'purchasePost',
       'modal-follow': 'followTimeline',
@@ -229,6 +243,11 @@ export default {
           case 'render-purchase-message':
             this.selectedResource = data.message
             this.$bvModal.show('modal-purchase-message')
+            break
+
+          case 'render-vault-selector':
+            this.modalPayload = data
+            this.$bvModal.show('modal-vault-selector')
             break
 
           case 'render-follow':
