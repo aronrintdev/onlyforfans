@@ -51,12 +51,12 @@
               :include-styling=true
               :useCustomSlot=true
               :duplicateCheck=true
-              v-on:vdropzone-file-added="addedEvent"
-              v-on:vdropzone-removed-file="removedEvent"
-              v-on:vdropzone-sending="sendingEvent"
-              v-on:vdropzone-success="successEvent"
-              v-on:vdropzone-error="errorEvent"
-              v-on:vdropzone-queue-complete="queueCompleteEvent"
+              @vdropzone-file-added="onDropzoneAdded"
+              @vdropzone-removed-file="onDropzoneRemoved"
+              @vdropzone-sending="onDropzoneSending"
+              @vdropzone-success="onDropzoneSuccess"
+              @vdropzone-error="onDropzoneError"
+              @vdropzone-queue-complete="onDropzoneQueueComplete"
               class="dropzone"
             >
               <div class="dz-custom-content">
@@ -134,6 +134,7 @@
 </template>
 
 <script>
+import Vuex from 'vuex'
 import moment from 'moment';
 import { isAndroid, isIOS, osVersion } from 'mobile-device-detect';
 
@@ -160,7 +161,12 @@ export default {
   computed: {
     isIOS9PlusAndAndroid() {
       return (isIOS && parseInt(osVersion.split('.')[0]) >= 9) || isAndroid;
-    }
+    },
+
+    ...Vuex.mapState('vault', [
+      'selectedMediafiles',
+      'uploadsVaultFolder',
+    ]),
   },
 
   data: () => ({
@@ -213,6 +219,17 @@ export default {
 
   methods: {
 
+    ...Vuex.mapMutations('vault', [
+      'ADD_SELECTED_MEDIAFILES',
+      'CLEAR_SELECTED_MEDIAFILES',
+      'UPDATE_SELECTED_MEDIAFILES',
+      'REMOVE_SELECTED_MEDIAFILE_BY_INDEX',
+    ]),
+
+    ...Vuex.mapActions('vault', [
+      'getUploadsVaultFolder',
+    ]),
+
     resetForm() {
       this.$refs.myVueDropzone.removeAllFiles();
       this.description = '';
@@ -247,7 +264,7 @@ export default {
 
         // (2) upload & attach the mediafiles (in dropzone queue)
         // %FIXME: if this fails, don't we have an orphaned post (?)
-        // %NOTE: files added manually don't seem to be put into the queue, thus sendingEvent won't be called for them (?)
+        // %NOTE: files added manually don't seem to be put into the queue, thus onDropzoneSending won't be called for them (?)
 
         // (3) create any mediaifle references, ex from selected files in vault
         if (this.mediafileIdsFromVault.length) {
@@ -282,9 +299,9 @@ export default {
     },
 
     // Dropzone: 'Modify the request and add addtional parameters to request before sending'
-    sendingEvent(file, xhr, formData) {
+    onDropzoneSending(file, xhr, formData) {
       // %NOTE: file.name is the mediafile PKID
-      this.$log.debug('sendingEvent', { file, formData, xhr });
+      this.$log.debug('onDropzoneSending', { file, formData, xhr });
       if ( !this.newPostId ) {
         throw new Error('Cancel upload, invalid post id');
       }
@@ -293,8 +310,9 @@ export default {
       formData.append('mftype', 'post');
     },
 
-    // for dropzone
-    addedEvent(file) {
+    // ------------ Dropzone ------------------------------------------------ //
+
+    onDropzoneAdded(file) {
       if (!file.filepath) {
         this.mediafiles.push({
           type: file.type,
@@ -304,28 +322,28 @@ export default {
       } else {
         this.mediafiles.push(file);
       }
-      this.$log.debug('addedEvent')
+      this.$log.debug('onDropzoneAdded')
     },
-    removedEvent(file, error, xhr) {
-      this.$log.debug('removedEvent')
+    onDropzoneRemoved(file, error, xhr) {
+      this.$log.debug('onDropzoneRemoved')
     },
-    successEvent(file, response) {
-      this.$log.debug('successEvent', { file, response, });
+    onDropzoneSuccess(file, response) {
+      this.$log.debug('onDropzoneSuccess', { file, response, });
     },
-    errorEvent(file, message, xhr) {
-      this.$log.debug('errorEvent', { file, message, xhr });
+    onDropzoneError(file, message, xhr) {
+      this.$log.debug('onDropzoneError', { file, message, xhr });
       if (file) {
         this.$refs.myVueDropzone.removeFile(file)
       }
     },
 
-    queueCompleteEvent() {
+    onDropzoneQueueComplete() {
       // Retrieves the newly created post to display at top of feed
       // Not sure why but this event is invoked when image add fails (eg, drag & drop to dropzone fails), so protect against it
       if ( !this.newPostId ) {
         return
       }
-      console.log('queueCompleteEvent', { });
+      console.log('onDropzoneQueueComplete', { });
       this.createCompleted();
     },
 

@@ -1,6 +1,7 @@
 <template>
   <div class="container p-0">
     <b-card header-tag="header" footer-tag="footer" class="position-relative">
+
       <template #header>
         <section class="d-flex tag-modal-header">
           <div class="my-auto mr-3">
@@ -11,10 +12,10 @@
           </div>
         </section>
       </template>
+
       <LoadingOverlay :loading="loading" />
-      <div>
-        <textarea v-model="reason" rows="8" class="w-100" placeholder="Please tell us why you are reporting this post..."></textarea>
-      </div>
+      <VaultSelectorComponent />
+
       <template #footer>
         <b-row>
           <b-col cols="12" class="d-flex justify-content-end">
@@ -22,16 +23,16 @@
           </b-col>
         </b-row>
       </template>
+
     </b-card>
   </div>
 </template>
 <script>
 import { eventBus } from '@/eventBus'
 import LoadingOverlay from '@components/common/LoadingOverlay'
+import VaultSelectorComponent from '@views/live-chat/components/ShowThread/VaultSelector'
 
 export default {
-  name: "VaultSelector",
-
   props: {
     post: { type: Object, default: () => ({}) },
   },
@@ -82,10 +83,14 @@ export default {
 
   components: {
     LoadingOverlay,
+    VaultSelectorComponent,
   },
+
+  name: "VaultSelectorModal",
 
 }
 </script>
+
 <style lang="scss" scoped>
 textarea,
 .dropzone,
@@ -105,7 +110,7 @@ textarea,
 <i18n lang="json5" scoped>
 {
   "en": {
-    "title": "Select Files (2)",
+    "title": "Select Files",
     "loading": {
       "error": "An error has occurred. Please return to the previous page and try again later."
     },

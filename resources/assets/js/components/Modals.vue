@@ -8,7 +8,7 @@
       body-class="p-0"
       @hide="closeModal"
     >
-      <VaultSelectorModal ref="selectFromVault" :session_user="session_user" :payload="modalPayload" />
+      <VaultSelectorModal @close="closeModal" :session_user="session_user" :payload="modalPayload" ref="selectFromVault" />
     </b-modal>
 
     <b-modal

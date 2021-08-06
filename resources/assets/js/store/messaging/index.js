@@ -50,9 +50,10 @@ export const messaging = {
     /**
      * Selected Media files for the message form
      */
+    /*
     selectedMediafiles: [],
-
     uploadsVaultFolder: null,
+    */
   }),
 
   /* ------------------------------------------------------------------------ */
@@ -141,7 +142,8 @@ export const messaging = {
       Vue.set(state.threads[message.chatthread_id].messages, message.id, message)
     },
 
-    /** Pushes mediafile or array of mediafiles onto selectedMediafiles */
+    /*
+    // Pushes mediafile or array of mediafiles onto selectedMediafiles
     ADD_SELECTED_MEDIAFILES(state, payload) {
       if (!payload) {
         return
@@ -162,7 +164,7 @@ export const messaging = {
       }
     },
 
-    /** Sets the selected media files */
+    // Sets the selected media files
     UPDATE_SELECTED_MEDIAFILES(state, payload) {
       state.selectedMediafiles = payload
     },
@@ -175,10 +177,11 @@ export const messaging = {
       state.uploadsVaultFolder = payload
     },
 
-    /** Clears out the selected media files */
+    // Clears out the selected media files
     CLEAR_SELECTED_MEDIAFILES(state) {
       state.selectedMediafiles = []
     },
+  */
   },
 
   /* ------------------------------------------------------------------------ */
@@ -256,6 +259,7 @@ export const messaging = {
           .catch(error => reject(error))
       })
     },
+    /*
     getUploadsVaultFolder({ commit, state }) {
       return new Promise((resolve, reject) => {
         if (state.uploadsVaultFolder) {
@@ -270,6 +274,7 @@ export const messaging = {
           .catch(error => reject(error))
       })
     }
+     */
   },
 }
 

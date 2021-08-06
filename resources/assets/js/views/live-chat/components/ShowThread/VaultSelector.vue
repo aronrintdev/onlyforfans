@@ -75,7 +75,7 @@ export default {
     ...Vuex.mapActions('vault', [
       'loadVaultDashboard',
     ]),
-    ...Vuex.mapMutations('messaging', [
+    ...Vuex.mapMutations('vault', [
       'ADD_SELECTED_MEDIAFILES',
     ]),
 

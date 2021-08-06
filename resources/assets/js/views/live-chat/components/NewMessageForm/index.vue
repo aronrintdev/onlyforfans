@@ -133,7 +133,7 @@ export default {
 
   computed: {
     ...Vuex.mapState([ 'mobile' ]),
-    ...Vuex.mapState('messaging', [
+    ...Vuex.mapState('vault', [
       'selectedMediafiles',
       'uploadsVaultFolder',
     ]),
@@ -227,14 +227,14 @@ export default {
   mounted() { },
 
   methods: {
-    ...Vuex.mapMutations('messaging', [
+    ...Vuex.mapMutations('vault', [
       'ADD_SELECTED_MEDIAFILES',
       'CLEAR_SELECTED_MEDIAFILES',
       'UPDATE_SELECTED_MEDIAFILES',
       'REMOVE_SELECTED_MEDIAFILE_BY_INDEX',
     ]),
 
-    ...Vuex.mapActions('messaging', [
+    ...Vuex.mapActions('vault', [
       'getUploadsVaultFolder',
     ]),
 
