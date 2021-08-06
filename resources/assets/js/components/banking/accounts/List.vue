@@ -4,7 +4,7 @@
       <ListItem v-for="item in accounts" :key="item.id" :value="item" />
     </b-list-group>
     <div class="mt-3">
-      <b-btn variant="success" block :to="{ name: 'banking.accounts.new' }">
+      <b-btn variant="primary" block :to="{ name: 'banking.accounts.new' }">
         <fa-icon icon="plus" />
         {{ $t('add') }}
       </b-btn>
