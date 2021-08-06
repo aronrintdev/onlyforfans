@@ -82,99 +82,101 @@
                 </b-form-group>
               </b-col>
             </b-row>
-
-            <b-card-title class="mt-4 mb-3">Demographics</b-card-title>
             <b-row>
-              <b-col sm="12" md="6">
-                <b-form-group id="group-bodytype" label="Body Type" label-for="bodytype">
-                  <b-form-select id="bodytype" v-model="formProfile.body_type" :options="options.bodyTypes"></b-form-select>
-                </b-form-group>
-              </b-col>
-              <b-col></b-col>
-            </b-row>
-
-            <b-row>
-              <b-col sm="12" md="6" lg="3">
-                <b-form-group id="group-chest" label="Chest" label-for="chest">
-                  <b-form-input id="chest" v-model="formProfile.chest"></b-form-input>
-                </b-form-group>
-              </b-col>
-              <b-col sm="12" md="6" lg="3">
-                <b-form-group id="group-waist" label="Waist" label-for="waist">
-                  <b-form-input id="waist" v-model="formProfile.waist"></b-form-input>
-                </b-form-group>
-              </b-col>
-              <b-col sm="12" md="6" lg="3">
-                <b-form-group id="group-hips" label="Hips" label-for="hips">
-                  <b-form-input id="hips" v-model="formProfile.hips"></b-form-input>
-                </b-form-group>
-              </b-col>
-              <b-col sm="12" md="6" lg="3">
-                <b-form-group id="group-arms" label="Arms" label-for="arms">
-                  <b-form-input id="arms" v-model="formProfile.arms"></b-form-input>
-                </b-form-group>
+              <b-col cols="12" class="text-right">
+                <div class="d-inline-block demographics_visible text-info" @click="isDemographicsVisible=!isDemographicsVisible">
+                  <span v-if="!isDemographicsVisible">View Demographics</span>
+                  <span v-else>Hide Demographics</span>
+                </div>
               </b-col>
             </b-row>
 
-            <b-row>
-              <b-col sm="12" md="6">
-                <b-form-group id="group-haircolor" label="Hair Color" label-for="haircolor">
-                  <b-form-select id="haircolor" v-model="formProfile.hair_color" :options="options.hairColors"></b-form-select>
-                </b-form-group>
-              </b-col>
-              <b-col sm="12" md="6">
-                <b-form-group id="group-eyecolor" label="Eye Color" label-for="eyecolor">
-                  <b-form-select id="eyecolor" v-model="formProfile.eye_color" :options="options.eyeColors"></b-form-select>
-                </b-form-group>
-              </b-col>
-            </b-row>
+            <template v-if="isDemographicsVisible">
+              <b-card-title class="mt-4 mb-3">Demographics</b-card-title>
+              <b-row>
+                <b-col sm="12" md="6">
+                  <b-form-group id="group-bodytype" label="Body Type" label-for="bodytype">
+                    <b-form-select id="bodytype" v-model="formProfile.body_type" :options="options.bodyTypes"></b-form-select>
+                  </b-form-group>
+                </b-col>
+                <b-col></b-col>
+              </b-row>
 
-            <b-row>
-              <b-col sm="12" md="4">
-                <b-form-group id="group-age" label="Age" label-for="age">
-                  <b-form-input id="age" v-model="formProfile.age"></b-form-input>
-                </b-form-group>
-              </b-col>
-              <b-col sm="12" md="4">
-                <b-form-group id="group-height" label="Height" label-for="height">
-                  <b-form-input id="height" v-model="formProfile.height"></b-form-input>
-                </b-form-group>
-              </b-col>
-              <b-col sm="12" md="4">
-                <b-form-group id="group-weight" label="Weight" label-for="weight">
-                  <b-form-input id="weight" v-model="formProfile.weight"></b-form-input>
-                </b-form-group>
-              </b-col>
-            </b-row>
+              <b-row>
+                <b-col sm="12" md="6" lg="3">
+                  <b-form-group id="group-chest" label="Chest" label-for="chest">
+                    <b-form-input id="chest" v-model="formProfile.chest"></b-form-input>
+                  </b-form-group>
+                </b-col>
+                <b-col sm="12" md="6" lg="3">
+                  <b-form-group id="group-waist" label="Waist" label-for="waist">
+                    <b-form-input id="waist" v-model="formProfile.waist"></b-form-input>
+                  </b-form-group>
+                </b-col>
+                <b-col sm="12" md="6" lg="3">
+                  <b-form-group id="group-hips" label="Hips" label-for="hips">
+                    <b-form-input id="hips" v-model="formProfile.hips"></b-form-input>
+                  </b-form-group>
+                </b-col>
+                <b-col sm="12" md="6" lg="3">
+                  <b-form-group id="group-arms" label="Arms" label-for="arms">
+                    <b-form-input id="arms" v-model="formProfile.arms"></b-form-input>
+                  </b-form-group>
+                </b-col>
+              </b-row>
 
-            <b-row>
-              <b-col sm="12" md="6">
-                <b-form-group id="group-education" label="Education" label-for="education">
-                  <b-form-select id="education" v-model="formProfile.education" :options="options.educations"></b-form-select>
-                </b-form-group>
-              </b-col>
-              <b-col sm="12" md="6">
-                <b-form-group id="group-lang" label="Language" label-for="lang">
-                  <b-form-select id="lang" v-model="formProfile.language" :options="options.languages"></b-form-select>
-                </b-form-group>
-              </b-col>
-            </b-row>
+              <b-row>
+                <b-col sm="12" md="6">
+                  <b-form-group id="group-haircolor" label="Hair Color" label-for="haircolor">
+                    <b-form-select id="haircolor" v-model="formProfile.hair_color" :options="options.hairColors"></b-form-select>
+                  </b-form-group>
+                </b-col>
+                <b-col sm="12" md="6">
+                  <b-form-group id="group-eyecolor" label="Eye Color" label-for="eyecolor">
+                    <b-form-select id="eyecolor" v-model="formProfile.eye_color" :options="options.eyeColors"></b-form-select>
+                  </b-form-group>
+                </b-col>
+              </b-row>
 
-            <b-row>
-              <b-col sm="12" md="6">
-                <b-form-group id="group-ethnicity" label="Ethnicity" label-for="ethnicity">
-                  <b-form-select id="ethnicity" v-model="formProfile.ethnicity" :options="options.ethnicitys"></b-form-select>
-                </b-form-group>
-              </b-col>
-              <b-col sm="12" md="6">
-                <b-form-group id="group-profession" label="Profession" label-for="profession">
-                  <b-form-input id="profession" v-model="formProfile.weight"></b-form-input>
-                </b-form-group>
-              </b-col>
-            </b-row>
+              <b-row>
+                <b-col sm="12" md="4">
+                  <b-form-group id="group-age" label="Age" label-for="age">
+                    <b-form-input id="age" v-model="formProfile.age"></b-form-input>
+                  </b-form-group>
+                </b-col>
+                <b-col sm="12" md="4">
+                  <b-form-group id="group-height" label="Height" label-for="height">
+                    <b-form-input id="height" v-model="formProfile.height"></b-form-input>
+                  </b-form-group>
+                </b-col>
+                <b-col sm="12" md="4">
+                  <b-form-group id="group-weight" label="Weight" label-for="weight">
+                    <b-form-input id="weight" v-model="formProfile.weight"></b-form-input>
+                  </b-form-group>
+                </b-col>
+              </b-row>
+
+              <b-row>
+                <b-col sm="12" md="4">
+                  <b-form-group id="group-education" label="Education" label-for="education">
+                    <b-form-select id="education" v-model="formProfile.education" :options="options.educations"></b-form-select>
+                  </b-form-group>
+                </b-col>
+                <b-col sm="12" md="4">
+                  <b-form-group id="group-ethnicity" label="Ethnicity" label-for="ethnicity">
+                    <b-form-select id="ethnicity" v-model="formProfile.ethnicity" :options="options.ethnicitys"></b-form-select>
+                  </b-form-group>
+                </b-col>
+                <b-col sm="12" md="4">
+                  <b-form-group id="group-profession" label="Profession" label-for="profession">
+                    <b-form-input id="profession" v-model="formProfile.profession"></b-form-input>
+                  </b-form-group>
+                </b-col>
+              </b-row>
+            </template>
           </fieldset>
 
-          <b-row class="mt-3">
+          <b-row class="mt-5">
             <b-col>
               <div class="w-100 d-flex justify-content-end">
                 <b-button :disabled="isSubmitting.formProfile" class="w-25 ml-3" type="submit" variant="primary">
@@ -264,17 +266,45 @@ export default {
         { value: 'average', text: 'Average' },
         { value: 'curvy', text: 'Curvy' },
         { value: 'overweight', text: 'Overweight' },
+        { value: 'rectangle', text: 'Rectangle' },
+        { value: 'triangle', text: 'Triangle' },
+        { value: 'spoon', text: 'Spoon' },
+        { value: 'hourglass', text: 'Hourglass' },
+        { value: 'top_hourglass', text: 'Top Hourglass' },
+        { value: 'bottom_hourglass', text: 'Bottom Hourglass' },
+        { value: 'inverted_triangle', text: 'Inverted Triangle' },
+        { value: 'round', text: 'Round' },
+        { value: 'diamond', text: 'Diamond' },
+        { value: 'other', text: 'Other' },
       ],
       hairColors: [
         { value: null, text: 'Please select an option' },
-        { value: 'black', text: 'Black' },
-        { value: 'brown', text: 'Brown' },
+        { value: 'sunflower_blonde', text: 'Sunflower Blonde' },
+        { value: 'caramel', text: 'Caramel' },
+        { value: 'french_roast', text: 'French Roast' },
+        { value: 'copper_shimmer', text: 'Copper Shimmer' },
+        { value: 'ruby_fusion', text: 'Ruby Fusion' },
+        { value: 'beeline_honey', text: 'Beeline Honey' },
+        { value: 'light_brown', text: '	Light Brown' },
+        { value: 'light_auburn', text: 'Light Auburn' },
+        { value: 'reddish_blonde', text: 'Reddish Blonde' },
+        { value: 'jet_black', text: 'Jet Black' },
+        { value: 'blonde', text: 'Blonde' },
+        { value: 'nrunette', text: 'Brunette' },
+        { value: 'red', text: 'Red' },
+        { value: 'hombre', text: 'Hombre' },
+        { value: 'balayage', text: 'Balayage' },
+        { value: 'auburn', text: 'Auburn' },
       ],
       eyeColors: [
         { value: null, text: 'Please select an option' },
-        { value: 'black', text: 'Black' },
         { value: 'brown', text: 'Brown' },
         { value: 'blue', text: 'Blue' },
+        { value: 'hazel', text: 'Hazel' },
+        { value: 'amber', text: 'Amber' },
+        { value: 'gray', text: 'Gray' },
+        { value: 'green', text: 'Green' },
+        { value: 'red', text: 'Red' },
       ],
       educations: [
         { value: null, text: 'Please select an option' },
@@ -285,10 +315,10 @@ export default {
         { value: 'graduate', text: 'Graduate Degree' },
         { value: 'doctoral', text: 'PhD / Post Doctoral' },
       ],
-      languages: [
-        { value: null, text: 'Please select an option' },
-        { value: 'en', text: 'English' },
-      ],
+      // languages: [
+      //   { value: null, text: 'Please select an option' },
+      //   { value: 'en', text: 'English' },
+      // ],
       ethnicitys: [
         { value: null, text: 'Please select an option' },
         { value: 'asia', text: 'Asian' },
@@ -302,7 +332,7 @@ export default {
         { value: 'caucasian', text: 'White / Caucasian' },
       ]
     },
-
+    isDemographicsVisible: false,
   }),
 
   mounted() {
@@ -372,6 +402,10 @@ textarea#about {
 #group-birthdate input[type="date"] {
   -webkit-appearance: none;
   width: 100%;
+}
+
+.demographics_visible {
+  cursor: pointer;
 }
 </style>
 
