@@ -313,6 +313,7 @@ export default {
   transform: translateY(-50%);
   border-radius: 50%;
   cursor: pointer;
+  z-index: 1000;
 
   &:active {
     svg {
@@ -329,6 +330,23 @@ export default {
   svg {
     width: 100%;
     height: 100%;
+  }
+
+  @media (max-width: 600px) {
+    & {
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 2px;
+      padding: 5px;
+      width: 30px;
+      height: 40px;
+
+      &.left {
+        left: 0;
+      }
+      &.right {
+        right: 0;
+      }
+    }
   }
 }
 </style>
@@ -350,6 +368,7 @@ export default {
       opacity: 1;
     }
   }
+
   .superbox-post {
     height: calc(100vh - 60px);
 
@@ -458,6 +477,15 @@ export default {
       .collapse {
         max-height: 250px;
         overflow: auto;
+      }
+    }
+  }
+
+  @media (max-width: 600px) {
+    .modal-header {
+      .close {
+        padding-left: 8px;
+        padding-right: 10px;
       }
     }
   }
