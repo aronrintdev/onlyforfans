@@ -12,6 +12,11 @@
                 <FormTextInput ikey="email" v-model="formGeneral.email" label="E-mail" :verrors="verrors" :disabled="true" />
               </b-col>
             </b-row>
+            <b-row>
+              <b-col>
+                <small class="text-secondary">* Changing the username or email is disabled during the beta testing phase.</small>
+              </b-col>
+            </b-row>
           </fieldset>
 
           <b-row class="mt-3">
@@ -94,6 +99,10 @@
 import Vuex from 'vuex'
 import FormTextInput from '@components/forms/elements/FormTextInput'
 import FormSelectInput from '@components/forms/elements/FormSelectInput'
+import Timezones from '@helpers/timezones.json'
+import AllLanguages from '@helpers/languages.json'
+import AllCountries from '@helpers/countries.json'
+import AllCurrencies from '@helpers/currencies.json'
 
 export default {
   props: {
@@ -133,35 +142,20 @@ export default {
     options: {
       currencies: [ 
         { value: null, text: 'Please select an option' },
-        { value: 'usd', text: 'US Dollar' },
-        { value: 'eur', text: 'Euro' },
-        { value: 'gbp', text: 'British Pound' },
-        { value: 'cad', text: 'Canadian Dollar' },
+        ...AllCurrencies,
       ],
-      languages: [ 
+      languages: [
         { value: null, text: 'Please select an option' },
-        { value: 'en', text: 'English' },
-        { value: 'de', text: 'German' },
-        { value: 'es', text: 'Spanish' },
-        { value: 'fr', text: 'French' },
-        { value: 'el', text: 'Greek' },
-        { value: 'ru', text: 'Russian' },
-        { value: 'ja', text: 'Japanese' },
+        ...AllLanguages,
       ],
       countries: [ 
         { value: null, text: 'Please select an option' },
-        { value: 'us', text: 'USA' },
-        { value: 'canada', text: 'Canada' },
-        { value: 'russia', text: 'Russian' },
-        { value: 'france', text: 'France' },
-        { value: 'japan', text: 'Japan' },
+        ...AllCountries
       ],
       timezones: [ 
         { value: null, text: 'Please select an option' },
-        { value: 'America/Los_Angeles', text: '(GMT-08:00) Pacific Time (US & Canada)' },
-        { value: 'US/Mountain', text: '(GMT-07:00) Mountain Time (US & Canada)' },
-        { value: 'US/Central', text: '(GMT-06:00) Central Time (US & Canada)' },
-        { value: 'US/Eastern', text: '(GMT-05:00) Eastern Time (US & Canada)' },
+        { value: 'us' , text: 'US time'},
+        ...Timezones,
       ],
     },
 
