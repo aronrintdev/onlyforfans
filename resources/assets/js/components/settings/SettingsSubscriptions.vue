@@ -1,13 +1,13 @@
 <template>
-  <b-card v-if="!isLoading" title="Message with Tip Only">
+  <b-card v-if="!isLoading" class="settings-messages" title="Messages">
     <b-card-text>
       <div class="pt-3 pb-2">
-        <b-form-checkbox switch v-model="user_settings.cattrs.message_with_tip_only" @change="onTipOnlyMessagesSettingChange" size="lg">
+        <b-form-checkbox disabled switch v-model="user_settings.cattrs.message_with_tip_only" @change="onTipOnlyMessagesSettingChange">
           Require sender to include a tip to receive messages.
         </b-form-checkbox>
       </div>
       <div class="pt-2 pb-3">
-        <b-form-checkbox v-model="user_settings.cattrs.enable_message_with_tip_only_pay" @change="onTipOnlyMessagesPaySettingChange" size="lg">
+        <b-form-checkbox disabled v-model="user_settings.cattrs.enable_message_with_tip_only_pay" @change="onTipOnlyMessagesPaySettingChange" >
           Require sender to include a tip of at least $5 amount to receive messages.
         </b-form-checkbox>
       </div>
