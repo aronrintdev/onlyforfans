@@ -1,10 +1,10 @@
 <template>
-  <WithSidebar v-if="!isLoading" id="view-livechat">
+  <WithSidebar v-if="!isLoading" id="view-livechat" :class="{ mobile: mobile }" :focusMain="threadOpen">
     <template #sidebar>
       <Sidebar :state="state" />
     </template>
 
-    <transition mode="out-in" name="quick-fade" :key="activeThreadId">
+    <transition mode="out-in" :name="mobile ? '' : 'quick-fade'" :key="activeThreadId">
       <router-view
         class="w-100"
         :key="activeThreadId"
@@ -62,6 +62,13 @@ export default {
     },
     activeThread() {
       return this.threads[this.activeThreadId] || {}
+    },
+
+    /**
+     * If a thread is open
+     */
+    threadOpen() {
+      return this.activeThreadId ? true : false
     },
 
     // renderedThreads() {
@@ -256,6 +263,15 @@ export default {
 <style lang="scss" scoped>
 #view-livechat {
   background-color: #fff;
+
+  &.mobile {
+    position: relative;
+    top: 0;
+    bottom: 0;
+    height: calc(100vh - 11rem);
+    padding-left: 0;
+    padding-right: 0;
+  }
 
   height: calc(100vh - 100px);
 

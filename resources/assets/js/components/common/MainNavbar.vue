@@ -72,7 +72,11 @@ export default {
     ...Vuex.mapState([ 'mobile' ]),
     ...Vuex.mapGetters(['session_user', 'unread_messages_count']),
     openHeight() {
-      const height = this.$vssHeight - this.$el.clientHeight
+      var height = this.$vssHeight
+      if (this.$el) {
+        height = height - this.$el.clientHeight
+      }
+
       if(this.$refs['scrollCollapse']) {
         return height + this.$refs['scrollCollapse'].maxHeight
       }
