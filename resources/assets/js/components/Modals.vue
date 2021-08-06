@@ -306,10 +306,10 @@ export default {
 
 <style lang="scss" scoped>
 .post-nav-arrows {
-  position: fixed;
+  position: absolute;
   width: 30px;
   height: 30px;
-  top: 50vh;
+  top: 50%;
   transform: translateY(-50%);
   border-radius: 50%;
   cursor: pointer;
@@ -487,6 +487,9 @@ export default {
         padding-left: 8px;
         padding-right: 10px;
       }
+    }
+    .superbox-post {
+      height: calc(100vh - 160px);
     }
   }
 }
