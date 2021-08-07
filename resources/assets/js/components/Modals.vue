@@ -70,7 +70,19 @@
       >
         <fa-icon :icon="['far', 'chevron-left']" size="lg" class="text-white" />
       </div>
-      <PostDisplay ref="postDisplay" :session_user="session_user" :post="selectedResource" :is_feed="false" />
+      <div
+        class="post-content"
+        v-touch:swipe.left="() => postModalAction('next')"
+        v-touch:swipe.right="() => postModalAction('prev')"
+        v-touch:start="startHandler"
+      >
+        <PostDisplay
+          ref="postDisplay"
+          :session_user="session_user"
+          :post="selectedResource"
+          :is_feed="false"
+        />
+      </div>
       <div
         class="post-nav-arrows right"
         v-if="showPostArrows"
@@ -214,6 +226,7 @@ export default {
     scheduled_at: null,
     is_for_edit: null,
     showPostArrows: false,
+    swipeEnabled: false,
   }),
 
   methods: {
@@ -291,10 +304,20 @@ export default {
 
     },
     postModalAction(action) {
-      eventBus.$emit('post-modal-actions', action);
+      console.log('----- swipeEnabled:', this.swipeEnabled);
+      if (this.swipeEnabled) {
+        eventBus.$emit('post-modal-actions', action);
+      }
     },
     closeModal() {
       eventBus.$emit('close-modal');
+    },
+    startHandler(event) {
+      if (event.srcElement.classList.contains('swiper-container')) {
+        this.swipeEnabled = false;
+      } else {
+        this.swipeEnabled = true;
+      }
     }
   },
 
@@ -322,10 +345,10 @@ export default {
   }
 
   &.left {
-    left: calc(50vw - 500px);
+    left: -100px;
   }
   &.right {
-    right: calc(50vw - 500px);
+    right: -100px;
   }
   svg {
     width: 100%;
@@ -339,6 +362,7 @@ export default {
       padding: 5px;
       width: 30px;
       height: 40px;
+      display: none;
 
       &.left {
         left: 0;
@@ -427,6 +451,10 @@ export default {
 
             .swiper-wrapper {
               align-items: center;
+
+              @media (max-width: 600px) {
+                pointer-events: none;
+              }
 
               video {
                 height: 100%;
