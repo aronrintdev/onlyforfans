@@ -11,7 +11,16 @@
     <b-row class="mt-3">
 
       <aside class="col-md-3 d-none d-lg-block">
-
+        <b-button
+          variant="link"
+          class="new-folder-icon"
+          @click="renderNewFolderForm"
+          v-b-tooltip
+          title="Create Folder"
+          placement="bottom"
+        >
+          <fa-icon :icon="['fas', 'plus']" size="lg" />
+        </b-button>
         <ul class="folder-nav pl-0">
           <TreeItem
             class="item"
@@ -90,9 +99,7 @@
                 <b-button variant="link" class="" @click="isUploaderVisible=!isUploaderVisible">
                   <fa-icon :icon="['fas', 'upload']" size="lg" />
                 </b-button>
-                <b-button variant="link" class="" @click="renderNewFolderForm">
-                  <fa-icon :icon="['fas', 'plus']" size="lg" />
-                </b-button>
+                
               </div>
 
             </section>
@@ -356,7 +363,7 @@ export default {
         const isActive = b.pkid === this.currentFolderId
         result.push({
           pkid: b.pkid,
-          text: b.vfname,
+          text: b.is_root ? 'Home' : b.vfname,
           active: isActive,
         })
       }
@@ -995,5 +1002,12 @@ body {
   .tag-folder .truncate {
     width: 200px;
   }
+}
+
+.new-folder-icon {
+  position: absolute; 
+  top: -6px;
+  right: 15px;
+  padding: 4px 6px;
 }
 </style>
