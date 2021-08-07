@@ -62,12 +62,14 @@
               <div class="dz-custom-content">
                 <textarea v-model="description" rows="8" class="w-100 p-3"></textarea>
               </div>
-              <UploadMediaPreview
-                :mediafiles="mediafiles"
-                @change="changeMediafiles"
-                @remove="removeMediafile"
-                @openFileUpload="openDropzone"
-              />
+              <template v-if="selectedMediafiles && selectedMediafiles.length > 0">
+                <UploadMediaPreview
+                  :mediafiles="selectedMediafiles"
+                  @change="changeMediafiles"
+                  @openFileUpload="openDropzone"
+                  @remove="removeMediafile"
+                />
+              </template>
             </vue-dropzone>
             <AudioRecorder
               v-if="showAudioRec"
@@ -185,7 +187,6 @@ export default {
     priceForPaidSubscribers: 0,
     currency: 'USD',
 
-    mediafileIdsFromVault: [], // content added from vault, not disk: should create new references, *not* new S3 content!
 
     // ref:
     //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
@@ -209,7 +210,7 @@ export default {
       },
     },
     scheduled_at: null,
-    mediafiles: [],
+    //mediafiles: [],
     posting: false,
     expirationPeriod: null,
     showVideoRec: false,
@@ -258,35 +259,19 @@ export default {
       })
       this.$log.debug('savePost', { response })
       const json = response.data;
+
+      // (2) upload & attach the mediafiles (in dropzone queue)
       if (json.post) {
         this.newPostId = json.post.id
         const queued = this.$refs.myVueDropzone.getQueuedFiles()
 
-        // (2) upload & attach the mediafiles (in dropzone queue)
         // %FIXME: if this fails, don't we have an orphaned post (?)
         // %NOTE: files added manually don't seem to be put into the queue, thus onDropzoneSending won't be called for them (?)
 
-        // (3) create any mediaifle references, ex from selected files in vault
-        if (this.mediafileIdsFromVault.length) {
-          this.mediafileIdsFromVault.forEach( async mfid => {
-            await axios.post(this.$apiRoute('mediafiles.store'), {
-              mediafile_id: mfid, // the presence of this field is what tells controller method to create a reference, not upload content
-              resource_id: json.post.id,
-              resource_type: 'posts',
-              mftype: 'post',
-            })
-            // %TODO: check failure case
-          })
-          this.mediafileIdsFromVault = [] // empty array (we could remove individually inside the loop)
-          this.$router.replace({'query': null}).catch(()=>{}); // clear mediafile router params from URL
-        } else if (queued.length) {
-          console.log('CreatePost::savePost() - process queue', {
-            queued,
-          })
-          this.$refs.myVueDropzone.processQueue() // this will call dispatch after files uploaded
-        } 
-
-        if ( !queued.length ) {
+        if (queued.length) {
+          console.log('CreatePost::savePost() - process queue', { queued, })
+          this.$refs.myVueDropzone.processQueue() // this will call createCompleted() via callback
+        }  else {
           console.log('CreatePost::savePost() - nothing queued')
           this.createCompleted();
         }
@@ -313,6 +298,7 @@ export default {
     // ------------ Dropzone ------------------------------------------------ //
 
     onDropzoneAdded(file) {
+      /*
       if (!file.filepath) {
         this.mediafiles.push({
           type: file.type,
@@ -323,17 +309,55 @@ export default {
         this.mediafiles.push(file);
       }
       this.$log.debug('onDropzoneAdded')
+       */
+      this.$log.debug('onDropzoneAdded', {file})
+      if (!file.filepath) {
+        this.ADD_SELECTED_MEDIAFILES({
+          ...file,
+          type: file.type,
+          filepath: URL.createObjectURL(file),
+        })
+      } else {
+        this.ADD_SELECTED_MEDIAFILES({
+          ...file,
+          type: file.type,
+        })
+      }
+      this.$nextTick(() => this.$forceUpdate())
     },
+
     onDropzoneRemoved(file, error, xhr) {
+      /*
       this.$log.debug('onDropzoneRemoved')
+       */
+      const index = _.findIndex(this.selectedMediafiles, mf => (mf.filepath === file.filepath))
+      if (index > -1)  {
+        this.REMOVE_SELECTED_MEDIAFILE_BY_INDEX(index)
+      }
     },
+
     onDropzoneSuccess(file, response) {
-      this.$log.debug('onDropzoneSuccess', { file, response, });
+      this.$log.debug('onDropzoneSuccess', { file, response })
+      // Remove Preview
+      if (file) {
+        this.$refs.myVueDropzone.removeFile(file)
+        this.removeFileFromSelected(file)
+      }
+      // Add Mediafile reference
+      this.ADD_SELECTED_MEDIAFILES(response.mediafile)
     },
+
     onDropzoneError(file, message, xhr) {
+      /*
       this.$log.debug('onDropzoneError', { file, message, xhr });
       if (file) {
         this.$refs.myVueDropzone.removeFile(file)
+      }
+       */
+      this.$log.error('Dropzone Error Event', { file, message, xhr })
+      if (file) {
+        this.$refs.myVueDropzone.removeFile(file)
+        this.removeFileFromSelected(file)
       }
     },
 
@@ -346,6 +370,16 @@ export default {
       console.log('onDropzoneQueueComplete', { });
       this.createCompleted();
     },
+
+    removeFileFromSelected(file) {
+      const index = _.findIndex(this.selectedMediafiles, mf => {
+        return mf.upload ? mf.upload.filename === file.name : false
+      })
+
+      this.REMOVE_SELECTED_MEDIAFILE_BY_INDEX(index)
+    },
+
+    // ---
 
     createCompleted() {
       this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
@@ -401,17 +435,30 @@ export default {
         }
       })
     },
+
     changeMediafiles(data) {
-      this.mediafiles = [...data];
+      this.UPDATE_SELECTED_MEDIAFILES([...data])
     },
+
+    onClearFiles() {
+      this.$refs.myVueDropzone.removeAllFiles()
+      this.CLEAR_SELECTED_MEDIAFILES()
+    },
+
     removeMediafile(index) {
+      /*
       const file = this.$refs.myVueDropzone.dropzone.files[index];
       if (file) {
         this.$refs.myVueDropzone.removeFile(file);
         this.mediafiles.splice(index, 1);
         this.mediafiles = [...this.mediafiles];
       }
+       */
+      if (index > -1)  {
+        this.REMOVE_SELECTED_MEDIAFILE_BY_INDEX(index)
+      }
     },
+
     openDropzone() {
       this.$refs.myVueDropzone.dropzone.hiddenFileInput.click();
     },
@@ -456,29 +503,6 @@ export default {
       self.expirationPeriod = data;
     })
 
-    if ( this.$route.params.context ) {
-      switch( this.$route.params.context ) {
-        case 'vault-via-postcreate': // we got here from the vault, likely with mediafiles to attach to a new post
-          const mediafileIds = this.$route.params.mediafile_ids || []
-          if ( mediafileIds.length ) {
-            // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
-            const response = axios.get(this.$apiRoute('mediafiles.index'), {
-              params: {
-                mediafile_ids: mediafileIds,
-              },
-            }).then( response => {
-              response.data.data.forEach( mf => {
-                // https://rowanwins.github.io/vue-dropzone/docs/dist/#/manual
-                const file = { size: mf.orig_size, name: mf.id, type: mf.mimetype, filepath: mf.filepath }
-                this.mediafileIdsFromVault.push(mf.id)
-                this.$refs.myVueDropzone.manuallyAddFile(file, mf.filepath)
-              })
-            })
-          }
-          break
-      } // switch
-    }
-
   }, // mounted
 
   created() {
@@ -501,6 +525,14 @@ export default {
       this.showedModal = null
     })
   },
+
+  watch: {
+
+    selectedMediafiles(value) {
+      this.$log.debug('watch selectedMediafiles', { value })
+    },
+
+  }, // watch
 
   components: {
     PriceSelector,
