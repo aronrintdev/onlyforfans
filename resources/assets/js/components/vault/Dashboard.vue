@@ -139,7 +139,7 @@
                   <fa-icon :icon="['fas', 'trash']" size="lg" class="text-danger" />
                 </div>
               </div>
-              <p class="text-center truncate m-0">{{ vf.name }}</p>
+              <p class="text-center truncate m-0 tag-folder-title">{{ vf.name }}</p>
             </b-col>
           </b-row>
         </b-overlay>
@@ -972,6 +972,13 @@ body {
       position: absolute;
       top: 0.7rem;
       left: 1.5rem;
+
+      .badge {
+        color: #fff;
+        background: #535353;
+        opacity: 0.7;
+        font-size: 11px;
+      }
     }
     .tag-folder .clickme_to-delete {
       position: absolute;
@@ -982,6 +989,18 @@ body {
       position: absolute;
       top: 45%;
       right: 50%;
+    }
+
+    .tag-folder-title {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-transform: capitalize;
+      color: #fff;
+      padding: 2px 12px;
+      border-radius: 5px;
+      background: rgba(83, 83, 83, 0.7);
     }
   }
 

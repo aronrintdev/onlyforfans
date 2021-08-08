@@ -76,7 +76,10 @@ body {
   ul {
     list-style: none;
   }
-  .tag-tree-node { 
+  .tag-tree-node {
+    .node-name {
+      text-transform: capitalize;
+    }
     .node-name:hover {
       cursor: pointer;
     }
