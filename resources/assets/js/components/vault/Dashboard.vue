@@ -111,7 +111,7 @@
           <b-row :no-gutters="false">
 
             <!-- Files -->
-            <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button" class="mb-2">
+            <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button" class="mb-3">
               <PreviewFile 
                 :data-mf_id="mf.id" 
                 :mediafile="mf" 
@@ -119,7 +119,7 @@
                 @render-lightbox="renderLightbox" 
                 class="OFF-p-1 tag-file" 
               />
-              <p class="text-center truncate m-0">{{ mf.mfname }}</p>
+              <!-- <p class="text-center truncate m-0">{{ mf.mfname }}</p> -->
             </b-col>
 
             <!-- Vaultfolders -->
