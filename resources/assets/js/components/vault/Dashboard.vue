@@ -50,7 +50,7 @@
           <b-col>
             <vue-dropzone 
               ref="myVueDropzone" 
-              id="dropzone" 
+              id="vaultfile-dropzone"
               :options="dropzoneOptions"
               v-on:vdropzone-sending="sendingEvent"
               v-on:vdropzone-success="successEvent"
@@ -437,6 +437,7 @@ export default {
         'X-Requested-With': 'XMLHttpRequest', 
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
       },
+      dictDefaultMessage: 'Drop files here to upload, or click browse.',
     },
 
     showVideoRec: false,
@@ -985,7 +986,11 @@ body {
   }
 
   .vue-dropzone {
-    background: #ccdfeb;
+    background: #d3d3d370;
+    border: 1px dashed gray;
+    align-items: center;
+    display: flex;
+    justify-content: center;
   }
   .share-list .tag-sharee {
     font-size: 1.2rem;
