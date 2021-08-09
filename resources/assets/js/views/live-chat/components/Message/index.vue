@@ -42,7 +42,7 @@ export default {
     ...Vuex.mapState( ['session_user', 'mobile'] ),
 
     shown() {
-      return this.value.mcontent || this.value.attachments.length > 0
+      return this.value.mcontent || ( Array.isArray(this.value.attachments) && this.value.attachments.length > 0 )
     },
   },
 
