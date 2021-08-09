@@ -398,11 +398,11 @@ class ChargebackTest extends TestCase
         $inAccount->handleChargeback($chargebackTransaction);
 
         // Chargeback Transactions
-        $this->assertEquals(3, Transaction::where([
+        $this->assertEquals(2, Transaction::where([
             'account_id' => $platformFeesAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
         ])->count());
-        $this->assertEquals(3, Transaction::where([
+        $this->assertEquals(2, Transaction::where([
             'account_id' => $taxAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
         ])->count());
