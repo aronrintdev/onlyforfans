@@ -1,24 +1,25 @@
 <?php
 namespace Tests\Feature;
 
-use Carbon\Carbon;
 use DB;
-use Illuminate\Foundation\Testing\WithFaker;
-//use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Http\File;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Database\Eloquent\Model;
-
+use Carbon\Carbon;
 use Tests\TestCase;
-use Database\Seeders\TestDatabaseSeeder;
-
-use App\Events\MessageSentEvent;
+//use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\User;
+use Illuminate\Http\File;
 use App\Models\Chatthread;
 use App\Models\Chatmessage;
+use App\Events\MessageSentEvent;
+use Illuminate\Http\UploadedFile;
+
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Event;
+
+use Illuminate\Support\Facades\Config;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+use Database\Seeders\TestDatabaseSeeder;
+use Illuminate\Foundation\Testing\WithFaker;
 
 class RestChatthreadsTest extends TestCase
 {
@@ -270,8 +271,11 @@ class RestChatthreadsTest extends TestCase
      */
     public function test_can_create_chat_thread_with_selected_participants()
     {
-        $originator = User::doesntHave('chatthreads')->firstOrFail();
-        $participants = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->take(3)->get();
+        // $originator = User::doesntHave('chatthreads')->firstOrFail();
+        // $participants = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->take(3)->get();
+        $originator = User::factory()->create();
+        $originator = User::find($originator->id);
+        $participants = new Collection([User::factory()->create(), User::factory()->create(), User::factory()->create() ]);
         $this->assertGreaterThan(0, $participants->count());
 
         $payload = [
@@ -300,9 +304,12 @@ class RestChatthreadsTest extends TestCase
         ]);
 
         // create chat
-        $originator = User::doesntHave('chatthreads')->firstOrFail();
+        // $originator = User::doesntHave('chatthreads')->firstOrFail();
+        $originator = User::factory()->create();
+        $originator = User::find($originator->id);
 
-        $recipients = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->take(1)->get();
+        // $recipients = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->take(1)->get();
+        $recipients = new Collection([User::factory()->create()]);
         $this->assertGreaterThan(0, $recipients->count());
 
         // --- Create a chatthread ---
@@ -371,7 +378,9 @@ class RestChatthreadsTest extends TestCase
         $MAX = 3;
 
         // create chat
-        $originator = User::doesntHave('chatthreads')->firstOrFail();
+        // $originator = User::doesntHave('chatthreads')->firstOrFail();
+        $originator = User::factory()->create();
+        $originator = User::find($originator->id);
         $recipients = User::where('id', '<>', $originator->id)->take($MAX)->get();
         $this->assertGreaterThan(2, $recipients->count());
         $this->assertLessThanOrEqual( $MAX, $recipients->count() );
@@ -485,9 +494,12 @@ class RestChatthreadsTest extends TestCase
         ]);
 
         // create chat
-        $originator = User::doesntHave('chatthreads')->firstOrFail();
+        // $originator = User::doesntHave('chatthreads')->firstOrFail();
+        $originator = User::factory()->create();
+        $originator = User::find($originator->id);
 
-        $recipients = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->take(1)->get();
+        // $recipients = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->take(1)->get();
+        $recipients = new Collection([ User::factory()->create() ]);
         $this->assertGreaterThan(0, $recipients->count());
 
         // --- Create a chatthread ---
@@ -524,9 +536,12 @@ class RestChatthreadsTest extends TestCase
         ]);
 
         // create chat
-        $originator = User::doesntHave('chatthreads')->firstOrFail();
+        // $originator = User::doesntHave('chatthreads')->firstOrFail();
+        $originator = User::factory()->create();
+        $originator = User::find($originator->id);
 
-        $recipients = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->take(1)->get();
+        // $recipients = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->take(1)->get();
+        $recipients = new Collection([ User::factory()->create() ]);
         $this->assertGreaterThan(0, $recipients->count());
 
         // --- Create a chatthread ---
@@ -596,7 +611,9 @@ class RestChatthreadsTest extends TestCase
     public function test_nonparticipant_can_not_view_chatthread()
     {
         $chatthread = Chatthread::has('chatmessages')->firstOrFail();
-        $nonparticipant = User::doesntHave('chatthreads')->firstOrFail();
+        // $nonparticipant = User::doesntHave('chatthreads')->firstOrFail();
+        $nonparticipant = User::factory()->create();
+        $nonparticipant = User::find($nonparticipant->id);
         $response = $this->actingAs($nonparticipant)->ajaxJSON( 'GET', route('chatthreads.show', $chatthread->id) );
         $response->assertStatus(403);
     }
@@ -611,8 +628,11 @@ class RestChatthreadsTest extends TestCase
     public function test_can_schedule_message()
     {
         // create chat
-        $originator = User::doesntHave('chatthreads')->firstOrFail();
-        $recipients = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->take(3)->get();
+        // $originator = User::doesntHave('chatthreads')->firstOrFail();
+        // $recipients = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->take(3)->get();
+        $originator = User::factory()->create();
+        $originator = User::find($originator->id);
+        $recipients = new Collection([User::factory()->create(), User::factory()->create(), User::factory()->create()]);
         $this->assertGreaterThan(0, $recipients->count());
 
         $payload = [
