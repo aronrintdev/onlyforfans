@@ -19,7 +19,7 @@
             </b-row>
           </fieldset>
 
-          <b-row class="mt-3">
+          <!-- <b-row class="mt-3">
             <b-col>
               <div class="w-100 d-flex justify-content-end">
                 <b-button :disabled="isSubmitting.formGeneral" class="w-25 ml-3" type="submit" variant="primary">
@@ -28,7 +28,7 @@
                 </b-button>
               </div>
             </b-col>
-          </b-row>
+          </b-row> -->
 
         </b-form>
       </b-card-text>
@@ -42,7 +42,7 @@
               <b-col>
                 <FormSelectInput
                   ikey="localization.language"
-                  v-model="formLocalization.localization.language"
+                  v-model="formData.language"
                   label="Language"
                   :verrors="verrors"
                   :options="options.languages"
@@ -51,7 +51,7 @@
               <b-col>
                 <FormSelectInput
                   ikey="localization.timezone"
-                  v-model="formLocalization.localization.timezone"
+                  v-model="formData.timezone"
                   label="Time Zone"
                   :verrors="verrors"
                   :options="options.timezones"
@@ -63,7 +63,7 @@
               <b-col>
                 <FormSelectInput 
                   ikey="localization.country"  
-                  v-model="formLocalization.localization.country" 
+                  v-model="formData.country" 
                   label="Country" 
                   :verrors="verrors" 
                   :options="options.countries" 
@@ -72,7 +72,7 @@
               <b-col>
                 <FormSelectInput 
                   ikey="localization.currency"  
-                  v-model="formLocalization.localization.currency" 
+                  v-model="formData.currency" 
                   label="Currency" 
                   :verrors="verrors" 
                   :options="options.currencies" 
@@ -130,13 +130,11 @@ export default {
       username: null,
       email: null,
     },
-    formLocalization: {
-      localization: { // cattrs
-        language: '',
-        country: '',
-        timezone: '',
-        currency: '',
-      },
+    formData: { // cattrs
+      language: null,
+      country: null,
+      timezone: null,
+      currency: null,
     },
 
     options: {
@@ -164,7 +162,7 @@ export default {
   watch: {
     user_settings(newVal) {
       if ( newVal.cattrs.localization ) {
-        this.formLocalization.localization = newVal.cattrs.localization
+        this.formData = newVal.cattrs.localization
       }
     },
   },
@@ -179,7 +177,7 @@ export default {
     this.formGeneral.email = this.session_user.email || ''
 
     if ( this.user_settings.cattrs.localization ) {
-      this.formLocalization.localization = this.user_settings.cattrs.localization
+      this.formData = this.user_settings.cattrs.localization
     }
   },
 
@@ -209,7 +207,11 @@ export default {
       this.isSubmitting.formLocalization = true
 
       try {
-        const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formLocalization)
+        const response = await axios.patch(`/users/${this.session_user.id}/settings`, {
+          localization: { // cattrs
+            ...this.formData,
+          },
+        })
         this.verrors = null
         this.onSuccess()
       } catch(err) {

@@ -84,7 +84,7 @@
             </b-row>
             <b-row>
               <b-col cols="12" class="text-right">
-                <div class="d-inline-block demographics_visible text-info" @click="isDemographicsVisible=!isDemographicsVisible">
+                <div class="d-inline-block demographics_visible text-primary" @click="isDemographicsVisible=!isDemographicsVisible">
                   <span v-if="!isDemographicsVisible">View Demographics</span>
                   <span v-else>Hide Demographics</span>
                 </div>
