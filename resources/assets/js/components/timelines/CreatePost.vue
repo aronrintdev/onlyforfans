@@ -67,7 +67,7 @@
                   :mediafiles="selectedMediafiles"
                   @change="changeMediafiles"
                   @openFileUpload="openDropzone"
-                  @remove="removeMediafile"
+                  @remove="removeMediafileByIndex"
                 />
               </template>
             </vue-dropzone>
@@ -169,7 +169,29 @@ export default {
       'selectedMediafiles',
       'uploadsVaultFolder',
     ]),
-  },
+
+    // ref:
+    //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
+    //  ~ https://www.dropzonejs.com/#config-autoProcessQueue
+    dropzoneOptions() {
+      return {
+        url: this.$apiRoute('mediafiles.store'),
+        paramName: 'mediafile',
+        maxFiles: null,
+        autoProcessQueue: false,
+        thumbnailWidth: 100,
+        clickable: '#clickme_to-select',
+        maxFilesize: 15.9,
+        addRemoveLinks: true,
+        removeType: 'client',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
+        },
+      }
+    },
+
+  }, // computed
 
   data: () => ({
     moment,
@@ -187,36 +209,14 @@ export default {
     priceForPaidSubscribers: 0,
     currency: 'USD',
 
-
-    // ref:
-    //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
-    //  ~ https://www.dropzonejs.com/#config-autoProcessQueue
-    dropzoneOptions: {
-      //url: '/mediafiles',
-      url: route('mediafiles.store'),
-      paramName: 'mediafile',
-      //acceptedFiles: 'image/*, video/*, audio/*',
-      maxFiles: null,
-      autoProcessQueue: false,
-      thumbnailWidth: 100,
-      //clickable: false, // must be false otherwise can't focus on text area to type (!)
-      clickable: '#clickme_to-select',
-      maxFilesize: 15.9,
-      addRemoveLinks: true,
-      removeType: 'client',
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
-      },
-    },
     scheduled_at: null,
-    //mediafiles: [],
+    //mediafiles: [],  use selectedMediafiles from store
     posting: false,
     expirationPeriod: null,
     showVideoRec: false,
     showAudioRec: false,
-  }),
 
+  }), // data
 
   methods: {
 
@@ -232,6 +232,7 @@ export default {
     ]),
 
     resetForm() {
+      this.CLEAR_SELECTED_MEDIAFILES()
       this.$refs.myVueDropzone.removeAllFiles();
       this.description = '';
       this.newPostId = null;
@@ -278,9 +279,24 @@ export default {
 
       } else {
         this.resetForm();
-        this.mediafiles = [];
         this.posting = false;
       }
+    },
+
+    // ------------ Dropzone ------------------------------------------------ //
+
+    openDropzone() {
+      this.$refs.myVueDropzone.dropzone.hiddenFileInput.click();
+    },
+
+    onDropzoneAdded(file) {
+      this.$log.debug('onDropzoneAdded', {file})
+      let payload = { ...file, type: file.type }
+      if (!file.filepath) {
+        payload.filepath = URL.createObjectURL(file)
+      }
+      this.ADD_SELECTED_MEDIAFILES(payload)
+      this.$nextTick(() => this.$forceUpdate())
     },
 
     // Dropzone: 'Modify the request and add addtional parameters to request before sending'
@@ -295,45 +311,6 @@ export default {
       formData.append('mftype', 'post');
     },
 
-    // ------------ Dropzone ------------------------------------------------ //
-
-    onDropzoneAdded(file) {
-      /*
-      if (!file.filepath) {
-        this.mediafiles.push({
-          type: file.type,
-          name: file.name,
-          filepath: URL.createObjectURL(file),
-        });
-      } else {
-        this.mediafiles.push(file);
-      }
-      this.$log.debug('onDropzoneAdded')
-       */
-      this.$log.debug('onDropzoneAdded', {file})
-      if (!file.filepath) {
-        this.ADD_SELECTED_MEDIAFILES({
-          ...file,
-          type: file.type,
-          filepath: URL.createObjectURL(file),
-        })
-      } else {
-        this.ADD_SELECTED_MEDIAFILES({
-          ...file,
-          type: file.type,
-        })
-      }
-      this.$nextTick(() => this.$forceUpdate())
-    },
-
-    onDropzoneRemoved(file, error, xhr) {
-      this.$log.debug('onDropzoneRemoved')
-      const index = _.findIndex(this.selectedMediafiles, mf => (mf.filepath === file.filepath))
-      if (index > -1)  {
-        this.REMOVE_SELECTED_MEDIAFILE_BY_INDEX(index)
-      }
-    },
-
     onDropzoneSuccess(file, response) {
       this.$log.debug('onDropzoneSuccess', { file, response })
       // Remove Preview
@@ -342,16 +319,10 @@ export default {
         this.removeFileFromSelected(file)
       }
       // Add Mediafile reference
-      this.ADD_SELECTED_MEDIAFILES(response.mediafile)
+      //this.ADD_SELECTED_MEDIAFILES(response.mediafile) // we don't need to do this as file is already uploaded & associated with post
     },
 
     onDropzoneError(file, message, xhr) {
-      /*
-      this.$log.debug('onDropzoneError', { file, message, xhr });
-      if (file) {
-        this.$refs.myVueDropzone.removeFile(file)
-      }
-       */
       this.$log.error('Dropzone Error Event', { file, message, xhr })
       if (file) {
         this.$refs.myVueDropzone.removeFile(file)
@@ -365,21 +336,65 @@ export default {
       if ( !this.newPostId ) {
         return
       }
-      console.log('onDropzoneQueueComplete', { });
       this.createCompleted();
     },
 
+    onDropzoneRemoved(file, error, xhr) {
+      this.$log.debug('onDropzoneRemoved')
+      //const index = _.findIndex(this.selectedMediafiles, mf => {
+      //  return mf.filepath === file.filepath
+      //})
+      //this.removeMediafileByIndex(index)
+    },
+
     removeFileFromSelected(file) {
+      this.$log.debug('removeFileFromSelected')
       const index = _.findIndex(this.selectedMediafiles, mf => {
         return mf.upload ? mf.upload.filename === file.name : false
       })
+      this.removeMediafileByIndex(index)
+    },
 
-      this.REMOVE_SELECTED_MEDIAFILE_BY_INDEX(index)
+    // %NOTE: this can be called as a handler for the 'remove' event emitted by UploadMediaPreview
+    removeMediafileByIndex(index) {
+      if (index > -1)  {
+
+        // If the file is in the Dropzone queue remove it from there as well
+        let dzUUID = null
+        if ( typeof this.selectedMediafiles[index] !== 'undefined' ) {
+          const file = this.selectedMediafiles[index]
+          if ( file.hasOwnProperty('upload') ) {
+            dzUUID = file.upload.uuid
+          }
+        }
+
+        if ( dzUUID !== null ) {
+          // workaround...so we can also remove from Dropzone if its a disk file...
+          this.$refs.myVueDropzone.getQueuedFiles().forEach( qf => {
+            if ( qf.hasOwnProperty('upload') && qf.upload.uuid === dzUUID ) {
+              this.$refs.myVueDropzone.removeFile(qf)
+            }
+          })
+        }
+
+        this.REMOVE_SELECTED_MEDIAFILE_BY_INDEX(index)
+      }
     },
 
     // ---
 
-    createCompleted() {
+    async createCompleted() {
+      // Take care of any files attached from vault (disk files have already been removed from selectedMediafiles)...
+      this.selectedMediafiles.forEach( async mf => {
+        await axios.post(this.$apiRoute('mediafiles.store'), {
+          mediafile_id: mf.id, // the presence of this field is what tells controller method to create a reference, not upload content
+          resource_id: this.newPostId,
+          resource_type: 'posts',
+          mftype: 'post',
+        })
+      })
+      // %TODO: find medaifile in selectedMediafiles and remove it
+
       this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
       this.$store.dispatch('getQueueMetadata');
       // Show notification if scheduled post is succesfully created
@@ -391,7 +406,6 @@ export default {
         })
       }
       this.resetForm();
-      this.mediafiles = [];
       this.posting = false;
     },
 
@@ -406,13 +420,6 @@ export default {
       this.selectedMedia = this.selectedMedia!=='audio' ? 'audio' : null
       this.showAudioRec = true
     },
-
-    // HERE
-    //uploadFromVault() {
-    //this.selectedMedia = this.selectedMedia!=='vault' ? 'vault' : null
-    //// %FIXME: should add full upload from vault feature instead of redirecting
-    //this.$router.push({ name: 'vault.dashboard' })
-    //},
 
     renderVaultSelector() {
       eventBus.$emit('open-modal', {
@@ -438,38 +445,20 @@ export default {
       this.UPDATE_SELECTED_MEDIAFILES([...data])
     },
 
-    onClearFiles() {
-      this.$refs.myVueDropzone.removeAllFiles()
-      this.CLEAR_SELECTED_MEDIAFILES()
-    },
 
-    removeMediafile(index) {
-      /*
-      const file = this.$refs.myVueDropzone.dropzone.files[index];
-      if (file) {
-        this.$refs.myVueDropzone.removeFile(file);
-        this.mediafiles.splice(index, 1);
-        this.mediafiles = [...this.mediafiles];
-      }
-       */
-      if (index > -1)  {
-        this.REMOVE_SELECTED_MEDIAFILE_BY_INDEX(index)
-      }
-    },
 
-    openDropzone() {
-      this.$refs.myVueDropzone.dropzone.hiddenFileInput.click();
-    },
     showExpirationPicker() {
       this.showedModal = 'expiration'
       eventBus.$emit('open-modal', {
         key: 'expiration-period',
       })
     },
+
     closeSchedulePicker(e) {
       this.scheduled_at = null;
       e.stopPropagation();
     },
+
     audioRecordFinished(file) {
       if (this.$refs.myVueDropzone) {
         this.$refs.myVueDropzone.addFile(file);
@@ -526,9 +515,9 @@ export default {
 
   watch: {
 
-    selectedMediafiles(value) {
-      this.$log.debug('watch selectedMediafiles', { value })
-    },
+    //selectedMediafiles(value) {
+    //this.$log.debug('watch selectedMediafiles', { value })
+    //},
 
   }, // watch
 

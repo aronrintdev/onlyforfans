@@ -170,11 +170,9 @@ export default {
       return {
         url: this.$apiRoute('mediafiles.store'),
         paramName: 'mediafile',
-        //acceptedFiles: 'image/*, video/*, audio/*',
         maxFiles: null,
         autoProcessQueue: false,
         thumbnailWidth: 100,
-        //clickable: false, // must be false otherwise can't focus on text area to type (!)
         clickable: '.upload-files', // button in the footer, see: https://www.dropzonejs.com/#configuration-options
         maxFilesize: 15.9,
         addRemoveLinks: true,
@@ -206,7 +204,7 @@ export default {
       return selected
     }
 
-  },
+  }, // computed
 
   data: () => ({
 
@@ -229,12 +227,6 @@ export default {
     sending: false,
 
   }), // data
-
-  created() {
-    this.isTyping = _.throttle(this._isTyping, 1000)
-  },
-
-  mounted() { },
 
   methods: {
     ...Vuex.mapMutations('vault', [
@@ -265,13 +257,9 @@ export default {
 
     // %NOTE: called when adding files from disk, but *not* called when adding files from vault
     onDropzoneAdded(file) {
-      this.$log.debug('NewMessageForm/index.vue::onDropzoneAdded().A', {file})
       let payload = { ...file, type: file.type }
       if (!file.filepath) {
-        this.$log.debug('NewMessageForm/index.vue::onDropzoneAdded().B1 - no filepath')
         payload.filepath = URL.createObjectURL(file)
-      } else {
-        this.$log.debug('NewMessageForm/index.vue::onDropzoneAdded().B2 - has filepath')
       }
       this.ADD_SELECTED_MEDIAFILES(payload)
       this.$nextTick(() => this.$forceUpdate())
@@ -296,7 +284,6 @@ export default {
     //    with resource_type = ‘vaultfolders’ ,and a second with resource_type=‘messages’...former 
     //    is not needed but is not cleaned up atm
     onDropzoneSuccess(file, response) {
-      this.$log.debug('onDropzoneSuccess', { file, response })
       // Remove Preview
       if (file) {
         this.$refs.myVueDropzone.removeFile(file)
@@ -307,7 +294,6 @@ export default {
     },
 
     onDropzoneError(file, message, xhr) {
-      this.$log.error('Dropzone Error Event', { file, message, xhr })
       if (file) {
         this.$refs.myVueDropzone.removeFile(file)
         this.removeFileFromSelected(file)
@@ -323,15 +309,13 @@ export default {
     },
 
     onDropzoneRemoved(file) {
-      this.$log.debug('NewMessageForm::onDropzoneRemoved', { file })
       //const index = _.findIndex(this.selectedMediafiles, mf => {
-      //return mf.filepath === file.filepath
+      //  return mf.filepath === file.filepath
       //})
       //this.removeMediafileByIndex(index)
     },
 
     removeFileFromSelected(file) {
-      this.$log.debug('NewMessageForm::removeFileFromSelected', { index, file })
       const index = _.findIndex(this.selectedMediafiles, mf => {
         return mf.upload ? mf.upload.filename === file.name : false
       })
@@ -340,7 +324,6 @@ export default {
 
     // %NOTE: this can be called as a handler for the 'remove' event emitted by UploadMediaPreview
     removeMediafileByIndex(index) {
-      this.$log.debug('NewMessageForm::removeMediafileByIndex', { index })
       if (index > -1)  {
 
         // If the file is in the Dropzone queue remove it from there as well
@@ -410,7 +393,6 @@ export default {
           created_at: this.moment().toISOString(),
           updated_at: this.moment().toISOString(),
         }
-        this.$log.debug('messageForm sendMessage', { message })
         // Whisper the message to the channel so that is shows up for other users as fast as possible if they are
         //   currently viewing this thread
         this.$echo.join(this.channelName).whisper('sendMessage', { message })
@@ -422,27 +404,23 @@ export default {
       this.clearForm() // removes mediafiles from store list and from Dropzone queue
       this.sending = false
 
-    }, //async finalizeMessageSend()
+    }, // finalizeMessageSend()
 
     async sendMessage() {
       this.sending = true
       // Validation check
       const mediafileCount = this.selectedMediafiles ? this.selectedMediafiles.length : 0
-      console.log('sendMessage', mediafileCount)
       if (this.newMessageForm.mcontent === '' && mediafileCount === 0) {
         eventBus.$emit('validation', { message: this.$t('validation') })
         return
       }
-      console.log(mediafileCount)
       if (this.newMessageForm.price > 0 && mediafileCount === 0) {
         eventBus.$emit('validation', { message: this.$t('pricedValidation')})
         return
       }
 
       // Process any file in the queue
-      //debugger
       const queued = this.$refs.myVueDropzone.getQueuedFiles()
-      this.$log.debug('sendMessage dropzone queue', { queued })
       if (queued.length > 0) {
         await this.getUploadsVaultFolder()
         this.$refs.myVueDropzone.processQueue() // when completed will call finalizeMessageSend()
@@ -452,9 +430,7 @@ export default {
 
     },
 
-    /**
-     * Send message on ctrl+enter
-     */
+    // Send message on ctrl+enter
     onEnterPress(e) {
       if (e.ctrlKey) {
         this.sendMessage()
@@ -532,6 +508,10 @@ export default {
 
   }, // methods
 
+  created() {
+    this.isTyping = _.throttle(this._isTyping, 1000)
+  },
+
   watch: {
     'newMessageForm.mcontent': function(value) {
       if (this.newMessageForm.deliver_at === undefined || this.newMessageForm.deliver_at === null) {
@@ -540,11 +520,6 @@ export default {
         }
       }
     },
-
-    selectedMediafiles(value) {
-      this.$log.debug('watch selectedMediafile', { value })
-    },
-
   }, // watch
 
 
