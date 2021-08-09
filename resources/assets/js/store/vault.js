@@ -43,7 +43,12 @@ export const vault = {
     },
 
     // Pushes mediafile or array of mediafiles onto selectedMediafiles
+    //  Could be from disk *or* an existing vault folder
+    //    ~ if from disk, will have an 'upload' attribute if using VueDropzone (?)
     ADD_SELECTED_MEDIAFILES(state, payload) {
+      console.log('store/vault.js::ADD_SELECTED_MEDIAFILES - ', { 
+        payload 
+      })
       if (!payload) {
         return
       }

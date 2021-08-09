@@ -114,6 +114,7 @@ import Footer from './Footer'
 
 // 
 //  sendMessage(): Footer form submit ||  press Ctrl + Enter
+//  await this.getUploadsVaultFolder()
 //  dropzone.processQueue()
 //  finalizeMessageSend()
 // 
@@ -174,7 +175,7 @@ export default {
         autoProcessQueue: false,
         thumbnailWidth: 100,
         //clickable: false, // must be false otherwise can't focus on text area to type (!)
-        clickable: '.upload-files',
+        clickable: '.upload-files', // button in the footer, see: https://www.dropzonejs.com/#configuration-options
         maxFilesize: 15.9,
         addRemoveLinks: true,
         headers: {
@@ -262,24 +263,22 @@ export default {
       this.$refs.myVueDropzone.dropzone.hiddenFileInput.click();
     },
 
+    // %NOTE: called when adding files from disk, but *not* called when adding files from vault
     onDropzoneAdded(file) {
-      this.$log.debug('onDropzoneAdded', {file})
+      this.$log.debug('NewMessageForm/index.vue::onDropzoneAdded().A', {file})
+      let payload = { ...file, type: file.type }
       if (!file.filepath) {
-        this.ADD_SELECTED_MEDIAFILES({
-          ...file,
-          type: file.type,
-          filepath: URL.createObjectURL(file),
-        })
+        this.$log.debug('NewMessageForm/index.vue::onDropzoneAdded().B1 - no filepath')
+        payload.filepath = URL.createObjectURL(file)
       } else {
-        this.ADD_SELECTED_MEDIAFILES({
-          ...file,
-          type: file.type,
-        })
+        this.$log.debug('NewMessageForm/index.vue::onDropzoneAdded().B2 - has filepath')
       }
+      this.ADD_SELECTED_MEDIAFILES(payload)
       this.$nextTick(() => this.$forceUpdate())
     },
 
-    /** Add to Dropzone formData */
+    // Appends to form data to effectively upload the files to a folder in the vault 
+    //  before attaching them to the message itself
     onDropzoneSending(file, xhr, formData) {
       if ( !this.uploadsVaultFolder ) {
         throw new Error('Cancel upload, invalid upload folder');
@@ -290,6 +289,12 @@ export default {
     },
 
     // Called each time the queue successfully uploads a file
+    // We have uploaded any files selected from disk to a 'temporary' vault folder...remove
+    //  these files from the Dropzone queue, and add them to selected mediafiles which may already contain
+    //  some pre-existing vault files that were selected 
+    // %NOTE:  user uploads a file in the message form, two [mediafiles] records are created: one 
+    //    with resource_type = ‘vaultfolders’ ,and a second with resource_type=‘messages’...former 
+    //    is not needed but is not cleaned up atm
     onDropzoneSuccess(file, response) {
       this.$log.debug('onDropzoneSuccess', { file, response })
       // Remove Preview
@@ -318,21 +323,44 @@ export default {
     },
 
     onDropzoneRemoved(file) {
-      const index = _.findIndex(this.selectedMediafiles, mf => {
-        return mf.filepath === file.filepath
-      })
-      this.removeMediafileByIndex(index)
+      this.$log.debug('NewMessageForm::onDropzoneRemoved', { file })
+      //const index = _.findIndex(this.selectedMediafiles, mf => {
+      //return mf.filepath === file.filepath
+      //})
+      //this.removeMediafileByIndex(index)
     },
 
     removeFileFromSelected(file) {
+      this.$log.debug('NewMessageForm::removeFileFromSelected', { index, file })
       const index = _.findIndex(this.selectedMediafiles, mf => {
         return mf.upload ? mf.upload.filename === file.name : false
       })
       this.removeMediafileByIndex(index)
     },
 
+    // %NOTE: this can be called as a handler for the 'remove' event emitted by UploadMediaPreview
     removeMediafileByIndex(index) {
+      this.$log.debug('NewMessageForm::removeMediafileByIndex', { index })
       if (index > -1)  {
+
+        // If the file is in the Dropzone queue remove it from there as well
+        let dzUUID = null
+        if ( typeof this.selectedMediafiles[index] !== 'undefined' ) {
+          const file = this.selectedMediafiles[index]
+          if ( file.hasOwnProperty('upload') ) {
+            dzUUID = file.upload.uuid
+          }
+        }
+
+        if ( dzUUID !== null ) {
+          // workaround...so we can also remove from Dropzone if its a disk file...
+          this.$refs.myVueDropzone.getQueuedFiles().forEach( qf => {
+            if ( qf.hasOwnProperty('upload') && qf.upload.uuid === dzUUID ) {
+              this.$refs.myVueDropzone.removeFile(qf)
+            }
+          })
+        }
+
         this.REMOVE_SELECTED_MEDIAFILE_BY_INDEX(index)
       }
     },
@@ -391,9 +419,10 @@ export default {
         await axios.post( this.$apiRoute('chatthreads.sendMessage', this.chatthread_id), params )
       }
 
-      this.clearForm()
+      this.clearForm() // removes mediafiles from store list and from Dropzone queue
       this.sending = false
-    },
+
+    }, //async finalizeMessageSend()
 
     async sendMessage() {
       this.sending = true
@@ -411,11 +440,12 @@ export default {
       }
 
       // Process any file in the queue
+      //debugger
       const queued = this.$refs.myVueDropzone.getQueuedFiles()
       this.$log.debug('sendMessage dropzone queue', { queued })
       if (queued.length > 0) {
         await this.getUploadsVaultFolder()
-        this.$refs.myVueDropzone.processQueue()
+        this.$refs.myVueDropzone.processQueue() // when completed will call finalizeMessageSend()
       } else {
         this.finalizeMessageSend()
       }

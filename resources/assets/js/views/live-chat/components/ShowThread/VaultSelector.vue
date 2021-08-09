@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="component-vault-selector">
     <div class="d-flex">
       <div class="h5" v-text="$t('header')" />
       <b-btn variant="link" class="ml-auto" @click="onClose">
@@ -7,7 +7,7 @@
       </b-btn>
     </div>
     <div class="d-flex mb-2">
-      <b-btn variant="success" class="ml-auto" @click="onSelect">
+      <b-btn variant="success" class="ml-auto clickme_to-apply_selected" @click="onSelect">
         <fa-icon icon="check" size="lg" class="mr-2" />
         {{ $t('selectButton') }}
       </b-btn>
@@ -103,7 +103,7 @@ export default {
     },
 
     onSelect() {
-      // Add selected Mediafiles to the selected media files list for messaging, then close
+      // Add selected Mediafiles to the selected media files list, then close
       const selected = _.filter(this.mediafiles, o => o.selected)
       this.ADD_SELECTED_MEDIAFILES(selected)
       this.$emit('close')

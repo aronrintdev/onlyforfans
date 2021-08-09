@@ -297,7 +297,6 @@ export default {
 
     // ------------ Dropzone ------------------------------------------------ //
 
-    // %NOTE: called when adding files from disk, but *not* called when adding files from vault
     onDropzoneAdded(file) {
       /*
       if (!file.filepath) {
