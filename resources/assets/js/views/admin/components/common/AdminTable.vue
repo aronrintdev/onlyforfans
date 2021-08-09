@@ -1,13 +1,16 @@
 <template>
-  <div v-if="!isLoading">
+  <div v-if="!isLoading" class="my-3">
 
-    <b-pagination
-      v-model="tobj.currentPage"
-      :total-rows="tobj.totalRows"
-      :per-page="tobj.perPage"
-      v-on:page-click="pageClickHandler"
-      aria-controls="admin-index-table"
-    ></b-pagination>
+    <section class="superbox-paging mb-3 d-flex align-items-center OFF-justify-content-between">
+      <b-pagination
+        v-model="tobj.currentPage"
+        :total-rows="tobj.totalRows"
+        :per-page="tobj.perPage"
+        v-on:page-click="pageClickHandler"
+        aria-controls="admin-index-table"
+      ></b-pagination>
+      <div class="ml-5">({{ tobj.totalRows }})</div>
+    </section>
 
     <b-table hover 
       :items="tobj.data"
@@ -50,6 +53,7 @@
 <script>
 import Vue from 'vue'
 import Vuex from 'vuex'
+import _ from 'lodash'
 
 export default {
   name: 'AdminTable',
@@ -95,7 +99,7 @@ export default {
     },
      */
 
-    async getData() {
+    async _getData() {
       let params = {
         page: this.tobj.currentPage,
         take: this.tobj.perPage,
@@ -103,7 +107,7 @@ export default {
         sortDir: this.tobj.sortDesc ? 'desc' : 'asc',
         ...this.encodedQueryFilters,
       }
-      console.log('getData', { params })
+      console.log('_getData', { params })
       try {
         const response = await axios.get( this.$apiRoute(this.indexRouteName), { params } )
         this.tobj.totalRows = response.data.meta.total // %NOTE: coupled to table
@@ -142,6 +146,7 @@ export default {
   },
 
   created() { 
+    this.getData = _.debounce(this._getData, 500);
     this.getData()
   },
 

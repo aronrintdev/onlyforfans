@@ -1,5 +1,5 @@
 <template>
-  <b-list-group-item class="message" v-if="shown">
+  <b-list-group-item class="message" :class="{ mobile }" v-if="shown">
     <section v-if="isDateBreak" class="grouping-day-divider">
       <span>{{ moment(value.created_at).format('MMM DD, YYYY') }}</span>
     </section>
@@ -39,7 +39,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState( ['session_user'] ),
+    ...Vuex.mapState( ['session_user', 'mobile'] ),
 
     shown() {
       return this.value.mcontent || this.value.attachments.length > 0

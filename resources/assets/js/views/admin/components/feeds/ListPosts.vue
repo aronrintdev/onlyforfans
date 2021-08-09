@@ -6,6 +6,10 @@
         <h6>Boolean</h6>
         <b-button v-for="(f,idx) in postFilters.booleans" :key="idx" @click="toggleFilter('booleans', f)" :variant="f.is_active ? 'primary' : 'outline-primary'" class="mr-3">{{ f.label }}</b-button>
       </div>
+      <div class="box-filter p-3">
+        <h6>Search</h6>
+        <b-form-input v-model="postFilters.qsearch" placeholder="Enter search text"></b-form-input>
+      </div>
     </section>
 
     <AdminTable 
@@ -41,7 +45,8 @@ import AdminTable from '@views/admin/components/common/AdminTable'
 export default {
   props: {},
 
-  computed: { },
+  computed: { 
+  },
 
   data: () => ({
     fields: [
@@ -49,7 +54,7 @@ export default {
       { key: 'type', label: 'Type', sortable: true, },
       { key: 'price', label: 'Price', sortable: true, formatter: v => Vue.options.filters.niceCurrency(v) },
       { key: 'description', label: 'Content', tdClass: 'tag-desc', },
-      { key: 'created_at', label: 'Created', sortable: true, formatter: v => Vue.options.filters.niceDate(v) },
+      { key: 'created_at', label: 'Created', sortable: true, formatter: v => Vue.options.filters.niceDate(v, true) },
       { key: 'ctrls', label: '', sortable: false, },
     ],
     isShowModalVisible: false,
@@ -59,6 +64,7 @@ export default {
       booleans: [
         { key: 'is_flagged', label: 'Reported', is_active: false, }, 
       ],
+      qsearch: '', // search query string
       start_date: null,
       end_date: null,
     },
@@ -116,10 +122,6 @@ export default {
 
     encodeQueryFilters() {
       const filters = this.postFilters
-      let params = {
-        is_flagged: 0,
-        //resource_type: [],
-      }
       for ( let s of filters.booleans ) {
         switch (s.key) {
           case 'is_flagged':
@@ -127,13 +129,26 @@ export default {
             break
         }
       }
+      if ( this.postFilters.qsearch === '' ) {
+        Vue.delete(this.encodedQueryFilters, 'qsearch')
+      } else {
+        Vue.set(this.encodedQueryFilters, 'qsearch', this.postFilters.qsearch) // %FIXME: combine into a single Vue.set (?)
+      }
     },
 
   },
 
-  watchers: {},
+  watch: {
+    'postFilters.qsearch': function (n, o) {
+      if ( n === o ) {
+        return
+      }
+      this.encodeQueryFilters()
+    },
+  },
 
-  created() {},
+  created() {
+  },
 
   components: {
     AdminTable,

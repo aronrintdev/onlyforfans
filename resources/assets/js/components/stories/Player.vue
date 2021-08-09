@@ -44,7 +44,12 @@
               <div class="tag-creator d-flex align-items-center">
                 <b-avatar v-if="avatar" :src="avatar.filepath" class="mr-2" size="2.5rem" />
                 <div>
+                  <!--
                   <h6 class="m-0">{{ storyteller }}</h6>
+                  -->
+                  <h6 class="m-0">
+                    <router-link :to="timelineRoute" v-text="storyteller" />
+                  </h6>
                   <small class="text-muted m-0"><timeago :datetime="s.created_at" /></small>
                 </div>
               </div>
@@ -65,7 +70,7 @@
                 <article v-if="s.stype==='text'" class="h-100 v-wrap">
                   <VueMarkdown :html="false" class="h4 text-center v-box text-white w-75" :source="s.content || ''" />
                 </article>
-                <article v-else-if="s.stype==='image' && s.mediafiles" class="h-100">
+                <article v-else-if="s.stype==='image' && s.mediafiles" :class="mobile ? 'subcrate-media-mobile' : 'subcrate-media-desktop'" class="h-100">
                   <img v-if="s.mediafiles[0].is_image" :src="s.mediafiles[0].filepath" />
                   <video v-if="s.mediafiles[0].is_video" autoplay="autoplay" class="OFF-d-block">
                     <source :src="s.mediafiles[0].filepath" type="video/webm" />
@@ -90,6 +95,7 @@
 // However 'story' should actually refer to the entire story timeline, composed
 // of multiple slides
 import _ from 'lodash'
+import Vuex from 'vuex'
 import SeeMore from './SeeMore.vue' // for swipe-up functionality
 import VueMarkdown from '@adapttive/vue-markdown'
 
@@ -105,6 +111,7 @@ export default {
   },
 
   data: () => ({
+
     INTERVAL_DELTA: 35, // milliseconds...smaller the number the faster the playback
     slideViewedDuration: 0, // interval counter, range 0 to 100; also used to fill in progress bar during auto-playback (could use a better name for this)
 
@@ -119,6 +126,8 @@ export default {
     isLoading() {
       return !this.timeline || !this.storyteller || !this.slides || !this.session_user || (this.slideIndexInit===null)
     },
+
+    ...Vuex.mapState([ 'mobile' ]),
 
     cssCurrentProgress() {
       return { '--current-progress': `${this.slideViewedDuration}%` }
@@ -135,7 +144,14 @@ export default {
 
     currentSlideId() {
       return (this.slides && this.slides.length && (this.slideIndex!==null)) ? this.slides[this.slideIndex].id : null
-    }
+    },
+
+    timelineRoute() {
+      return {
+        name: 'timeline.show',
+        params: { slug: this.timeline.slug }
+      }
+    },
 
   },
 
@@ -234,6 +250,23 @@ export default {
       this.$router.push({ name: 'index' }) // return to home feed/storybar (close player)
     },
 
+    handleKeyup(e) {
+      console.log('handleKeyup', {
+        keyCode: e.keyCode,
+      })
+      switch (e.keyCode) {
+        case 32: // space up
+          this.isAutoplay = !this.isAutoplay
+          break
+        case 37: // left arrow
+          this.doNav('previous')
+          break
+        case 39: // right arrow
+          this.doNav('next')
+          break
+      }
+    },
+
   },
 
   watch: {
@@ -244,6 +277,10 @@ export default {
         this.stopPlayback()
       }
     },
+  },
+
+  created() {
+    window.addEventListener('keyup', this.handleKeyup)
   },
 
   mounted() {
@@ -258,6 +295,7 @@ export default {
 
   beforeDestroy() {
     this.stopPlayback()
+    window.removeEventListener('keyup', this.handleKeyup);
   },
 
   components: {
@@ -280,6 +318,10 @@ export default {
     left: 1rem;
     z-index: 200;
   }
+  .tag-creator a {
+    color: #fff;
+    text-decoration: none;
+  }
 
   .crate-content {
     position: absolute;
@@ -288,18 +330,30 @@ export default {
     width: 100%;
     height: 100%;
 
+    .subcrate-media-mobile {
+      display: flex;
+      align-items: center !important;
+      justify-content: center;
+      img, video {
+        width: 100%;
+      }
+    }
+
+    .subcrate-media-desktop {
+      img, video {
+        max-width: 100%;
+        margin: auto;
+        object-fit: cover;
+        height: 100%;
+        display: block;
+      }
+    }
+
     p {
       margin: auto;
     }
 
-    img, video {
-      max-width: 100%;
-      height: 100%;
-      display: block;
-      margin: auto;
-      object-fit: cover;
-    }
-  }
+  } // .crate-content
 
   .bg-blur {
     opacity: 0.99;

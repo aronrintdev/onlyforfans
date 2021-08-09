@@ -4,8 +4,10 @@
 
 // Bootstrap overwrite variables here
 
-$brand: #ff3399;
+$brand: #ee3d96;
+$brand-secondary: #6699ff;
 
 $theme-colors: (
-  "brand": $brand
+  "brand": $brand,
+  "brand-secondary": $brand-secondary
 );
