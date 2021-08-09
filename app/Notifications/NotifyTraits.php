@@ -56,32 +56,59 @@ trait NotifyTraits {
         }
 
         $is = false; // default to false, possibly set to true below
+
+        // Avoid undefined index Exception Fallback if notifications settings is not set
+        if (!isset($settings->cattrs['notifications'])) {
+            return $is;
+        }
+        $notifications = $settings->cattrs['notifications'];
         switch ($notifySlug) {
             // campaigns
             case 'new-campaign-contribution-received':
+                if (!isset($notifications['campaigns'])) {
+                    break;
+                }
                 $is = $settings->cattrs['notifications']['campaigns']['new_contribution'] ? true : false;
                 break;
             case 'campaign-goal-reached':
+                if (!isset($notifications['campaigns'])) {
+                    break;
+                }
                 $is = $settings->cattrs['notifications']['campaigns']['goal_reached'] ? true : false;
                 break;
             // income
             case 'tip-received':
+                if (!isset($notifications['income'])) {
+                    break;
+                }
                 $is = $settings->cattrs['notifications']['income']['new_tip'] ? true : false;
                 break;
             // messages
             case 'new-message-received':
+                if (!isset($notifications['messages'])) {
+                    break;
+                }
                 $is = $settings->cattrs['notifications']['messages']['new_message'] ? true : false;
                 break;
             // posts
             case 'comment-received':
+                if (!isset($notifications['posts'])) {
+                    break;
+                }
                 $is = $settings->cattrs['notifications']['posts']['new_comment'] ? true : false;
                 break;
             // referrals
             case 'new-referral-received':
+                if (!isset($notifications['referrals'])) {
+                    break;
+                }
                 $is = $settings->cattrs['notifications']['referrals']['new_referral'] ? true : false;
                 break;
             // subscriptions
             case 'new-sub-payment-received':
+                if (!isset($notifications['subscriptions'])) {
+                    break;
+                }
                 $is = $settings->cattrs['notifications']['subscriptions']['new_payment'] ? true : false;
                 break;
             default:
