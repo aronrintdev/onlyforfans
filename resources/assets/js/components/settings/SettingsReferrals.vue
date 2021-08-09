@@ -11,14 +11,14 @@
           </b-col>
           <b-col>
             <h6
-              class="text-info text-right font-weight-bold mt-2 mr-2 clickable"
+              class="text-primary text-right font-weight-bold mt-2 mr-2 clickable"
               v-clipboard:copy="referralUrl"
               v-clipboard:success="onCopySuccess"
               v-clipboard:error="onCopyError"
             >
               Copy Link
             </h6>
-            <p class="text-info text-right font-weight-normal mt-5 mr-2 clickable" @click="enableViewReferrals = !enableViewReferrals">
+            <p class="text-primary text-right font-weight-normal mt-5 mr-2 clickable" @click="enableViewReferrals = !enableViewReferrals">
               {{!enableViewReferrals ? 'View Referred Users' : 'Hide Referred Users'}}
             </p>
           </b-col>

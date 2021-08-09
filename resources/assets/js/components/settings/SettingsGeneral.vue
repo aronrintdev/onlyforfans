@@ -12,9 +12,14 @@
                 <FormTextInput ikey="email" v-model="formGeneral.email" label="E-mail" :verrors="verrors" :disabled="true" />
               </b-col>
             </b-row>
+            <b-row>
+              <b-col>
+                <small class="text-secondary">* Changing the username or email is disabled during the beta testing phase.</small>
+              </b-col>
+            </b-row>
           </fieldset>
 
-          <b-row class="mt-3">
+          <!-- <b-row class="mt-3">
             <b-col>
               <div class="w-100 d-flex justify-content-end">
                 <b-button :disabled="isSubmitting.formGeneral" class="w-25 ml-3" type="submit" variant="primary">
@@ -23,7 +28,7 @@
                 </b-button>
               </div>
             </b-col>
-          </b-row>
+          </b-row> -->
 
         </b-form>
       </b-card-text>
@@ -37,7 +42,7 @@
               <b-col>
                 <FormSelectInput
                   ikey="localization.language"
-                  v-model="formLocalization.localization.language"
+                  v-model="formData.language"
                   label="Language"
                   :verrors="verrors"
                   :options="options.languages"
@@ -46,7 +51,7 @@
               <b-col>
                 <FormSelectInput
                   ikey="localization.timezone"
-                  v-model="formLocalization.localization.timezone"
+                  v-model="formData.timezone"
                   label="Time Zone"
                   :verrors="verrors"
                   :options="options.timezones"
@@ -58,7 +63,7 @@
               <b-col>
                 <FormSelectInput 
                   ikey="localization.country"  
-                  v-model="formLocalization.localization.country" 
+                  v-model="formData.country" 
                   label="Country" 
                   :verrors="verrors" 
                   :options="options.countries" 
@@ -67,7 +72,7 @@
               <b-col>
                 <FormSelectInput 
                   ikey="localization.currency"  
-                  v-model="formLocalization.localization.currency" 
+                  v-model="formData.currency" 
                   label="Currency" 
                   :verrors="verrors" 
                   :options="options.currencies" 
@@ -94,6 +99,10 @@
 import Vuex from 'vuex'
 import FormTextInput from '@components/forms/elements/FormTextInput'
 import FormSelectInput from '@components/forms/elements/FormSelectInput'
+import Timezones from '@helpers/timezones.json'
+import AllLanguages from '@helpers/languages.json'
+import AllCountries from '@helpers/countries.json'
+import AllCurrencies from '@helpers/currencies.json'
 
 export default {
   props: {
@@ -121,47 +130,30 @@ export default {
       username: null,
       email: null,
     },
-    formLocalization: {
-      localization: { // cattrs
-        language: '',
-        country: '',
-        timezone: '',
-        currency: '',
-      },
+    formData: { // cattrs
+      language: null,
+      country: null,
+      timezone: null,
+      currency: null,
     },
 
     options: {
       currencies: [ 
         { value: null, text: 'Please select an option' },
-        { value: 'usd', text: 'US Dollar' },
-        { value: 'eur', text: 'Euro' },
-        { value: 'gbp', text: 'British Pound' },
-        { value: 'cad', text: 'Canadian Dollar' },
+        ...AllCurrencies,
       ],
-      languages: [ 
+      languages: [
         { value: null, text: 'Please select an option' },
-        { value: 'en', text: 'English' },
-        { value: 'de', text: 'German' },
-        { value: 'es', text: 'Spanish' },
-        { value: 'fr', text: 'French' },
-        { value: 'el', text: 'Greek' },
-        { value: 'ru', text: 'Russian' },
-        { value: 'ja', text: 'Japanese' },
+        ...AllLanguages,
       ],
       countries: [ 
         { value: null, text: 'Please select an option' },
-        { value: 'us', text: 'USA' },
-        { value: 'canada', text: 'Canada' },
-        { value: 'russia', text: 'Russian' },
-        { value: 'france', text: 'France' },
-        { value: 'japan', text: 'Japan' },
+        ...AllCountries
       ],
       timezones: [ 
         { value: null, text: 'Please select an option' },
-        { value: 'America/Los_Angeles', text: '(GMT-08:00) Pacific Time (US & Canada)' },
-        { value: 'US/Mountain', text: '(GMT-07:00) Mountain Time (US & Canada)' },
-        { value: 'US/Central', text: '(GMT-06:00) Central Time (US & Canada)' },
-        { value: 'US/Eastern', text: '(GMT-05:00) Eastern Time (US & Canada)' },
+        { value: 'us' , text: 'US time'},
+        ...Timezones,
       ],
     },
 
@@ -170,7 +162,7 @@ export default {
   watch: {
     user_settings(newVal) {
       if ( newVal.cattrs.localization ) {
-        this.formLocalization.localization = newVal.cattrs.localization
+        this.formData = newVal.cattrs.localization
       }
     },
   },
@@ -185,7 +177,7 @@ export default {
     this.formGeneral.email = this.session_user.email || ''
 
     if ( this.user_settings.cattrs.localization ) {
-      this.formLocalization.localization = this.user_settings.cattrs.localization
+      this.formData = this.user_settings.cattrs.localization
     }
   },
 
@@ -215,7 +207,11 @@ export default {
       this.isSubmitting.formLocalization = true
 
       try {
-        const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formLocalization)
+        const response = await axios.patch(`/users/${this.session_user.id}/settings`, {
+          localization: { // cattrs
+            ...this.formData,
+          },
+        })
         this.verrors = null
         this.onSuccess()
       } catch(err) {

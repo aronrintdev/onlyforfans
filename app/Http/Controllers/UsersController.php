@@ -140,6 +140,7 @@ class UsersController extends AppBaseController
             'birthdate' => 'date|nullable',
             'weblinks' => 'array|nullable',
             'weblinks.*' => 'url|nullable',
+            'weblinks.website' => 'domain|nullable',
             'body_type' => 'string|nullable',
             'chest' => 'string|nullable',
             'waist' => 'string|nullable',

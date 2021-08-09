@@ -93,11 +93,6 @@ export default {
     currentPage: 1,
 
     fields: [
-      {
-        //key: 'user_id',
-        key: 'user.username',
-        label: 'Username',
-      },
       /*
       {
         key: 'browser',
@@ -173,6 +168,10 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
+  #loginSessions-table thead th:first-child,
+  #loginSessions-table thead th:last-child {
+    white-space: nowrap;
+  }
 </style>
 
