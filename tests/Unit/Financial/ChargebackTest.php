@@ -20,6 +20,7 @@ use Tests\traits\Financial\NoHoldPeriod;
  * @group unit
  * @group financial
  * @group financial-chargeback
+ * @group regression-financial
  *
  * @package Tests\Unit\Financial
  */
