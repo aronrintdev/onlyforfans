@@ -42,6 +42,8 @@ class AppServiceProvider extends ServiceProvider
             return true;
         });
 
+        Validator::extend('domain', 'App\Rules\Domain@passes');
+
 
         if (Config::get('app.env', 'production') !== 'local') {
             DB::connection()->disableQueryLog();

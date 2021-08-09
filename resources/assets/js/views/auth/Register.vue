@@ -4,8 +4,8 @@
       <div class="login-card p-5">
         <!-- SignUp Form -->
         <b-form @submit.prevent="signup">
-          <Branding type="text" size="3x" class="mb-3 signin-logo" />
-          <div class="h1 mb-5" v-text="$t('signUpLink')" />
+          <Branding type="text" size="3x" class="mb-3 register-logo" />
+          <div class="h1 mb-3" v-text="$t('signUpLink')" />
           <div class="signup-form">
             <div v-if="$route.query.beta">
               <b-alert variant="primary" v-text="$t('betaMessage')" show />
@@ -73,7 +73,7 @@
                 name="checkbox-tos"
                 @focus="clearVerrors"
               >
-                I agree to the Terms of Service and Privacy Policy and confirm that I am at least 18 years old.
+                I agree to the <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a> and confirm that I am at least 18 years old.
               </b-form-checkbox>
             </b-form-group>
           </div>

@@ -22,7 +22,11 @@ Vue.filter('niceCurrency', function (value, currency = 'USD') {
 })
 
 Vue.filter('niceGuid', function (v) {
-  return v ? v.slice(-12) : ''
+  if ( typeof v === 'string' ) {
+    return v ? v.slice(0, 8) : ''
+  } else {
+    return ''
+  }
 })
 
 Vue.filter('niceBool', function (v) {
@@ -59,11 +63,15 @@ Vue.filter('ucfirst', function(str) {
   return str.charAt(0).toUpperCase() + str.slice(1)
 })
 
-Vue.filter('niceDate', function (value) {
+Vue.filter('niceDate', function (value, isShort=false) {
   if (typeof value === 'undefined' || value === null || value === '') {
     return ''
   }
-  return moment(value).format('MMMM Do, YYYY')
+  if (isShort) {
+    return moment(value).format('M/D/YY')
+  } else {
+    return moment(value).format('MMMM Do, YYYY')
+  }
 })
 
 Vue.filter('niceDateTime', function (value) {
@@ -78,4 +86,22 @@ Vue.filter('niceDateTimeShort', function (value) {
     return ''
   }
   return moment(value).format('MMM Do, YYYY HH:mm:ss')
+})
+
+Vue.filter('niceFilesize', function (value) {
+  const K = 1000
+  const M = K * 1000
+  const G = M * 1000
+  if (typeof value === 'undefined' || value === null || value === '') {
+    return ''
+  }
+  if ( value >= G  ) {
+    return Math.floor(value/G)+' GB'
+  } else if ( value >= M ) {
+    return Math.floor(value/M)+' MB'
+  } else if (value >= K ) {
+    return Math.floor(value/K)+' KB'
+  } else {
+    return value
+  }
 })

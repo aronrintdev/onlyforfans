@@ -140,6 +140,7 @@ class UsersController extends AppBaseController
             'birthdate' => 'date|nullable',
             'weblinks' => 'array|nullable',
             'weblinks.*' => 'url|nullable',
+            'weblinks.website' => 'domain|nullable',
             'body_type' => 'string|nullable',
             'chest' => 'string|nullable',
             'waist' => 'string|nullable',
@@ -178,7 +179,16 @@ class UsersController extends AppBaseController
             }
             $timeline->save();
 
-            $cattrsFields = [ 'subscriptions', 'localization', 'privacy', 'blocked', 'watermark', 'message_with_tip_only', 'enable_message_with_tip_only_pay' ];
+            $cattrsFields = [ 
+                'blocked', 
+                'enable_message_with_tip_only_pay',
+                'localization', 
+                'message_with_tip_only', 
+                'privacy', 
+                'subscriptions', 
+                'watermark', 
+                'weblinks', 
+            ];
             $attrs = $request->except($cattrsFields);
 
             $userSetting = $user->settings;
@@ -377,6 +387,7 @@ class UsersController extends AppBaseController
     }
 
     // --- Identity Verification ---
+    // %TODO move to own controller
 
     // Send a request for identity verification (starts the process)
     public function requestVerify(Request $request)

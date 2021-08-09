@@ -49,8 +49,7 @@ class UserSetting extends Model
     // %%% Relationships
     //--------------------------------------------
 
-    public function user()
-    {
+    public function user() {
         return $this->belongsTo(User::class);
     }
 
@@ -61,42 +60,51 @@ class UserSetting extends Model
     public static $notifyTypes = [ 'email', 'sms', 'site', 'push' ];
     public static $vrules = [
         'notifications' => [
-                'global.*' => 'array',
-                'global.*.*' => 'string|in:email,sms,site,push',
                 'campaigns.*' => 'array',
                 'campaigns.*.*' => 'string|in:email,sms,site,push',
-                'refunds.*' => 'array',
-                'refunds.*.*' => 'string|in:email,sms,site,push',
+                'global.*' => 'array',
+                'global.*.*' => 'string|in:email,sms,site,push',
                 'income.*' => 'array',
                 'income.*.*' => 'string|in:email,sms,site,push',
                 'posts.*' => 'array',
                 'posts.*.*' => 'string|in:email,sms,site,push',
+                'refunds.*' => 'array',
+                'refunds.*.*' => 'string|in:email,sms,site,push',
         ],
     ];
 
     public static $template = [
         'notifications' => [ // group
-            'global' => [
-                'enabled' => [],
-                'show_full_text' => [],
-            ],  // (group) subcat (global override by notifyType)
             'campaigns' => [ // subcat
                 'goal_achieved' => [],
                 'new_contribution' => [],
             ],
-            'refunds' => [ // subcat
-                'new_refund' => [],
-            ],
+            'global' => [
+                'enabled' => [],
+                'show_full_text' => [],
+            ],  // (group) subcat (global override by notifyType)
             'income' => [ // subcat
                 'new_tip' => [],
                 'new_subscription' => [],
                 //'renewed_subscription' => [],
                 //'returning_subscription' => [],
             ],
+            'messages' => [ // subcat
+                'new_message' => [],
+            ],
             'posts' => [ // subcat
                 //'new_post_summary' => [],
                 'new_comment' => [],
                 'new_like' => [],
+            ],
+            'referrals' => [ // subcat
+                'new_referral' => [],
+            ],
+            'refunds' => [ // subcat
+                'new_refund' => [],
+            ],
+            'subscriptions' => [ // subcat
+                'new_payment' => [],
             ],
         ],
         'subscriptions' => [ // group

@@ -190,7 +190,7 @@
 
           <template #modal-footer>
             <div class="w-100">
-              <b-button variant="warning" size="sm" @click="hideShareForm">Cancel</b-button>
+              <b-button variant="secondary" size="sm" @click="hideShareForm">Cancel</b-button>
               <b-button variant="primary" size="sm" @click="shareSelectedFiles">Share</b-button>
             </div>
           </template>
@@ -275,7 +275,7 @@
       </div>
       <template #modal-footer>
         <div class="w-100">
-          <b-button variant="warning" size="sm" @click="isSaveToStoryModalVisible=false">Cancel</b-button>
+          <b-button variant="secondary" size="sm" @click="isSaveToStoryModalVisible=false">Cancel</b-button>
           <b-button variant="primary" size="sm" @click="sendSelected('story')">Save</b-button>
         </div>
       </template>

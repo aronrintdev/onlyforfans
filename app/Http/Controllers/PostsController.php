@@ -27,6 +27,7 @@ class PostsController extends AppBaseController
             // filters
             'timeline_id' => 'uuid|exists:timelines,id', // if admin only
             'user_id' => 'uuid|exists:users,id', // if admin only
+            'qsearch' => 'string',
         ]);
         $filters = $request->only(['timeline_id', 'user_id', 'is_flagged']) ?? [];
 
@@ -52,6 +53,13 @@ class PostsController extends AppBaseController
                 $query->where($key, $f);
                 break;
             }
+        }
+
+        if ( $request->has('qsearch') && (strlen($request->qsearch)>2) ) {
+            $query->orWhere( function($q1) use(&$request) {
+                $q1->where('description', 'LIKE', '%'.$request->qsearch.'%');
+                $q1->orWhere('id', 'LIKE', $request->qsearch.'%');
+            });
         }
 
         // Sorting
