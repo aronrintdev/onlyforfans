@@ -337,8 +337,9 @@ class Account extends Model implements Ownable
 
         $this->refresh();
 
-        app(Dispatcher::class)->dispatch(new UpdateAccountBalance($this));
-        app(Dispatcher::class)->dispatch(new UpdateAccountBalance($toAccount));
+        UpdateAccountBalance::dispatch($this);
+        UpdateAccountBalance::dispatch($toAccount);
+
         return new Collection([ 'debit' => $debitTransaction, 'credit' => $creditTransaction ]);
     }
 

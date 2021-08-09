@@ -8,6 +8,7 @@ use App\Models\Financial\SystemOwner;
 use App\Models\Financial\Transaction;
 use Illuminate\Support\Facades\Event;
 use App\Enums\Financial\AccountTypeEnum;
+use App\Enums\Financial\TransactionTypeEnum;
 use Tests\Helpers\Financial\AccountHelpers;
 
 use App\Jobs\Financial\UpdateAccountBalance;
@@ -24,20 +25,13 @@ use Tests\traits\Financial\NoHoldPeriod;
  * @group financial
  * @group financial-account
  *
+ * @group regression-financial
+ *
  * @package Tests\Unit\Financial
  */
 class AccountModelTest extends TestCase
 {
     use NoHoldPeriod;
-
-    /**
-     * In account is created correctly
-     */
-    public function test_create_in_account()
-    {
-        // TODO: Implement
-        $this->markTestIncomplete();
-    }
 
     /**
      * Internal wallet account is created correctly
@@ -59,7 +53,7 @@ class AccountModelTest extends TestCase
 
     /**
      * User's Internal account is created and retrieved when using getWalletAccount()
-     * @depends test_create_user_internal_account
+     * @depends test_create_user_wallet_account
      */
     public function test_get_user_wallet_account()
     {
@@ -83,15 +77,6 @@ class AccountModelTest extends TestCase
         $account = $user->getWalletAccount($this->defaultSystem, $this->defaultCurrency);
         $this->assertInstanceOf(Account::class, $account);
         $this->assertEquals($accountId, $account->id);
-    }
-
-    /**
-     * Out account is created correctly
-     */
-    public function test_create_out_account()
-    {
-        // TODO: Implement
-        $this->markTestIncomplete();
     }
 
     public function test_move_negative_amount_fails()
@@ -156,7 +141,6 @@ class AccountModelTest extends TestCase
 
     /**
      * Internal accounts need to have enough balance
-     * @depends test_move_to_internal_account_from_internal_account
      */
     public function test_move_with_insufficient_funds_fails()
     {
@@ -177,13 +161,15 @@ class AccountModelTest extends TestCase
         $account = Account::factory()->asInternal()->withBalance(1000)->create();
         $toAccount = Account::factory()->asInternal()->withBalance(0)->create();
 
-        $account->moveTo($toAccount, 300);
+        $account->moveTo($toAccount, 300, [ 'type' => TransactionTypeEnum::SALE ]);
+
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $account->getKey(),
             'credit_amount' => 0,
             'debit_amount' => 300,
             'currency' => $this->defaultCurrency,
         ], $this->getConnectionString());
+
         $this->assertDatabaseHas($this->tableNames['transaction'], [
             'account_id' => $toAccount->getKey(),
             'credit_amount' => 300,
@@ -243,9 +229,6 @@ class AccountModelTest extends TestCase
 
     /**
      * Account balance is settled correctly
-     * @depends test_move_to_internal_account_from_in_account
-     * @depends test_move_to_internal_account_from_internal_account
-     * @return void
      */
     public function test_settle_account_balance()
     {
@@ -253,22 +236,13 @@ class AccountModelTest extends TestCase
         $items = AccountHelpers::loadWallet(1000);
         $this->assertHasBalanceOf(-1000, $items['in']);
         $this->assertHasBalanceOf(1000, $items['internal']);
-        $creator = Account::factory()->asInternal()->create();
-        $items['internal']->moveTo($creator, 1000);
+        $creator = Account::factory()->asEarnings(User::factory()->create())->create();
+        $items['internal']->moveTo($creator, 1000, [ 'type' => TransactionTypeEnum::SALE ]);
         AccountHelpers::settleAccounts([$items['in'], $items['internal'], $creator]);
 
         $this->assertHasBalanceOf(-1000, $items['in']);
         $this->assertHasBalanceOf(0, $items['internal']);
         $this->assertHasBalanceOf(650, $creator);
-    }
-
-    /**
-     * Test that accounts verify correctly.
-     */
-    public function test_verify_account()
-    {
-        // TODO: Implement
-        $this->markTestIncomplete();
     }
 
     /**
