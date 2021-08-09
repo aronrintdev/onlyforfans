@@ -297,6 +297,7 @@ export default {
 
     // ------------ Dropzone ------------------------------------------------ //
 
+    // %NOTE: called when adding files from disk, but *not* called when adding files from vault
     onDropzoneAdded(file) {
       /*
       if (!file.filepath) {
@@ -327,9 +328,7 @@ export default {
     },
 
     onDropzoneRemoved(file, error, xhr) {
-      /*
       this.$log.debug('onDropzoneRemoved')
-       */
       const index = _.findIndex(this.selectedMediafiles, mf => (mf.filepath === file.filepath))
       if (index > -1)  {
         this.REMOVE_SELECTED_MEDIAFILE_BY_INDEX(index)

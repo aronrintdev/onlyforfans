@@ -47,7 +47,7 @@
             :mediafiles="selectedMediafiles"
             @change="changeMediafiles"
             @openFileUpload="openDropzone"
-            @remove="removeMediafile"
+            @remove="removeMediafileByIndex"
           />
         </div>
 
@@ -112,6 +112,15 @@ import AudioRecorder from '@components/audioRecorder';
 import SetPrice from './SetPrice.vue'
 import Footer from './Footer'
 
+// 
+//  sendMessage(): Footer form submit ||  press Ctrl + Enter
+//  dropzone.processQueue()
+//  finalizeMessageSend()
+// 
+// 
+// 
+// 
+// 
 export default {
   name: 'NewMessageForm',
 
@@ -270,19 +279,6 @@ export default {
       this.$nextTick(() => this.$forceUpdate())
     },
 
-    onDropzoneRemoved(file) {
-      const index = _.findIndex(this.selectedMediafiles, mf => (mf.filepath === file.filepath))
-      if (index > -1)  {
-        this.REMOVE_SELECTED_MEDIAFILE_BY_INDEX(index)
-      }
-    },
-
-    removeMediafile(index) {
-      if (index > -1)  {
-        this.REMOVE_SELECTED_MEDIAFILE_BY_INDEX(index)
-      }
-    },
-
     /** Add to Dropzone formData */
     onDropzoneSending(file, xhr, formData) {
       if ( !this.uploadsVaultFolder ) {
@@ -321,16 +317,30 @@ export default {
       this.$refs.myVueDropzone.dropzone.hiddenFileInput.click();
     },
 
+    onDropzoneRemoved(file) {
+      const index = _.findIndex(this.selectedMediafiles, mf => {
+        return mf.filepath === file.filepath
+      })
+      this.removeMediafileByIndex(index)
+    },
+
     removeFileFromSelected(file) {
       const index = _.findIndex(this.selectedMediafiles, mf => {
         return mf.upload ? mf.upload.filename === file.name : false
       })
+      this.removeMediafileByIndex(index)
+    },
 
-      this.REMOVE_SELECTED_MEDIAFILE_BY_INDEX(index)
+    removeMediafileByIndex(index) {
+      if (index > -1)  {
+        this.REMOVE_SELECTED_MEDIAFILE_BY_INDEX(index)
+      }
     },
 
     //----------------------------------------------------------------------- //
 
+    // Called when dropzone completes processing its queue, *OR* manually in 'sendMessage()' 
+    //   when sending a message without any attachements
     async finalizeMessageSend() {
       var params = {
         mcontent: this.newMessageForm.mcontent,
