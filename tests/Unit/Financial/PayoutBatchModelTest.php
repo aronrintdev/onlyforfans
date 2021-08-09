@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use App\Models\Financial\PayoutBatch;
 use Illuminate\Support\Facades\Config;
 use Tests\traits\Financial\NoHoldPeriod;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Enums\Financial\PayoutBatchTypeEnum as BatchType;
 
 /**
@@ -18,8 +17,7 @@ use App\Enums\Financial\PayoutBatchTypeEnum as BatchType;
  */
 class PayoutBatchModelTest extends TestCase
 {
-    use RefreshDatabase,
-        NoHoldPeriod;
+    use NoHoldPeriod;
 
     public function setUp(): void
     {

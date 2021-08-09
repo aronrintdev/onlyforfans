@@ -48,10 +48,10 @@ class AccountHelpers
         if (!isset($in)) {
             $in = Account::factory()->asIn()->create();
         }
-        $internal = $in->owner->getInternalAccount($in->system, $in->currency);
-        $transactions = $in->moveToInternal($amount);
-        AccountHelpers::settleAccounts([$in, $internal]);
-        return new Collection([ 'in' => $in, 'internal' => $internal, 'transactions' => $transactions ]);
+        $wallet = $in->owner->getWalletAccount($in->system, $in->currency);
+        $transactions = $in->moveToWallet($amount);
+        AccountHelpers::settleAccounts([$in, $wallet]);
+        return new Collection([ 'in' => $in, 'internal' => $wallet, 'transactions' => $transactions ]);
     }
 
     /**

@@ -242,8 +242,6 @@ class ProcessSegPayWebhook implements ShouldQueue
     private function handleAuth($transaction)
     {
 
-
-
         // ---------------------------------- SALE ---------------------------------- //
         if (Str::lower($transaction->transactionType) === TransactionType::SALE) {
             // Check for reference_id
@@ -251,7 +249,7 @@ class ProcessSegPayWebhook implements ShouldQueue
 
             // Handle Failed Transactions
             if (Str::lower($transaction->approved) === 'no') {
-                $account = User::find($transaction->user_id)->getInternalAccount('segpay', $transaction->currencyCode);
+                $account = User::find($transaction->user_id)->getWalletAccount('segpay', $transaction->currencyCode);
                 if ($transaction->item_type === PaymentTypeEnum::PURCHASE) {
                     PurchaseFailed::dispatch($item, $account, 'Not Approved');
                     return ['message' => 'Purchase not approved'];
@@ -315,10 +313,15 @@ class ProcessSegPayWebhook implements ShouldQueue
                         $subscription = $card->account->createSubscription($item, $price, [
                             'manual_charge' => false,
                         ]);
-                        $subscription->custom_attributes = [ 'segpay_reference' => $transaction->transactionId, 'segpay_purchase_id' => $transaction->purchaseId ];
+                        $subscription->custom_attributes = [
+                            'segpay_reference' => $transaction->transactionId,
+                            'segpay_purchase_id' => $transaction->purchaseId
+                        ];
                         $transactions = $subscription->process();
                         if ($transactions->has('inTransactions')) {
-                            $transactions['inTransactions']['debit']->metadata = ['segpay_transaction_id' => $transaction->transactionId];
+                            $transactions['inTransactions']['debit']->metadata = [
+                                'segpay_transaction_id' => $transaction->transactionId
+                            ];
                             $transactions['inTransactions']['debit']->save();
                         }
 
@@ -333,11 +336,16 @@ class ProcessSegPayWebhook implements ShouldQueue
                     Str::lower($transaction->stage) === StageEnum::REBILL
                     || Str::lower($transaction->stage) === StageEnum::CONVERSION
                 ) {
-                    $subscription = Subscription::where('custom_attributes->segpay_reference', $transaction->relatedTransactionId)->first();
+                    $subscription = Subscription::where(
+                            'custom_attributes->segpay_reference',
+                            $transaction->relatedTransactionId
+                        )->first();
                     if (isset($subscription)) {
                         $transactions = $subscription->process();
                         if ($transactions->has('inTransactions')) {
-                            $transactions['inTransactions']['debit']->metadata = ['segpay_transaction_id' => $transaction->transactionId];
+                            $transactions['inTransactions']['debit']->metadata = [
+                                'segpay_transaction_id' => $transaction->transactionId
+                            ];
                             $transactions['inTransactions']['debit']->save();
                         }
 
@@ -401,7 +409,10 @@ class ProcessSegPayWebhook implements ShouldQueue
             $account = $card->account;
         } else {
             $user = User::find($transaction->user_id);
-            $account = $user->getInternalAccount('segpay', $transaction->currencyCode ?? Config::get('transactions.defaultCurrency'));
+            $account = $user->getWalletAccount(
+                'segpay',
+                $transaction->currencyCode ?? Config::get('transactions.defaultCurrency')
+            );
         }
 
         if ($transaction->item_type === PaymentTypeEnum::PURCHASE) {
@@ -422,7 +433,10 @@ class ProcessSegPayWebhook implements ShouldQueue
                 Str::lower($transaction->stage) === StageEnum::REBILL
                 || Str::lower($transaction->stage) === StageEnum::CONVERSION
             ) {
-                $subscription = Subscription::where('custom_attributes->segpay_reference', $transaction->relatedTransactionId)->first();
+                $subscription = Subscription::where(
+                        'custom_attributes->segpay_reference',
+                        $transaction->relatedTransactionId
+                    )->first();
                 if (isset($subscription)) {
                     $subscription->cancel();
                     return ['message' => 'Subscription canceled due to rebill transaction void'];

@@ -7,7 +7,9 @@ use App\Models\User;
 use App\Models\Financial\Account;
 use Illuminate\Support\Facades\Config;
 use App\Enums\Financial\AccountTypeEnum;
+use App\Models\Financial\Earnings;
 use App\Models\Financial\SegpayCard;
+use App\Models\Financial\Wallet;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Collection;
 
@@ -148,6 +150,36 @@ class AccountFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [ 'type' => AccountTypeEnum::INTERNAL, ];
+        });
+    }
+
+    public function asWallet(User $user)
+    {
+        return $this->state(function (array $attributes) use ($user) {
+            $wallet = Wallet::create([
+                'owner_type' => $user->getMorphString(),
+                'owner_id' => $user->getKey(),
+            ]);
+            return [
+                'type' => AccountTypeEnum::INTERNAL,
+                'owner_type' => $user->getMorphString(),
+                'owner_id' => $user->getKey(),
+            ];
+        });
+    }
+
+    public function asEarnings(User $user)
+    {
+        return $this->state(function (array $attributes) use ($user) {
+            $earnings = Earnings::create([
+                'owner_type' => $user->getMorphString(),
+                'owner_id' => $user->getKey(),
+            ]);
+            return [
+                'type' => AccountTypeEnum::INTERNAL,
+                'owner_type' => $user->getMorphString(),
+                'owner_id' => $user->getKey(),
+            ];
         });
     }
 

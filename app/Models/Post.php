@@ -358,7 +358,7 @@ class Post extends Model
 
     public function getOwnerAccount(string $system, string $currency): Account
     {
-        return $this->getOwner()->first()->getInternalAccount($system, $currency);
+        return $this->getOwner()->first()->getEarningsAccount($system, $currency);
     }
 
     public function getDescriptionNameString(): string

@@ -7,12 +7,39 @@ use App\Models\Financial\Account;
 interface HasFinancialAccounts
 {
     /**
-     * Get the internal financial account belonging to this model
+     * Get the Wallet Internal account of this owner
+     *
+     * @param string $system   Name of financial system
+     * @param string $currency Currency of financial system
+     * @return Account
      */
-    public function getInternalAccount(string $system, string $currency): Account;
+    public function getWalletAccount(string $system, string $currency): Account;
+
     /**
-     * Create the internal financial account belonging to this model
+     * Create the Wallet Internal account of this owner
+     *
+     * @param string $system   Name of financial system
+     * @param string $currency Currency of financial system
+     * @return Account
      */
-    public function createInternalAccount(string $system, string $currency): Account;
+    public function createWalletAccount(string $system, string $currency): Account;
+
+    /**
+     * Get the Earnings Internal account of this owner
+     *
+     * @param string $system   Name of financial system
+     * @param string $currency Currency of financial system
+     * @return Account
+     */
+    public function getEarningsAccount(string $system, string $currency): Account;
+
+    /**
+     * Create the Wallet Internal account of this owner
+     *
+     * @param string $system   Name of financial system
+     * @param string $currency Currency of financial system
+     * @return Account
+     */
+    public function createEarningsAccount(string $system, string $currency): Account;
 
 }

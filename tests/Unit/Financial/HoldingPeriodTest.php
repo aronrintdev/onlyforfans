@@ -2,8 +2,6 @@
 
 namespace Tests\Unit\Financial;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
 /**
  * Tests Related to the financial holding period
  *
@@ -15,8 +13,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
  */
 class HoldingPeriodTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function test_pending_funds_calculated_correctly()
     {
         $this->markTestIncomplete();

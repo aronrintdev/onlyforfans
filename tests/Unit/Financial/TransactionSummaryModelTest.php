@@ -9,7 +9,6 @@ use Tests\traits\Financial\NoHoldPeriod;
 use Tests\Helpers\Financial\AccountHelpers;
 use App\Models\Financial\TransactionSummary;
 use App\Jobs\StartTransactionSummaryCreation;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Enums\Financial\TransactionSummaryTypeEnum;
 
 /**
@@ -21,7 +20,7 @@ use App\Enums\Financial\TransactionSummaryTypeEnum;
  */
 class TransactionSummaryModelTest extends TestCase
 {
-    use RefreshDatabase, NoHoldPeriod;
+    use NoHoldPeriod;
 
     public $inAccount;
     public $fanAccount;

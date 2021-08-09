@@ -33,7 +33,7 @@ class EarningsController extends Controller
 
         // Get summary items
         $user = Auth::user();
-        $account = $user->getInternalAccount(Config::get('transactions.default'), Config::get('transactions.defaultCurrency'));
+        $account = $user->getEarningsAccount(Config::get('transactions.default'), Config::get('transactions.defaultCurrency'));
         $credits = $account->transactions()
             ->select('type', DB::raw('SUM(credit_amount) as total, COUNT(*) as count'))
             ->where('credit_amount', '>', 0)->orderBy('settled_at', 'desc')
@@ -90,7 +90,7 @@ class EarningsController extends Controller
 
     public function balances(Request $request)
     {
-        $account = $request->user()->getInternalAccount(
+        $account = $request->user()->getEarningsAccount(
             Config::get('transactions.default'),
             Config::get('transactions.defaultCurrency')
         );
@@ -110,7 +110,7 @@ class EarningsController extends Controller
     public function transactions(Request $request)
     {
         $user = Auth::user();
-        $account = $user->getInternalAccount(Config::get('transactions.default'), Config::get('transactions.defaultCurrency'));
+        $account = $user->getEarningsAccount(Config::get('transactions.default'), Config::get('transactions.defaultCurrency'));
         $query = $account->transactions()->where('credit_amount', '>', 0)->orderBy('settled_at', 'desc')
             ->whereIn('type', [ TransactionTypeEnum::SALE, TransactionTypeEnum::TIP, TransactionTypeEnum::SUBSCRIPTION ]);
 

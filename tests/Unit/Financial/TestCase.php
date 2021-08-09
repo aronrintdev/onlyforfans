@@ -28,6 +28,15 @@ class TestCase extends TestsTestCase
         $this->defaultSystem = Config::get('transactions.default');
         $this->defaultCurrency = Config::get('transactions.defaultCurrency');
         $this->tableNames = $this->getTableNames();
+
+        dump('copy empty database template');
+        exec('cp ' . __DIR__ . '/../../../database/templateEmpty.sqlite ' . __DIR__ . '/../../../storage/logs/tmp4test.sqlite');
+    }
+
+    public function tearDown(): void
+    {
+        dump('copy seeded database template');
+        $this->setupDatabase();
     }
 
     public function getConnectionString()
