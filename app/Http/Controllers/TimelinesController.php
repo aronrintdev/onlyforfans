@@ -202,7 +202,9 @@ class TimelinesController extends AppBaseController
     {
         $TAKE = $request->input('take', $request->limit);
         $query = Post::with('mediafiles', 'user')
-            ->has('mediafiles')
+            ->whereHas('mediafiles', function($q1) {
+                $q1->isImage();
+            })
             ->withCount('comments')->orderBy('comments_count', 'desc')
             //->withCount('likes')->orderBy('likes_count', 'desc')
             ->where('active', 1)
