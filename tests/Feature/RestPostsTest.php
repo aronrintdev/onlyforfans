@@ -383,20 +383,18 @@ class RestPostsTest extends TestCase
      */
     public function test_owner_can_delete_free_post()
     {
-        $timeline = Timeline::has('followers', '>=', 1)
-            ->whereHas('posts', function($q1) {
-                $q1->where('type', PostTypeEnum::FREE);
-            })->firstOrFail();
-        $creator = $timeline->user;
-        $this->assertNotNull($creator);
-
         $post = Post::where('postable_type', 'timelines')
-            ->where('postable_id', $timeline->id)
+            //->where('postable_id', $timeline->id)
             ->has('likes','>',0)
             ->has('comments','>',0)
             ->has('mediafiles','>',0)
             ->doesntHave('sharees')
-            ->firstorFail();
+            ->firstOrFail();
+
+        $timeline = $post->timeline;
+        $creator = $timeline->user;
+        $this->assertNotNull($creator);
+
         $numLikes = Likeable::where('likeable_type', 'posts')->where('likeable_id', $post->id)->count();
         $this->assertGreaterThan(0, $numLikes);
         $numComments = Comment::where('commentable_type', 'posts')->where('commentable_id', $post->id)->count();
@@ -1104,7 +1102,6 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      *  @group regression-base
-     *  @group erik
      */
     public function test_owner_can_not_edit_content_of_a_priced_post_that_others_have_purchased()
     {

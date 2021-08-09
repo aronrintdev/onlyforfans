@@ -1,7 +1,7 @@
 <template>
-  <div v-if="!isLoading" class="h-100 d-flex flex-column pl-3" :key="this.id">
+  <div v-if="!isLoading" class="h-100 d-flex flex-column" :key="this.id">
 
-    <section class="chatthread-header">
+    <section class="chatthread-header" :class="{ mobile: mobile }">
       <div class="d-flex align-items-center">
         <b-btn variant="link" class="" @click="onBackClicked">
           <fa-icon :icon="['fas', 'arrow-left']" class="fa-lg" />
@@ -76,7 +76,7 @@
       </div>
     </section>
 
-    <hr />
+    <hr v-if="!mobile" />
 
     <transition-group name="quick-fade" mode="out-in" class="flex-fill scroll-wrapper">
       <section v-if="vaultSelectionOpen" key="vaultSelect" class="vault-selection">
@@ -105,6 +105,8 @@
       :session_user="session_user"
       :chatthread_id="id"
       :vaultOpen="vaultSelectionOpen"
+      class="message-form"
+      :class="{ mobile: mobile }"
       @sendMessage="addTempMessage"
       @toggleVaultSelect="vaultSelectionOpen = !vaultSelectionOpen"
     />
@@ -151,7 +153,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState(['session_user']),
+    ...Vuex.mapState(['session_user', 'mobile']),
     ...Vuex.mapState('messaging', [ 'threads' ]),
 
     isLoading() {
@@ -474,6 +476,30 @@ export default {
 ::v-deep.btn:focus, ::v-deep.btn.focus, ::v-deep.btn:active {
   box-shadow: none;
   text-decoration: none;
+}
+
+.chatthread-header {
+  &.mobile {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--light);
+    padding: 0.5rem;
+    z-index: 5;
+  }
+}
+
+.message-form {
+  &.mobile {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--light);
+    padding: 0.5rem;
+    z-index: 5;
+  }
 }
 
 .scroll-wrapper {

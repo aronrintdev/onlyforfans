@@ -1,5 +1,5 @@
 <template>
-  <section class="crate" :class="value.sender_id === session_user.id ? 'session_user' : 'other_user'">
+  <section class="crate" :class="[ value.sender_id === session_user.id ? 'session_user' : 'other_user', { mobile }]">
     <article class="box">
       <Attachments :attachments="value.attachments" />
       <VueMarkdown :html="false" v-if="value.mcontent" class="content" :source="value.mcontent || ''" />
@@ -60,7 +60,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState( ['session_user'] ),
+    ...Vuex.mapState( ['session_user', 'mobile'] ),
 
     shown() {
       return this.value.mcontent || this.value.attachments.length > 0
@@ -108,6 +108,9 @@ export default {
     margin-left: auto;
     margin-right: 0;
     padding-left: 5rem;
+    &.mobile {
+      padding-left: 1rem;
+    }
 
     .content {
       margin-left: auto;
@@ -122,6 +125,10 @@ export default {
     margin-left: 0;
     margin-right: auto;
     padding-right: 5rem;
+    &.mobile {
+      padding-right: 1rem;
+    }
+
     .content {
       margin-right: auto;
     }
@@ -129,6 +136,8 @@ export default {
       text-align: left;
     }
   }
+
+
 
 } // crate
 </style>

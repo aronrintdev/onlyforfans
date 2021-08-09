@@ -70,7 +70,19 @@
       >
         <fa-icon :icon="['far', 'chevron-left']" size="lg" class="text-white" />
       </div>
-      <PostDisplay ref="postDisplay" :session_user="session_user" :post="selectedResource" :is_feed="false" />
+      <div
+        class="post-content"
+        v-touch:swipe.left="() => postModalAction('next')"
+        v-touch:swipe.right="() => postModalAction('prev')"
+        v-touch:start="startHandler"
+      >
+        <PostDisplay
+          ref="postDisplay"
+          :session_user="session_user"
+          :post="selectedResource"
+          :is_feed="false"
+        />
+      </div>
       <div
         class="post-nav-arrows right"
         v-if="showPostArrows"
@@ -214,6 +226,7 @@ export default {
     scheduled_at: null,
     is_for_edit: null,
     showPostArrows: false,
+    swipeEnabled: false,
   }),
 
   methods: {
@@ -291,10 +304,20 @@ export default {
 
     },
     postModalAction(action) {
-      eventBus.$emit('post-modal-actions', action);
+      console.log('----- swipeEnabled:', this.swipeEnabled);
+      if (this.swipeEnabled) {
+        eventBus.$emit('post-modal-actions', action);
+      }
     },
     closeModal() {
       eventBus.$emit('close-modal');
+    },
+    startHandler(event) {
+      if (event.srcElement.classList.contains('swiper-container')) {
+        this.swipeEnabled = false;
+      } else {
+        this.swipeEnabled = true;
+      }
     }
   },
 
@@ -306,13 +329,14 @@ export default {
 
 <style lang="scss" scoped>
 .post-nav-arrows {
-  position: fixed;
+  position: absolute;
   width: 30px;
   height: 30px;
-  top: 50vh;
+  top: 50%;
   transform: translateY(-50%);
   border-radius: 50%;
   cursor: pointer;
+  z-index: 1000;
 
   &:active {
     svg {
@@ -321,14 +345,32 @@ export default {
   }
 
   &.left {
-    left: calc(50vw - 500px);
+    left: -100px;
   }
   &.right {
-    right: calc(50vw - 500px);
+    right: -100px;
   }
   svg {
     width: 100%;
     height: 100%;
+  }
+
+  @media (max-width: 600px) {
+    & {
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 2px;
+      padding: 5px;
+      width: 30px;
+      height: 40px;
+      display: none;
+
+      &.left {
+        left: 0;
+      }
+      &.right {
+        right: 0;
+      }
+    }
   }
 }
 </style>
@@ -350,6 +392,7 @@ export default {
       opacity: 1;
     }
   }
+
   .superbox-post {
     height: calc(100vh - 60px);
 
@@ -409,6 +452,10 @@ export default {
             .swiper-wrapper {
               align-items: center;
 
+              @media (max-width: 600px) {
+                pointer-events: none;
+              }
+
               video {
                 height: 100%;
               }
@@ -459,6 +506,18 @@ export default {
         max-height: 250px;
         overflow: auto;
       }
+    }
+  }
+
+  @media (max-width: 600px) {
+    .modal-header {
+      .close {
+        padding-left: 8px;
+        padding-right: 10px;
+      }
+    }
+    .superbox-post {
+      height: calc(100vh - 160px);
     }
   }
 }
