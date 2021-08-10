@@ -68,9 +68,9 @@ export default {
           linkTo: { name: 'settings.profile' }
         },
         {
-          label: 'Lists',
-          icon: 'cog',
-          linkTo: { name: 'lists.favorites' }
+          label: 'Fans',
+          icon: 'users',
+          linkTo: { name: 'lists.followers' }
         },
       ]
 

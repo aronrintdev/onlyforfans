@@ -20,9 +20,12 @@
     <transition name="quick-fade" mode="out-in">
       <b-card-body v-if="step === 'initial'" key="initial">
         <div v-if="timeline.is_following"> <!-- un-follow or un-subscribe -->
-          <p>Sorry to see you go! If you're sure you want to cancel, confirm below...</p>
-          <b-button v-if="timeline.is_subscribed" @click="doSubscribe" variant="danger" class="w-100">Click to Cancel Subscription</b-button>
-          <b-button v-else @click="doFollow" variant="danger" class="w-100">Click to Unfollow</b-button>
+          <p>If you're sure you want to unfollow this user, please confirm below.</p>
+          <div class="text-right">
+            <b-button class="mr-2 px-4" variant="secondary" @click="$bvModal.hide('modal-follow')">Cancel</b-button>
+            <b-button v-if="timeline.is_subscribed" @click="doSubscribe" variant="danger">Click to Cancel Subscription</b-button>
+            <b-button v-else @click="doFollow" variant="danger" class="px-4">Unfollow</b-button>
+          </div>
         </div>
         <div v-else> <!-- follow or subscribe -->
           <div v-if="!userCampaign">
@@ -207,6 +210,5 @@ body .user-avatar img {
 
 body .user-details .tag-username {
   color: #859AB5;
-  text-transform: capitalize;
 }
 </style>

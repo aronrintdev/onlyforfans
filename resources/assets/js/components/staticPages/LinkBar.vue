@@ -39,10 +39,10 @@ export default {
         name: 'legal',
         linkTo: 'static.legal',
       },
-      {
-        name: 'blog',
-        linkTo: 'static.blog',
-      },
+      // {
+      //   name: 'blog',
+      //   linkTo: 'static.blog',
+      // },
     ]
   }),
 }

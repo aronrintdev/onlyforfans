@@ -39,7 +39,6 @@
         <b-card-img
           top
           :src="timeline.cover.filepath"
-          :alt="timeline.slug"
           class="cursor-pointer"
           @click="$router.push({ name: 'timeline.show', params: { slug: timeline.slug } })"
         />
@@ -51,7 +50,6 @@
                 rounded="circle"
                 class="w-100 h-100"
                 :src="timeline.avatar.filepath"
-                :alt="timeline.slug"
                 :title="timeline.name"
               />
             </router-link>

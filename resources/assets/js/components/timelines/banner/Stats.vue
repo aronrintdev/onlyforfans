@@ -3,7 +3,7 @@
     <li
       v-for="item in statsDisplay"
       :key="item.stat"
-      class="list-inline-item pl-3"
+      class="list-inline-item pl-3 text-secondary"
       v-b-tooltip.hover
       :title="item.tooltip"
     >

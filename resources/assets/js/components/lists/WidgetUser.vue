@@ -39,6 +39,7 @@
         <b-card-sub-title class="mb-1">
           <router-link :to="{ name: 'timeline.show', params: { slug } }">@{{ user.username }}</router-link>
         </b-card-sub-title>
+        <OnlineStatus :user="user" />
       </div>
 
       <b-card-text v-if="notes" class="mt-2 mb-2"><pre>{{ notes }}</pre></b-card-text>
@@ -49,10 +50,10 @@
         Add to favorites
       </b-card-text>
 
-      <b-button variant="primary">Message</b-button>
-      <b-button disabled variant="primary">Discount</b-button>
-      <b-button disabled variant="primary">Restrict</b-button>
-      <b-button variant="primary" @click="showNotesModal">{{ notesButtonCaption }}</b-button>
+      <b-button class="mb-1" variant="primary">Message</b-button>
+      <b-button class="mb-1" disabled variant="primary">Discount</b-button>
+      <b-button class="mb-1" disabled variant="primary">Restrict</b-button>
+      <b-button class="mb-1" variant="primary" @click="showNotesModal">{{ notesButtonCaption }}</b-button>
       <div class="mt-2 mb-2">
         <small v-if="access_level==='premium'" class="text-muted">Subscribed since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
         <small v-else class="text-muted">Following for free since {{ moment(created_at).format('MMM DD, YYYY') }}</small>
@@ -95,6 +96,7 @@
 import { eventBus } from '@/eventBus'
 //import { DateTime } from 'luxon'
 import moment from 'moment'
+import OnlineStatus from '@components/user/OnlineStatus'
 
 export default {
 
@@ -117,10 +119,10 @@ export default {
 
     notesButtonCaption() {
       if (this.notes) {
-        return 'Edit Notes'
+        return 'Notes'
       }
 
-      return 'Add Notes'
+      return 'Notes'
     },
   },
 
@@ -221,7 +223,9 @@ export default {
     this.notesInput = this.notes;
   },
   created() { },
-  components: { },
+  components: {
+    OnlineStatus,
+  },
 
 }
 </script>

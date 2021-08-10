@@ -94,7 +94,6 @@
                     <fa-icon :icon="selectedMedia==='vault' ? ['fas', 'archive'] : ['far', 'archive']" size="lg" :class="selectedMedia==='vault' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
-                <div class="border-right"></div>
                 <ul class="list-inline d-flex mb-0 pt-1">
                   <!--
                   <li class="selectable select-location"><span><LocationPinIcon /></span> </li>
@@ -109,7 +108,6 @@
                     <fa-icon :icon="showedModal === 'schedule' ? ['fas', 'calendar-alt'] : ['far', 'calendar-alt']" size="lg" :class="showedModal === 'schedule' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
-                <div class="border-right"></div>
                 <ul class="list-inline d-flex mb-0 pt-1">
                   <li @click="showCampaignModal()" class="selectable select-pic" title="Start Promotional Campaign">
                     <fa-icon :icon="showedModal === 'campaign' ? ['fas', 'hand-holding-usd'] : ['far', 'hand-holding-usd']" size="lg" :class="showedModal === 'campaign' ? 'text-primary' : 'text-secondary'" />
@@ -119,7 +117,7 @@
               <b-col cols="12" md="4">
                 <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
                   <li class="w-100 mx-0">
-                    <button :disabled="posting" @click="savePost()" class="btn btn-submit btn-primary w-100">
+                    <button :disabled="posting || (!description && mediafiles.length === 0)" @click="savePost()" class="btn btn-submit btn-primary w-100">
                       <span v-if="posting" class="text-white spinner-border spinner-border-sm pr-2" role="status" aria-hidden="true"></span>
                       Post
                     </button>
@@ -595,6 +593,9 @@ li.selectable[disabled] {
 
 .create_post-crate textarea {
   resize: none;
+  @media (max-width: 576px) {
+    height: 125px;
+  }
 }
 
 /*
@@ -624,6 +625,10 @@ li.selectable[disabled] {
 
 .post-create-footer-ctrl {
   font-size: 1.5rem;
+}
+
+#post-type {
+  font-size: 14px;
 }
 </style>
 

@@ -3,16 +3,19 @@
     <b-navbar-brand :to="{ name: 'index' }" class="navbar-brand" :class="mobile ? 'mr-2' : 'mr-5'">
       <Branding :type="mobile ? 'text' : 'text'" :size="mobile ? 'lg' : 'lg'" :variant="mobile ? 'brand' : 'brand'" />
     </b-navbar-brand>
-    <b-navbar-toggle target="nav-collapse" class="mb-2">
+    <b-navbar-toggle target="nav-collapse" class="ml-auto mb-1">
       <ProfileButton />
     </b-navbar-toggle>
+    <div @click="showSearch = !showSearch">
+      <fa-icon v-if="mobile" icon="search" />
+    </div>
     <b-collapse v-if="mobile" id="nav-collapse" is-nav>
       <b-navbar-nav>
         <ProfileMenu v-if="session_user" />
       </b-navbar-nav>
     </b-collapse>
 
-    <ScrollCollapse v-if="mobile" ref="scrollCollapse" class="w-100" :full-open="searchOpen" :full-open-height="openHeight">
+    <ScrollCollapse v-if="mobile && showSearch" ref="scrollCollapse" class="w-100" :full-open="searchOpen" :full-open-height="openHeight">
       <div class="d-flex flex-column justify-content-between h-100">
         <SearchBar class="w-100 mt-3" :mobile="true" @opening="searchOpen = true" @closing="searchOpen = false" @scroll="onScroll" />
       </div>
@@ -90,6 +93,7 @@ export default {
   data: () => ({
     searchOpen: false,
     screenWidth: null,
+    showSearch: false,
   }),
 
   methods: {
@@ -97,7 +101,7 @@ export default {
       if (this.searchOpen) {
         this.$forceCompute('openHeight')
       }
-    }
+    },
   },
 
   watch: {
@@ -115,6 +119,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.nav-bar {
+  position: unset;
+}
+.navbar-toggler {
+  border: none;
+  outline: none;
+}
 .navbar-collapse {
   &.collapse { // When mobile
     .search {
