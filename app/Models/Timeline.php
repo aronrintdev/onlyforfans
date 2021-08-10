@@ -115,7 +115,7 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     public function sluggable(): array
     {
         return ['slug' => [
-            'source' => [ 'user.username' ],
+            'source' => [ 'name' ],
         ]];
     }
 

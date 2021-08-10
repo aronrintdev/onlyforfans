@@ -13,13 +13,18 @@
               </b-col>
             </b-row>
             <b-row>
+              <b-col sm="12" md="6">
+                <FormTextInput ikey="slug" v-model="formGeneral.slug" label="Display Username (or handle)" :verrors="verrors" />
+              </b-col>
+            </b-row>
+            <b-row>
               <b-col>
                 <small class="text-secondary">* Changing the username or email is disabled during the beta testing phase.</small>
               </b-col>
             </b-row>
           </fieldset>
 
-          <!-- <b-row class="mt-3">
+          <b-row class="mt-3">
             <b-col>
               <div class="w-100 d-flex justify-content-end">
                 <b-button :disabled="isSubmitting.formGeneral" class="w-25 ml-3" type="submit" variant="primary">
@@ -28,7 +33,7 @@
                 </b-button>
               </div>
             </b-col>
-          </b-row> -->
+          </b-row>
 
         </b-form>
       </b-card-text>
@@ -108,11 +113,12 @@ export default {
   props: {
     session_user: null,
     user_settings: null,
+    timeline: null,
   },
 
   computed: {
     isLoading() {
-      return !this.session_user || !this.user_settings
+      return !this.session_user || !this.user_settings || !this.timeline
     },
   },
 
@@ -125,10 +131,9 @@ export default {
     verrors: null,
 
     formGeneral: {
-      firstname: null,
-      lastname: null,
       username: null,
       email: null,
+      slug: null,
     },
     formData: { // cattrs
       language: null,
@@ -172,9 +177,8 @@ export default {
 
   created() {
     this.formGeneral.username = this.session_user.username || ''
-    this.formGeneral.firstname = this.session_user.firstname || ''
-    this.formGeneral.lastname = this.session_user.lastname || ''
     this.formGeneral.email = this.session_user.email || ''
+    this.formGeneral.slug = this.timeline.slug || ''
 
     if ( this.user_settings.cattrs.localization ) {
       this.formData = this.user_settings.cattrs.localization

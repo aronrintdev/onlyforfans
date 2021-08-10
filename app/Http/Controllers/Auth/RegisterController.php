@@ -155,11 +155,6 @@ class RegisterController extends Controller
             $user->settings()->update([ 'city' => $request->city ]);
         }
 
-        $user->timeline()->create([
-            'name' => $request->name,
-            'about' => '',
-        ]);
-
         if ($user) {
 
             $this->betaCheck($request, $user);
