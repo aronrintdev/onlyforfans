@@ -250,6 +250,7 @@ export default {
   display: none;
   @media (max-width: 576px) {
     display: block;
+    width: 154px;
     margin: 0 auto 25px;
   }
 }
