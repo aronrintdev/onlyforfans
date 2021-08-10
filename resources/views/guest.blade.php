@@ -12,11 +12,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
-        <meta property="og:image" content="{{ url('setting/logo.jpg') }}" />
         <meta property="og:title" content="{{ Setting::get('site_title') }}" />
-        <meta property="og:type" content="Social Network" />
-        <meta name="keywords" content="{{ Setting::get('meta_keywords') }}">
-        <meta name="description" content="{{ Setting::get('meta_description') }}">
+        <meta name="robots" content="noimageindex, noarchive">
+        <meta property="og:site_name" content="{{ Setting::get('site_name') }}" />
+        <meta property="og:image" content="{{ Setting::get('site_image') }}" />
+        <meta property="og:type" content="{{ Setting::get('site_type') }}" />
+        <meta name="description" content="{{ Setting::get('meta_description') }}" />
+        <meta name="keywords" content="{{ Setting::get('meta_keywords') }}" />
 
         {{-- Fav Icon --}}
         <link rel="icon" type="image/x-icon" href="{{asset('images/favicon.ico')}}">
@@ -30,6 +32,9 @@
 
         {{-- Style Sheets --}}
         <link href="{{ mix('/css/app.css') }}" rel="stylesheet">
+        <link rel="apple-touch-icon" sizes="180x180" href="/images/logos/allfans-apple-touch-icon-180x180.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/images/logos/allfans-apple-touch-icon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/images/logos/allfans-apple-touch-icon-16x16.png" />
 
         {{-- Routing --}}
         @routes()
