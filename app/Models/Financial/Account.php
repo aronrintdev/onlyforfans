@@ -137,19 +137,77 @@ class Account extends Model implements Ownable
     /* ------------------------------- Scopes ------------------------------- */
     #region Scopes
 
+    /**
+     * Limit scope to accounts that are Earnings Accounts
+     * `$account->isEarnings();`
+     */
+    public function scopeIsEarnings($query)
+    {
+        return $query->where('resource_type', Earnings::getMorphStringStatic());
+    }
+
+    /**
+     * Limit scope to accounts that are a Wallet Account
+     * `$account->isWallet();`
+     */
+    public function scopeIsWallet($query)
+    {
+        return $query->where('resource_type', Wallet::getMorphStringStatic());
+    }
+
+    /**
+     * Alias for system and currency
+     * `$account->financialSystem($system, $currency);`
+     */
+    public function scopeFinancialSystem($query, $system, $currency)
+    {
+        return $query->system($system)->currency($currency);
+    }
+
+    /**
+     * `$account->currency($currency);`
+     */
+    public function scopeCurrency($query, $currency)
+    {
+        return $query->where('currency', $currency);
+    }
+
+    /**
+     * `$account->system($system);`
+     */
+    public function scopeSystem($query, $system)
+    {
+        return $query->where('system', $system);
+    }
+
+    /**
+     * Scope for type of account
+     * `$account->type($type);`
+     */
     public function scopeType($query, $type)
     {
         return $query->where('type', $type);
     }
 
+    /**
+     * `$account->isIn();`
+     */
     public function scopeIsIn($query)
     {
         return $query->type(AccountTypeEnum::IN);
     }
+
+    /**
+     * `$account->isInternal();`
+     */
     public function scopeIsInternal($query)
     {
         return $query->type(AccountTypeEnum::INTERNAL);
     }
+
+    /**
+     * `$account->isOut();`
+     */
     public function scopeIsOut($query)
     {
         return $query->type(AccountTypeEnum::OUT);
@@ -161,29 +219,37 @@ class Account extends Model implements Ownable
     /* ------------------------------ Functions ----------------------------- */
     #region Functions
     /**
-     * Move funds to this owners internal account
+     * Move funds to this owners Wallet account
      *
      * @return Collection - Transaction created successfully
      */
-    public function moveToInternal($amount, array $options = []): Collection
+    public function moveToWallet($amount, array $options = []): Collection
     {
         if ($this->type !== AccountTypeEnum::IN) {
             throw new IncorrectTypeException($this, AccountTypeEnum::IN);
         }
 
         // Get internal account in this system and currency
-        $internalAccount = $this->owner->getInternalAccount($this->system, $this->currency);
+        $internalAccount = $this->owner->getWalletAccount($this->system, $this->currency);
 
         return $this->moveTo($internalAccount, $amount, $options);
     }
 
     /**
-     * Gets instance of internal account of owner
+     * Gets the owner of this account's wallet account
      * @return Account
      */
-    public function getInternalAccount(): Account
+    public function getWalletAccount(): Account
     {
-        return $this->owner->getInternalAccount($this->system, $this->currency);
+        return $this->owner->getWalletAccount($this->system, $this->currency);
+    }
+
+    /**
+     * Gets the owner of this account's earnings account
+     */
+    public function getEarningsAccount(): Account
+    {
+        return $this->owner->getEarningsAccount($this->system, $this->currency);
     }
 
     /**
@@ -233,7 +299,7 @@ class Account extends Model implements Ownable
             $commons = [
                 'currency' => $fromAccount->currency,
                 'description' => $options['description'] ?? null,
-                'type' => $options['type'] ?? TransactionTypeEnum::PAYMENT,
+                'type' => $options['type'] ?? TransactionTypeEnum::TRANSFER,
                 'resource_id' => isset($options['resource_id'])
                     ? $options['resource_id']
                     : (isset($options['resource'])
@@ -271,8 +337,9 @@ class Account extends Model implements Ownable
 
         $this->refresh();
 
-        app(Dispatcher::class)->dispatch(new UpdateAccountBalance($this));
-        app(Dispatcher::class)->dispatch(new UpdateAccountBalance($toAccount));
+        UpdateAccountBalance::dispatch($this);
+        UpdateAccountBalance::dispatch($toAccount);
+
         return new Collection([ 'debit' => $debitTransaction, 'credit' => $creditTransaction ]);
     }
 
@@ -536,11 +603,17 @@ class Account extends Model implements Ownable
             }
         }
 
-        // Move funds to internal account first if this is a in account
+        $transactionDescription = "Purchase of {$purchaseable->getDescriptionNameString()} {$purchaseable->getKey()}";
+
+        // Move funds to wallet account first if this is a in account
         if ($this->type === AccountTypeEnum::IN) {
-            $inTransactions = $this->moveToInternal($amount);
-            $internalAccount = $this->getInternalAccount();
-            return $internalAccount->purchase(
+            $inTransactions = $this->moveToWallet($amount, [
+                'resource' => $purchaseable,
+                'type' => TransactionTypeEnum::TRANSFER, // Transfer of funds will not incur a fee.
+                'description' => $transactionDescription,
+            ]);
+            $walletAccount = $this->getWalletAccount();
+            return $walletAccount->purchase(
                 $purchaseable,
                 $amount,
                 $purchaseLevel,
@@ -557,7 +630,7 @@ class Account extends Model implements Ownable
             array_merge($transactionAttributes, [
                 'resource' => $purchaseable,
                 'type' => TransactionTypeEnum::SALE,
-                'description' => "Purchase of {$purchaseable->getDescriptionNameString()} {$purchaseable->getKey()}"
+                'description' => $transactionDescription,
         ]));
 
         $purchaseable->grantAccess($this->getOwner()->first(), $purchaseLevel, array_merge($customAttributes,  [
@@ -586,18 +659,29 @@ class Account extends Model implements Ownable
     {
         $amount = $this->asMoney($payment);
 
-        // Move funds to internal account first if this is a in account
+        $transactionDescription = "Tip to {$tippable->getDescriptionNameString()} {$tippable->getKey()}";
+
+        // Move funds to wallet account first if this is a in account
         if ($this->type === AccountTypeEnum::IN) {
-            $inTransactions = $this->moveToInternal($amount);
-            $internalAccount = $this->getInternalAccount();
-            return $internalAccount->tip($tippable, $amount, array_merge($customAttributes, [ 'ignoreBalance' => true ]));
+            $inTransactions = $this->moveToWallet($amount, [
+                'resource' => $tippable,
+                'type' => TransactionTypeEnum::TRANSFER, // Transfer of funds will not incur a fee.
+                'description' => $transactionDescription,
+            ]);
+            $walletAccount = $this->getWalletAccount();
+            return $walletAccount->tip($tippable, $amount, array_merge($customAttributes, [
+                'ignoreBalance' => true
+            ]));
         }
 
         // Payment funds movement
-        $transactions = $this->moveTo($tippable->getOwnerAccount($this->system, $this->currency), $amount, array_merge($customAttributes, [
-            'resource' => $tippable,
-            'type' => TransactionTypeEnum::TIP,
-            'description' => "Tip to {$tippable->getDescriptionNameString()} {$tippable->getKey()}"
+        $transactions = $this->moveTo(
+            $tippable->getOwnerAccount($this->system, $this->currency),
+            $amount, array_merge($customAttributes,
+            [
+                'resource' => $tippable,
+                'type' => TransactionTypeEnum::TIP,
+                'description' => $transactionDescription,
         ]));
 
         ItemTipped::dispatch($tippable, $this->getOwner()->first());
@@ -676,7 +760,7 @@ class Account extends Model implements Ownable
             'name' => $name,
             'system' => $system,
         ]);
-        return $systemOwner->getInternalAccount($system, $currency);
+        return $systemOwner->getEarningsAccount($system, $currency);
     }
 
     #endregion

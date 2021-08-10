@@ -105,6 +105,11 @@ return [
             'database' => __DIR__.'/../database/template.sqlite',
             'prefix' => ''
         ],
+        'templateEmpty' => [
+            'driver' => 'sqlite',
+            'database' => __DIR__.'/../database/templateEmpty.sqlite',
+            'prefix' => '',
+        ],
         /*
         'testing' => [
             'driver' => 'sqlite',

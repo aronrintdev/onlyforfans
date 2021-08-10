@@ -11,7 +11,7 @@
 
       <template v-if="true || mediafile.access">
         <b-row>
-          <b-col cols="8" class="d-flex align-items-center justify-content-center">
+          <b-col cols="12" class="d-flex align-items-center justify-content-center">
             <div class="w-100">
               <b-img v-if="mediafile.is_image" 
                 fluid
@@ -24,9 +24,6 @@
                 :session_user="session_user" 
                 :use_mid="use_mid" />
             </div>
-          </b-col>
-          <b-col cols="4">
-            <pre> {{ JSON.stringify(this.stats, null, 2) }} </pre>
           </b-col>
         </b-row>
       </template>

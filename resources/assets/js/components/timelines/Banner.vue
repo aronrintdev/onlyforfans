@@ -46,6 +46,7 @@
         :alt="timeline.name"
         :title="timeline.name"
       />
+      <OnlineStatus :user="timeline.user" size="lg" :textInvisible="false" />
       <input type="file" id="avatar-upload-btn" class="file-input" @change="onAvatarChange" />
       <label v-if="uploadAvatarVisible" for="avatar-upload-btn" class="btn photo-btn">
         <fa-icon :icon="['far', 'camera']" size="2x" class="text-white" />
@@ -55,25 +56,21 @@
     <b-container fluid>
       <b-row class="avatar-profile py-3">
         <b-col cols="12" md="4" offset-md="1" class="pl-5 avatar-details text-right text-md-left">
-          <h2 class="avatar-name my-0">
-            <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
-              {{ timeline.name }}
-            </router-link>
+          <h2 class="avatar-name my-0 text-secondary">
+            {{ timeline.name }}
             <span v-if="timeline.verified" class="verified-badge">
               <fa-icon icon="check-circle" class="text-primary" />
             </span>
           </h2>
-          <div class="avatar-username-status">
-            <p class="avatar-mail my-0 mr-3 text-secondary">
-              <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
-                @{{ timeline.slug || 'TODO' }}
-              </router-link>
-            </p>
+          <p class="avatar-mail my-0 mr-3 text-secondary">
+            @{{ timeline.slug || 'TODO' }}
+          </p>
+          <div class="banner-online-status">
             <OnlineStatus :user="timeline.user" :indicatorVisible="false" />
           </div>
         </b-col>
 
-        <b-col cols="12" md="4" offset-md="3" class="tag-stats my-0">
+        <b-col cols="12" md="4" offset-md="3" class="tag-stats mt-2">
           <Stats :stats="timeline.userstats" />
         </b-col>
       </b-row>
@@ -215,6 +212,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.session_banner-crate {
+  border: solid #dfdfdf 1px;
+  border-radius: 3px;
+}
 .tag-crate {
   background-color: #fff;
 }
@@ -244,8 +245,11 @@ header.masthead .profile-ctrl.dropdown button {
   background: transparent;
 }
 
-.avatar-username-status {
-  display: flex;
+.banner-online-status {
+  @media (max-width: 576px) {
+    float: right;
+    margin-right: 1rem;
+  }
 }
 
 .avatar-img {
@@ -254,6 +258,12 @@ header.masthead .profile-ctrl.dropdown button {
   top: 185px; /* %TODO: bg image height - 1/2*avatar height */
   width: 130px;
   height: 130px;
+  .onlineStatus {
+    position: absolute;
+    bottom: 15px;
+    right: 5px;
+    z-index: 1;
+  }
 }
 
 .file-input {

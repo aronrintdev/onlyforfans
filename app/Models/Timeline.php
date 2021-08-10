@@ -270,7 +270,7 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
 
     public function getOwnerAccount(string $system, string $currency): Account
     {
-        return $this->getOwner()->first()->getInternalAccount($system, $currency);
+        return $this->getOwner()->first()->getEarningsAccount($system, $currency);
     }
 
     #endregion Subscribable

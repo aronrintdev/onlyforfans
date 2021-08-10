@@ -10,7 +10,7 @@
 
     <b-row>
       <b-col>
-        <section v-if="!is_schedulefeed" class="feed-ctrl my-3 px-2 py-2 d-flex flex-column flex-md-row justify-content-center justify-content-md-between">
+        <section v-if="!is_schedulefeed" class="feed-ctrl mt-3 px-2 py-2 d-flex flex-column flex-md-row justify-content-center justify-content-md-between">
           <b-nav v-if="!is_homefeed" pills>
             <b-nav-item @click="setFeedType('default')" :active="feedType==='default'">All</b-nav-item>
             <b-nav-item @click="setFeedType('photos')" :active="feedType==='photos'">Photos</b-nav-item>
@@ -19,7 +19,7 @@
           <article v-else>
             <!-- empty placeholder to preserve justify arrangment in flex area -->
           </article>
-          <article class="d-md-block">
+          <article class="d-md-block ml-auto mr-0">
             <!-- <div v-if="!is_homefeed" @click="renderTip" class="btn">
               <fa-icon icon="dollar-sign" class="tag-ctrl text-primary" />
             </div>
@@ -78,7 +78,7 @@
           @delete-post="deletePost"
         />
       </article>
-      <article class="load-more-item col-sm-12">
+      <article class="load-more-item col-sm-12 my-3">
         <b-card :class="{ 'cursor-pointer': !moreLoading && !isLastPage }" @click="onLoadMoreClick">
           <div class="w-100 d-flex my-3 justify-content-center" >
             <fa-icon v-if="moreLoading" icon="spinner" spin size="lg" />
@@ -125,7 +125,7 @@ export default {
       return {
         'col-sm-12': !this.isGridLayout,
         'col-sm-4': this.isGridLayout,
-        'mb-3': true,
+        'mt-3': true,
       }
     },
 

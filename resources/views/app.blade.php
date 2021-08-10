@@ -10,12 +10,23 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <meta name="robots" content="noimageindex, noarchive">
+    <meta property="og:site_name" content="{{ Setting::get('site_name') }}" />
+    <meta property="og:image" content="{{ Setting::get('site_image') }}" />
+    <meta property="og:type" content="{{ Setting::get('site_type') }}" />
+    <meta name="description" content="{{ Setting::get('meta_description') }}" />
+    <meta name="keywords" content="{{ Setting::get('meta_keywords') }}" />
+
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Styles -->
     <!-- %NOTE: this is the *generated* CSS file -->
     <link href="{{ mix('/css/app.css') }}" rel="stylesheet">
 
+    <link rel="prefetch" as="image" href="/images/logos/allfans-logo-986x205.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/logos/allfans-apple-touch-icon-180x180.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/logos/allfans-apple-touch-icon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/logos/allfans-apple-touch-icon-16x16.png" />
     <!-- Static Data -->
     <script>
         const myUserId = '{{ Auth::user()->id }}';

@@ -51,23 +51,25 @@
               :include-styling=true
               :useCustomSlot=true
               :duplicateCheck=true
-              v-on:vdropzone-file-added="addedEvent"
-              v-on:vdropzone-removed-file="removedEvent"
-              v-on:vdropzone-sending="sendingEvent"
-              v-on:vdropzone-success="successEvent"
-              v-on:vdropzone-error="errorEvent"
-              v-on:vdropzone-queue-complete="queueCompleteEvent"
+              @vdropzone-file-added="onDropzoneAdded"
+              @vdropzone-removed-file="onDropzoneRemoved"
+              @vdropzone-sending="onDropzoneSending"
+              @vdropzone-success="onDropzoneSuccess"
+              @vdropzone-error="onDropzoneError"
+              @vdropzone-queue-complete="onDropzoneQueueComplete"
               class="dropzone"
             >
               <div class="dz-custom-content">
                 <textarea v-model="description" rows="8" class="w-100 p-3"></textarea>
               </div>
-              <UploadMediaPreview
-                :mediafiles="mediafiles"
-                @change="changeMediafiles"
-                @remove="removeMediafile"
-                @openFileUpload="openDropzone"
-              />
+              <template v-if="selectedMediafiles && selectedMediafiles.length > 0">
+                <UploadMediaPreview
+                  :mediafiles="selectedMediafiles"
+                  @change="changeMediafiles"
+                  @openFileUpload="openDropzone"
+                  @remove="removeMediafileByIndex"
+                />
+              </template>
             </vue-dropzone>
             <AudioRecorder
               v-if="showAudioRec"
@@ -88,11 +90,10 @@
                   <li @click="recordAudio()" class="selectable select-audio">
                     <fa-icon :icon="selectedMedia==='audio' ? ['fas', 'microphone'] : ['far', 'microphone']" size="lg" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li @click="uploadFromVault()" class="selectable select-audio">
+                  <li @click="renderVaultSelector()" class="selectable select-audio">
                     <fa-icon :icon="selectedMedia==='vault' ? ['fas', 'archive'] : ['far', 'archive']" size="lg" :class="selectedMedia==='vault' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
-                <div class="border-right"></div>
                 <ul class="list-inline d-flex mb-0 pt-1">
                   <!--
                   <li class="selectable select-location"><span><LocationPinIcon /></span> </li>
@@ -107,7 +108,6 @@
                     <fa-icon :icon="showedModal === 'schedule' ? ['fas', 'calendar-alt'] : ['far', 'calendar-alt']" size="lg" :class="showedModal === 'schedule' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
-                <div class="border-right"></div>
                 <ul class="list-inline d-flex mb-0 pt-1">
                   <li @click="showCampaignModal()" class="selectable select-pic" title="Start Promotional Campaign">
                     <fa-icon :icon="showedModal === 'campaign' ? ['fas', 'hand-holding-usd'] : ['far', 'hand-holding-usd']" size="lg" :class="showedModal === 'campaign' ? 'text-primary' : 'text-secondary'" />
@@ -117,7 +117,7 @@
               <b-col cols="12" md="4">
                 <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
                   <li class="w-100 mx-0">
-                    <button :disabled="posting" @click="savePost()" class="btn btn-submit btn-primary w-100">
+                    <button :disabled="posting || (!description && ( selectedMediafiles && selectedMediafiles.length === 0 ))" @click="savePost()" class="btn btn-submit btn-primary w-100">
                       <span v-if="posting" class="text-white spinner-border spinner-border-sm pr-2" role="status" aria-hidden="true"></span>
                       Post
                     </button>
@@ -134,6 +134,7 @@
 </template>
 
 <script>
+import Vuex from 'vuex'
 import moment from 'moment';
 import { isAndroid, isIOS, osVersion } from 'mobile-device-detect';
 
@@ -160,8 +161,35 @@ export default {
   computed: {
     isIOS9PlusAndAndroid() {
       return (isIOS && parseInt(osVersion.split('.')[0]) >= 9) || isAndroid;
-    }
-  },
+    },
+
+    ...Vuex.mapState('vault', [
+      'selectedMediafiles',
+      'uploadsVaultFolder',
+    ]),
+
+    // ref:
+    //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
+    //  ~ https://www.dropzonejs.com/#config-autoProcessQueue
+    dropzoneOptions() {
+      return {
+        url: this.$apiRoute('mediafiles.store'),
+        paramName: 'mediafile',
+        maxFiles: null,
+        autoProcessQueue: false,
+        thumbnailWidth: 100,
+        clickable: '#clickme_to-select',
+        maxFilesize: 15.9,
+        addRemoveLinks: true,
+        removeType: 'client',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
+        },
+      }
+    },
+
+  }, // computed
 
   data: () => ({
     moment,
@@ -179,39 +207,30 @@ export default {
     priceForPaidSubscribers: 0,
     currency: 'USD',
 
-    mediafileIdsFromVault: [], // content added from vault, not disk: should create new references, *not* new S3 content!
-
-    // ref:
-    //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
-    //  ~ https://www.dropzonejs.com/#config-autoProcessQueue
-    dropzoneOptions: {
-      //url: '/mediafiles',
-      url: route('mediafiles.store'),
-      paramName: 'mediafile',
-      //acceptedFiles: 'image/*, video/*, audio/*',
-      maxFiles: null,
-      autoProcessQueue: false,
-      thumbnailWidth: 100,
-      //clickable: false, // must be false otherwise can't focus on text area to type (!)
-      clickable: '#clickme_to-select',
-      maxFilesize: 15.9,
-      addRemoveLinks: true,
-      removeType: 'client',
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
-      },
-    },
     scheduled_at: null,
-    mediafiles: [],
+    //mediafiles: [],  use selectedMediafiles from store
     posting: false,
     expirationPeriod: null,
     showVideoRec: false,
     showAudioRec: false,
-  }),
+
+  }), // data
+
   methods: {
 
+    ...Vuex.mapMutations('vault', [
+      'ADD_SELECTED_MEDIAFILES',
+      'CLEAR_SELECTED_MEDIAFILES',
+      'UPDATE_SELECTED_MEDIAFILES',
+      'REMOVE_SELECTED_MEDIAFILE_BY_INDEX',
+    ]),
+
+    ...Vuex.mapActions('vault', [
+      'getUploadsVaultFolder',
+    ]),
+
     resetForm() {
+      this.CLEAR_SELECTED_MEDIAFILES()
       this.$refs.myVueDropzone.removeAllFiles();
       this.description = '';
       this.newPostId = null;
@@ -239,50 +258,49 @@ export default {
       })
       this.$log.debug('savePost', { response })
       const json = response.data;
+
+      // (2) upload & attach the mediafiles (in dropzone queue)
       if (json.post) {
         this.newPostId = json.post.id
         const queued = this.$refs.myVueDropzone.getQueuedFiles()
 
-        // (2) upload & attach the mediafiles (in dropzone queue)
         // %FIXME: if this fails, don't we have an orphaned post (?)
-        // %NOTE: files added manually don't seem to be put into the queue, thus sendingEvent won't be called for them (?)
+        // %NOTE: files added manually don't seem to be put into the queue, thus onDropzoneSending won't be called for them (?)
 
-        // (3) create any mediaifle references, ex from selected files in vault
-        if (this.mediafileIdsFromVault.length) {
-          this.mediafileIdsFromVault.forEach( async mfid => {
-            await axios.post(this.$apiRoute('mediafiles.store'), {
-              mediafile_id: mfid, // the presence of this field is what tells controller method to create a reference, not upload content
-              resource_id: json.post.id,
-              resource_type: 'posts',
-              mftype: 'post',
-            })
-            // %TODO: check failure case
-          })
-          this.mediafileIdsFromVault = [] // empty array (we could remove individually inside the loop)
-          this.$router.replace({'query': null}).catch(()=>{}); // clear mediafile router params from URL
-        } else if (queued.length) {
-          console.log('CreatePost::savePost() - process queue', {
-            queued,
-          })
-          this.$refs.myVueDropzone.processQueue() // this will call dispatch after files uploaded
-        } 
-
-        if ( !queued.length ) {
+        if (queued.length) {
+          console.log('CreatePost::savePost() - process queue', { queued, })
+          this.$refs.myVueDropzone.processQueue() // this will call createCompleted() via callback
+        }  else {
           console.log('CreatePost::savePost() - nothing queued')
           this.createCompleted();
         }
 
       } else {
         this.resetForm();
-        this.mediafiles = [];
         this.posting = false;
       }
     },
 
+    // ------------ Dropzone ------------------------------------------------ //
+
+    openDropzone() {
+      this.$refs.myVueDropzone.dropzone.hiddenFileInput.click();
+    },
+
+    onDropzoneAdded(file) {
+      this.$log.debug('onDropzoneAdded', {file})
+      let payload = { ...file, type: file.type }
+      if (!file.filepath) {
+        payload.filepath = URL.createObjectURL(file)
+      }
+      this.ADD_SELECTED_MEDIAFILES(payload)
+      this.$nextTick(() => this.$forceUpdate())
+    },
+
     // Dropzone: 'Modify the request and add addtional parameters to request before sending'
-    sendingEvent(file, xhr, formData) {
+    onDropzoneSending(file, xhr, formData) {
       // %NOTE: file.name is the mediafile PKID
-      this.$log.debug('sendingEvent', { file, formData, xhr });
+      this.$log.debug('onDropzoneSending', { file, formData, xhr });
       if ( !this.newPostId ) {
         throw new Error('Cancel upload, invalid post id');
       }
@@ -291,43 +309,90 @@ export default {
       formData.append('mftype', 'post');
     },
 
-    // for dropzone
-    addedEvent(file) {
-      if (!file.filepath) {
-        this.mediafiles.push({
-          type: file.type,
-          name: file.name,
-          filepath: URL.createObjectURL(file),
-        });
-      } else {
-        this.mediafiles.push(file);
-      }
-      this.$log.debug('addedEvent')
-    },
-    removedEvent(file, error, xhr) {
-      this.$log.debug('removedEvent')
-    },
-    successEvent(file, response) {
-      this.$log.debug('successEvent', { file, response, });
-    },
-    errorEvent(file, message, xhr) {
-      this.$log.debug('errorEvent', { file, message, xhr });
+    onDropzoneSuccess(file, response) {
+      this.$log.debug('onDropzoneSuccess', { file, response })
+      // Remove Preview
       if (file) {
         this.$refs.myVueDropzone.removeFile(file)
+        this.removeFileFromSelected(file)
+      }
+      // Add Mediafile reference
+      //this.ADD_SELECTED_MEDIAFILES(response.mediafile) // we don't need to do this as file is already uploaded & associated with post
+    },
+
+    onDropzoneError(file, message, xhr) {
+      this.$log.error('Dropzone Error Event', { file, message, xhr })
+      if (file) {
+        this.$refs.myVueDropzone.removeFile(file)
+        this.removeFileFromSelected(file)
       }
     },
 
-    queueCompleteEvent() {
+    onDropzoneQueueComplete() {
       // Retrieves the newly created post to display at top of feed
       // Not sure why but this event is invoked when image add fails (eg, drag & drop to dropzone fails), so protect against it
       if ( !this.newPostId ) {
         return
       }
-      console.log('queueCompleteEvent', { });
       this.createCompleted();
     },
 
-    createCompleted() {
+    onDropzoneRemoved(file, error, xhr) {
+      this.$log.debug('onDropzoneRemoved')
+      //const index = _.findIndex(this.selectedMediafiles, mf => {
+      //  return mf.filepath === file.filepath
+      //})
+      //this.removeMediafileByIndex(index)
+    },
+
+    removeFileFromSelected(file) {
+      this.$log.debug('removeFileFromSelected')
+      const index = _.findIndex(this.selectedMediafiles, mf => {
+        return mf.upload ? mf.upload.filename === file.name : false
+      })
+      this.removeMediafileByIndex(index)
+    },
+
+    // %NOTE: this can be called as a handler for the 'remove' event emitted by UploadMediaPreview
+    removeMediafileByIndex(index) {
+      if (index > -1)  {
+
+        // If the file is in the Dropzone queue remove it from there as well
+        let dzUUID = null
+        if ( typeof this.selectedMediafiles[index] !== 'undefined' ) {
+          const file = this.selectedMediafiles[index]
+          if ( file.hasOwnProperty('upload') ) {
+            dzUUID = file.upload.uuid
+          }
+        }
+
+        if ( dzUUID !== null ) {
+          // workaround...so we can also remove from Dropzone if its a disk file...
+          this.$refs.myVueDropzone.getQueuedFiles().forEach( qf => {
+            if ( qf.hasOwnProperty('upload') && qf.upload.uuid === dzUUID ) {
+              this.$refs.myVueDropzone.removeFile(qf)
+            }
+          })
+        }
+
+        this.REMOVE_SELECTED_MEDIAFILE_BY_INDEX(index)
+      }
+    },
+
+    // ---
+
+    async createCompleted() {
+      // Take care of any files attached from vault (disk files have already been removed from selectedMediafiles)...
+      this.selectedMediafiles.forEach( async mf => {
+        await axios.post(this.$apiRoute('mediafiles.store'), {
+          mediafile_id: mf.id, // the presence of this field is what tells controller method to create a reference, not upload content
+          resource_id: this.newPostId,
+          resource_type: 'posts',
+          mftype: 'post',
+        })
+      })
+      // %TODO: find medaifile in selectedMediafiles and remove it
+
       this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
       this.$store.dispatch('getQueueMetadata');
       // Show notification if scheduled post is succesfully created
@@ -339,7 +404,6 @@ export default {
         })
       }
       this.resetForm();
-      this.mediafiles = [];
       this.posting = false;
     },
 
@@ -355,10 +419,14 @@ export default {
       this.showAudioRec = true
     },
 
-    uploadFromVault() {
-      this.selectedMedia = this.selectedMedia!=='vault' ? 'vault' : null
-      // %FIXME: should add full upload from vault feature instead of redirecting
-      this.$router.push({ name: 'vault.dashboard' })
+    renderVaultSelector() {
+      eventBus.$emit('open-modal', {
+        key: 'render-vault-selector',
+        data: { 
+          resource: this.timeline,
+          resource_type: 'timelines', 
+        },
+      })
     },
 
     showSchedulePicker() {
@@ -370,30 +438,25 @@ export default {
         }
       })
     },
+
     changeMediafiles(data) {
-      this.mediafiles = [...data];
+      this.UPDATE_SELECTED_MEDIAFILES([...data])
     },
-    removeMediafile(index) {
-      const file = this.$refs.myVueDropzone.dropzone.files[index];
-      if (file) {
-        this.$refs.myVueDropzone.removeFile(file);
-        this.mediafiles.splice(index, 1);
-        this.mediafiles = [...this.mediafiles];
-      }
-    },
-    openDropzone() {
-      this.$refs.myVueDropzone.dropzone.hiddenFileInput.click();
-    },
+
+
+
     showExpirationPicker() {
       this.showedModal = 'expiration'
       eventBus.$emit('open-modal', {
         key: 'expiration-period',
       })
     },
+
     closeSchedulePicker(e) {
       this.scheduled_at = null;
       e.stopPropagation();
     },
+
     audioRecordFinished(file) {
       if (this.$refs.myVueDropzone) {
         this.$refs.myVueDropzone.addFile(file);
@@ -413,6 +476,7 @@ export default {
         this.$refs.myVueDropzone.addFile(file);
       }
     },
+
   },
 
   mounted() {
@@ -423,29 +487,6 @@ export default {
     eventBus.$on('set-expiration-period', function(data) {
       self.expirationPeriod = data;
     })
-
-    if ( this.$route.params.context ) {
-      switch( this.$route.params.context ) {
-        case 'vault-via-postcreate': // we got here from the vault, likely with mediafiles to attach to a new post
-          const mediafileIds = this.$route.params.mediafile_ids || []
-          if ( mediafileIds.length ) {
-            // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
-            const response = axios.get(this.$apiRoute('mediafiles.index'), {
-              params: {
-                mediafile_ids: mediafileIds,
-              },
-            }).then( response => {
-              response.data.data.forEach( mf => {
-                // https://rowanwins.github.io/vue-dropzone/docs/dist/#/manual
-                const file = { size: mf.orig_size, name: mf.id, type: mf.mimetype, filepath: mf.filepath }
-                this.mediafileIdsFromVault.push(mf.id)
-                this.$refs.myVueDropzone.manuallyAddFile(file, mf.filepath)
-              })
-            })
-          }
-          break
-      } // switch
-    }
 
   }, // mounted
 
@@ -470,6 +511,13 @@ export default {
     })
   },
 
+  watch: {
+
+    //selectedMediafiles(value) {
+    //this.$log.debug('watch selectedMediafiles', { value })
+    //},
+
+  }, // watch
 
   components: {
     PriceSelector,
@@ -479,6 +527,7 @@ export default {
     VideoRecorder,
     AudioRecorder,
   },
+
 }
 </script>
 
@@ -544,6 +593,9 @@ li.selectable[disabled] {
 
 .create_post-crate textarea {
   resize: none;
+  @media (max-width: 576px) {
+    height: 125px;
+  }
 }
 
 /*
@@ -573,6 +625,10 @@ li.selectable[disabled] {
 
 .post-create-footer-ctrl {
   font-size: 1.5rem;
+}
+
+#post-type {
+  font-size: 14px;
 }
 </style>
 

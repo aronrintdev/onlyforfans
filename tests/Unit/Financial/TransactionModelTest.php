@@ -7,7 +7,6 @@ use App\Models\Financial\Transaction;
 use Illuminate\Support\Facades\Event;
 use Tests\Helpers\Financial\AccountHelpers;
 use App\Jobs\Financial\UpdateAccountBalance;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Financial\Exceptions\TransactionAlreadySettled;
 
 /**
@@ -21,8 +20,6 @@ use App\Models\Financial\Exceptions\TransactionAlreadySettled;
  */
 class TransactionModelTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * Test if transactions are created successfully
      */
@@ -111,7 +108,7 @@ class TransactionModelTest extends TestCase
         $inAccount = Account::factory()->asIn()->create();
         $creatorAccount = Account::factory()->asInternal()->create();
 
-        $transactions = $inAccount->moveToInternal(10000);
+        $transactions = $inAccount->moveToWallet(10000);
 
         $this->assertCurrencyAmountIsEqual(0, $transactions['debit']->calculateBalance());
         $this->assertCurrencyAmountIsEqual(0, $transactions['credit']->calculateBalance());
@@ -127,7 +124,7 @@ class TransactionModelTest extends TestCase
         $this->assertHasBalanceOf(10000, $transactions['credit']);
 
         // Moving to creators Account
-        $userAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
+        $userAccount = $inAccount->owner->getWalletAccount($this->defaultSystem, $this->defaultCurrency);
 
         // Settle Account balance
         $userAccount->settleBalance();
@@ -174,7 +171,7 @@ class TransactionModelTest extends TestCase
     {
         $inAccount = Account::factory()->asIn()->create();
 
-        $transactions = $inAccount->moveToInternal(10000);
+        $transactions = $inAccount->moveToWallet(10000);
 
         $this->assertCurrencyAmountIsEqual(0, $transactions['debit']->calculateBalance());
         $this->assertCurrencyAmountIsEqual(0, $transactions['credit']->calculateBalance());
@@ -195,7 +192,7 @@ class TransactionModelTest extends TestCase
     {
         $inAccount = Account::factory()->asIn()->create();
 
-        $transactions = $inAccount->moveToInternal(10000);
+        $transactions = $inAccount->moveToWallet(10000);
 
         $this->assertCurrencyAmountIsEqual(0, $transactions['debit']->calculateBalance());
         $this->assertCurrencyAmountIsEqual(0, $transactions['credit']->calculateBalance());

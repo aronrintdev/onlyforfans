@@ -51,6 +51,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        Log::info('Schedule is being run');
         // Transaction Summaries Creations
         $schedule->call(function () {
             $queue = Config::get('transactions.summarizeQueue');

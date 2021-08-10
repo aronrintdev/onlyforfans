@@ -116,6 +116,7 @@ $  echo "" > storage/logs/laravel.log; php -n   -dextension=intl.so  vendor/bin/
 $ php artisan test --group regression-base
 $ php artisan test --group regression-financial
 $ php artisan test --group regression
+$ echo "" > storage/logs/laravel.log; php artisan test --group regression
 
 
 # Sendgrid email test

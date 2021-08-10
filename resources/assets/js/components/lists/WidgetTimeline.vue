@@ -35,6 +35,7 @@
         <b-card-sub-title class="mb-1">
           <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">@{{ timeline.slug }}</router-link>
         </b-card-sub-title>
+        <OnlineStatus :user="{ id: timeline.user_id }" />
       </div>
 
       <slot></slot>
@@ -53,6 +54,7 @@
 import { eventBus } from '@/eventBus'
 //import { DateTime } from 'luxon'
 import moment from 'moment'
+import OnlineStatus from '@components/user/OnlineStatus'
 
 export default {
 
@@ -88,7 +90,9 @@ export default {
 
   mounted() { },
   created() { },
-  components: { },
+  components: {
+    OnlineStatus,
+  },
 
 }
 </script>

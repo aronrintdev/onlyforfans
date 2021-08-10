@@ -4,7 +4,7 @@
       <fa-icon :icon="isOpen ? ['fas', 'caret-down'] : ['fas', 'caret-right']" fixed-width class="" />
     </span>
     <span :class="{bold: true, active: currentFolderId===item.id}" @dblclick="makeFolder">
-      <span @click="doNav(item)" class="node-name">{{ item.name }}</span>
+      <span @click="doNav(item)" class="node-name">{{ item.parent_id == null ? 'Home' : item.name }}</span>
     </span>
     <ul v-show="isOpen" class="pl-3">
       <TreeItem
@@ -17,9 +17,7 @@
         @add-item="$emit('add-item', $event)"
         @do-nav="$emit('do-nav', $event)"
       />
-      <!--
-      <li class="add" @click="$emit('add-item', item)">+</li>
-      -->
+      <!-- <li class="add" @click="$emit('add-item', item)">+</li> -->
     </ul>
   </li>
 </template>
@@ -78,12 +76,15 @@ body {
   ul {
     list-style: none;
   }
-  .tag-tree-node { 
+  .tag-tree-node {
+    .node-name {
+      text-transform: capitalize;
+    }
     .node-name:hover {
       cursor: pointer;
     }
     .active {
-      color: red;
+      color: #007bff;
     }
   }
 }

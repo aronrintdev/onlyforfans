@@ -186,11 +186,13 @@ class TimelinesController extends AppBaseController
             $q1->whereDoesntHave('followedtimelines', function($q2) use(&$followedIDs) {
                 $q2->whereIn('shareable_id', $followedIDs);
             });
+            // no-include admin users
+            $q1->isAdmin(true);
         });
 
         // Apply filters
-        if ( $request->has('free_only') ) {
-            $query->where('is_follow_for_free', true);
+        if ( $request->boolean('paid_only') ) {
+            $query->where('is_follow_for_free', false);
         }
 
         $data = $query->get();
@@ -202,7 +204,9 @@ class TimelinesController extends AppBaseController
     {
         $TAKE = $request->input('take', $request->limit);
         $query = Post::with('mediafiles', 'user')
-            ->has('mediafiles')
+            ->whereHas('mediafiles', function($q1) {
+                $q1->isImage();
+            })
             ->withCount('comments')->orderBy('comments_count', 'desc')
             //->withCount('likes')->orderBy('likes_count', 'desc')
             ->where('active', 1)

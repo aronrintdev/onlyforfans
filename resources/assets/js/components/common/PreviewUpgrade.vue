@@ -1,12 +1,12 @@
 <template>
-  <div v-if="!isLoading" class="preview_upgrade-crate tag-crate">
+  <div v-if="!isLoading" class="preview_upgrade-crate tag-crate my-3">
     <b-card tag="article">
       <b-card-text>
-        <b-row>
-          <h3 class="card-title mt-1 mb-2 ml-1">Photos</h3>
+        <b-row class="mx-0">
+          <h3 class="card-title my-2">Photos</h3>
         </b-row>
 
-        <b-row>
+        <b-row class="mx-0">
           <b-col cols="4" v-for="(p,idx) in previewposts" :key="p.id" class="px-1">
   <div class="tag-debug">
             <ul class="pl-0">
@@ -126,11 +126,13 @@ export default {
 </script>
 
 <style scoped>
+.preview_upgrade-crate h3 {
+  font-size: 20px;
+}
 .view-more-photos {
   cursor: pointer;
 }
 .tag-wrap {
-  border: solid 4px #a5a5a5;
   position: relative;
 }
 /*

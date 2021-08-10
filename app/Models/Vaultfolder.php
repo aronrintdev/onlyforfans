@@ -114,6 +114,7 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
                 'pkid' => $vf->id,
                 'vfname' => $vf->vfname,
                 'slug' => $vf->slug,
+                'is_root' => $vf->parent_id == null,
             ]);
             $vf = !empty($vf->parent_id) ? Vaultfolder::find($vf->parent_id) : null;
         }

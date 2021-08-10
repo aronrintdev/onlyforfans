@@ -15,10 +15,9 @@
         </p>
 
         <p>
-          Hitzke & Ferran<br />
-          Erick Ferran Esq.<br />
-          2110 East Flamingo Road, Suite 206<br />
-          Las Vegas, Nevada 89119<br />
+          Flangas Law Group<br />
+          3275 South Jones Blvd., Suite 105<br />
+          Las Vegas, Nevada 89146<br />
           legal@allfans.com
         </p>
 

@@ -1,12 +1,24 @@
 <template>
   <div>
     <b-modal
+      id="modal-vault-selector"
+      size="lg"
+      hide-header
+      hide-footer
+      body-class="p-0"
+      @hide="closeModal"
+    >
+      <VaultSelectorModal @close="closeModal" :session_user="session_user" :payload="modalPayload" ref="selectFromVault" />
+    </b-modal>
+
+    <b-modal
       id="modal-tip"
       size="lg"
       title="Send a Tip"
       hide-footer
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('modal-tip')"
+      :centered="mobile"
     >
       <SendTip ref="sendTip" :session_user="session_user" :payload="modalPayload" />
     </b-modal>
@@ -17,7 +29,8 @@
       title="Purchase Post"
       hide-footer
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('modal-purchase-post')"
+      :centered="mobile"
     >
       <PurchasePost ref="purchasePost" :session_user="session_user" :post_id="selectedResourceId" />
     </b-modal>
@@ -28,18 +41,20 @@
       title="Purchase Message"
       hide-footer
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('modal-purchase-message')"
+      :centered="mobile"
     >
       <PurchaseMessage ref="purchaseMessage" :message="selectedResource" />
     </b-modal>
 
     <b-modal
       id="modal-follow"
-      size="lg"
-      title="Follow"
+      size="md"
+      :title="selectedTimeline && selectedTimeline.is_following ? 'Unfollow' : 'Follow'"
       hide-footer
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('modal-follow')"
+      :centered="mobile"
     >
       <FollowTimeline ref="followTimeline" :session_user="session_user" :timeline="selectedTimeline" :subscribe_only="subscribeOnly" />
     </b-modal>
@@ -50,7 +65,8 @@
       title="Upload Avatar"
       hide-footer
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('modal-crop')"
+      :centered="mobile"
     >
       <CropImage ref="cropImage" :session_user="session_user" :url="selectedUrl" :timelineId="selectedTimelineId" />
     </b-modal>
@@ -61,7 +77,7 @@
       hide-footer
       centered
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('modal-post')"
     >
       <div
         class="post-nav-arrows left"
@@ -98,7 +114,8 @@
       title="Photo"
       hide-footer
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('modal-photo')"
+      :centered="mobile"
     >
       <ImageDisplay ref="ImageDisplay" :session_user="session_user" :mediafile="selectedResource" :is_feed="false" />
     </b-modal>
@@ -109,7 +126,8 @@
       size="md"
       hide-footer
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('modal-schedule-datetime')"
+      :centered="mobile"
     >
       <ScheduleDateTime ref="schedule_picker_modal" :scheduled_at="scheduled_at" :for_edit="is_for_edit" />
     </b-modal>
@@ -121,7 +139,8 @@
       hide-footer
       body-class="p-0"
       no-close-on-backdrop
-      @hide="closeModal"
+      @hide="closeModal('edit-post')"
+      :centered="mobile"
     >
       <EditPost ref="editPost" :post="selectedResource" />
     </b-modal>
@@ -133,7 +152,8 @@
       hide-footer
       body-class="p-0"
       no-close-on-backdrop
-      @hide="closeModal"
+      @hide="closeModal('report-post')"
+      :centered="mobile"
     >
       <ReportPost ref="reportPost" :post="selectedResource" />
     </b-modal>
@@ -144,7 +164,8 @@
       hide-footer
       size="md"
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('expiration-period')"
+      :centered="mobile"
     >
       <ExpirationPeriod ref="expirationPeriod" />
     </b-modal>
@@ -155,7 +176,8 @@
       hide-footer
       size="lg"
       body-class="p-0"
-      @hide="closeModal"
+      @hide="closeModal('modal-promotion-campaign')"
+      :centered="mobile"
     >
       <PromotionCampaign ref="promotionCampaign" />
     </b-modal>
@@ -172,6 +194,7 @@ import FollowTimeline from '@components/modals/FollowTimeline.vue'
 import CropImage from '@components/modals/CropImage.vue'
 import PurchasePost from '@components/modals/PurchasePost.vue'
 import SendTip from '@components/modals/SendTip.vue'
+import VaultSelectorModal from '@components/modals/VaultSelector.vue'
 import PostDisplay from '@components/posts/Display'
 import ImageDisplay from '@components/timelines/elements/ImageDisplay'
 import ScheduleDateTime from '@components/modals/ScheduleDateTime.vue'
@@ -190,6 +213,7 @@ export default {
     PurchasePost,
     PurchaseMessage,
     SendTip,
+    VaultSelectorModal,
     PostDisplay,
     ImageDisplay,
     ScheduleDateTime,
@@ -200,11 +224,12 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState([ 'session_user', 'timeline', ]) // %TODO: may be able to drop timeline here (?)
+    ...Vuex.mapState([ 'session_user', 'timeline', 'mobile' ]) // %TODO: may be able to drop timeline here (?)
   },
 
   data: () => ({
     references: {
+      'modal-vault-selector': 'selectFromVault',
       'modal-tip': 'sendTip',
       'modal-purchase-post': 'purchasePost',
       'modal-follow': 'followTimeline',
@@ -242,6 +267,11 @@ export default {
           case 'render-purchase-message':
             this.selectedResource = data.message
             this.$bvModal.show('modal-purchase-message')
+            break
+
+          case 'render-vault-selector':
+            this.modalPayload = data
+            this.$bvModal.show('modal-vault-selector')
             break
 
           case 'render-follow':
@@ -309,7 +339,8 @@ export default {
         eventBus.$emit('post-modal-actions', action);
       }
     },
-    closeModal() {
+    closeModal(modalId) {
+      this.$bvModal.hide(modalId)
       eventBus.$emit('close-modal');
     },
     startHandler(event) {

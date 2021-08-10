@@ -23,20 +23,27 @@ class EarningsController extends Controller
     public function index(Request $request)
     {
         $request->validate([
-            'from' => 'date',
-            'to' => 'date',
+            'from'     => 'date',
+            'to'       => 'date',
+            'ago_unit' => 'string',
+            'ago'      => 'numeric',
         ]);
 
         $DAYS_BACK = 3000;
-        $from = $request->has('from') ? new Carbon($request->from) : Carbon::now()->subDays($DAYS_BACK);
+        $ago_unit = $request->has('ago_unit') ? $request->ago_unit : 'day';
+        $ago = $request->has('ago') ? $request->ago : $DAYS_BACK;
+
+        $from = $request->has('from') ? new Carbon($request->from) : Carbon::now()->sub($ago_unit, $ago);
         $to   = $request->has('to')   ? new Carbon($request->to)   : Carbon::now();
+
+        [ $system, $currency ] = $this->systemAndCurrency($request);
 
         // Get summary items
         $user = Auth::user();
-        $account = $user->getInternalAccount(Config::get('transactions.default'), Config::get('transactions.defaultCurrency'));
+        $account = $user->getEarningsAccount($system, $currency);
         $credits = $account->transactions()
             ->select('type', DB::raw('SUM(credit_amount) as total, COUNT(*) as count'))
-            ->where('credit_amount', '>', 0)->orderBy('settled_at', 'desc')
+            ->isCredit()->settled()
             ->whereIn('type', [
                 TransactionTypeEnum::SALE,
                 TransactionTypeEnum::TIP,
@@ -48,7 +55,7 @@ class EarningsController extends Controller
 
         $debits = $account->transactions()
             ->select('type', DB::raw('SUM(debit_amount) as total, COUNT(*) as count'))
-            ->where('debit_amount', '>', 0)->orderBy('settled_at', 'desc')
+            ->isDebit()->settled()
             ->whereIn('type', [
                 TransactionTypeEnum::FEE,
                 TransactionTypeEnum::CHARGEBACK,
@@ -74,9 +81,12 @@ class EarningsController extends Controller
 
         return [
             'credits' => [
-                TransactionTypeEnum::SALE => $credits->firstWhere('type', TransactionTypeEnum::SALE) ?? [ 'total' => 0, 'count' => 0 ],
-                TransactionTypeEnum::TIP => $credits->firstWhere('type', TransactionTypeEnum::TIP) ?? ['total' => 0, 'count' => 0],
-                TransactionTypeEnum::SUBSCRIPTION => $credits->firstWhere('type', TransactionTypeEnum::SUBSCRIPTION) ?? ['total' => 0, 'count' => 0],
+                TransactionTypeEnum::SALE =>
+                    $credits->firstWhere('type', TransactionTypeEnum::SALE) ?? [ 'total' => 0, 'count' => 0 ],
+                TransactionTypeEnum::TIP =>
+                    $credits->firstWhere('type', TransactionTypeEnum::TIP) ?? ['total' => 0, 'count' => 0],
+                TransactionTypeEnum::SUBSCRIPTION =>
+                    $credits->firstWhere('type', TransactionTypeEnum::SUBSCRIPTION) ?? ['total' => 0, 'count' => 0],
             ],
             'debits' => [
                 TransactionTypeEnum::FEE => $debits->firstWhere('type', TransactionTypeEnum::FEE) ?? ['total' => 0, 'count' => 0],
@@ -90,14 +100,17 @@ class EarningsController extends Controller
 
     public function balances(Request $request)
     {
-        $account = $request->user()->getInternalAccount(
-            Config::get('transactions.default'),
-            Config::get('transactions.defaultCurrency')
-        );
+
+
+        [ $system, $currency ] = $this->systemAndCurrency($request);
+
+        $account = $request->user()->getEarningsAccount($system, $currency);
 
         return [
-            'available' => $account->balance,
+            'balance' => $account->balance,
+            'balance_last_updated_at' => $account->balance_last_updated_at,
             'pending' => $account->pending,
+            'pending_last_updated_at' => $account->pending_last_updated_at,
         ];
     }
 
@@ -109,12 +122,42 @@ class EarningsController extends Controller
      */
     public function transactions(Request $request)
     {
+        $request->validate([
+            'from' => 'date',
+            'to' => 'date',
+        ]);
+
+        [ $system, $currency ] = $this->systemAndCurrency($request);
+
         $user = Auth::user();
-        $account = $user->getInternalAccount(Config::get('transactions.default'), Config::get('transactions.defaultCurrency'));
-        $query = $account->transactions()->where('credit_amount', '>', 0)->orderBy('settled_at', 'desc')
-            ->whereIn('type', [ TransactionTypeEnum::SALE, TransactionTypeEnum::TIP, TransactionTypeEnum::SUBSCRIPTION ]);
+        $account = $user->getEarningsAccount($system, $currency);
+        $query = $account->transactions()
+            ->where('credit_amount', '>', 0)
+            ->orderBy('settled_at', 'desc')
+            ->whereIn('type', Config::get("transactions.systems.$system.feesOn")); // Get only transactions that have fees taken out on them
 
         $data = $query->paginate($request->input('take', Config::get('collections.max.transactions', 20)));
         return new TransactionCollection($data);
     }
+
+    /**
+     * Shared system and currency prams from request.
+     *
+     * @param Request $request
+     * @return array [ 'system', 'currency' ]
+     */
+    private function systemAndCurrency(Request $request): array
+    {
+        $request->validate([
+            'system'   => 'string',
+            'currency' => 'size:3',
+        ]);
+
+        return [
+            $request->has('system')   ? $request->system   : Config::get('transactions.default'),
+            $request->has('currency') ? $request->currency : Config::get('transactions.defaultCurrency'),
+        ];
+    }
+
+
 }

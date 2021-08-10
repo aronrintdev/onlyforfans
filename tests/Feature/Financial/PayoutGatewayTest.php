@@ -3,12 +3,12 @@
 namespace Tests\Feature\Financial;
 
 use Tests\TestCase;
+use App\Models\User;
 use App\Models\Financial\Account;
 use App\Models\Financial\AchAccount;
 use Tests\traits\Financial\NoHoldPeriod;
 use Tests\Helpers\Financial\AccountHelpers;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
  * @group payouts
@@ -18,7 +18,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
  */
 class PayoutGatewayTest extends TestCase
 {
-    use RefreshDatabase, WithFaker, NoHoldPeriod;
+    use WithFaker, NoHoldPeriod;
 
     protected $connectionName = 'financial';
 
@@ -32,11 +32,15 @@ class PayoutGatewayTest extends TestCase
     {
         // Seed
         $inAccount = Account::factory()->asIn()->create();
-        $inAccount->moveToInternal(10000);
+        $inAccount->moveToWallet(10000);
+        $wallet = $inAccount->getWalletAccount();
 
         $achAccount = AchAccount::factory()->forUser($inAccount->owner)->create();
+        $earnings = $achAccount->account->getEarningsAccount();
 
-        $response = $this->actingAs($inAccount->owner)->ajaxJSON('POST', route('payouts.request'), [
+        $wallet->moveTo($earnings, 10000, [ 'ignoreBalance' => true ]);
+
+        $response = $this->actingAs($earnings->owner)->ajaxJSON('POST', route('payouts.request'), [
             'account_id' => $achAccount->account->getKey(),
             'amount'     => 10000,
             'currency'   => $achAccount->account->currency,
@@ -54,7 +58,7 @@ class PayoutGatewayTest extends TestCase
     public function test_cannot_request_payout_higher_than_balance()
     {
         $inAccount = Account::factory()->asIn()->create();
-        $inAccount->moveToInternal(10000);
+        $inAccount->moveToWallet(10000);
 
         $achAccount = AchAccount::factory()->forUser($inAccount->owner)->create();
 

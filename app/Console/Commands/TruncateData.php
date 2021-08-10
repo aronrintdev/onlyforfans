@@ -45,6 +45,9 @@ class TruncateData extends Command
             case 'shareables':
                 $list = self::$shareablesList;
                 break;
+            case 'financial':
+                $list = self::$financialList;
+                break;
         }
 
         foreach ( $list['tables'] as $t ) {
@@ -76,6 +79,29 @@ class TruncateData extends Command
         $mf->delete();
     }
 
+    private static $financialList = [
+        'models' => [
+            \App\Models\Financial\Account::class,
+            \App\Models\Financial\AchAccount::class,
+            \App\Models\Financial\Earnings::class,
+            \App\Models\Financial\Flag::class,
+            \App\Models\Financial\PayoutBatch::class,
+            \App\Models\Financial\SegpayCall::class,
+            \App\Models\Financial\SegpayCard::class,
+            \App\Models\Financial\SystemOwner::class,
+            \App\Models\Financial\Transaction::class,
+            \App\Models\Financial\TransactionSummary::class,
+            \App\Models\Financial\Wallet::class,
+
+            \App\Models\Comment::class,
+            \App\Models\Tip::class,
+            \App\Models\Subscription::class,
+        ],
+        'tables' => [
+            'shareables',
+        ],
+    ];
+
     private static $shareablesList = [
         'models' => [
             \App\Models\Financial\Transaction::class,
@@ -83,8 +109,10 @@ class TruncateData extends Command
             \App\Models\Financial\Flag::class,
         ],
         'tables' => [
+            'comments',
             'shareables',
             'subscriptions',
+            'tips',
         ],
 
     ];

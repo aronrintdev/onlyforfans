@@ -1,35 +1,28 @@
 <?php
 namespace App\Models;
 
-use App\Enums\Financial\AccountTypeEnum;
 use App\Enums\ShareableAccessLevelEnum;
-use DB;
-use Auth;
-
-use App\Interfaces\Ownable;
+use App\Enums\VerifyStatusTypeEnum;
 use App\Interfaces\Blockable;
 use App\Interfaces\HasFinancialAccounts;
-use App\Interfaces\ShortUuid;
+use App\Interfaces\Ownable;
+use App\Models\Financial\Account;
+use App\Models\Financial\Traits\HasFinancialAccounts as HasFinancialAccountsTrait;
+use App\Models\Traits\MorphFunctions;
 use App\Models\Traits\UsesUuid;
 use App\Notifications\PasswordReset as PasswordResetNotification;
-
-use App\Interfaces\PaymentSendable;
-use App\Models\Financial\Account;
-use App\Models\Traits\MorphFunctions;
-use App\Models\Traits\UsesShortUuid;
+use Auth;
 use Carbon\Carbon;
-use Spatie\Permission\Traits\HasRoles;
 use Cmgmyr\Messenger\Traits\Messagable;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use DB;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use InvalidArgumentException;
 use Laravel\Scout\Searchable;
-
-use App\Enums\VerifyStatusTypeEnum;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Spatie\Permission\Traits\HasRoles;
 
 /**
  * @property string      $id                 `uuid` | `unique`
@@ -51,14 +44,15 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
  */
 class User extends Authenticatable implements Blockable, HasFinancialAccounts, MustVerifyEmail
 {
-    use HasRoles,
-        HasFactory,
+    use HasFactory,
+        HasFinancialAccountsTrait,
+        HasRoles,
         Messagable,
-        SoftDeletes,
-        UsesUuid,
         MorphFunctions,
         Notifiable,
-        Searchable;
+        Searchable,
+        SoftDeletes,
+        UsesUuid;
 
     /* ---------------------------------------------------------------------- */
     /*                            Model Properties                            */
@@ -590,50 +584,19 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
         return $sales > 0;
     }
 
-    /* ---------------------------------------------------------------------- */
-    /*                          HasFinancialAccounts                          */
-    /* ---------------------------------------------------------------------- */
-    #region HasFinancialAccounts
-    public function getInternalAccount(string $system, string $currency): Account
-    {
-        $account = $this->financialAccounts()->where('system', $system)
-            ->where('currency', $currency)
-            ->where('type', AccountTypeEnum::INTERNAL)
-            ->first();
-        if (isset($account)) {
-            return $account;
-        }
-        return $this->createInternalAccount($system, $currency);
-    }
-
-    public function createInternalAccount(string $system, string $currency): Account
-    {
-        $account = Account::create([
-            'system' => $system,
-            'owner_type' => $this->getMorphString(),
-            'owner_id' => $this->getKey(),
-            'name' => $this->username . ' Balance Account',
-            'type' => AccountTypeEnum::INTERNAL,
-            'currency' => $currency,
-            'balance' => 0,
-            'balance_last_updated_at' => Carbon::now(),
-            'pending' => 0,
-            'pending_last_updated_at' => Carbon::now(),
-        ]);
-        $account->verified = true;
-        $account->can_make_transactions = true;
-        $account->save();
-        return $account;
-    }
-
-    #endregion HasFinancialAccounts
-    /* ---------------------------------------------------------------------- */
-
     // %%% --- Misc. ---
 
     // https://laravel.com/docs/8.x/passwords#reset-email-customization
     public function sendPasswordResetNotification($token) {
-        $this->notify( new PasswordResetNotification($user, ['token'=>$token]) );
+        $this->notify( new PasswordResetNotification($this, ['token' => $token]) );
+    }
+
+    public function scopeIsAdmin($query, $opposite = false) {
+        return ($opposite ? $query->whereDoesntHave('roles')->orWhereHas('roles', function($q) {
+            $q->whereNotIn('name', ['super-admin', 'admin']);
+        }) : $query->whereHas('roles', function($q) {
+            $q->whereIn('name', ['super-admin', 'admin']);
+        }));
     }
 
 }

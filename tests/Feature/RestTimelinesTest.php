@@ -567,13 +567,13 @@ class RestTimelinesTest extends TestCase
 
         // Amount from fan to creator
         $this->assertDatabaseHas('transactions', [
-            'account_id'   => $fan->getInternalAccount('segpay', 'USD')->getKey(),
+            'account_id'   => $fan->getWalletAccount('segpay', 'USD')->getKey(),
             'debit_amount' => $payload['amount'],
         ], 'financial');
 
         // Amount to creator from fan
         $this->assertDatabaseHas('transactions', [
-            'account_id'    => $creator->getInternalAccount('segpay', 'USD')->getKey(),
+            'account_id'    => $creator->getEarningsAccount('segpay', 'USD')->getKey(),
             'credit_amount' => $payload['amount'],
         ], 'financial');
     }
@@ -739,14 +739,14 @@ class RestTimelinesTest extends TestCase
 
         // Amount from fan to creator
         $this->assertDatabaseHas('transactions', [
-            'account_id' => $fan->getInternalAccount('segpay', 'USD')->getKey(),
+            'account_id' => $fan->getWalletAccount('segpay', 'USD')->getKey(),
             'debit_amount' => $timeline->price->getAmount(),
             'resource_id' => $timeline->getKey(),
         ], 'financial');
 
         // Amount to creator from fan
         $this->assertDatabaseHas('transactions', [
-            'account_id' => $creator->getInternalAccount('segpay', 'USD')->getKey(),
+            'account_id' => $creator->getEarningsAccount('segpay', 'USD')->getKey(),
             'credit_amount' => $timeline->price->getAmount(),
             'resource_id' => $timeline->getKey(),
         ], 'financial');

@@ -4,6 +4,7 @@ namespace App\Events;
 
 use App\Interfaces\Tippable;
 use App\Models\Financial\Account;
+use App\Models\Tip;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -17,7 +18,7 @@ class TipFailed implements ShouldBroadcast
     /**
      * The Item that was purchased
      *
-     * @var Tippable
+     * @var Tip
      */
     public $item;
 
@@ -40,7 +41,7 @@ class TipFailed implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct(Tippable $item, Account $account, string $message = '')
+    public function __construct(Tip $item, Account $account, string $message = '')
     {
         $this->item    = $item->withoutRelations();
         $this->account = $account->withoutRelations();
@@ -68,8 +69,8 @@ class TipFailed implements ShouldBroadcast
     public function broadcastWith()
     {
         return [
-            'item_type'  => $this->item->getMorphString(),
-            'item_id'    => $this->item->getKey(),
+            'item_type'  => $this->item->tippable->getMorphString(),
+            'item_id'    => $this->item->tippable->getKey(),
             'account_id' => $this->account->getKey(),
             'message'    => $this->message,
         ];

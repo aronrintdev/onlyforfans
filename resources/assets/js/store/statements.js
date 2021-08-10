@@ -18,7 +18,7 @@ export const statements = {
      * Creator Balances
      */
     balances: {
-      available: { amount: 0, currency: 'USD' },
+      balances: { amount: 0, currency: 'USD' },
       pending: { amount: 0, currency: 'USD' },
     },
 

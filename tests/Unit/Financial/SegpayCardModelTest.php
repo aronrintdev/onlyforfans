@@ -2,8 +2,6 @@
 
 namespace Tests\Unit\Financial;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
 /**
  * @group unit
  * @group financial
@@ -11,8 +9,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
  */
 class SegpayCardModelTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      *
      */

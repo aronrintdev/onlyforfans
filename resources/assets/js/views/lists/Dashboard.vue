@@ -3,7 +3,7 @@
 
     <section class="row">
       <article class="col-sm-12">
-        <h1>Fans</h1>
+        <h4>Fans</h4>
       </article>
     </section>
 

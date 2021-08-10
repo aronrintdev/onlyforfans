@@ -43,6 +43,9 @@ export default {
   z-index: 2000;
   background-color: var(--light);
 }
+.site-loading-logo {
+  width: 154px;
+}
 </style>
 
 <i18n lang="json5" scoped>
