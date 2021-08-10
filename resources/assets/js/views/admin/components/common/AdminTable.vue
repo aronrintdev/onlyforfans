@@ -27,8 +27,8 @@
         <span @click="doEmit('render-show', data.item)" class="clickable">{{ data.item.id | niceGuid }}</span>
       </template>
       <template #cell(ctrls)="data">
-        <span class="">
-          <fa-icon @click="doEmit('render-ellipsis', data.item)" :icon="['fas', 'ellipsis-h']" class="clickable fa-sm" />
+        <span @click="doEmit('render-ellipsis', data.item)">
+          <fa-icon :icon="['fas', 'ellipsis-h']" class="clickable fa-sm" />
         </span>
         <span @click="doEmit('render-flag', data.item)" class="">
           <fa-icon v-if="flagCount(data.item)>0" :icon="['fas', 'flag']" class="clickable fa-sm text-danger" />

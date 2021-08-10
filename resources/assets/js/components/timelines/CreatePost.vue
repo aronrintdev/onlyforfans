@@ -491,7 +491,7 @@ export default {
 
    if ( this.$route.params.context ) {
      switch( this.$route.params.context ) {
-       case 'vault-via-postcreate': // we got here from the vault, likely with mediafiles to attach to a new post
+       case 'mediafiles-selected-in-vault': // we got here from the vault, likely with mediafiles to attach to a new post
          const mediafileIds = this.$route.params.mediafile_ids || []
          if ( mediafileIds.length ) {
            // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
