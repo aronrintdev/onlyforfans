@@ -51,7 +51,7 @@ abstract class TestCase extends BaseTestCase
     }
 
     protected function setupDatabase() {
-        if (1) { 
+        if (1) {
             //$this->output->writeln('setupDatabase -- copy template sqlite to test file...');
             dump('setupDatabase -- copy template sqlite to test file...');
             // use File:copy(?)

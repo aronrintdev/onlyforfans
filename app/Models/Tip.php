@@ -195,12 +195,12 @@ class Tip extends Model implements Messagable
         // Create transaction record
         $ignoreBalance = false;
         if ($this->account->type === AccountTypeEnum::IN) {
-            $inTransactions = $this->account->moveToInternal($this->amount);
+            $inTransactions = $this->account->moveToWallet($this->amount);
             $ignoreBalance = true;
         }
 
-        $transactions = $this->account->getInternalAccount()->moveTo(
-            $this->receiver->getInternalAccount($this->account->system, $this->account->currency),
+        $transactions = $this->account->getWalletAccount()->moveTo(
+            $this->receiver->getEarningsAccount($this->account->system, $this->account->currency),
             $this->amount,
             [
                 'ignoreBalance'    => $ignoreBalance,

@@ -9,8 +9,8 @@ use Tests\traits\Financial\NoHoldPeriod;
 use Tests\Helpers\Financial\AccountHelpers;
 use App\Models\Financial\TransactionSummary;
 use App\Jobs\StartTransactionSummaryCreation;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Enums\Financial\TransactionSummaryTypeEnum;
+use App\Enums\Financial\TransactionTypeEnum;
 
 /**
  * Unit test cases related to `App\Models\Financial\TransactionSummary` model
@@ -21,7 +21,7 @@ use App\Enums\Financial\TransactionSummaryTypeEnum;
  */
 class TransactionSummaryModelTest extends TestCase
 {
-    use RefreshDatabase, NoHoldPeriod;
+    use NoHoldPeriod;
 
     public $inAccount;
     public $fanAccount;
@@ -34,14 +34,21 @@ class TransactionSummaryModelTest extends TestCase
         $this->fanAccount = $accounts[0];
         $this->creatorAccount = $accounts[1];
 
-        $this->inAccount = Account::factory()->asIn()->sameOwnerAs($this->fanAccount)->create();
+        $this->inAccount = Account::factory()->asIn()->create();
 
-        $this->inAccount->moveTo($this->fanAccount, 10000);
+        $this->inAccount->moveToWallet(10000);
+        $this->fanAccount = $this->inAccount->getWalletAccount();
 
-        $accounts[0]->moveTo($accounts[1], 1000);
-        $accounts[0]->moveTo($accounts[1], 2000);
-        $accounts[0]->moveTo($accounts[1], 3000);
-        $accounts[0]->moveTo($accounts[1], 2000);
+        $this->fanAccount->settleBalance();
+        $this->fanAccount->save();
+
+        $this->fanAccount->moveTo($this->creatorAccount, 1000, [ 'type' => TransactionTypeEnum::SALE ]);
+        $this->fanAccount->moveTo($this->creatorAccount, 2000, [ 'type' => TransactionTypeEnum::SALE ]);
+        $this->fanAccount->moveTo($this->creatorAccount, 3000, [ 'type' => TransactionTypeEnum::SALE ]);
+        $this->fanAccount->moveTo($this->creatorAccount, 2000, [ 'type' => TransactionTypeEnum::SALE ]);
+
+        $this->creatorAccount->settleBalance();
+        $this->creatorAccount->save();
     }
 
     /**

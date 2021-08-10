@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Event;
 use App\Enums\Financial\TransactionTypeEnum;
 use App\Events\FinancialFlagRaised;
 use App\Jobs\Financial\UpdateAccountBalance;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
 use App\Models\Financial\Exceptions\TransactionAccountMismatchException;
+use App\Models\User;
 use Tests\Helpers\Financial\AccountHelpers;
 use Tests\traits\Financial\NoHoldPeriod;
 
@@ -20,14 +20,13 @@ use Tests\traits\Financial\NoHoldPeriod;
  * @group unit
  * @group financial
  * @group financial-chargeback
+ * @group regression-financial
  *
  * @package Tests\Unit\Financial
  */
 class ChargebackTest extends TestCase
 {
-    use RefreshDatabase,
-        NoHoldPeriod;
-
+    use NoHoldPeriod;
 
     #region Error Handling
 
@@ -39,11 +38,11 @@ class ChargebackTest extends TestCase
     {
         Event::fake([UpdateAccountBalance::class]);
         $inAccount = Account::factory()->asIn()->create();
-        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
-        $transactions = $inAccount->moveToInternal(1000);
+        $walletAccount = $inAccount->owner->getWalletAccount($this->defaultSystem, $this->defaultCurrency);
+        $transactions = $inAccount->moveToWallet(1000);
 
         $this->expectException(IncorrectTypeException::class);
-        $internalAccount->handleChargeback($transactions['credit']);
+        $walletAccount->handleChargeback($transactions['credit']);
     }
 
     /**
@@ -54,8 +53,8 @@ class ChargebackTest extends TestCase
     {
         Event::fake([UpdateAccountBalance::class]);
         $inAccount = Account::factory()->asIn()->create();
-        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
-        $transactions = $inAccount->moveToInternal(1000);
+        $walletAccount = $inAccount->owner->getWalletAccount($this->defaultSystem, $this->defaultCurrency);
+        $transactions = $inAccount->moveToWallet(1000);
         $this->expectException(TransactionAccountMismatchException::class);
         $inAccount->handleChargeback($transactions['credit']);
     }
@@ -75,7 +74,7 @@ class ChargebackTest extends TestCase
         [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
 
         $creatorAccount = Account::factory()->asInternal()->create();
-        $paymentTransactions = $internalAccount->moveTo($creatorAccount, 1000);
+        $paymentTransactions = $internalAccount->moveTo($creatorAccount, 1000, ['type' => TransactionTypeEnum::SALE]);
 
         // Do Chargeback before creators account ballance and fees are settled.
         $chargebackTransactions = $inAccount->handleChargeback($chargebackTransaction);
@@ -127,9 +126,10 @@ class ChargebackTest extends TestCase
 
         [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
 
-        $creatorAccount = Account::factory()->asInternal()->create();
+        $creator = User::factory()->create();
+        $creatorAccount = Account::factory()->asEarnings($creator)->create();
         // Payment to creator
-        $paymentTransactions = $internalAccount->moveTo($creatorAccount, 1000);
+        $paymentTransactions = $internalAccount->moveTo($creatorAccount, 1000, [ 'type' => TransactionTypeEnum::SALE ]);
 
         // Settle all balances
         AccountHelpers::settleAccounts([
@@ -225,9 +225,9 @@ class ChargebackTest extends TestCase
         $creatorAccount2 = Account::factory()->asInternal()->create();
         $creatorAccount3 = Account::factory()->asInternal()->create();
 
-        $internalAccount->moveTo($creatorAccount1, 500);
-        $internalAccount->moveTo($creatorAccount2, 300);
-        $internalAccount->moveTo($creatorAccount3, 200);
+        $internalAccount->moveTo($creatorAccount1, 500, ['type' => TransactionTypeEnum::SALE]);
+        $internalAccount->moveTo($creatorAccount2, 300, ['type' => TransactionTypeEnum::SALE]);
+        $internalAccount->moveTo($creatorAccount3, 200, ['type' => TransactionTypeEnum::SALE]);
 
         // Chargeback
         $inAccount->handleChargeback($chargebackTransaction);
@@ -285,9 +285,9 @@ class ChargebackTest extends TestCase
         $creatorAccount2 = Account::factory()->asInternal()->create();
         $creatorAccount3 = Account::factory()->asInternal()->create();
 
-        $internalAccount->moveTo($creatorAccount1, 500);
-        $internalAccount->moveTo($creatorAccount2, 300);
-        $internalAccount->moveTo($creatorAccount3, 200);
+        $internalAccount->moveTo($creatorAccount1, 500, [ 'type' => TransactionTypeEnum::SALE ]);
+        $internalAccount->moveTo($creatorAccount2, 300, [ 'type' => TransactionTypeEnum::SALE ]);
+        $internalAccount->moveTo($creatorAccount3, 200, [ 'type' => TransactionTypeEnum::SALE ]);
 
         $platformFeesAccount = Account::getFeeAccount('platformFee', $this->defaultSystem, $this->defaultCurrency);
         $taxAccount = Account::getFeeAccount('tax', $this->defaultSystem, $this->defaultCurrency);
@@ -377,9 +377,9 @@ class ChargebackTest extends TestCase
         $creatorAccount2 = Account::factory()->asInternal()->create();
         $creatorAccount3 = Account::factory()->asInternal()->create();
 
-        $internalAccount->moveTo($creatorAccount1, 500);
-        $internalAccount->moveTo($creatorAccount2, 300);
-        $internalAccount->moveTo($creatorAccount3, 200);
+        $internalAccount->moveTo($creatorAccount1, 500, [ 'type' => TransactionTypeEnum::SALE ]);
+        $internalAccount->moveTo($creatorAccount2, 300, [ 'type' => TransactionTypeEnum::SALE ]);
+        $internalAccount->moveTo($creatorAccount3, 200, [ 'type' => TransactionTypeEnum::SALE ]);
 
         $platformFeesAccount = Account::getFeeAccount('platformFee', $this->defaultSystem, $this->defaultCurrency);
         $taxAccount = Account::getFeeAccount('tax', $this->defaultSystem, $this->defaultCurrency);
@@ -461,10 +461,10 @@ class ChargebackTest extends TestCase
         Event::fake([UpdateAccountBalance::class]);
         // User's accounts
         $inAccount = Account::factory()->asIn()->create();
-        $internalAccount = $inAccount->owner->getInternalAccount($this->defaultSystem, $this->defaultCurrency);
-        $transactions = $inAccount->moveToInternal(900);
-        $inAccount->moveToInternal(100);
-        AccountHelpers::settleAccounts([$inAccount, $internalAccount]);
+        $walletAccount = $inAccount->owner->getWalletAccount($this->defaultSystem, $this->defaultCurrency);
+        $transactions = $inAccount->moveToWallet(900);
+        $inAccount->moveToWallet(100);
+        AccountHelpers::settleAccounts([$inAccount, $walletAccount]);
         $chargebackTransaction = $transactions['debit'];
 
         // Payments to multiple creators
@@ -472,9 +472,9 @@ class ChargebackTest extends TestCase
         $creatorAccount2 = Account::factory()->asInternal()->create();
         $creatorAccount3 = Account::factory()->asInternal()->create();
 
-        $internalAccount->moveTo($creatorAccount1, 500);
-        $internalAccount->moveTo($creatorAccount2, 300);
-        $internalAccount->moveTo($creatorAccount3, 200);
+        $walletAccount->moveTo($creatorAccount1, 500, [ 'type' => TransactionTypeEnum::SALE ]);
+        $walletAccount->moveTo($creatorAccount2, 300, [ 'type' => TransactionTypeEnum::SALE ]);
+        $walletAccount->moveTo($creatorAccount3, 200, [ 'type' => TransactionTypeEnum::SALE ]);
 
         $platformFeesAccount = Account::getFeeAccount('platformFee', $this->defaultSystem, $this->defaultCurrency);
         $taxAccount = Account::getFeeAccount('tax', $this->defaultSystem, $this->defaultCurrency);
@@ -482,7 +482,7 @@ class ChargebackTest extends TestCase
         // Settle balances and fees
         AccountHelpers::settleAccounts([
             $inAccount,
-            $internalAccount,
+            $walletAccount,
             $creatorAccount1,
             $creatorAccount2,
             $creatorAccount3,
@@ -524,7 +524,7 @@ class ChargebackTest extends TestCase
             'credit_amount' => 100,
         ], $this->getConnectionString());
         $this->assertDatabaseHas($this->tableNames['transaction'], [
-            'account_id' => $internalAccount->getKey(),
+            'account_id' => $walletAccount->getKey(),
             'type' => TransactionTypeEnum::CHARGEBACK,
             'debit_amount' => 900,
         ], $this->getConnectionString());
@@ -536,7 +536,7 @@ class ChargebackTest extends TestCase
 
         AccountHelpers::settleAccounts([
             $inAccount,
-            $internalAccount,
+            $walletAccount,
             $creatorAccount1,
             $creatorAccount2,
             $creatorAccount3,
@@ -545,7 +545,7 @@ class ChargebackTest extends TestCase
         ]);
 
         $this->assertHasBalanceOf(-100, $inAccount);
-        $this->assertHasBalanceOf(0, $internalAccount);
+        $this->assertHasBalanceOf(0, $walletAccount);
         $this->assertHasBalanceOf(0, $creatorAccount1);
         $this->assertHasBalanceOf(0, $creatorAccount2);
         // 65% of 100
@@ -571,7 +571,7 @@ class ChargebackTest extends TestCase
         $creatorAccount = Account::factory()->asInternal()->create();
         $creatorOutAccount = Account::factory()->asOut()->sameOwnerAs($creatorAccount)->create();
 
-        $internalAccount->moveTo($creatorAccount, 1000);
+        $internalAccount->moveTo($creatorAccount, 1000, ['type' => TransactionTypeEnum::SALE]);
 
         $platformFeesAccount = Account::getFeeAccount('platformFee', $this->defaultSystem, $this->defaultCurrency);
         $taxAccount = Account::getFeeAccount('tax', $this->defaultSystem, $this->defaultCurrency);
@@ -642,9 +642,9 @@ class ChargebackTest extends TestCase
         [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
 
         $creatorAccount = Account::factory()->asInternal()->create();
-        $internalAccount->moveTo($creatorAccount, 1000);
+        $internalAccount->moveTo($creatorAccount, 1000, ['type' => TransactionTypeEnum::SALE]);
 
-        $inAccount->moveToInternal(300);
+        $inAccount->moveToWallet(300);
         AccountHelpers::settleAccounts([$inAccount, $internalAccount, $creatorAccount]);
 
         $inAccount->handleChargeback($chargebackTransaction);
@@ -667,9 +667,9 @@ class ChargebackTest extends TestCase
         [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
 
         $creatorAccount = Account::factory()->asInternal()->create();
-        $internalAccount->moveTo($creatorAccount, 1000);
+        $internalAccount->moveTo($creatorAccount, 1000, ['type' => TransactionTypeEnum::SALE]);
 
-        $inAccount->moveToInternal(1000);
+        $inAccount->moveToWallet(1000);
         AccountHelpers::settleAccounts([$inAccount, $internalAccount, $creatorAccount]);
 
         $inAccount->handleChargeback($chargebackTransaction);
@@ -691,9 +691,9 @@ class ChargebackTest extends TestCase
         [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
 
         $creatorAccount = Account::factory()->asInternal()->create();
-        $internalAccount->moveTo($creatorAccount, 1000);
+        $internalAccount->moveTo($creatorAccount, 1000, ['type' => TransactionTypeEnum::SALE]);
 
-        $inAccount->moveToInternal(1200);
+        $inAccount->moveToWallet(1200);
         AccountHelpers::settleAccounts([$inAccount, $internalAccount, $creatorAccount]);
 
         $inAccount->handleChargeback($chargebackTransaction);
@@ -714,7 +714,7 @@ class ChargebackTest extends TestCase
 
         [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
         $creatorAccount = Account::factory()->asInternal()->create();
-        $internalAccount->moveTo($creatorAccount, 1000);
+        $internalAccount->moveTo($creatorAccount, 1000, ['type' => TransactionTypeEnum::SALE]);
 
         $inAccount->handleChargeback($chargebackTransaction);
         AccountHelpers::settleAccounts([$inAccount, $internalAccount, $creatorAccount]);
@@ -728,7 +728,7 @@ class ChargebackTest extends TestCase
 
         [$inAccount, $internalAccount, $chargebackTransaction] = $this->setupUserAccounts(1000);
         $creatorAccount = Account::factory()->asInternal()->create();
-        $internalAccount->moveTo($creatorAccount, 1000);
+        $internalAccount->moveTo($creatorAccount, 1000, ['type' => TransactionTypeEnum::SALE]);
 
         $inAccount->handleChargeback($chargebackTransaction);
         AccountHelpers::settleAccounts([$inAccount, $internalAccount, $creatorAccount]);

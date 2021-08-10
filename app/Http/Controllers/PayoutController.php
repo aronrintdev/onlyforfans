@@ -31,7 +31,7 @@ class PayoutController extends Controller
         $outAccount = Account::find($request->account_id);
         $this->authorize('payout', $outAccount);
 
-        $internalAccount = $outAccount->getInternalAccount();
+        $internalAccount = $outAccount->getEarningsAccount();
 
         // Verify available balance
         $amount = Money::toMoney($request->amount, $request->currency);

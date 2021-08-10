@@ -182,9 +182,9 @@ class TransactionsBuilder
         $transactions = new Collection([]);
         // Check if need to move to Internal account first.
         if ($debitAccount->type === AccountTypeEnum::IN) {
-            if ($debitAccount->getInternalAccount()->id !== $creditAccount->id) {
-                $transactions = $transactions->moveToInternal($amount);
-                $debitAccount = $debitAccount->getInternalAccount();
+            if ($debitAccount->getWalletAccount()->id !== $creditAccount->id) {
+                $transactions = $transactions->moveToWallet($amount);
+                $debitAccount = $debitAccount->getWalletAccount();
                 $debitAccount->settleBalance();
             }
         }

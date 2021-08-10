@@ -271,16 +271,16 @@ class Subscription extends Model implements Ownable
         }
 
         if ($this->account->type === AccountTypeEnum::IN) {
-            $inTransactions = $this->account->moveToInternal($this->price);
-            $transactions = $this->account->getInternalAccount()->moveTo(
+            $inTransactions = $this->account->moveToWallet($this->price);
+            $transactions = $this->account->getWalletAccount()->moveTo(
                 $this->subscribable->getOwnerAccount($this->account->system, $this->account->currency),
                 $this->price,
                 [
-                    'ignoreBalance'    => true,
-                    'type'             => TransactionTypeEnum::SUBSCRIPTION,
+                    'ignoreBalance' => true,
+                    'type'          => TransactionTypeEnum::SUBSCRIPTION,
                     'resource_type' => $this->subscribable->getMorphString(),
                     'resource_id'   => $this->subscribable->getKey(),
-                    'metadata'         => ['subscription' => $this->getKey()],
+                    'metadata'      => ['subscription' => $this->getKey()],
                 ]
             );
             $this->last_transaction_id = $transactions['debit']->getKey();
