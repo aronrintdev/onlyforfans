@@ -117,7 +117,7 @@
               <b-col cols="12" md="4">
                 <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
                   <li class="w-100 mx-0">
-                    <button :disabled="posting || (!description && mediafiles.length === 0)" @click="savePost()" class="btn btn-submit btn-primary w-100">
+                    <button :disabled="posting || (!description && ( selectedMediafiles && selectedMediafiles.length === 0 ))" @click="savePost()" class="btn btn-submit btn-primary w-100">
                       <span v-if="posting" class="text-white spinner-border spinner-border-sm pr-2" role="status" aria-hidden="true"></span>
                       Post
                     </button>
