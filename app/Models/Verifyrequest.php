@@ -61,6 +61,7 @@ class Verifyrequest extends Model
             ->where('vstatus', VerifyStatusTypeEnum::PENDING)
             ->orderBy('created_at', 'desc')
             ->get();
+
         try { 
             $json = null; // default
             if ( $pending->count() > 0 ) {
@@ -84,6 +85,10 @@ class Verifyrequest extends Model
     
             // --
 
+            Log::info('App\Models\Verifyrequest::verifyUser().A -- calling Api/doVerify(): '.json_encode([
+                'userAttrs' => $userAttrs,
+            ]));
+
             $api = IdMeritApi::create();
             $response = $api->doVerify($userAttrs);
 
@@ -94,6 +99,10 @@ class Verifyrequest extends Model
             }
 
             $json['created_at'] = $now;
+            Log::info('App\Models\Verifyrequest::verifyUser().B -- processing response: '.json_encode([
+                'json' => $json,
+            ]));
+
             $cattrs = [
                 'vrequest_raw_request' => $userAttrs,
                 'vrequest_raw_response' => $json,
@@ -119,7 +128,7 @@ class Verifyrequest extends Model
 
         } catch (Exception $e) {
             Log::error( json_encode([
-                'src' => 'App/Models/Verifyreqeust::verifyUser()',
+                'src' => 'App/Models/Verifyreqeust::verifyUser().EXCEPTION',
                 'message' => $e->getMessage(),
                 'userId' => $userId,
                 'userAttrs' => $userAttrs ?? 'not-set',
@@ -141,19 +150,25 @@ class Verifyrequest extends Model
             ->where('vstatus', VerifyStatusTypeEnum::PENDING)
             ->orderBy('created_at', 'desc')
             ->get();
+
+// check_verify_status_response.scanImage
         try { 
             $json = null; 
             if ( !$pending->count() ) {
-                throw new Exception('checkStatus() - User has no verification request currently pending');
+                throw new Exception('App/Models/Verifyrequest::checkStatus() - User has no verification request currently pending');
             }
     
-            $vr = $pending[0];
+            $vr = $pending[0]; // latest pending request for this user
     
             if ( empty($vr->service_guid) ) {
-                throw new Exception('checkStatus() - Could not find guid from remote service request to lookup status: ', $vr->id);
+                throw new Exception('App/Models/Verifyrequest::checkStatus() - Could not find guid from remote service request to lookup status: ', $vr->id);
             }
 
             $uniqueID = $vr->service_guid;
+
+            Log::info('App\Models\Verifyrequest::verifyUser().A -- calling Api/checkStatus(): '.json_encode([
+                'uniqueID (service_guid)' => $uniqueID,
+            ]));
 
             $api = IdMeritApi::create();
             $response = $api->checkVerify($uniqueID);
@@ -161,8 +176,12 @@ class Verifyrequest extends Model
             $status = $response->status();
             $json = $response->json();
             if ($status !== 200) {
-                throw new Exception('checkStatus() - Verify service returned non-200 status: '.$status);
+                throw new Exception('App/Models/Verifyrequest::checkStatus() - Verify service returned non-200 status: '.$status);
             }
+
+            Log::info('App\Models\Verifyrequest::verifyUser().B -- processing response: '.json_encode([
+                'json' => $json,
+            ]));
 
             $cattrs = $vr->cattrs;
             if ( !array_key_exists('check_verify_status_response', $cattrs) ) {
@@ -185,7 +204,7 @@ class Verifyrequest extends Model
                 //$vr->vstatus =  VerifyStatusTypeEnum::PENDING; // no change
                 break;
             default:
-                throw new Exception('checkStatus() - Unknown status returned: ', $vr->id);
+                throw new Exception('App/Models/Verifyrequest::checkStatus() - Unknown status returned: ', $vr->id);
             }
             // ...
 
