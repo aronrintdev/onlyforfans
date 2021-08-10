@@ -11,7 +11,16 @@
     <b-row class="mt-3">
 
       <aside class="col-md-3 d-none d-lg-block">
-
+        <b-button
+          variant="link"
+          class="new-folder-icon"
+          @click="renderNewFolderForm"
+          v-b-tooltip
+          title="Create Folder"
+          placement="bottom"
+        >
+          <fa-icon :icon="['fas', 'plus']" size="lg" />
+        </b-button>
         <ul class="folder-nav pl-0">
           <TreeItem
             class="item"
@@ -41,7 +50,7 @@
           <b-col>
             <vue-dropzone 
               ref="myVueDropzone" 
-              id="dropzone" 
+              id="vaultfile-dropzone"
               :options="dropzoneOptions"
               v-on:vdropzone-sending="sendingEvent"
               v-on:vdropzone-success="successEvent"
@@ -70,11 +79,11 @@
               </b-breadcrumb>
         
               <div v-if="this.selectedMediafiles.length" class="d-flex align-items-center">
-                <div class="mr-2">{{ this.selectedMediafiles.length }} selected</div>
-                <div class="mr-2"><b-button @click="clearSelected()" variant="warning">Clear Selection</b-button></div>
-                <div class="mr-5"><b-button @click="selectAll()" variant="secondary">Select All</b-button></div>
+                <div class="mr-3">{{ this.selectedMediafiles.length }} selected</div>
+                <div class="mr-5" v-if="isAllSelected"><b-button @click="clearSelected()" variant="light">Clear Selection</b-button></div>
+                <div class="mr-5" v-else><b-button @click="selectAll()" variant="secondary">Select All</b-button></div>
                 <div class="">
-                  <b-button @click="renderSendForm()" variant="primary" class="mr-1">Add To</b-button>
+                  <b-button @click="renderSendForm()" variant="primary" class="mr-1">Send To</b-button>
                   <b-button @click="renderShareForm()" variant="primary" class="mr-1">Share</b-button>
                   <b-button @click="renderDeleteForm()" variant="danger" class="mr-1">Delete</b-button>
                 </div>
@@ -90,9 +99,7 @@
                 <b-button variant="link" class="" @click="isUploaderVisible=!isUploaderVisible">
                   <fa-icon :icon="['fas', 'upload']" size="lg" />
                 </b-button>
-                <b-button variant="link" class="" @click="renderNewFolderForm">
-                  <fa-icon :icon="['fas', 'plus']" size="lg" />
-                </b-button>
+                
               </div>
 
             </section>
@@ -104,7 +111,7 @@
           <b-row :no-gutters="false">
 
             <!-- Files -->
-            <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button" class="mb-2">
+            <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button" class="mb-3">
               <PreviewFile 
                 :data-mf_id="mf.id" 
                 :mediafile="mf" 
@@ -112,7 +119,7 @@
                 @render-lightbox="renderLightbox" 
                 class="OFF-p-1 tag-file" 
               />
-              <p class="text-center truncate m-0">{{ mf.mfname }}</p>
+              <!-- <p class="text-center truncate m-0">{{ mf.mfname }}</p> -->
             </b-col>
 
             <!-- Vaultfolders -->
@@ -132,7 +139,7 @@
                   <fa-icon :icon="['fas', 'trash']" size="lg" class="text-danger" />
                 </div>
               </div>
-              <p class="text-center truncate m-0">{{ vf.name }}</p>
+              <p class="text-center truncate m-0 tag-folder-title">{{ vf.name }}</p>
             </b-col>
           </b-row>
         </b-overlay>
@@ -142,7 +149,7 @@
     </b-row>
 
     <!-- Modal for sharing selected files or folders to one or more users (ie manager -> creators) -->
-    <b-modal v-model="isShareFilesModalVisible" size="lg" title="Share Files" >
+    <b-modal v-model="isShareFilesModalVisible" size="md" title="Share Files" >
       <b-form>
 
           <div class="autosuggest-container">
@@ -156,7 +163,7 @@
               ></b-form-input>
             </b-form-group>
               -->
-            <b-form-group>
+            <b-form-group class="m-0">
               <vue-autosuggest
                 v-model="query"
                 :suggestions="filteredOptions"
@@ -164,7 +171,7 @@
                 @input="getMatches"
                 @selected="addSharee"
                 :get-suggestion-value="getSuggestionValue"
-                :input-props="{id:'autosuggest__input', class: 'form-control', placeholder:'Enter user to share with...'}">
+                :input-props="{id:'autosuggest__input', class: 'form-control', placeholder:'Enter a username to share with'}">
                 <div slot-scope="{suggestion}" style="display: flex; align-items: center;">
                   <div style="{ display: 'flex' }">{{suggestion.item.label}}</div>
                 </div>
@@ -172,9 +179,9 @@
             </b-form-group>
           </div>
 
-          <div class="share-list">
-            <div v-if="shareForm.sharees.length">
-              <span v-for="(se) in shareForm.sharees" class="tag-sharee mr-3">
+          <div class="share-list mt-3" v-if="shareForm.sharees.length">
+            <div>
+              <span v-for="(se, idx) in shareForm.sharees" :key="idx" class="tag-sharee mr-2">
                 <b-badge variant="info" class="p-2">{{ se.label }} 
                   <span @click="removeSharee(se)" role="button"><fa-icon :icon="['far', 'times']" /></span>
                 </b-badge>
@@ -189,9 +196,9 @@
         </b-form>
 
           <template #modal-footer>
-            <div class="w-100">
-              <b-button variant="secondary" size="sm" @click="hideShareForm">Cancel</b-button>
-              <b-button variant="primary" size="sm" @click="shareSelectedFiles">Share</b-button>
+            <div class="w-100 text-right">
+              <b-button variant="secondary" @click="hideShareForm">Cancel</b-button>
+              <b-button variant="primary" @click="shareSelectedFiles">Share</b-button>
             </div>
           </template>
 
@@ -199,24 +206,24 @@
 
 
     <!-- Modal for selecting where to 'send' the selected files: to the story (max 1 file), to a post, or to a message -->
-    <b-modal v-model="isSendFilesModalVisible" size="lg" title="Send Files" hide-footer body-class="p-0" >
+    <b-modal v-model="isSendFilesModalVisible" id="send-files-modal" size="sm" title="Send To" hide-footer body-class="p-0" >
       <div>
         <b-list-group>
           <b-list-group-item v-if="sendChannels.includes('post')">
-            <b-button @click="sendSelected('post')" variant="link" class="text-decoration-none">
-              <fa-icon :icon="['far', 'plus-square']" fixed-width class="mx-2" size="lg" />
+            <b-button @click="sendSelected('post')" variant="link" class="send-to-group-item text-decoration-none pr-3">
+              <fa-icon :icon="['far', 'plus-square']" fixed-width class="mr-2" size="lg" />
               Send in New Post
             </b-button>
           </b-list-group-item>
           <b-list-group-item v-if="sendChannels.includes('story')">
-            <b-button :disabled="selectedMediafiles.length>1" @click="sendSelected('story')" variant="link" class="text-decoration-none">
-              <fa-icon :icon="['far', 'plus-square']" fixed-width class="mx-2" size="lg" />
+            <b-button :disabled="selectedMediafiles.length>1" @click="sendSelected('story')" variant="link" class="send-to-group-item text-decoration-none pr-3">
+              <fa-icon :icon="['far', 'plus-square']" fixed-width class="mr-2" size="lg" />
               Send in New Story
             </b-button>
           </b-list-group-item>
           <b-list-group-item v-if="sendChannels.includes('message')">
-            <b-button @click="sendSelected('message')" variant="link" class="text-decoration-none">
-              <fa-icon :icon="['far', 'plus-square']" fixed-width class="mx-2" size="lg" />
+            <b-button @click="sendSelected('message')" variant="link" class="send-to-group-item text-decoration-none pr-3">
+              <fa-icon :icon="['far', 'plus-square']" fixed-width class="mr-2" size="lg" />
               Send in New Message
             </b-button>
           </b-list-group-item>
@@ -225,8 +232,8 @@
     </b-modal>
 
     <!-- Modal for deleting selected files or folders -->
-    <b-modal v-model="isDeleteFilesModalVisible" size="lg" title="Confirm Delete" >
-        <p>Are you sure you want to delete the following {{ selectedMediafiles.length }} files...</p>
+    <b-modal v-model="isDeleteFilesModalVisible" size="md" title="Confirm Delete" >
+        <p>Are you sure you want to delete the following {{ selectedMediafiles.length }} files?</p>
         <b-list-group class="delete-list">
           <b-list-group-item v-for="(mf) in selectedMediafiles" :key="mf.id">{{ mf.mfname }}</b-list-group-item>
         </b-list-group>
@@ -264,7 +271,7 @@
     </b-modal>
 
     <!-- 'Lightbox' modal for image preview when clicking on a file in the vault grid/list -->
-    <b-modal v-model="isMediaLightboxModalVisible" id="modal-media-lightbox" title="" hide-footer body-class="p-0" size="xl">
+    <b-modal v-model="isMediaLightboxModalVisible" id="modal-media-lightbox" centered title="" hide-footer body-class="p-0" size="lg">
       <MediaLightbox :session_user="session_user" :mediafile="lightboxSelection" />
     </b-modal>
 
@@ -356,7 +363,7 @@ export default {
         const isActive = b.pkid === this.currentFolderId
         result.push({
           pkid: b.pkid,
-          text: b.vfname,
+          text: b.is_root ? 'Home' : b.vfname,
           active: isActive,
         })
       }
@@ -430,11 +437,13 @@ export default {
         'X-Requested-With': 'XMLHttpRequest', 
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
       },
+      dictDefaultMessage: 'Drop files here to upload, or click browse.',
     },
 
     showVideoRec: false,
     fileUploading: false,
     showAudioRec: false,
+    isAllSelected: false,
   }), // data
 
   methods: {
@@ -539,9 +548,11 @@ export default {
     },
 
     selectAll() {
+      this.isAllSelected = true;
       this.mediafiles = _.mapValues( this.mediafiles, o => ({ ...o, selected: true }) )
     },
     clearSelected() {
+      this.isAllSelected = false;
       this.mediafiles = _.mapValues( this.mediafiles, o => ({ ...o, selected: false }) )
     },
 
@@ -964,6 +975,13 @@ body {
       position: absolute;
       top: 0.7rem;
       left: 1.5rem;
+
+      .badge {
+        color: #fff;
+        background: #535353;
+        opacity: 0.7;
+        font-size: 11px;
+      }
     }
     .tag-folder .clickme_to-delete {
       position: absolute;
@@ -975,10 +993,26 @@ body {
       top: 45%;
       right: 50%;
     }
+
+    .tag-folder-title {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-transform: capitalize;
+      color: #fff;
+      padding: 2px 12px;
+      border-radius: 5px;
+      background: rgba(83, 83, 83, 0.7);
+    }
   }
 
   .vue-dropzone {
-    background: #ccdfeb;
+    background: #d3d3d370;
+    border: 1px dashed gray;
+    align-items: center;
+    display: flex;
+    justify-content: center;
   }
   .share-list .tag-sharee {
     font-size: 1.2rem;
@@ -995,5 +1029,18 @@ body {
   .tag-folder .truncate {
     width: 200px;
   }
+}
+
+.new-folder-icon {
+  position: absolute; 
+  top: -6px;
+  right: 15px;
+  padding: 4px 6px;
+}
+</style>
+
+<style>
+#send-files-modal .modal-dialog {
+  width: 248px;
 }
 </style>
