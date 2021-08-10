@@ -445,8 +445,6 @@ export default {
       this.UPDATE_SELECTED_MEDIAFILES([...data])
     },
 
-
-
     showExpirationPicker() {
       this.showedModal = 'expiration'
       eventBus.$emit('open-modal', {
@@ -482,6 +480,7 @@ export default {
   },
 
   mounted() {
+
     const self = this;
     eventBus.$on('apply-schedule', function(data) {
       self.scheduled_at = data;
@@ -489,6 +488,26 @@ export default {
     eventBus.$on('set-expiration-period', function(data) {
       self.expirationPeriod = data;
     })
+
+   if ( this.$route.params.context ) {
+     switch( this.$route.params.context ) {
+       case 'vault-via-postcreate': // we got here from the vault, likely with mediafiles to attach to a new post
+         const mediafileIds = this.$route.params.mediafile_ids || []
+         if ( mediafileIds.length ) {
+           // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
+           const response = axios.get(this.$apiRoute('mediafiles.index'), {
+             params: {
+               mediafile_ids: mediafileIds,
+             },
+           }).then( response => {
+             response.data.data.forEach( mf => {
+               this.ADD_SELECTED_MEDIAFILES(mf)
+             })
+           })
+         }
+         break
+     } // switch
+   }
 
   }, // mounted
 

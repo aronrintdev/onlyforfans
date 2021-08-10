@@ -447,7 +447,7 @@ export default {
 
     sendSelected(resourceType) {
       // send (share) selected files to a post, story, or message
-      // %TODO: as part of AF-492 deprecate this code 20210806
+      // %TODO: as part of AF-492 deprecate this code 20210806 -- No actually we need it to send from vault to other areas (eg post create form)
       const params = {
           mediafile_ids: this.selectedMediafiles.map( ({id}) => id )
       }
@@ -461,12 +461,10 @@ export default {
             this.storeStory()
           }
           break
-          /* %TODO: remove
-          //case 'post':
-          //params.context = 'vault-via-postcreate'
-          //this.$router.replace({ name: 'index', params })
-          //break
-          */
+        case 'post':
+          params.context = 'vault-via-postcreate'
+          this.$router.replace({ name: 'index', params })
+          break
         case 'message':
           this.$router.replace({ name: 'chatthreads.create', params })
           break
