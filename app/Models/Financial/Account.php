@@ -603,9 +603,15 @@ class Account extends Model implements Ownable
             }
         }
 
+        $transactionDescription = "Purchase of {$purchaseable->getDescriptionNameString()} {$purchaseable->getKey()}";
+
         // Move funds to wallet account first if this is a in account
         if ($this->type === AccountTypeEnum::IN) {
-            $inTransactions = $this->moveToWallet($amount);
+            $inTransactions = $this->moveToWallet($amount, [
+                'resource' => $purchaseable,
+                'type' => TransactionTypeEnum::TRANSFER, // Transfer of funds will not incur a fee.
+                'description' => $transactionDescription,
+            ]);
             $walletAccount = $this->getWalletAccount();
             return $walletAccount->purchase(
                 $purchaseable,
@@ -624,7 +630,7 @@ class Account extends Model implements Ownable
             array_merge($transactionAttributes, [
                 'resource' => $purchaseable,
                 'type' => TransactionTypeEnum::SALE,
-                'description' => "Purchase of {$purchaseable->getDescriptionNameString()} {$purchaseable->getKey()}"
+                'description' => $transactionDescription,
         ]));
 
         $purchaseable->grantAccess($this->getOwner()->first(), $purchaseLevel, array_merge($customAttributes,  [
@@ -653,9 +659,15 @@ class Account extends Model implements Ownable
     {
         $amount = $this->asMoney($payment);
 
+        $transactionDescription = "Tip to {$tippable->getDescriptionNameString()} {$tippable->getKey()}";
+
         // Move funds to wallet account first if this is a in account
         if ($this->type === AccountTypeEnum::IN) {
-            $inTransactions = $this->moveToWallet($amount);
+            $inTransactions = $this->moveToWallet($amount, [
+                'resource' => $tippable,
+                'type' => TransactionTypeEnum::TRANSFER, // Transfer of funds will not incur a fee.
+                'description' => $transactionDescription,
+            ]);
             $walletAccount = $this->getWalletAccount();
             return $walletAccount->tip($tippable, $amount, array_merge($customAttributes, [
                 'ignoreBalance' => true
@@ -669,7 +681,7 @@ class Account extends Model implements Ownable
             [
                 'resource' => $tippable,
                 'type' => TransactionTypeEnum::TIP,
-                'description' => "Tip to {$tippable->getDescriptionNameString()} {$tippable->getKey()}"
+                'description' => $transactionDescription,
         ]));
 
         ItemTipped::dispatch($tippable, $this->getOwner()->first());

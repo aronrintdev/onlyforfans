@@ -4,7 +4,7 @@
       <b-list-group-item>
         <div class="d-flex">
           <span v-text="$t('available')" />
-          <span class="ml-auto">{{ balances.available | niceCurrency }}</span>
+          <span class="ml-auto">{{ balances.balance | niceCurrency }}</span>
         </div>
       </b-list-group-item>
       <b-list-group-item>
@@ -15,7 +15,7 @@
       </b-list-group-item>
     </b-list-group>
     <div class="d-flex">
-      <b-btn variant="primary" class="ml-auto" :disabled="!balances.available || balances.available.amount <= 0">
+      <b-btn variant="primary" class="ml-auto" :disabled="!balances.balance || balances.balance.amount <= 0">
         {{ $t('request') }}
       </b-btn>
     </div>
