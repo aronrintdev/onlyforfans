@@ -636,6 +636,14 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
         $this->notify( new PasswordResetNotification($user, ['token'=>$token]) );
     }
 
+    public function scopeIsAdmin($query, $opposite = false) {
+        return ($opposite ? $query->whereDoesntHave('roles')->orWhereHas('roles', function($q) {
+            $q->whereNotIn('name', ['super-admin', 'admin']);
+        }) : $query->whereHas('roles', function($q) {
+            $q->whereIn('name', ['super-admin', 'admin']);
+        }));
+    }
+
 }
 
     /*

@@ -186,6 +186,8 @@ class TimelinesController extends AppBaseController
             $q1->whereDoesntHave('followedtimelines', function($q2) use(&$followedIDs) {
                 $q2->whereIn('shareable_id', $followedIDs);
             });
+            // no-include admin users
+            $q1->isAdmin(true);
         });
 
         // Apply filters
