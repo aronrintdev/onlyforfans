@@ -271,7 +271,7 @@
     </b-modal>
 
     <!-- 'Lightbox' modal for image preview when clicking on a file in the vault grid/list -->
-    <b-modal v-model="isMediaLightboxModalVisible" id="modal-media-lightbox" title="" hide-footer body-class="p-0" size="xl">
+    <b-modal v-model="isMediaLightboxModalVisible" id="modal-media-lightbox" centered title="" hide-footer body-class="p-0" size="lg">
       <MediaLightbox :session_user="session_user" :mediafile="lightboxSelection" />
     </b-modal>
 
