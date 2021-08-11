@@ -90,7 +90,7 @@
                   <li @click="recordAudio()" class="selectable select-audio">
                     <fa-icon :icon="selectedMedia==='audio' ? ['fas', 'microphone'] : ['far', 'microphone']" size="lg" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li @click="renderVaultSelector()" class="selectable select-audio">
+                  <li @click="renderVaultSelector()" class="selectable">
                     <fa-icon :icon="selectedMedia==='vault' ? ['fas', 'archive'] : ['far', 'archive']" size="lg" :class="selectedMedia==='vault' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
@@ -131,7 +131,9 @@
         </b-card>
       </div>
     </section>
+
     <VideoRecorder v-if="showVideoRec" @close="showVideoRec=false; selectedMedia=null" @complete="videoRecCompleted" />
+
   </div>
 </template>
 
@@ -428,8 +430,7 @@ export default {
       eventBus.$emit('open-modal', {
         key: 'render-vault-selector',
         data: { 
-          resource: this.timeline,
-          resource_type: 'timelines', 
+          context: 'create-post',
         },
       })
     },

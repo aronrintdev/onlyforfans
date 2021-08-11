@@ -394,7 +394,7 @@ export default {
     // By default we can send to story, post, or message...may be overridden if this 'page' is 
     // loaded in another context (hack for mvp)
     sendChannels: ['story', 'post', 'message'],
-    sendAction: null,
+    //sendAction: null,
 
     isUploaderVisible: false,
     isSendFilesModalVisible: false,
@@ -475,10 +475,13 @@ export default {
 
       switch (resourceType) {
         case 'story':
+          /*
           params.context = 'send-selected-mediafiles-to-story' // 'mediafiles-selected-in-vault'
           if ( this.sendAction === 'storybar' ) {
             this.$router.replace({ name: 'index', params })
-          } if ( this.selectedMediafiles.length ) {
+          } 
+          */
+          if ( this.selectedMediafiles.length ) {
             //this.$router.replace({ name: 'index', params })
             this.storyAttrs.link = null
             this.storyAttrs.selectedMediafile = this.selectedMediafiles[0] // if selected from vault
@@ -495,7 +498,7 @@ export default {
           break
       }
       this.sendChannels =  ['story', 'post', 'message']
-      this.sendAction =  null
+      //this.sendAction =  null
     },
 
     // API to update a new story in the database for this user's timeline
@@ -826,6 +829,7 @@ export default {
       this.$store.dispatch('getVaultfolder', this.vaultfolder_pkid)
     })
 
+      /*
     // %HERE %FIXME act on any special context params passed from Vue router
     if ( this.$route.params.context ) {
       switch( this.$route.params.context ) {
@@ -835,6 +839,7 @@ export default {
           break
       }
     }
+    */
   },
 
   watch: {
