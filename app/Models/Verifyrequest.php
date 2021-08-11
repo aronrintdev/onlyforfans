@@ -140,33 +140,26 @@ class Verifyrequest extends Model
         return $vr;
     }
 
-    public static function checkStatus(User $user) 
+    // Updates the Verifyrequest DB record
+    public static function checkStatusByGUID(string $guid) 
     {
         $now = Carbon::now();
 
-        // only submit if there's an existing pending reqeust
-        $userId = $user->id;
-        $pending = Verifyrequest::where('requester_id', $userId)
-            ->where('vstatus', VerifyStatusTypeEnum::PENDING)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $vr = Verifyrequest::where('guid', $guid)->first();
 
-// check_verify_status_response.scanImage
         try { 
             $json = null; 
-            if ( !$pending->count() ) {
-                throw new Exception('App/Models/Verifyrequest::checkStatus() - User has no verification request currently pending');
+            if ( !$vr ) {
+                throw new Exception('App/Models/Verifyrequest::checkStatusByGUID() - Could not find vr with guid '.$guid);
             }
     
-            $vr = $pending[0]; // latest pending request for this user
-    
             if ( empty($vr->service_guid) ) {
-                throw new Exception('App/Models/Verifyrequest::checkStatus() - Could not find guid from remote service request to lookup status: ', $vr->id);
+                throw new Exception('App/Models/Verifyrequest::checkStatusByGUID() - Could not find guid from remote service request to lookup status: ', $vr->guid);
             }
 
             $uniqueID = $vr->service_guid;
 
-            Log::info('App\Models\Verifyrequest::verifyUser().A -- calling Api/checkStatus(): '.json_encode([
+            Log::info('App\Models\Verifyrequest::checkStatusByGUID().A -- calling Api/checkStatus(): '.json_encode([
                 'uniqueID (service_guid)' => $uniqueID,
             ]));
 
@@ -176,10 +169,10 @@ class Verifyrequest extends Model
             $status = $response->status();
             $json = $response->json();
             if ($status !== 200) {
-                throw new Exception('App/Models/Verifyrequest::checkStatus() - Verify service returned non-200 status: '.$status);
+                throw new Exception('App/Models/Verifyrequest::checkStatusByGUID() - Verify service returned non-200 status: '.$status);
             }
 
-            Log::info('App\Models\Verifyrequest::verifyUser().B -- processing response: '.json_encode([
+            Log::info('App\Models\Verifyrequest::checkStatusByGUID().B -- processing response: '.json_encode([
                 'json' => $json,
             ]));
 
@@ -204,7 +197,7 @@ class Verifyrequest extends Model
                 //$vr->vstatus =  VerifyStatusTypeEnum::PENDING; // no change
                 break;
             default:
-                throw new Exception('App/Models/Verifyrequest::checkStatus() - Unknown status returned: ', $vr->id);
+                throw new Exception('App/Models/Verifyrequest::checkStatusByGUID() - Unknown status returned: ', $vr->id);
             }
             // ...
 
@@ -212,7 +205,7 @@ class Verifyrequest extends Model
 
         } catch (Exception $e) {
             Log::error( json_encode([
-                'src' => 'App/Models/Verifyreqeust::checkStatus()',
+                'src' => 'App/Models/Verifyreqeust::checkStatusByGUID()',
                 'message' => $e->getMessage(),
                 'userId' => $userId,
                 'userAttrs' => $userAttrs ?? 'not-set',
@@ -223,6 +216,5 @@ class Verifyrequest extends Model
 
         return $vr;
     }
-
 
 }

@@ -48,8 +48,14 @@
         </table>
       </section>
       <template #modal-footer>
-        <b-button variant="success">Sync</b-button>
-        <b-button variant="secondary" @click="isEllipsisModalVisible=false">Cancel</b-button>
+        <section class="d-flex align-items-center">
+          <p v-if="renderError" class="mb-0 text-danger">There was a problem with your request</p>
+          <b-button @click="isEllipsisModalVisible=false" class="ml-3" variant="secondary">Cancel</b-button>
+          <b-button @click="checkStatus()" class="ml-3" variant="success" :disabled="isProcessing">
+            <span v-if="!isProcessing">Check Status</span>
+            <span v-else>Checking... <fa-icon class="input-spinner" icon="spinner" spin /></span>
+          </b-button>
+        </section>
       </template>
     </b-modal>
 
@@ -86,6 +92,8 @@ export default {
     isShowModalVisible: false,
     isEllipsisModalVisible: false,
     modalSelection: null,
+    isProcessing: false,
+    renderError: false,
 
     tblFilters: {
       booleans: [
@@ -110,6 +118,19 @@ export default {
       }
     },
 
+    async checkStatus() {
+      this.renderError = false
+      this.isProcessing = true
+      try { 
+        const response = await axios.get( this.$apiRoute('verifyrequests.checkStatus', this.modalSelection.id) )
+        //console.log('response', { response } )
+        this.modalSelection = response.data.data
+      } catch (err) {
+        this.renderError = true
+      }
+      this.isProcessing = false
+    },
+
     async renderModal(modal, s) {
       this.modalSelection = s
       switch (modal) {
@@ -117,6 +138,8 @@ export default {
           this.isShowModalVisible = true
           break
         case 'ellipsis':
+          const response = await axios.get( this.$apiRoute('verifyrequests.show', this.modalSelection.id) )
+          this.modalSelection = response.data.data
           this.isEllipsisModalVisible = true
           break
       }
@@ -143,11 +166,11 @@ export default {
         _pop[ filterGroup ][_idx] = { ...fObj, is_active: !fObj.is_active }
         this.postFilters = _pop
         this.encodeQueryFilters()
-        }
+      }
     },
 
     encodeQueryFilters() {
-    const filters = this.postFilters
+      const filters = this.postFilters
       let params = {
         //is_flagged: 0,
         //resource_type: [],
@@ -187,6 +210,15 @@ export default {
             delete t.selfieImage
             delete t.documentType
             delete t.validatedTime
+            delete t.dobScore
+            delete t.nameScore
+            delete t.riskFactor
+            delete t.countryCode
+            delete t.dateOfBirth
+            delete t.faceMatches
+            delete t.documentScore
+            delete t.forgeryResult
+            delete t.forgeryStatus
             return t
           })
         } else {
@@ -205,8 +237,6 @@ export default {
     },
 
   },
-
-  watchers: {},
 
   created() { },
 

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 //use App\Notifications\CommentReceived;
 use App\Http\Resources\VerifyrequestCollection;
 use App\Http\Resources\Verifyrequest as VerifyrequestResource;
+use App\Enums\VerifyStatusTypeEnum;
 use App\Models\Verifyrequest;
 
 class VerifyrequestsController extends AppBaseController
@@ -42,10 +43,29 @@ class VerifyrequestsController extends AppBaseController
         return new VerifyrequestCollection($data);
     }
 
-    public function show(Request $request, Comment $comment)
+    public function show(Request $request, Verifyrequest $verifyrequest)
     {
-        $this->authorize('view', $comment);
-        return new CommentResource($comment);
+        $vr = $verifyrequest;
+        //$vr->load('requester');
+        //dd($vr->toArray());
+        //$this->authorize('view', $comment);
+        return new VerifyrequestResource($vr);
+    }
+
+    // Manually check status of a request by GUID
+    // %TODO: put on queue (?)
+    public function checkStatus(Verifyrequest $vr)
+    {
+        $vr = Verifyrequest::checkStatusByGUID($vr->guid);
+        /* disable for now as this is done by admin...tho we could notify if status changes %TODO
+        if ( $vr->vstatus ===  VerifyStatusTypeEnum::VERIFIED ) {
+            $vr->requester->notify( new IdentityVerificationVerified($vr, $user) );
+        } else if ( $vr->vstatus ===  VerifyStatusTypeEnum::REJECTED ) {
+            $vr->requester->notify( new IdentityVerificationRejected($vr, $user) );
+        }
+         */
+        return new VerifyrequestResource($vr);
+        //return response()->json( $vr );
     }
 
 }
