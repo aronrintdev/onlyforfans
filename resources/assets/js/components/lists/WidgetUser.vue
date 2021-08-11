@@ -22,7 +22,7 @@
 
       <div class="avatar-img">
         <router-link :to="{ name: 'timeline.show', params: { slug } }">
-          <b-img thumbnail rounded="circle" class="w-100 h-100" :src="user.avatar.filepath" :alt="user.username" :title="user.name" />
+          <b-img-lazy thumbnail rounded="circle" class="w-100 h-100" :src="user.avatar.filepath" :alt="user.username" :title="user.name" />
         </router-link>
       </div>
 
@@ -65,7 +65,7 @@
       <div class="user-details">
         <div class="avatar-img">
           <router-link :to="{ name: 'timeline.show', params: { slug } }">
-            <b-img thumbnail rounded="circle" class="w-100 h-100" :src="user.avatar.filepath" :alt="user.username" :title="user.name" />
+            <b-img-lazy thumbnail rounded="circle" class="w-100 h-100" :src="user.avatar.filepath" :alt="user.username" :title="user.name" />
           </router-link>
         </div>
         <div class="sharee-id">

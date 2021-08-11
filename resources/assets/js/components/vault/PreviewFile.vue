@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="img-box position-relative">
-      <img
+      <b-img-lazy
         @click="$emit('render-lightbox', mediafile)"
         v-if="mediafile.is_image"
         :class="mediafile.selected ? 'tag-selected' : ''"

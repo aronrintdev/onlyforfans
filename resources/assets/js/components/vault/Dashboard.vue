@@ -125,13 +125,13 @@
             <!-- Vaultfolders -->
             <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3" class="mb-2">
               <div v-if="vf.is_pending_approval" class="tag-folder img-box tag-shared tag-pending-approval">
-                <b-img fluid @click="renderApproveSharedModal(vf)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
+                <b-img-lazy fluid @click="renderApproveSharedModal(vf)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img-lazy>
                 <div class="icon-pending-approval" style="font-size: 3rem;">
                   <fa-icon :icon="['fas', 'share-alt']" class="text-primary" />
                 </div>
               </div>
               <div v-else class="tag-folder img-box">
-                <b-img fluid @click="doNav(vf.id)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
+                <b-img-lazy fluid @click="doNav(vf.id)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img-lazy>
                 <div class="file-count">
                   <b-badge variant="warning" class="p-2">{{ vf.mediafiles.length + vf.vfchildren.length }}</b-badge>
                 </div>
@@ -278,7 +278,7 @@
     <!-- Form modal for image preview before saving to story (%FIXME DRY: see StoryBar.vue) -->
     <b-modal v-model="isSaveToStoryModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="p-0">
       <div>
-        <b-img fluid :src="selectedMediafiles.length ? selectedMediafiles[0].filepath : null"></b-img>
+        <b-img-lazy fluid :src="selectedMediafiles.length ? selectedMediafiles[0].filepath : null"></b-img-lazy>
       </div>
       <template #modal-footer>
         <div class="w-100">

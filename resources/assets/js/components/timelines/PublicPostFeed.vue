@@ -10,7 +10,7 @@
         @click="openPost(mf.post, index)"
       >
         <div class="media-wrapper" v-if="mf.is_image" >
-          <img
+          <b-img-lazy
             :src="mf.filepath"
             alt=""
           />

@@ -13,12 +13,12 @@
         <b-row>
           <b-col cols="12" class="d-flex align-items-center justify-content-center">
             <div class="w-100">
-              <b-img v-if="mediafile.is_image" 
+              <b-img-lazy v-if="mediafile.is_image" 
                 fluid
                 class="d-block w-100"
                 :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
                 :alt="mediafile.mfname">
-              </b-img>
+              </b-img-lazy>
               <MediaSlider v-else-if="!mediafile.is_image" 
                 :mediafiles="[mediafile]" 
                 :session_user="session_user" 

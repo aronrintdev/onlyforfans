@@ -10,11 +10,11 @@
     >
 
       <template v-if="mediafile.access">
-        <img v-if="mediafile.is_image" @click="renderFull"
+        <b-img-lazy v-if="mediafile.is_image" @click="renderFull"
           class="d-block"
           :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
           :alt="mediafile.mfname"
-        >
+        />
       </template>
       <template v-else-if="mediafile.resource_type==='posts'">
         <PostCta :post="mediafile.resource" :session_user="session_user" :primary_mediafile="mediafile" />

@@ -7,7 +7,7 @@
       <b-media v-for="n in notifications" :key="n.id" tag="li" class="mb-0">
         <template #aside>
           <router-link :to="{ name: 'timeline.show', params: { slug: n.data.actor.slug ? n.data.actor.slug : n.data.actor.username } }">
-            <b-img width="48" height="48" rounded="circle" :src="n.data.actor.avatar" :alt="n.data.actor.slug" :title="n.data.actor.name" />
+            <b-img-lazy width="48" height="48" rounded="circle" :src="n.data.actor.avatar" :alt="n.data.actor.slug" :title="n.data.actor.name" />
           </router-link>
         </template>
         <h6 class="mt-0 mb-1">

@@ -45,7 +45,7 @@
         <b-card-body>
           <div class="avatar-img">
             <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
-              <b-img
+              <b-img-lazy
                 thumbnail
                 rounded="circle"
                 class="w-100 h-100"

@@ -5,7 +5,7 @@
         ghost-class="ghost">
         <div v-for="(element, index) in files" :key="index" class="drag-element">
           <div class="img-wrapper">
-            <img v-if="element.type.indexOf('image/') > -1" :src="element.filepath || element.src" alt="" />
+            <b-img-lazy v-if="element.type.indexOf('image/') > -1" :src="element.filepath || element.src" alt="" />
             <video v-if="element.type.indexOf('video/') > -1">
               <source :src="element.filepath" :type="element.type" />
             </video>
@@ -34,7 +34,7 @@
       <swiper-slide class="slide">
         <div v-if="!isDragListVisible">
           <div class="swiper-image-wrapper" v-for="(media, index) in files" :key="index">
-            <img @click="openPhotoSwipe(index)" class="swiper-lazy" :src="media.filepath || media.src" v-if="media.type && media.type.indexOf('image/') > -1" />
+            <b-img-lazy @click="openPhotoSwipe(index)" class="swiper-lazy" :src="media.filepath || media.src" v-if="media.type && media.type.indexOf('image/') > -1" />
             <div class="swiper-lazy video" @click="openPhotoSwipe(index)" v-if="media.type && media.type.indexOf('video/') > -1">
               <video>
                 <source :src="media.filepath" :type="media.type" />

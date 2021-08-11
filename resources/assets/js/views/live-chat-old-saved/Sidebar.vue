@@ -114,7 +114,7 @@
                 <span :class="`status-holder status-holder-${user.profile.id}`"></span>
               </div>
               <div class="user-logo" v-if="user.profile.avatar">
-                <img :src="user.profile.avatar.filepath" alt="" />
+                <b-img-lazy :src="user.profile.avatar.filepath" alt="" />
                 <span :class="`status-holder status-holder-${user.profile.id}`"></span>
               </div>
               <div class="user-details">
@@ -181,7 +181,7 @@
                     {{ getLogoFromName(user.name) }}
                   </div>
                   <div class="user-logo" v-if="user.avatar"  :key="user.id">
-                    <img :src="user.avatar.filepath" alt="" />
+                    <b-img-lazy :src="user.avatar.filepath" alt="" />
                   </div>
                 </template>
               </div>
