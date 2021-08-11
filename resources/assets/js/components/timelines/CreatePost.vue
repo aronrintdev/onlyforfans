@@ -357,6 +357,9 @@ export default {
 
     // %NOTE: this can be called as a handler for the 'remove' event emitted by UploadMediaPreview
     removeMediafileByIndex(index) {
+      console.log('CreatePost::removeMediafileByIndex()', {
+        index,
+      })
       if (index > -1)  {
 
         // If the file is in the Dropzone queue remove it from there as well
@@ -491,7 +494,8 @@ export default {
 
    if ( this.$route.params.context ) {
      switch( this.$route.params.context ) {
-       case 'mediafiles-selected-in-vault': // we got here from the vault, likely with mediafiles to attach to a new post
+       case 'send-selected-mediafiles-to-post': // we got here from the vault, likely with mediafiles to attach to a new post
+         console.log('CreatePost::mounted() -- send-selected-mediafiles-to-post')
          const mediafileIds = this.$route.params.mediafile_ids || []
          if ( mediafileIds.length ) {
            // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something

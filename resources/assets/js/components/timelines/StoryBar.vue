@@ -61,9 +61,9 @@
 
     <!-- Form modal for story preview (incl. image) before saving -->
     <b-modal v-model="isPreviewModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="OFF-p-0">
-      <section class="OFF-d-flex">
+      <section>
         <div class="box-image-preview text-center">
-          <b-img v-if="storyAttrs.selectedMediafileId" fluid :src="selectedFileUrl"></b-img>
+          <b-img v-if="storyAttrs.selectedMediafileId" fluid :src="selectedFileUrl"></b-img> <!-- re-routed from vault (?) -->
           <b-img v-else-if="fileInput" fluid :src="selectedFileUrl"></b-img>
         </div>
       </section>
@@ -251,7 +251,7 @@ export default {
   mounted() { 
     if ( this.$route.params.context ) {
       switch( this.$route.params.context ) {
-        case 'mediafiles-selected-in-vault': // we got here from the vault, likely with a mediafile to attach to some action
+        case 'send-selected-mediafiles-to-story': // we got here from the vault, likely with a mediafile to attach to some action
           const mediafileIds = this.$route.params.mediafile_ids || []
           if ( mediafileIds.length ) {
             const response = axios.get(this.$apiRoute('mediafiles.index'), {

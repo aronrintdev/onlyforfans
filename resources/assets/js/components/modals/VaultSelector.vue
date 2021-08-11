@@ -28,6 +28,7 @@
   </div>
 </template>
 <script>
+
 import { eventBus } from '@/eventBus'
 import LoadingOverlay from '@components/common/LoadingOverlay'
 import VaultSelectorComponent from '@views/live-chat/components/ShowThread/VaultSelector'

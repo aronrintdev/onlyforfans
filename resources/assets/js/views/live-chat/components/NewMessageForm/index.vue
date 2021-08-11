@@ -324,6 +324,9 @@ export default {
 
     // %NOTE: this can be called as a handler for the 'remove' event emitted by UploadMediaPreview
     removeMediafileByIndex(index) {
+      console.log('NewMessageForm::removeMediafileByIndex()', {
+        index,
+      })
       if (index > -1)  {
 
         // If the file is in the Dropzone queue remove it from there as well

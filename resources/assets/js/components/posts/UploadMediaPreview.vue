@@ -1,5 +1,6 @@
 <template>
   <div class="swiper-slider">
+    <!-- resources/assets/js/components/posts/UploadMediaPreview.vue -->
     <div v-if="isDragListVisible">
       <draggable class="sort-change-div" v-model="files" :group="'column.components'" handle=".handle"
         ghost-class="ghost">
