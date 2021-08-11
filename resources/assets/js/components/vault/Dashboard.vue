@@ -46,7 +46,7 @@
       <main class="col-md-9">
 
         <!-- +++ File Thumbnails / Dropzone File Uploader +++ -->
-        <b-row v-if="isUploaderVisible">
+        <b-row>
           <b-col>
             <vue-dropzone 
               ref="myVueDropzone" 
@@ -54,7 +54,13 @@
               :options="dropzoneOptions"
               v-on:vdropzone-sending="sendingEvent"
               v-on:vdropzone-success="successEvent"
-            ></vue-dropzone>
+              :useCustomSlot="true"
+            >
+              <div class="dropzone-custom-content">
+                <fa-icon :icon="['fas', 'upload']" size="lg" />
+                <span>Drop files here to upload, or click to browse.</span>
+              </div>
+            </vue-dropzone>
           </b-col>
         </b-row>
         
@@ -85,6 +91,7 @@
                 <div class="">
                   <b-button @click="renderSendForm()" variant="primary" class="mr-1">Send To</b-button>
                   <b-button @click="renderShareForm()" variant="primary" class="mr-1">Share</b-button>
+                  <b-button @click="renderDownloadForm()" variant="primary" class="mr-1">Download</b-button>
                   <b-button @click="renderDeleteForm()" variant="danger" class="mr-1">Delete</b-button>
                 </div>
               </div>
@@ -96,10 +103,6 @@
                 <b-button variant="link" class="" @click="recordAudio">
                   <fa-icon :icon="['fas', 'microphone']" size="lg" />
                 </b-button>
-                <b-button variant="link" class="" @click="isUploaderVisible=!isUploaderVisible">
-                  <fa-icon :icon="['fas', 'upload']" size="lg" />
-                </b-button>
-                
               </div>
 
             </section>
@@ -301,6 +304,18 @@
 
     <!-- Video Recorder -->
     <VideoRecorder v-if="showVideoRec" @close="showVideoRec=false;" @complete="recordCompleted" />
+
+    <!-- Modal for downloading selected files or folders -->
+    <b-modal v-model="isDownloadFilesModalVisible" size="md" title="Confirm Download" >
+        <p>Are you sure you want to download the following {{ selectedMediafiles.length }} files?</p>
+        <b-list-group class="download-list">
+          <b-list-group-item v-for="(mf) in selectedMediafiles" :key="mf.id">{{ mf.mfname }}</b-list-group-item>
+        </b-list-group>
+        <template #modal-footer>
+            <b-button variant="secondary" @click="isDownloadFilesModalVisible=false">Cancel</b-button>
+            <b-button variant="primary" @click="downloadSelectedFiles">Download Files</b-button>
+        </template>
+    </b-modal>
   </div>
 </template>
 
@@ -393,7 +408,6 @@ export default {
     sendChannels: ['story', 'post', 'message'],
     sendAction: null,
 
-    isUploaderVisible: false,
     isSendFilesModalVisible: false,
     isShareFilesModalVisible: false,
     isDeleteFilesModalVisible: false,
@@ -402,6 +416,7 @@ export default {
     isSaveToStoryModalVisible: false,
     isMediaLightboxModalVisible: false,
     isApproveSharedModalVisible: false,
+    isDownloadFilesModalVisible: false,
 
     selectedVfToApprove: null,
     selectedVfToDelete: null,
@@ -437,7 +452,7 @@ export default {
         'X-Requested-With': 'XMLHttpRequest', 
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
       },
-      dictDefaultMessage: 'Drop files here to upload, or click browse.',
+      dictDefaultMessage: 'Drop files here to upload, or click to browse.',
     },
 
     showVideoRec: false,
@@ -540,6 +555,10 @@ export default {
       this.isDeleteFilesModalVisible = true
     },
 
+    renderDownloadForm() {
+      this.isDownloadFilesModalVisible = true
+    },
+
     onPreviewFileInput(value) {
       Vue.set(this.mediafiles, value.id, value) // Sets .selected on mediafiles array depending on child form component's action
     },
@@ -612,6 +631,13 @@ export default {
       this.$store.dispatch('getVaultfolder', this.currentFolderId)
       this.clearSelected()
       this.$root.$bvToast.toast( `Successfully deleted ${payload.mediafile_ids.length} files)`, {toaster: 'b-toaster-top-center', variant: 'success'} )
+    },
+
+
+    async downloadSelectedFiles() {
+      this.isDownloadFilesModalVisible = false
+      this.clearSelected()
+      this.$root.$bvToast.toast( `Successfully downloaded ${this.selectedMediafiles.length} files)`, {toaster: 'b-toaster-top-center', variant: 'success'} )
     },
 
     // --- New Vault Folder Form methods ---
