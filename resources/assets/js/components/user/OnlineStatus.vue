@@ -1,7 +1,7 @@
 <template>
   <div class="onlineStatus">
     <slot :loading="loading" :status="status" :textVariant="textVariant" :message="message" :lastSeen="lastSeen">
-      <div v-if="indicatorVisible" class="status-indicator" :class="{'online-status': status === 'online', 'no-border': size ==='sm'}" :style="{ height: s, width: s }" v-b-tooltip.hover.bottom :title="message" />
+      <div v-if="indicatorVisible" class="status-indicator" :class="{'bg-success': status === 'online', 'no-border': size ==='sm'}" :style="{ height: s, width: s }" v-b-tooltip.hover.bottom :title="message" />
       <span v-if="!loading && textInvisible" class="status" :class="[`status-holder-${user.id}`, textVariant]">
       {{ message }}
       </span>
@@ -170,9 +170,6 @@ export default {
   border: solid 3px #fff;
   border-radius: 100%;
   background: gray;
-}
-.status-indicator.online-status {
-  background: green;
 }
 .status-indicator.no-border {
   border: none;
