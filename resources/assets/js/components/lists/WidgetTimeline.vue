@@ -21,6 +21,7 @@
         <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
           <b-img-lazy thumbnail rounded="circle" class="w-100 h-100" :src="timeline.avatar.filepath" :alt="timeline.slug" :title="timeline.name" />
         </router-link>
+        <OnlineStatus :user="{ id: timeline.user_id }" size="lg" :textInvisible="false" />
       </div>
 
       <div class="shareable-id">
@@ -35,7 +36,7 @@
         <b-card-sub-title class="mb-1">
           <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">@{{ timeline.slug }}</router-link>
         </b-card-sub-title>
-        <OnlineStatus :user="{ id: timeline.user_id }" />
+        <OnlineStatus :user="{ id: timeline.user_id }" :indicatorVisible="false" />
       </div>
 
       <slot></slot>
