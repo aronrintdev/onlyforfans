@@ -512,6 +512,12 @@ export default {
     this.isTyping = _.throttle(this._isTyping, 1000)
   },
 
+  beforeDestroy() {
+    // Clear out any mediafiles so they don't get "carried" between threads before send is clicked
+    this.CLEAR_SELECTED_MEDIAFILES()
+    this.$refs.myVueDropzone.removeAllFiles()
+  },
+
   watch: {
     'newMessageForm.mcontent': function(value) {
       if (this.newMessageForm.deliver_at === undefined || this.newMessageForm.deliver_at === null) {

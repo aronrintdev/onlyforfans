@@ -532,6 +532,12 @@ export default {
     })
   },
 
+  beforeDestroy() {
+    // Clear out any mediafiles so they don't get "carried" between threads before send is clicked
+    this.CLEAR_SELECTED_MEDIAFILES()
+    this.$refs.myVueDropzone.removeAllFiles()
+  },
+
   watch: {
 
     //selectedMediafiles(value) {
@@ -553,29 +559,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-/*
-.dropzone, .dropzone * {
-  box-sizing: border-box;
-}
-.vue-dropzone {
-  border: 2px solid #e5e5e5;
-  font-family: Arial,sans-serif;
-  letter-spacing: .2px;
-  color: #777;
-  transition: .2s linear;
-}
-.dropzone {
-  min-height: 150px;
-  border: 2px solid rgba(0, 0, 0, 0.3);
-  background: white;
-  padding: 20px 20px;
-}
-                               */
 
 .card-header .dropdown {
-  /*
-  background-color: ...;
-   */
 }
 
 .card-body {
@@ -616,11 +601,9 @@ li.selectable[disabled] {
   resize: none;
 }
 
-/*
-.create_post-crate .dropzone .dz-image img {
-  width: 128px;
+.create_post-crate ::v-deep.swiper-slider {
+  padding: 0.5rem 1rem !important;
 }
- */
 
 .create_post-crate footer ul li {
   padding-left: 0.5em;
