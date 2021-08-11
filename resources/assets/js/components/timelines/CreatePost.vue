@@ -181,7 +181,7 @@ export default {
         autoProcessQueue: false,
         thumbnailWidth: 100,
         clickable: '#clickme_to-select',
-        maxFilesize: 15.9,
+        maxFilesize: 99,
         addRemoveLinks: true,
         removeType: 'client',
         headers: {
