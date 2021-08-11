@@ -87,12 +87,19 @@ class Api
         $response = Http::withToken($this->token)
             ->withHeaders([ 'Content-Type' => 'application/json' ])
             ->get($url);
+
+        // Remove scanImage from response
+        if ( is_array($response) && array_key_exists('scanImage', $response) ) {
+            unset($response['scanImage']);
+        }
+
         return $response;
     }
 
     public function getToken() {
         return $this->token;
     }
+
     public function hasToken() {
         return !empty($this->token);
     }

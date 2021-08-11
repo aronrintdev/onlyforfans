@@ -250,7 +250,7 @@ export default {
   mounted() { 
     if ( this.$route.params.context ) {
       switch( this.$route.params.context ) {
-        case 'vault-via-storybar': // we got here from the vault, likely with a mediafile to attach to some action
+        case 'mediafiles-selected-in-vault': // we got here from the vault, likely with a mediafile to attach to some action
           const mediafileIds = this.$route.params.mediafile_ids || []
           if ( mediafileIds.length ) {
             const response = axios.get(this.$apiRoute('mediafiles.index'), {

@@ -174,7 +174,7 @@ export default {
         autoProcessQueue: false,
         thumbnailWidth: 100,
         clickable: '.upload-files', // button in the footer, see: https://www.dropzonejs.com/#configuration-options
-        maxFilesize: 15.9,
+        maxFilesize: 99,
         addRemoveLinks: true,
         headers: {
           'X-Requested-With': 'XMLHttpRequest',

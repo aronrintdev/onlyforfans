@@ -14,12 +14,12 @@
       </template>
 
       <LoadingOverlay :loading="loading" />
-      <VaultSelectorComponent />
+      <VaultSelectorComponent @close="exit" ref="vaultSelector" />
 
       <template #footer>
         <b-row>
           <b-col cols="12" class="d-flex justify-content-end">
-            <b-btn class="px-3" variant="primary" :disabled="!isSaveable" @click="save">{{ $t('save.button') }}</b-btn>
+            <b-btn class="px-3" variant="primary" :disabled="!isSaveable" @click="applySelection">Select</b-btn>
           </b-col>
         </b-row>
       </template>
@@ -34,39 +34,24 @@ import VaultSelectorComponent from '@views/live-chat/components/ShowThread/Vault
 
 export default {
   props: {
-    post: { type: Object, default: () => ({}) },
+    payload: null,
   },
 
   computed: {
     isSaveable() {
-      return (this.loading) ? false  : (this.reason !== '')
+      return true // (this.loading) ? false  : ...
     }
   },
 
   data: () => ({
     loading: false,
-    reason: '',
   }),
 
   methods: {
 
-    save(e) {
-      /*
-      this.loading = true
-      this.axios.post(this.$apiRoute('contentflags.store'), {
-        //flagger_id: this.flagger_id,
-        flaggable_id: this.post.id,
-        flaggable_type: 'posts',
-        notes: this.reason,
-      }).then(response => {
-        this.loading = false
-        //eventBus.$emit('update-posts', this.post.id)
-        this.exit()
-      }).catch(error => {
-        eventBus.$emit('error', { error, message: this.$t('save.error') })
-        this.loading = false
-      })
-      */
+    // %NOTE: this is coupled to the VaultSelector child component, essentially assumes its onSelect() method is 'public'
+    applySelection() {
+      this.$refs.vaultSelector.applySelection()
     },
 
     discard(e) {

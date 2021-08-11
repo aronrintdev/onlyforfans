@@ -85,9 +85,7 @@
               <b-col class="col-sm-12">
                 <b-button @click="checkStatus" type="submit" variant="primary" class="clickme_to-submit OFF-w-100" :disabled="isProcessing">
                   <span v-if="!isProcessing">Check Status</span>
-                  <span v-else>
-                      Sending... <fa-icon class="input-spinner" icon="spinner" spin />
-                    </span>
+                  <span v-else>Sending... <fa-icon class="input-spinner" icon="spinner" spin /></span>
                 </b-button>
               </b-col>
             </b-form-row>

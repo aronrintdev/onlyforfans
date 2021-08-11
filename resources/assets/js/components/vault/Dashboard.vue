@@ -432,7 +432,7 @@ export default {
       url: route('mediafiles.index'),
       paramName: 'mediafile',
       thumbnailHeight: 128,
-      maxFilesize: 15.9,
+      maxFilesize: 99,
       headers: { 
         'X-Requested-With': 'XMLHttpRequest', 
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
@@ -456,26 +456,23 @@ export default {
 
     sendSelected(resourceType) {
       // send (share) selected files to a post, story, or message
-      // %TODO: as part of AF-492 deprecate this code 20210806
+      // %TODO: as part of AF-492 deprecate this code 20210806 -- No actually we need it to send from vault to other areas (eg post create form)
       const params = {
-          mediafile_ids: this.selectedMediafiles.map( ({id}) => id )
+          mediafile_ids: this.selectedMediafiles.map( ({id}) => id ),
+          context: 'mediafiles-selected-in-vault',
       }
 
       switch (resourceType) {
         case 'story':
           if ( this.sendAction === 'storybar' ) {
-            params.context = 'vault-via-storybar'
             this.$router.replace({ name: 'index', params })
           } else {
             this.storeStory()
           }
           break
-          /* %TODO: remove
-          //case 'post':
-          //params.context = 'vault-via-postcreate'
-          //this.$router.replace({ name: 'index', params })
-          //break
-          */
+        case 'post':
+          this.$router.replace({ name: 'index', params })
+          break
         case 'message':
           this.$router.replace({ name: 'chatthreads.create', params })
           break

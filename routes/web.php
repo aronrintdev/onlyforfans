@@ -279,6 +279,7 @@ Route::group(['middleware' => ['auth']], function () {
         ->name('vaultfolders.uploads-folder');
     Route::resource('vaultfolders', 'VaultfoldersController', [ ]);
 
+    Route::get('/verifyrequests/{vr}/check-status', ['as'=>'verifyrequests.checkStatus', 'uses' => 'VerifyrequestsController@checkStatus'])->middleware(['role:admin|super-admin']);
     Route::resource('verifyrequests', 'VerifyrequestsController', [ 'only' => [ 'index', 'show', ] ])->middleware(['role:admin|super-admin']);
 
     // -- misc --
