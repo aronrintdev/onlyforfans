@@ -425,7 +425,7 @@ export default {
       url: route('mediafiles.index'),
       paramName: 'mediafile',
       thumbnailHeight: 128,
-      maxFilesize: 99,
+      maxFilesize: 5000, // 5 GB
       headers: { 
         'X-Requested-With': 'XMLHttpRequest', 
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
