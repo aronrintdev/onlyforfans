@@ -495,7 +495,6 @@ export default {
    if ( this.$route.params.context ) {
      switch( this.$route.params.context ) {
        case 'send-selected-mediafiles-to-post': // we got here from the vault, likely with mediafiles to attach to a new post
-         console.log('CreatePost::mounted() -- send-selected-mediafiles-to-post')
          const mediafileIds = this.$route.params.mediafile_ids || []
          if ( mediafileIds.length ) {
            // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something

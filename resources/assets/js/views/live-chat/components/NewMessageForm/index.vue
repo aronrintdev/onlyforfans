@@ -118,10 +118,6 @@ import Footer from './Footer'
 //  dropzone.processQueue()
 //  finalizeMessageSend()
 // 
-// 
-// 
-// 
-// 
 export default {
   name: 'NewMessageForm',
 
@@ -510,6 +506,28 @@ export default {
     },
 
   }, // methods
+
+  mounted() {
+   if ( this.$route.params.context ) {
+     switch( this.$route.params.context ) {
+       case 'send-selected-mediafiles-to-message': // we got here from the vault, with mediafiles to attach to a new message
+         const mediafileIds = this.$route.params.mediafile_ids || []
+         if ( mediafileIds.length ) {
+           // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
+           const response = axios.get(this.$apiRoute('mediafiles.index'), {
+             params: {
+               mediafile_ids: mediafileIds,
+             },
+           }).then( response => {
+             response.data.data.forEach( mf => {
+               this.ADD_SELECTED_MEDIAFILES(mf)
+             })
+           })
+         }
+         break
+     } // switch
+   }
+  },
 
   created() {
     this.isTyping = _.throttle(this._isTyping, 1000)
