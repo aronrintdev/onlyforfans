@@ -4,7 +4,7 @@
 
       <b-card class="locked mb-1 b-none" bg-variant="light" :style="{ minWidth: '50%' }">
         <div v-if="images.length > 0" class="d-flex justify-content-center">
-          <img v-if="firstImageBlur" :src="firstImageBlur">
+          <b-img-lazy v-if="firstImageBlur" :src="firstImageBlur" />
           <div v-else class="p-5 text-muted">
             <fa-icon icon="lock" size="3x" />
           </div>

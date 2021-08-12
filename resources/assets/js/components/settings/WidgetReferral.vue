@@ -5,7 +5,7 @@
     <b-card-body class="py-1">
       <div class="avatar-img">
         <router-link :to="{ name: 'timeline.show', params: { slug } }">
-          <b-img thumbnail rounded="circle" class="w-100 h-100" :src="referral.avatar.filepath" :alt="referral.username" :title="referral.name" />
+          <b-img-lazy thumbnail rounded="circle" class="w-100 h-100" :src="referral.avatar.filepath" :alt="referral.username" :title="referral.name" />
         </router-link>
       </div>
 

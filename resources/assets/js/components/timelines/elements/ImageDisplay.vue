@@ -10,11 +10,11 @@
     >
 
       <template v-if="mediafile.access">
-        <img v-if="mediafile.is_image" 
+        <b-img-lazy v-if="mediafile.is_image" 
           @click="renderFull"
           class="d-block"
           :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
-          :alt="mediafile.mfname" >
+          :alt="mediafile.mfname" />
         <MediaSlider v-else-if="mediafile.is_video" 
           @click="renderFull"
           :mediafiles="[mediafile]" 

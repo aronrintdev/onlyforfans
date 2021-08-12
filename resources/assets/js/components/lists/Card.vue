@@ -18,7 +18,7 @@
 
       <div class="avatar-img">
         <router-link :to="link">
-          <b-img thumbnail rounded="circle" class="w-100 h-100" :src="value.avatar.filepath" :alt=" value.slug || value.username" :title="value.name" />
+          <b-img-lazy thumbnail rounded="circle" class="w-100 h-100" :src="value.avatar.filepath" :alt=" value.slug || value.username" :title="value.name" />
         </router-link>
       </div>
 

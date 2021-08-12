@@ -4,7 +4,7 @@
     <b-card-header>
       <section class="user-avatar">
         <router-link :to="tippedTimelineUrl">
-          <b-img :src="tippedTimeline.avatar.filepath" :alt="tippedTimeline.name" :title="tippedTimeline.name" />
+          <b-img-lazy :src="tippedTimeline.avatar.filepath" :alt="tippedTimeline.name" :title="tippedTimeline.name" />
         </router-link>
       </section>
       <section class="user-details">

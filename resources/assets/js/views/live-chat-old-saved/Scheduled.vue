@@ -28,7 +28,7 @@
                       <span :class="`status-holder status-holder-${scheduled_message.profile.id}`"></span>
                     </div>
                     <div class="user-logo" v-if="scheduled_message.profile.avatar">
-                      <img :src="scheduled_message.profile.avatar.filepath" alt="" />
+                      <b-img-lazy :src="scheduled_message.profile.avatar.filepath" alt="" />
                       <span :class="`status-holder status-holder-${scheduled_message.profile.id}`"></span>
                     </div>
                     <div class="user-details">

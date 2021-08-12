@@ -1,6 +1,6 @@
 <template>
   <div id="preview">
-    <img :src="imgPreviewUrl" class="img-fluid" />
+    <b-img-lazy :src="imgPreviewUrl" class="img-fluid" />
     <see-more v-if="linkValid" :link="attrs.link"></see-more>
   </div>
 </template>

@@ -3,7 +3,7 @@
 
     <b-card-header>
       <section class="user-avatar">
-        <router-link :to="timelineUrl"><b-img :src="timeline.avatar.filepath" :alt="timeline.name" :title="timeline.name"></b-img></router-link>
+        <router-link :to="timelineUrl"><b-img-lazy :src="timeline.avatar.filepath" :alt="timeline.name" :title="timeline.name"></b-img-lazy></router-link>
       </section>
       <section class="user-details">
         <div>

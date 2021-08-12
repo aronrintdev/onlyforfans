@@ -11,14 +11,14 @@
       >
         <div class="avatar-img">
           <a :href="`/${timeline.slug}`">
-            <b-img
+            <b-img-lazy
               thumbnail
               rounded="circle"
               class="w-100 h-100"
               :src="session_user.avatar.filepath"
               :alt="timeline.name"
               :title="timeline.name"
-            ></b-img>
+            ></b-img-lazy>
           </a>
         </div>
 

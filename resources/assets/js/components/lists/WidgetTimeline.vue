@@ -19,7 +19,7 @@
       </div>
       <div class="avatar-img">
         <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
-          <b-img thumbnail rounded="circle" class="w-100 h-100" :src="timeline.avatar.filepath" :alt="timeline.slug" :title="timeline.name" />
+          <b-img-lazy thumbnail rounded="circle" class="w-100 h-100" :src="timeline.avatar.filepath" :alt="timeline.slug" :title="timeline.name" />
         </router-link>
       </div>
 

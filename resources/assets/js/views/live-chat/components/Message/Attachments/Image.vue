@@ -1,6 +1,6 @@
 <template>
   <div style="">
-    <b-img :src="value.filepath" thumbnail height="10rem" />
+    <b-img-lazy :src="value.filepath" thumbnail height="10rem" />
   </div>
 </template>
 

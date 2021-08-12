@@ -15,7 +15,7 @@
         <swiper-slide v-for="tl in timelines" :key="tl.id" class="story slide tag-followed_timeline">
           <router-link :to="isMyTimeline(tl) ? '' : { name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story" @click.native="renderSelectFileModal">
             <div class="avatar-container" :class="{ 'my-story-avatar': isMyTimeline(tl) && sessionUserHasActiveStories, 'my-story-avatar-no-story': isMyTimeline(tl) && !sessionUserHasActiveStories, 'all-viewed': tl.allViewed }">
-              <b-img
+              <b-img-lazy
                 rounded="circle" 
                 :src="tl.avatar.filepath"
               />
@@ -65,8 +65,8 @@
     <b-modal v-model="isPreviewModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="OFF-p-0">
       <section>
         <div class="box-image-preview text-center">
-          <b-img v-if="storyAttrs.selectedMediafile" fluid :src="selectedFileUrl"></b-img>
-          <b-img v-else-if="fileInput" fluid :src="selectedFileUrl"></b-img>
+          <b-img-lazy v-if="storyAttrs.selectedMediafile" fluid :src="selectedFileUrl" />
+          <b-img-lazy v-else-if="fileInput" fluid :src="selectedFileUrl" />
         </div>
       </section>
       <b-form v-on:submit.prevent class="mt-3">
