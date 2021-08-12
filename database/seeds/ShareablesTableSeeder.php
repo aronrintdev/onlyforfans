@@ -84,7 +84,7 @@ class ShareablesTableSeeder extends Seeder
             }
 
             $followerPool->random($max)->each( function(User $follower) use(&$timeline) {
-                //$ts = $this->faker->dateTimeBetween($startDate = '-5 years', $endDate = 'now');
+                $ts = $this->faker->dateTimeBetween($startDate = '-5 years', $endDate = 'now');
                 $customAttributes = [ 'notes' => 'ShareablesTableSeeder.follow_some_free_timelines' ];
                 DB::table('shareables')->insert([
                     //'id' =>  Str::uuid(),
@@ -94,8 +94,8 @@ class ShareablesTableSeeder extends Seeder
                     'is_approved' => 1,
                     'access_level' => 'default',
                     'cattrs' => json_encode($customAttributes), // encode manually since we are using query builder
-                    //'created_at' => $ts,
-                    //'updated_at' => $ts,
+                    'created_at' => $ts,
+                    'updated_at' => $ts,
                 ]);
                 // %PSG: Disable as this will trigger SendGrid emails
                 //$timeline->user->notify(new TimelineFollowedNotify($timeline, $follower));
