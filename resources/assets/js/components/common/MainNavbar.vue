@@ -161,8 +161,4 @@ export default {
   }
 }
 
-.nav-logo {
-  width: 154px;
-}
-
 </style>
