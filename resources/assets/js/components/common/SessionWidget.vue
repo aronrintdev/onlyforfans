@@ -11,7 +11,7 @@
         >
         <div class="avatar-img">
           <a :href="`/${follower.username}`">
-            <b-img thumbnail rounded="circle" class="w-100 h-100" :src="follower.avatar.filepath" :alt="follower.name" :title="follower.name"></b-img>
+            <b-img-lazy thumbnail rounded="circle" class="w-100 h-100" :src="follower.avatar.filepath" :alt="follower.name" :title="follower.name"></b-img-lazy>
           </a>
         </div>
 

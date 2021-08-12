@@ -1,6 +1,6 @@
 <template>
   <section class="avatar-img" :style="{ height: s, width: s }">
-    <b-img
+    <b-img-lazy
       v-if="noLink"
       :thumbnail="thumbnail"
       rounded="circle"
@@ -13,7 +13,7 @@
       v-else
       :to="{ name: 'timeline.show', params: { slug: user.timeline ? user.timeline.slug : user.slug } }"
     >
-      <b-img
+      <b-img-lazy
         :thumbnail="thumbnail"
         rounded="circle"
         class="w-100 h-100"

@@ -10,7 +10,7 @@
         <article>
           <b-media no-body>
             <b-media-aside>
-              <b-img :src="dtoUser.avatar.filepath" rounded="circle" width="64" height="64" alt="avatar"></b-img>
+              <b-img-lazy :src="dtoUser.avatar.filepath" rounded="circle" width="64" height="64" alt="avatar"></b-img-lazy>
             </b-media-aside>
             <b-media-body>
               <h5 class="mt-3">{{ dtoUser.fullName }}</h5>
@@ -27,7 +27,7 @@
                 {{ s.content }}
               </article>
               <article v-if="s.stype==='image'" v-bind:class="{ 'tag-image': s.stype==='image' }">
-                <b-img fluid :src="s.mf_url" alt="story pic"></b-img>
+                <b-img-lazy fluid :src="s.mf_url" alt="story pic"></b-img-lazy>
               </article>
             </b-list-group-item>
           </b-list-group>

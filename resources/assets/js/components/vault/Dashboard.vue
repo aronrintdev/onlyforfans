@@ -46,7 +46,7 @@
       <main class="col-md-9">
 
         <!-- +++ File Thumbnails / Dropzone File Uploader +++ -->
-        <b-row v-if="isUploaderVisible">
+        <b-row>
           <b-col>
             <vue-dropzone 
               ref="myVueDropzone" 
@@ -54,7 +54,13 @@
               :options="dropzoneOptions"
               v-on:vdropzone-sending="sendingEvent"
               v-on:vdropzone-success="successEvent"
-            ></vue-dropzone>
+              :useCustomSlot="true"
+            >
+              <div class="dropzone-custom-content">
+                <fa-icon :icon="['fas', 'upload']" size="lg" />
+                <span>Drop files here to upload, or click to browse.</span>
+              </div>
+            </vue-dropzone>
           </b-col>
         </b-row>
         
@@ -85,6 +91,7 @@
                 <div class="">
                   <b-button @click="renderSendForm()" variant="primary" class="mr-1">Send To</b-button>
                   <b-button @click="renderShareForm()" variant="primary" class="mr-1">Share</b-button>
+                  <b-button @click="renderDownloadForm()" variant="primary" class="mr-1">Download</b-button>
                   <b-button @click="renderDeleteForm()" variant="danger" class="mr-1">Delete</b-button>
                 </div>
               </div>
@@ -96,10 +103,6 @@
                 <b-button variant="link" class="" @click="recordAudio">
                   <fa-icon :icon="['fas', 'microphone']" size="lg" />
                 </b-button>
-                <b-button variant="link" class="" @click="isUploaderVisible=!isUploaderVisible">
-                  <fa-icon :icon="['fas', 'upload']" size="lg" />
-                </b-button>
-                
               </div>
 
             </section>
@@ -125,13 +128,13 @@
             <!-- Vaultfolders -->
             <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3" class="mb-2">
               <div v-if="vf.is_pending_approval" class="tag-folder img-box tag-shared tag-pending-approval">
-                <b-img fluid @click="renderApproveSharedModal(vf)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
+                <b-img-lazy fluid @click="renderApproveSharedModal(vf)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img-lazy>
                 <div class="icon-pending-approval" style="font-size: 3rem;">
                   <fa-icon :icon="['fas', 'share-alt']" class="text-primary" />
                 </div>
               </div>
               <div v-else class="tag-folder img-box">
-                <b-img fluid @click="doNav(vf.id)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
+                <b-img-lazy fluid @click="doNav(vf.id)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img-lazy>
                 <div class="file-count">
                   <b-badge variant="warning" class="p-2">{{ vf.mediafiles.length + vf.vfchildren.length }}</b-badge>
                 </div>
@@ -276,15 +279,21 @@
     </b-modal>
 
     <!-- Form modal for image preview before saving to story (%FIXME DRY: see StoryBar.vue) -->
-    <b-modal v-model="isSaveToStoryModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="p-0">
-      <div>
-        <b-img fluid :src="selectedMediafiles.length ? selectedMediafiles[0].filepath : null"></b-img>
-      </div>
-      <template #modal-footer>
-        <div class="w-100">
-          <b-button variant="secondary" size="sm" @click="isSaveToStoryModalVisible=false">Cancel</b-button>
-          <b-button variant="primary" size="sm" @click="sendSelected('story')">Save</b-button>
+    <b-modal v-model="isSaveToStoryModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story">
+      <section>
+        <div class="box-image-preview text-center">
+          <b-img-lazy v-if="storyAttrs.selectedMediafile" fluid :src="storyAttrs.selectedMediafile.filepath"></b-img-lazy>
         </div>
+      </section>
+      <b-form v-on:submit.prevent class="mt-3">
+        <b-form-group label='"Swipe Up" Link (optional)' label-for="swipe-up-link">
+          <b-form-input id="swipe-up-link" type="url" v-model="storyAttrs.link" :state="urlState" placeholder="http://example.com"></b-form-input>
+        </b-form-group>
+      </b-form>
+
+      <template #modal-footer>
+        <b-button variant="secondary" size="sm" @click="isSaveToStoryModalVisible=false">Cancel</b-button>
+        <b-button variant="primary" size="sm" @click="storeStory()">Save</b-button>
       </template>
     </b-modal>
 
@@ -301,6 +310,18 @@
 
     <!-- Video Recorder -->
     <VideoRecorder v-if="showVideoRec" @close="showVideoRec=false;" @complete="recordCompleted" />
+
+    <!-- Modal for downloading selected files or folders -->
+    <b-modal v-model="isDownloadFilesModalVisible" size="md" title="Confirm Download" >
+        <p>Are you sure you want to download the following {{ selectedMediafiles.length }} files?</p>
+        <b-list-group class="download-list">
+          <b-list-group-item v-for="(mf) in selectedMediafiles" :key="mf.id">{{ mf.mfname }}</b-list-group-item>
+        </b-list-group>
+        <template #modal-footer>
+            <b-button variant="secondary" @click="isDownloadFilesModalVisible=false">Cancel</b-button>
+            <b-button variant="primary" @click="downloadSelectedFiles">Download Files</b-button>
+        </template>
+    </b-modal>
   </div>
 </template>
 
@@ -380,6 +401,10 @@ export default {
       return _.filter(this.mediafiles, o => (o.selected))
     },
 
+    urlState() { // for story form
+      return this.storyAttrs.link ? validateUrl(this.storyAttrs.link) : null
+    },
+
   },
 
   data: () => ({
@@ -391,9 +416,8 @@ export default {
     // By default we can send to story, post, or message...may be overridden if this 'page' is 
     // loaded in another context (hack for mvp)
     sendChannels: ['story', 'post', 'message'],
-    sendAction: null,
+    //sendAction: null,
 
-    isUploaderVisible: false,
     isSendFilesModalVisible: false,
     isShareFilesModalVisible: false,
     isDeleteFilesModalVisible: false,
@@ -402,6 +426,7 @@ export default {
     isSaveToStoryModalVisible: false,
     isMediaLightboxModalVisible: false,
     isApproveSharedModalVisible: false,
+    isDownloadFilesModalVisible: false,
 
     selectedVfToApprove: null,
     selectedVfToDelete: null,
@@ -412,6 +437,13 @@ export default {
       name: '',
       //vault_id: this.vault_pkid,
       //parent_id: this.currentFolderId,
+    },
+
+    storyAttrs: { // for 'send-to-story' form
+      color: '#fff',
+      contents: '',
+      link: null,
+      selectedMediafile: null, // if selected from vault
     },
 
     currentFolderId: null,
@@ -432,12 +464,12 @@ export default {
       url: route('mediafiles.index'),
       paramName: 'mediafile',
       thumbnailHeight: 128,
-      maxFilesize: 15.9,
+      maxFilesize: 5000, // 5 GB
       headers: { 
         'X-Requested-With': 'XMLHttpRequest', 
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
       },
-      dictDefaultMessage: 'Drop files here to upload, or click browse.',
+      dictDefaultMessage: 'Drop files here to upload, or click to browse.',
     },
 
     showVideoRec: false,
@@ -456,50 +488,62 @@ export default {
 
     sendSelected(resourceType) {
       // send (share) selected files to a post, story, or message
-      // %TODO: as part of AF-492 deprecate this code 20210806
+      // %TODO: as part of AF-492 deprecate this code 20210806 -- No actually we need it to send from vault to other areas (eg post create form)
       const params = {
-          mediafile_ids: this.selectedMediafiles.map( ({id}) => id )
+          mediafile_ids: this.selectedMediafiles.map( ({id}) => id ),
       }
+      console.log('Vault/Dashboard::sendSelected', {
+        resourceType, 
+        params,
+      })
 
       switch (resourceType) {
         case 'story':
+          /*
+          params.context = 'send-selected-mediafiles-to-story' // 'mediafiles-selected-in-vault'
           if ( this.sendAction === 'storybar' ) {
-            params.context = 'vault-via-storybar'
             this.$router.replace({ name: 'index', params })
-          } else {
-            this.storeStory()
+          } 
+          */
+          if ( this.selectedMediafiles.length ) {
+            //this.$router.replace({ name: 'index', params })
+            this.storyAttrs.link = null
+            this.storyAttrs.selectedMediafile = this.selectedMediafiles[0] // if selected from vault
+            this.isSaveToStoryModalVisible = true
           }
           break
-          /* %TODO: remove
-          //case 'post':
-          //params.context = 'vault-via-postcreate'
-          //this.$router.replace({ name: 'index', params })
-          //break
-          */
+        case 'post':
+          params.context = 'send-selected-mediafiles-to-post' // 'mediafiles-selected-in-vault'
+          this.$router.replace({ name: 'index', params })
+          break
         case 'message':
+          params.context = 'send-selected-mediafiles-to-message' // 'mediafiles-selected-in-vault'
           this.$router.replace({ name: 'chatthreads.create', params })
           break
       }
       this.sendChannels =  ['story', 'post', 'message']
-      this.sendAction =  null
+      //this.sendAction =  null
     },
 
     // API to update a new story in the database for this user's timeline
     // %NOTE: can only send 1 file per new story 
     async storeStory() {
       const stype = 'image'
+
       let payload = new FormData()
       payload.append('stype', stype) // %FIXME: hardcoded
-      payload.append('bgcolor', "#fff")
-      payload.append('content', '') // this.storyAttrs.contents
-      payload.append('link', null) // this.storyAttrs.link)
+      payload.append('bgcolor', this.storyAttrs.color || "#fff")
+      payload.append('content', this.storyAttrs.contents)
+      if ( this.storyAttrs.link ) {
+        payload.append('link', this.storyAttrs.link)
+      }
 
       switch ( stype ) {
         case 'text':
           break
         case 'image':
-          if ( this.selectedMediafiles.length ) {
-            payload.append('mediafile_id', this.selectedMediafiles[0].id)
+          if ( this.storyAttrs.selectedMediafile ) {
+            payload.append('mediafile_id', this.storyAttrs.selectedMediafile.id)
           }
           break
       } 
@@ -510,7 +554,9 @@ export default {
         }
       })
       this.isSaveToStoryModalVisible = false
-      this.fileInput = null // form input
+      this.isSendFilesModalVisible = false
+      this.resetStoryForm()
+
       if ( this.$route.params.context === 'storybar' ) {
         //this.$route.params = null %TODO: clear ?
         this.$router.replace({ 
@@ -520,6 +566,13 @@ export default {
           },
         })
       }
+    },
+
+    resetStoryForm() {
+      this.storyAttrs.selectedMediafile = null
+      this.storyAttrs.color = '#fff'
+      this.storyAttrs.contents = ''
+      this.storyAttrs.link = null
     },
 
     renderLightbox(mediafile) {
@@ -541,6 +594,10 @@ export default {
 
     renderDeleteForm() {
       this.isDeleteFilesModalVisible = true
+    },
+
+    renderDownloadForm() {
+      this.isDownloadFilesModalVisible = true
     },
 
     onPreviewFileInput(value) {
@@ -615,6 +672,13 @@ export default {
       this.$store.dispatch('getVaultfolder', this.currentFolderId)
       this.clearSelected()
       this.$root.$bvToast.toast( `Successfully deleted ${payload.mediafile_ids.length} files)`, {toaster: 'b-toaster-top-center', variant: 'success'} )
+    },
+
+
+    async downloadSelectedFiles() {
+      this.isDownloadFilesModalVisible = false
+      this.clearSelected()
+      this.$root.$bvToast.toast( `Successfully downloaded ${this.selectedMediafiles.length} files)`, {toaster: 'b-toaster-top-center', variant: 'success'} )
     },
 
     // --- New Vault Folder Form methods ---
@@ -802,7 +866,8 @@ export default {
       this.$store.dispatch('getVaultfolder', this.vaultfolder_pkid)
     })
 
-    // act on any special context params passed from Vue router
+      /*
+    // %HERE %FIXME act on any special context params passed from Vue router
     if ( this.$route.params.context ) {
       switch( this.$route.params.context ) {
         case 'storybar': // we got here from the storybar, so instead of sending the story directly, return to story bar (!)
@@ -811,6 +876,7 @@ export default {
           break
       }
     }
+    */
   },
 
   watch: {

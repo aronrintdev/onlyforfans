@@ -7,7 +7,7 @@
       </b-btn>
     </div>
     <div class="d-flex mb-2">
-      <b-btn variant="success" class="ml-auto clickme_to-apply_selected" @click="onSelect">
+      <b-btn variant="success" class="ml-auto clickme_to-apply_selected" @click="applySelection">
         <fa-icon icon="check" size="lg" class="mr-2" />
         {{ $t('selectButton') }}
       </b-btn>
@@ -49,7 +49,9 @@ export default {
     MediaList,
   },
 
-  props: {},
+  props: {
+    payload: null,
+  },
 
   computed: {
     ...Vuex.mapGetters(['session_user', 'vaultfolder', 'breadcrumb']),
@@ -64,6 +66,10 @@ export default {
 
     isLoading() {
       return !this.myVault || !this.vaultRootFolder || !this.session_user
+    },
+
+    context() {
+      return payload.context || ''
     },
   },
 
@@ -102,10 +108,11 @@ export default {
       this.$emit('close')
     },
 
-    onSelect() {
+    applySelection() {
       // Add selected Mediafiles to the selected media files list, then close
       const selected = _.filter(this.mediafiles, o => o.selected)
       this.ADD_SELECTED_MEDIAFILES(selected)
+      eventBus.$emit('vaultselector-mediafiles-selected', { foo: 'bar' } )
       this.$emit('close')
     }
   },

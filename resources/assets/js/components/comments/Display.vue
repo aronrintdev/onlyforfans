@@ -2,7 +2,7 @@
   <b-media :class="isReply ? 'show_reply-box' : 'show_comment-crate'" :data-comment_guid="comment.id">
 
     <template #aside>
-      <b-img thumbnail fluid :src="comment.user.avatar.filepath" alt="Avatar"></b-img>
+      <b-img-lazy thumbnail fluid :src="comment.user.avatar.filepath" alt="Avatar"></b-img-lazy>
     </template>
 
     <article>

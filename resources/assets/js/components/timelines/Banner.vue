@@ -38,7 +38,7 @@
       @mouseleave="toggleUploadAvatar(false)"
       class="avatar-img"
     >
-      <b-img
+      <b-img-lazy
         thumbnail
         rounded="circle"
         class="w-100 h-100"

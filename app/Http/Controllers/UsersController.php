@@ -424,13 +424,26 @@ class UsersController extends AppBaseController
         return response()->json( $vr );
     }
 
-    // Manually check status of a pending request
+    // Manually check status of a pending request for the session user
     // %TODO: put on queue (?)
     public function checkVerifyStatus(Request $request)
     {
         $sessionUser = $request->user();
         $user = $sessionUser;
-        $vr = Verifyrequest::checkStatus($user);
+
+        // only submit if there's an existing pending request
+        $userId = $user->id;
+        $pending = Verifyrequest::where('requester_id', $userId)
+            ->where('vstatus', VerifyStatusTypeEnum::PENDING)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        if ( !$pending->count() ) {
+            throw new Exception('UserController::checkVerifyStatus() - User has no verification request currently pending');
+        }
+        $vr = $pending[0]; // use latest pending request for this user
+
+        $vr = Verifyrequest::checkStatusByGUID($vr->guid);
+
         if ( $vr->vstatus ===  VerifyStatusTypeEnum::VERIFIED ) {
             $user->notify( new IdentityVerificationVerified($vr, $user) );
         } else if ( $vr->vstatus ===  VerifyStatusTypeEnum::REJECTED ) {
