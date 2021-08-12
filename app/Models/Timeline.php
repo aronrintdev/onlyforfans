@@ -98,9 +98,10 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     //         //: (object) ['filepath' => url('user/cover/default-' . $this->gender . '-cover.png')]; // %TODO %FIXME
     // }
 
-     public function getVerifiedAttribute($value) {
-         return $this->user->verifyrequest && ($this->user->verifyrequest->vstatus===VerifyStatusTypeEnum::VERIFIED);
-     }
+    // %FIXME [timelines].verified field should be deprecated (renamed then removed)
+    public function getVerifiedAttribute($value) {
+        return $this->user->verifyrequest && ($this->user->verifyrequest->vstatus===VerifyStatusTypeEnum::VERIFIED);
+    }
 
     public function toArray()
     {
