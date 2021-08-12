@@ -175,8 +175,8 @@ export default {
     },
 
     getVariant(amount) {
-      if (amount === this.formPayload.amount && !this.showCustomPrice) return 'primary'
-      if (!amount && this.showCustomPrice) return 'primary'
+      if (amount === this.formPayload.amount && !this.showCustomPrice) return 'secondary'
+      if (!amount && this.showCustomPrice) return 'secondary'
       return 'light'
     }
   },
