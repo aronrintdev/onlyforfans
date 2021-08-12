@@ -129,9 +129,9 @@ export default {
 }
 
 .mobile {
-  position: fixed;
-  bottom: 0px;
-  left: 0px;
+  // position: fixed;
+  // bottom: 0px;
+  // left: 0px;
   width: 100vw;
   background-color: var(--light);
   .nav-item {
@@ -139,6 +139,7 @@ export default {
     flex-grow: 1;
     margin-left: 0;
     margin-right: 0;
+    color: rgba(0, 0, 0, 0.5);
   }
   .nav-link {
     flex-grow: 1;
@@ -147,6 +148,7 @@ export default {
     align-content: center;
     justify-content: center;
     width: 100%;
+    color: rgba(0, 0, 0, 0.5);
     // padding-left: 1rem;
     // padding-right: 1rem;
     // border: 1px var(--gray) solid;

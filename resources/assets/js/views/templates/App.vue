@@ -11,13 +11,15 @@
       </transition>
     </div>
 
+    <NavButtons v-if="mobile" :mobile-style="mobile" :unread-messages-count="unread_messages_count" class="bottom-nav" />
+
     <Modals />
 
     <Toaster />
 
     <EventUpdater />
 
-    <SiteFooter v-if="!isFooterHidden" />
+    <SiteFooter v-if="!isFooterHidden && !mobile" />
   </div>
 </template>
 
@@ -29,6 +31,7 @@ import VueScreenSize from 'vue-screen-size'
 import EventUpdater from '@components/EventUpdater'
 import MainNavBar from '@components/common/MainNavbar'
 import Modals from '@components/Modals'
+import NavButtons from '@components/common/navbar/NavButtons'
 import SiteFooter from '@views/templates/SiteFooter'
 import SiteLoading from '@components/common/SiteLoading'
 import Toaster from '@components/Toaster'
@@ -39,6 +42,7 @@ export default {
     EventUpdater,
     MainNavBar,
     Modals,
+    NavButtons,
     SiteFooter,
     SiteLoading,
     Toaster,
@@ -52,7 +56,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState(['session_user', 'mobile', 'screenSize']),
+    ...Vuex.mapState(['session_user', 'mobile', 'screenSize', 'unread_messages_count']),
 
     mobileWidth() {
       if (typeof this.toggleMobileAt === 'number') {
@@ -140,5 +144,9 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+.bottom-nav {
+  position: sticky;
+  bottom: 0;
+}
 </style>
