@@ -1,6 +1,6 @@
 <template>
   <div class="cursor-pointer" @click="onClick">
-    <img
+    <b-img-lazy
       v-if="value.is_image"
       :src="value.filepath"
       class="img-thumbnail rounded"

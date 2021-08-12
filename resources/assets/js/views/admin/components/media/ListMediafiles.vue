@@ -41,7 +41,7 @@
     <b-modal v-model="isShowModalVisible" id="modal-show-mediafile" size="lg" title="File Details" body-class="OFF-p-0">
       <section v-if="modalSelection" class="OFF-d-flex">
         <div class="box-image-preview text-center">
-          <b-img fluid :src="modalSelection.render_urls.full"></b-img>
+          <b-img-lazy fluid :src="modalSelection.render_urls.full"></b-img-lazy>
         </div>
         <div class="box-details">
           <pre>{{ JSON.stringify(modalSelection, null, 2) }}</pre>
@@ -59,7 +59,7 @@
     <b-modal v-model="isFlagModalVisible" id="modal-manage-flagged-content" size="lg" title="Flagged Content Management" body-class="OFF-p-0">
       <section v-if="modalSelection" class="OFF-d-flex">
         <div class="box-image-preview text-center">
-          <b-img fluid :src="modalSelection.render_urls.full"></b-img>
+          <b-img-lazy fluid :src="modalSelection.render_urls.full"></b-img-lazy>
         </div>
         <div class="box-details">
           <p>Flag Count: {{ modalSelection.flag_count }}</p>

@@ -22,8 +22,9 @@
 
       <div class="avatar-img">
         <router-link :to="{ name: 'timeline.show', params: { slug } }">
-          <b-img thumbnail rounded="circle" class="w-100 h-100" :src="user.avatar.filepath" :alt="user.username" :title="user.name" />
+          <b-img-lazy thumbnail rounded="circle" class="w-100 h-100" :src="user.avatar.filepath" :alt="user.username" :title="user.name" />
         </router-link>
+        <OnlineStatus :user="user" size="lg" :textInvisible="false" />
       </div>
 
 
@@ -39,7 +40,7 @@
         <b-card-sub-title class="mb-1">
           <router-link :to="{ name: 'timeline.show', params: { slug } }">@{{ user.username }}</router-link>
         </b-card-sub-title>
-        <OnlineStatus :user="user" />
+        <OnlineStatus :user="user" :indicatorVisible="false" />
       </div>
 
       <b-card-text v-if="notes" class="mt-2 mb-2"><pre>{{ notes }}</pre></b-card-text>
@@ -65,7 +66,7 @@
       <div class="user-details">
         <div class="avatar-img">
           <router-link :to="{ name: 'timeline.show', params: { slug } }">
-            <b-img thumbnail rounded="circle" class="w-100 h-100" :src="user.avatar.filepath" :alt="user.username" :title="user.name" />
+            <b-img-lazy thumbnail rounded="circle" class="w-100 h-100" :src="user.avatar.filepath" :alt="user.username" :title="user.name" />
           </router-link>
         </div>
         <div class="sharee-id">

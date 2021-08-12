@@ -5,14 +5,14 @@
         <source :src="mediafiles[0].filepath" type="video/webm" />
         <source :src="mediafiles[0].filepath" type="video/mp4" />
       </video>
-      <img
+      <b-img-lazy
         v-preview
         v-if="mediafiles[0].is_image"
         class="d-block"
         :src="use_mid && mediafiles[0].has_mid ? mediafiles[0].midFilepath : mediafiles[0].filepath"
       />
       <div class="background-preview" v-if="mediafiles[0].is_image">
-        <img
+        <b-img-lazy
           class="d-block"
           :src="use_mid && mediafiles[0].has_mid ? mediafiles[0].midFilepath : mediafiles[0].filepath"
         />
@@ -32,14 +32,14 @@
             <source :src="mf.filepath" type="video/webm" />
             <source :src="mf.filepath" type="video/mp4" />
           </video>
-          <img
+          <b-img-lazy
             v-preview:[imageScope]="imageScope"
             v-if="mf.is_image"
             class="d-block"
             :src="use_mid && mf.has_mid ? mf.midFilepath : mf.filepath"
           />
           <div class="background-preview" v-if="mf.is_image">
-            <img
+            <b-img-lazy
               class="d-block"
               :src="use_mid && mf.has_mid ? mf.midFilepath : mf.filepath"
             />

@@ -2,10 +2,10 @@
   <div class="post-author">
     <section class="user-avatar">
       <router-link :to="timelineRoute">
-        <b-img
+        <b-img-lazy
           :src="post.user.avatar.filepath"
           :title="post.user.name"
-        ></b-img>
+        ></b-img-lazy>
       </router-link>
     </section>
     <section class="user-details">

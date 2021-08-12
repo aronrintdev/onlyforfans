@@ -116,7 +116,7 @@
                                 {{ getLogoFromName(selectedUser.name) }}
                               </div>
                               <div class="user-logo" v-if="selectedUser && selectedUser.profile.avatar">
-                                <img :src="selectedUser.profile.avatar.filepath" alt="" />
+                                <b-img-lazy :src="selectedUser.profile.avatar.filepath" alt="" />
                               </div>
                               <div class="content">
                                 <div class="non-paid-message" v-if="message.tip_price && !message.paid">
@@ -171,8 +171,8 @@
                                   <template v-for="msg in message.messages">
                                     <div class="text" :class="`message-${msg.id}`" v-if="!msg.mediafile" :key="msg.id">{{ msg.mcontent }}</div>
                                     <div class="image" :class="`message-${msg.id}`" v-if="msg.mediafile" :key="msg.id">
-                                      <img v-preview:scope-b class="lazy" v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
-                                      <img src="/images/loading.gif" v-if="msg.mediafile.is_image" class="loading-image" />
+                                      <b-img-lazy v-preview:scope-b class="lazy" v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
+                                      <b-img-lazy src="/images/loading.gif" v-if="msg.mediafile.is_image" class="loading-image" />
                                       <video v-if="msg.mediafile.is_video" controls>
                                         <source :src="msg.mediafile.filepath" type="video/mp4" />
                                       </video>
@@ -217,8 +217,8 @@
                                   </svg>
                                 </div>
                                 <div class="image" :class="`message-${msg.id}`" v-if="msg.mediafile" :key="msg.id">
-                                  <img v-preview:scope-b class="lazy" v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
-                                  <img src="/images/loading.gif" v-if="msg.mediafile.is_image"  class="loading-image" />
+                                  <b-img-lazy v-preview:scope-b class="lazy" v-if="msg.mediafile.is_image" :data-src="msg.mediafile.filepath" :alt="msg.mediafile.mfname" />
+                                  <b-img-lazy src="/images/loading.gif" v-if="msg.mediafile.is_image"  class="loading-image" />
                                   <video v-if="msg.mediafile.is_video" controls>
                                     <source :src="msg.mediafile.filepath" type="video/mp4" />
                                   </video>
@@ -283,7 +283,7 @@
                         <draggable class="sort-change-div" v-model="sortableMedias" :group="'column.components'" handle=".handle" ghost-class="ghost">
                           <div v-for="(element, index) in sortableMedias" :key="index" class="drag-element">
                             <div class="img-wrapper">
-                              <img v-if="element.type.indexOf('image/') > -1" :src="element.src" alt="" />
+                              <b-img-lazy v-if="element.type.indexOf('image/') > -1" :src="element.src" alt="" />
                               <video v-if="element.type.indexOf('video/') > -1">
                                 <source :src="element.src" type="video/mp4" />
                               </video>
@@ -320,7 +320,7 @@
                         <swiper-slide class="slide">
                           <div v-if="!isDragListVisible">
                             <div class="swiper-image-wrapper" v-for="(media, index) in sortableMedias" :key="index">
-                              <img v-preview:scope-a class="swiper-lazy" v-if="media.type.indexOf('image/') > -1" :src="media.src" />
+                              <b-img-lazy v-preview:scope-a class="swiper-lazy" v-if="media.type.indexOf('image/') > -1" :src="media.src" />
                               <video v-preview:scope-a class="swiper-lazy" v-if="media.type.indexOf('video/') > -1">
                                 <source :src="media.src" type="video/mp4" />
                               </video>
@@ -566,7 +566,7 @@
                     {{ getLogoFromName(user.name) }}
                   </div>
                   <div class="user-logo" v-if="user.avatar"  :key="user.id">
-                    <img :src="user.avatar.filepath" alt="" />
+                    <b-img-lazy :src="user.avatar.filepath" alt="" />
                   </div>
                 </template>
               </div>
@@ -660,7 +660,7 @@
           </div>
           <div class="gallery-list" v-if="!isVaultLoading && vaultFiles.length">
             <div class="img-wrapper" v-for="media in vaultFiles" :key="media.id">
-              <img v-preview:scope-a v-if="media.is_image" :src="media.filepath" :alt="media.mfname" />
+              <b-img-lazy v-preview:scope-a v-if="media.is_image" :src="media.filepath" :alt="media.mfname" />
               <video v-if="media.is_video" @click="() => showMediaPopup(media)">
                 <source :src="media.filepath" type="video/mp4" />
               </video>
@@ -676,7 +676,7 @@
                     c0,4.146,4.69,6.554,8.059,4.138l31.583-22.647C97.418,73.331,97.418,69.118,94.585,67.086z"/>
                 </g>
               </svg>
-              <img v-if="media.mimetype.indexOf('audio/') > -1" src="/images/audio-thumb.png" alt="" @click="showMediaPopup(media)" />
+              <b-img-lazy v-if="media.mimetype.indexOf('audio/') > -1" src="/images/audio-thumb.png" alt="" @click="showMediaPopup(media)" />
               <span class="timestamp">{{ moment(media.created_at).format('MMM DD') }}</span>
               <div class="checkbox" @click="selectVaultFiles(media)">
                 <round-check-box

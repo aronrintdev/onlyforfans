@@ -71,7 +71,7 @@
                   <VueMarkdown :html="false" class="h4 text-center v-box text-white w-75" :source="s.content || ''" />
                 </article>
                 <article v-else-if="s.stype==='image' && s.mediafiles" :class="mobile ? 'subcrate-media-mobile' : 'subcrate-media-desktop'" class="h-100">
-                  <img v-if="s.mediafiles[0].is_image" :src="s.mediafiles[0].filepath" />
+                  <b-img-lazy v-if="s.mediafiles[0].is_image" :src="s.mediafiles[0].filepath" />
                   <video v-if="s.mediafiles[0].is_video" autoplay="autoplay" class="OFF-d-block">
                     <source :src="s.mediafiles[0].filepath" type="video/webm" />
                     <source :src="s.mediafiles[0].filepath" type="video/mp4" />

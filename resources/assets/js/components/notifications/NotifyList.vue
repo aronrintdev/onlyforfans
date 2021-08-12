@@ -7,7 +7,7 @@
       <b-media v-for="n in notifications" :key="n.id" tag="li" class="mb-0">
         <template #aside>
           <router-link v-if="n.data.actor" :to="{ name: 'timeline.show', params: { slug: n.data.actor.slug ? n.data.actor.slug : n.data.actor.username } }">
-            <b-img width="48" height="48" rounded="circle" :src="n.data.actor.avatar" :alt="n.data.actor.slug" :title="n.data.actor.name" />
+            <b-img-lazy width="48" height="48" rounded="circle" :src="n.data.actor.avatar" :alt="n.data.actor.slug" :title="n.data.actor.name" />
           </router-link>
           <router-link v-if="n.data.sender" :to="{ name: 'timeline.show', params: { slug: n.data.sender.slug ? n.data.sender.slug : n.data.sender.username } }">
             <b-img width="48" height="48" rounded="circle" :src="n.data.sender.avatar" :alt="n.data.sender.slug" :title="n.data.sender.name" />
