@@ -17,7 +17,7 @@
           </span>
         </div>
         <div>
-          <router-link :to="tippedTimelineUrl" class="tag-username">@{{ tippedTimeline.slug }}</router-link>
+          <span class="text-secondary">@{{ tippedTimeline.slug }}</span>
         </div>
       </section>
     </b-card-header>
@@ -27,9 +27,16 @@
     <transition name="quick-fade" mode="out-in">
       <b-form v-if="step === 'initial'" @submit="sendTip">
         <b-card-body>
+          <b-button variant="light" @click="formPayload.amount = 500">$5.00</b-button>
+          <b-button variant="light" @click="formPayload.amount = 1000">$10.00</b-button>
+          <b-button variant="light" @click="formPayload.amount = 2000">$20.00</b-button>
+          <b-button variant="light" @click="formPayload.amount = 5000">$50.00</b-button>
+          <b-button variant="light" @click="showCustomPrice = true">Other</b-button>
+
           <b-form-spinbutton
+            v-if="showCustomPrice"
             id="tip-amount"
-            class="w-100 mx-auto tag-tip_amount"
+            class="w-100 mx-auto tag-tip_amount mt-3"
             v-model="formPayload.amount"
             :formatter-fn="$options.filters.niceCurrency"
             :min="config.min"
@@ -37,13 +44,11 @@
             :step="config.step"
           />
 
-          <p class="text-center"><small><span v-if="renderDetails">{{ renderDetails }}</span></small></p>
-
           <textarea
             v-model="formPayload.message"
             cols="60"
             rows="5"
-            class="w-100"
+            class="w-100 tip-modal-text"
             placeholder="Write a message"
           ></textarea>
 
@@ -130,7 +135,7 @@ export default {
     config: {
       min: 500,   // $  5.00
       max: 10000, // $100.00
-      step: 500,  // $  5.00
+      step: 100,  // $  1.00
     },
 
     formPayload: {
@@ -138,6 +143,8 @@ export default {
       currency: 'USD',
       message: '',
     },
+
+    showCustomPrice: false,
   }),
 
   created() {
@@ -180,10 +187,9 @@ body .user-avatar img {
   height: 100%;
   border-radius: 50%;
 }
-
-body .user-details .tag-username {
-  color: #859AB5;
-  text-transform: capitalize;
+.tip-modal-text {
+  border: solid 1px #dfdfdf;
+  margin-top: 1rem;
 }
 </style>
 
