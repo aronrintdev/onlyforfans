@@ -13,7 +13,7 @@
 
     <b-modal
       id="modal-tip"
-      size="lg"
+      size="md"
       title="Send a Tip"
       hide-footer
       body-class="p-0"
