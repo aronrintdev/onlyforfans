@@ -74,7 +74,7 @@
                     <b-button block v-b-toggle.accordion-countries variant="light" disabled>Countries</b-button>
                     <b-collapse id="accordion-countries" accordion="my-accordion" role="tabpanel">
                       <ul class="list-blocked list-unstyled">
-                        <li v-for="(b,idx) in blocked.countries || []"> {{ b }}
+                        <li v-for="(b,idx) in blocked.countries || []" :key="idx"> {{ b }}
                           <span @click="unblock(b)" class="unblock ml-1"><b-icon icon="x-circle-fill" variant="danger" font-scale="1"></b-icon></span>
                         </li>
                       </ul>
@@ -84,7 +84,7 @@
                     <b-button block v-b-toggle.accordion-users variant="light">Users</b-button>
                     <b-collapse id="accordion-users" accordion="my-accordion" role="tabpanel">
                       <ul class="list-blocked list-unstyled">
-                        <li v-for="(b,idx) in blocked.usernames || []"> {{ b }}
+                        <li v-for="(b,idx) in blocked.usernames || []" :key="idx"> {{ b }}
                           <span @click="unblock(b)" class="unblock ml-1"><b-icon icon="x-circle-fill" variant="danger" font-scale="1"></b-icon></span>
                         </li>
                       </ul>
