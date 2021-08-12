@@ -4,8 +4,8 @@
 
       <!-- Add to story icon form -->
       <div class="story tag-ctrls mr-3">
-        <b-form-file @change="handleDiskSelect" ref="fileInput" v-model="fileInput" class="d-none"></b-form-file>
-        <div @click="isSelectFileModalVisible=true">
+        <b-form-file @change="renderPreviewModal" ref="fileInput" v-model="fileInput" class="d-none"></b-form-file>
+        <div @click="renderSelectFileModal">
           <fa-icon size="sm" :icon="['far', 'plus']" class="add-story-icon text-white" />
         </div>
       </div>
@@ -13,7 +13,7 @@
       <!-- Followed creators' stories avatar -->
       <swiper ref="mySwiper" :options="swiperOptions" class="">
         <swiper-slide v-for="tl in timelines" :key="tl.id" class="story slide tag-followed_timeline">
-          <router-link :to="isMyTimeline(tl) ? '' : { name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story" @click.native="isSelectFileModalVisible=true">
+          <router-link :to="isMyTimeline(tl) ? '' : { name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story" @click.native="renderSelectFileModal">
             <div class="avatar-container" :class="{ 'my-story-avatar': isMyTimeline(tl) && sessionUserHasActiveStories, 'my-story-avatar-no-story': isMyTimeline(tl) && !sessionUserHasActiveStories, 'all-viewed': tl.allViewed }">
               <b-img-lazy
                 rounded="circle" 
@@ -51,7 +51,10 @@
     <b-modal v-model="isSelectFileModalVisible" id="modal-select-file" size="md" title="Select a Story Type" hide-footer >
       <div>
         <b-button block variant="primary" class="" @click="selectFromFiles">Add from Device</b-button>
+        <!--
         <b-button block variant="primary" class="" :to="{ name: 'vault.dashboard', params: { context: 'storybar' } }">Add from Vault</b-button>
+        -->
+        <b-button block variant="primary" class="" @click="renderVaultSelector()">Add from Vault</b-button>
         <b-button block variant="primary" class="" @click="selectTextOnly">Add Text Only</b-button>
         <hr />
         <b-button block variant="primary" class="" :to="{ name: 'stories.player', params: { timeline_id: timeline.id } }">View My Stories</b-button>
@@ -60,14 +63,14 @@
 
     <!-- Form modal for story preview (incl. image) before saving -->
     <b-modal v-model="isPreviewModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="OFF-p-0">
-      <section class="OFF-d-flex">
+      <section>
         <div class="box-image-preview text-center">
-          <b-img-lazy v-if="storyAttrs.selectedMediafileId" fluid :src="selectedFileUrl"></b-img-lazy>
-          <b-img-lazy v-else-if="fileInput" fluid :src="selectedFileUrl"></b-img-lazy>
+          <b-img-lazy v-if="storyAttrs.selectedMediafile" fluid :src="selectedFileUrl" />
+          <b-img-lazy v-else-if="fileInput" fluid :src="selectedFileUrl" />
         </div>
       </section>
       <b-form v-on:submit.prevent class="mt-3">
-        <b-form-group v-if="!storyAttrs.selectedMediafileId && !fileInput" label="Story Text" label-for="story-contents-1">
+        <b-form-group v-if="!storyAttrs.selectedMediafile && !fileInput" label="Story Text" label-for="story-contents-1">
           <b-form-textarea id="story-contents" v-model="storyAttrs.contents" placeholder="Enter text for your new story..." rows="5" ></b-form-textarea>
         </b-form-group>
         <b-form-group label='"Swipe Up" Link (optional)' label-for="swipe-up-link">
@@ -85,6 +88,7 @@
 
 <script>
 import Vuex from 'vuex'
+import { eventBus } from '@/eventBus'
 import validateUrl from '@helpers/validateUrl';
 
 export default {
@@ -99,6 +103,11 @@ export default {
     isLoading() {
       return !this.session_user || !this.timeline || !this.timelines
     },
+
+    ...Vuex.mapState('vault', [
+      'selectedMediafiles',
+      'uploadsVaultFolder',
+    ]),
 
     urlState() {
       return this.storyAttrs.link ? validateUrl(this.storyAttrs.link) : null
@@ -124,7 +133,7 @@ export default {
       color: '#fff',
       contents: '',
       link: null,
-      selectedMediafileId: null, // if selected from vault
+      selectedMediafile: null, // used if selected from vault
     },
 
     selectedFileUrl: null,
@@ -137,9 +146,20 @@ export default {
   }),
 
   methods: {
+    ...Vuex.mapMutations('vault', [
+      'ADD_SELECTED_MEDIAFILES',
+      'CLEAR_SELECTED_MEDIAFILES',
+      'UPDATE_SELECTED_MEDIAFILES',
+      'REMOVE_SELECTED_MEDIAFILE_BY_INDEX',
+    ]),
+
+    ...Vuex.mapActions('vault', [
+      'getUploadsVaultFolder',
+    ]),
+
     selectTextOnly() {
       this.selectedFileUrl = null 
-      this.storyAttrs.selectedMediafileId = null
+      this.storyAttrs.selectedMediafile = null
       this.isSelectFileModalVisible = false
       this.isPreviewModalVisible = true
     },
@@ -148,11 +168,22 @@ export default {
       this.$refs.fileInput.$el.childNodes[0].click()
     },
 
-    selectFromVault() {
-      // %TODO...right now we are 'hacking' this by redirecting (routing) to vault, selecting files, then routing back here...
+    renderVaultSelector() {
+      eventBus.$emit('open-modal', {
+        key: 'render-vault-selector',
+        data: { 
+          context: 'story-bar',
+        },
+      })
     },
 
-    handleDiskSelect(e) {
+    renderSelectFileModal() {
+      this.CLEAR_SELECTED_MEDIAFILES()
+      this.isPreviewModalVisible = false
+      this.isSelectFileModalVisible = true
+    },
+
+    renderPreviewModal(e) {
       const file = e.target.files[0]
       this.selectedFileUrl = URL.createObjectURL(file)
       //this.$bvModal.show('modal-select-file', { })
@@ -162,9 +193,10 @@ export default {
 
     resetStoryForm() {
       // reset form input
+      this.CLEAR_SELECTED_MEDIAFILES()
       this.fileInput = null 
       this.selectedFileUrl = null 
-      this.storyAttrs.selectedMediafileId = null
+      this.storyAttrs.selectedMediafile = null
       this.storyAttrs.color = '#fff'
       this.storyAttrs.contents = ''
       this.storyAttrs.link = null
@@ -182,8 +214,8 @@ export default {
       }
 
       let stype = 'text' // default, if vault or diskfile is attached set to 'image' below
-      if ( this.storyAttrs.selectedMediafileId ) {
-        payload.append('mediafile_id', this.storyAttrs.selectedMediafileId)
+      if ( this.storyAttrs.selectedMediafile ) {
+        payload.append('mediafile_id', this.storyAttrs.selectedMediafile.id)
         stype = 'image'
       } else if (this.fileInput) {
         payload.append('mediafile', this.fileInput)
@@ -245,33 +277,25 @@ export default {
         variant: 'success',
       })
     }
+
+    eventBus.$on('vaultselector-mediafiles-selected', payload => {
+      console.log('StoryBar - eventBus.$on(vaultselector-mediafiles-selected)', {
+        payload,
+      })
+      if ( !this.isSelectFileModalVisible ) {
+        return // %FIXME: this is a hack as this listener will trigger even if post create form has used vault selector (!)
+      }
+      if ( Array.isArray(this.selectedMediafiles) && this.selectedMediafiles.length ) {
+        this.storyAttrs.selectedMediafile = this.selectedMediafiles[0]
+        this.selectedFileUrl = this.storyAttrs.selectedMediafile.filepath
+      }
+      this.CLEAR_SELECTED_MEDIAFILES() // %NOTE atm it will appear in post create form so we need to clear it here
+      this.isSelectFileModalVisible = false
+      this.isPreviewModalVisible = true
+    })
   },
 
-  mounted() { 
-    if ( this.$route.params.context ) {
-      switch( this.$route.params.context ) {
-        case 'mediafiles-selected-in-vault': // we got here from the vault, likely with a mediafile to attach to some action
-          const mediafileIds = this.$route.params.mediafile_ids || []
-          if ( mediafileIds.length ) {
-            const response = axios.get(this.$apiRoute('mediafiles.index'), {
-              params: {
-                mediafile_ids: mediafileIds,
-              },
-            }).then( response => {
-              response.data.data.forEach( mf => {
-                this.storyAttrs.selectedMediafileId = mf.id // basically just take the last if multiple
-                this.selectedFileUrl = mf.filepath
-              })
-              this.isSelectFileModalVisible = false
-              this.isPreviewModalVisible = true
-            })
-          }
-          //this.sendChannels = ['story']
-          //this.sendAction = 'storybar'
-          break
-      }
-    }
-  },
+  mounted() { }, // mounted()
 
   watch: {
     isPreviewModalVisible(v) {

@@ -18,6 +18,7 @@ use App\Models\Traits\UsesShortUuid;
 use App\Models\Financial\Transaction;
 use App\Models\Traits\SluggableTraits;
 use App\Enums\ShareableAccessLevelEnum;
+use App\Enums\VerifyStatusTypeEnum;
 use App\Interfaces\Subscribable;
 use App\Interfaces\Tippable;
 use App\Models\Casts\Money;
@@ -96,6 +97,11 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     //     return is_null($value) ? (object)['filepath' => url('/images/locked_post.png')] : $value;
     //         //: (object) ['filepath' => url('user/cover/default-' . $this->gender . '-cover.png')]; // %TODO %FIXME
     // }
+
+    // %FIXME [timelines].verified field should be deprecated (renamed then removed)
+    public function getVerifiedAttribute($value) {
+        return $this->user->verifyrequest && ($this->user->verifyrequest->vstatus===VerifyStatusTypeEnum::VERIFIED);
+    }
 
     public function toArray()
     {

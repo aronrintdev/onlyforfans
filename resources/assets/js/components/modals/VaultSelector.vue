@@ -1,5 +1,5 @@
 <template>
-  <div class="container p-0">
+  <div v-if="!isLoading" class="container p-0">
     <b-card header-tag="header" footer-tag="footer" class="position-relative">
 
       <template #header>
@@ -13,8 +13,8 @@
         </section>
       </template>
 
-      <LoadingOverlay :loading="loading" />
-      <VaultSelectorComponent @close="exit" ref="vaultSelector" />
+      <LoadingOverlay :loading="isLoading" />
+      <VaultSelectorComponent @close="exit" :payload="payload" ref="vaultSelector" />
 
       <template #footer>
         <b-row>
@@ -28,6 +28,7 @@
   </div>
 </template>
 <script>
+
 import { eventBus } from '@/eventBus'
 import LoadingOverlay from '@components/common/LoadingOverlay'
 import VaultSelectorComponent from '@views/live-chat/components/ShowThread/VaultSelector'
@@ -38,13 +39,16 @@ export default {
   },
 
   computed: {
+    isLoading() {
+      return false
+    },
+
     isSaveable() {
-      return true // (this.loading) ? false  : ...
+      return !this.isLoading
     }
   },
 
   data: () => ({
-    loading: false,
   }),
 
   methods: {

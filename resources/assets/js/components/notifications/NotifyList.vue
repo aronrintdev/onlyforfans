@@ -6,16 +6,27 @@
     <ul class="list-unstyled">
       <b-media v-for="n in notifications" :key="n.id" tag="li" class="mb-0">
         <template #aside>
-          <router-link :to="{ name: 'timeline.show', params: { slug: n.data.actor.slug ? n.data.actor.slug : n.data.actor.username } }">
+          <router-link v-if="n.data.actor" :to="{ name: 'timeline.show', params: { slug: n.data.actor.slug ? n.data.actor.slug : n.data.actor.username } }">
             <b-img-lazy width="48" height="48" rounded="circle" :src="n.data.actor.avatar" :alt="n.data.actor.slug" :title="n.data.actor.name" />
           </router-link>
+          <router-link v-if="n.data.sender" :to="{ name: 'timeline.show', params: { slug: n.data.sender.slug ? n.data.sender.slug : n.data.sender.username } }">
+            <b-img width="48" height="48" rounded="circle" :src="n.data.sender.avatar" :alt="n.data.sender.slug" :title="n.data.sender.name" />
+          </router-link>
         </template>
-        <h6 class="mt-0 mb-1">
+        <h6 class="mt-0 mb-1" v-if="n.data.actor">
           <router-link :to="{ name: 'timeline.show', params: { slug: n.data.actor.slug ? n.data.actor.slug : n.data.actor.username } }">
             <span>{{n.data.actor.name}}</span>
           </router-link>&nbsp;
           <router-link :to="{ name: 'timeline.show', params: { slug: n.data.actor.slug ? n.data.actor.slug : n.data.actor.username } }">
             <small class="text-muted">@{{ n.data.actor.username}}</small>
+          </router-link>
+        </h6>
+        <h6 class="mt-0 mb-1" v-if="n.data.sender">
+          <router-link :to="{ name: 'timeline.show', params: { slug: n.data.sender.slug ? n.data.sender.slug : n.data.sender.username } }">
+            <span>{{n.data.sender.name}}</span>
+          </router-link>&nbsp;
+          <router-link :to="{ name: 'timeline.show', params: { slug: n.data.sender.slug ? n.data.sender.slug : n.data.sender.username } }">
+            <small class="text-muted">@{{ n.data.sender.username}}</small>
           </router-link>
         </h6>
         <p class="mb-0 notify-message">
@@ -44,7 +55,13 @@
             </template>
             <template v-else>comment</template>
           </template>
-          <template v-if="n.type==='App\\Notifications\\MessageReceived'">sent you a 
+          <template v-if="n.type==='App\\Notifications\\MessageReceived' && n.data.actor">sent a 
+            <template v-if="n.data.resource_type==='chatmessages'">
+              <router-link :to="{ name: 'chatthreads.show', params: { id: n.data.resource_slug } }">message</router-link> to {{ n.data.reciever_name }}
+            </template>
+            <template v-else>message to {{ n.data.reciever_name }}</template>
+          </template>
+          <template v-if="n.type==='App\\Notifications\\MessageReceived' && n.data.sender">sent you a 
             <template v-if="n.data.resource_type==='chatmessages'">
               <router-link :to="{ name: 'chatthreads.show', params: { id: n.data.resource_slug } }">message</router-link>
             </template>
