@@ -20,7 +20,9 @@
         </div>
         <div class="media-wrapper" v-if="mf.is_video" >
           <video>
-            <source :src="`${mf.filepath}#t=2`" :type="mf.mimetype" />
+            <source :src="`${mf.filepath}#t=2`" type="video/mp4" />
+            <source :src="`${mf.filepath}#t=2`" type="video/webm" />
+            <source :src="`${mf.filepath}#t=2`" type="video/quicktime" />
           </video>
           <div class="icon-video">
             <fa-icon :icon="['fas', 'play']" class="text-white icon" />
