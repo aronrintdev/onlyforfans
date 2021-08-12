@@ -104,7 +104,7 @@ export default {
     },
 
     checkStatus(members) {
-      this.$log.debug('OnlineStatus checkStatus', { members })
+      //this.$log.debug('OnlineStatus checkStatus', { members })
       const user = _.find(members, u => ( u.id == this.user.id ))
       if (user) {
         this.pendingOffline = false

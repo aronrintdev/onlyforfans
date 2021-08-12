@@ -279,15 +279,21 @@
     </b-modal>
 
     <!-- Form modal for image preview before saving to story (%FIXME DRY: see StoryBar.vue) -->
-    <b-modal v-model="isSaveToStoryModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="p-0">
-      <div>
-        <b-img fluid :src="selectedMediafiles.length ? selectedMediafiles[0].filepath : null"></b-img>
-      </div>
-      <template #modal-footer>
-        <div class="w-100">
-          <b-button variant="secondary" size="sm" @click="isSaveToStoryModalVisible=false">Cancel</b-button>
-          <b-button variant="primary" size="sm" @click="sendSelected('story')">Save</b-button>
+    <b-modal v-model="isSaveToStoryModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story">
+      <section>
+        <div class="box-image-preview text-center">
+          <b-img v-if="storyAttrs.selectedMediafile" fluid :src="storyAttrs.selectedMediafile.filepath"></b-img>
         </div>
+      </section>
+      <b-form v-on:submit.prevent class="mt-3">
+        <b-form-group label='"Swipe Up" Link (optional)' label-for="swipe-up-link">
+          <b-form-input id="swipe-up-link" type="url" v-model="storyAttrs.link" :state="urlState" placeholder="http://example.com"></b-form-input>
+        </b-form-group>
+      </b-form>
+
+      <template #modal-footer>
+        <b-button variant="secondary" size="sm" @click="isSaveToStoryModalVisible=false">Cancel</b-button>
+        <b-button variant="primary" size="sm" @click="storeStory()">Save</b-button>
       </template>
     </b-modal>
 
@@ -395,6 +401,10 @@ export default {
       return _.filter(this.mediafiles, o => (o.selected))
     },
 
+    urlState() { // for story form
+      return this.storyAttrs.link ? validateUrl(this.storyAttrs.link) : null
+    },
+
   },
 
   data: () => ({
@@ -406,7 +416,7 @@ export default {
     // By default we can send to story, post, or message...may be overridden if this 'page' is 
     // loaded in another context (hack for mvp)
     sendChannels: ['story', 'post', 'message'],
-    sendAction: null,
+    //sendAction: null,
 
     isSendFilesModalVisible: false,
     isShareFilesModalVisible: false,
@@ -429,6 +439,13 @@ export default {
       //parent_id: this.currentFolderId,
     },
 
+    storyAttrs: { // for 'send-to-story' form
+      color: '#fff',
+      contents: '',
+      link: null,
+      selectedMediafile: null, // if selected from vault
+    },
+
     currentFolderId: null,
 
     inviteeInput: '',
@@ -447,7 +464,7 @@ export default {
       url: route('mediafiles.index'),
       paramName: 'mediafile',
       thumbnailHeight: 128,
-      maxFilesize: 99,
+      maxFilesize: 5000, // 5 GB
       headers: { 
         'X-Requested-With': 'XMLHttpRequest', 
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
@@ -474,44 +491,59 @@ export default {
       // %TODO: as part of AF-492 deprecate this code 20210806 -- No actually we need it to send from vault to other areas (eg post create form)
       const params = {
           mediafile_ids: this.selectedMediafiles.map( ({id}) => id ),
-          context: 'mediafiles-selected-in-vault',
       }
+      console.log('Vault/Dashboard::sendSelected', {
+        resourceType, 
+        params,
+      })
 
       switch (resourceType) {
         case 'story':
+          /*
+          params.context = 'send-selected-mediafiles-to-story' // 'mediafiles-selected-in-vault'
           if ( this.sendAction === 'storybar' ) {
             this.$router.replace({ name: 'index', params })
-          } else {
-            this.storeStory()
+          } 
+          */
+          if ( this.selectedMediafiles.length ) {
+            //this.$router.replace({ name: 'index', params })
+            this.storyAttrs.link = null
+            this.storyAttrs.selectedMediafile = this.selectedMediafiles[0] // if selected from vault
+            this.isSaveToStoryModalVisible = true
           }
           break
         case 'post':
+          params.context = 'send-selected-mediafiles-to-post' // 'mediafiles-selected-in-vault'
           this.$router.replace({ name: 'index', params })
           break
         case 'message':
+          params.context = 'send-selected-mediafiles-to-message' // 'mediafiles-selected-in-vault'
           this.$router.replace({ name: 'chatthreads.create', params })
           break
       }
       this.sendChannels =  ['story', 'post', 'message']
-      this.sendAction =  null
+      //this.sendAction =  null
     },
 
     // API to update a new story in the database for this user's timeline
     // %NOTE: can only send 1 file per new story 
     async storeStory() {
       const stype = 'image'
+
       let payload = new FormData()
       payload.append('stype', stype) // %FIXME: hardcoded
-      payload.append('bgcolor', "#fff")
-      payload.append('content', '') // this.storyAttrs.contents
-      payload.append('link', null) // this.storyAttrs.link)
+      payload.append('bgcolor', this.storyAttrs.color || "#fff")
+      payload.append('content', this.storyAttrs.contents)
+      if ( this.storyAttrs.link ) {
+        payload.append('link', this.storyAttrs.link)
+      }
 
       switch ( stype ) {
         case 'text':
           break
         case 'image':
-          if ( this.selectedMediafiles.length ) {
-            payload.append('mediafile_id', this.selectedMediafiles[0].id)
+          if ( this.storyAttrs.selectedMediafile ) {
+            payload.append('mediafile_id', this.storyAttrs.selectedMediafile.id)
           }
           break
       } 
@@ -522,7 +554,9 @@ export default {
         }
       })
       this.isSaveToStoryModalVisible = false
-      this.fileInput = null // form input
+      this.isSendFilesModalVisible = false
+      this.resetStoryForm()
+
       if ( this.$route.params.context === 'storybar' ) {
         //this.$route.params = null %TODO: clear ?
         this.$router.replace({ 
@@ -532,6 +566,13 @@ export default {
           },
         })
       }
+    },
+
+    resetStoryForm() {
+      this.storyAttrs.selectedMediafile = null
+      this.storyAttrs.color = '#fff'
+      this.storyAttrs.contents = ''
+      this.storyAttrs.link = null
     },
 
     renderLightbox(mediafile) {
@@ -825,7 +866,8 @@ export default {
       this.$store.dispatch('getVaultfolder', this.vaultfolder_pkid)
     })
 
-    // act on any special context params passed from Vue router
+      /*
+    // %HERE %FIXME act on any special context params passed from Vue router
     if ( this.$route.params.context ) {
       switch( this.$route.params.context ) {
         case 'storybar': // we got here from the storybar, so instead of sending the story directly, return to story bar (!)
@@ -834,6 +876,7 @@ export default {
           break
       }
     }
+    */
   },
 
   watch: {

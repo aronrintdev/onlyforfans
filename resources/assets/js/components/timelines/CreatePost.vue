@@ -90,7 +90,7 @@
                   <li @click="recordAudio()" class="selectable select-audio">
                     <fa-icon :icon="selectedMedia==='audio' ? ['fas', 'microphone'] : ['far', 'microphone']" size="lg" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li @click="renderVaultSelector()" class="selectable select-audio">
+                  <li @click="renderVaultSelector()" class="selectable">
                     <fa-icon :icon="selectedMedia==='vault' ? ['fas', 'archive'] : ['far', 'archive']" size="lg" :class="selectedMedia==='vault' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
@@ -129,7 +129,9 @@
         </b-card>
       </div>
     </section>
+
     <VideoRecorder v-if="showVideoRec" @close="showVideoRec=false; selectedMedia=null" @complete="videoRecCompleted" />
+
   </div>
 </template>
 
@@ -179,7 +181,7 @@ export default {
         autoProcessQueue: false,
         thumbnailWidth: 100,
         clickable: '#clickme_to-select',
-        maxFilesize: 99,
+        maxFilesize: 5000, // 5 GB
         addRemoveLinks: true,
         removeType: 'client',
         headers: {
@@ -355,6 +357,9 @@ export default {
 
     // %NOTE: this can be called as a handler for the 'remove' event emitted by UploadMediaPreview
     removeMediafileByIndex(index) {
+      console.log('CreatePost::removeMediafileByIndex()', {
+        index,
+      })
       if (index > -1)  {
 
         // If the file is in the Dropzone queue remove it from there as well
@@ -423,8 +428,7 @@ export default {
       eventBus.$emit('open-modal', {
         key: 'render-vault-selector',
         data: { 
-          resource: this.timeline,
-          resource_type: 'timelines', 
+          context: 'create-post',
         },
       })
     },
@@ -489,7 +493,7 @@ export default {
 
    if ( this.$route.params.context ) {
      switch( this.$route.params.context ) {
-       case 'mediafiles-selected-in-vault': // we got here from the vault, likely with mediafiles to attach to a new post
+       case 'send-selected-mediafiles-to-post': // we got here from the vault, likely with mediafiles to attach to a new post
          const mediafileIds = this.$route.params.mediafile_ids || []
          if ( mediafileIds.length ) {
            // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
@@ -530,6 +534,12 @@ export default {
     })
   },
 
+  beforeDestroy() {
+    // Clear out any mediafiles so they don't get "carried" between threads before send is clicked
+    this.CLEAR_SELECTED_MEDIAFILES()
+    this.$refs.myVueDropzone.removeAllFiles()
+  },
+
   watch: {
 
     //selectedMediafiles(value) {
@@ -551,29 +561,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-/*
-.dropzone, .dropzone * {
-  box-sizing: border-box;
-}
-.vue-dropzone {
-  border: 2px solid #e5e5e5;
-  font-family: Arial,sans-serif;
-  letter-spacing: .2px;
-  color: #777;
-  transition: .2s linear;
-}
-.dropzone {
-  min-height: 150px;
-  border: 2px solid rgba(0, 0, 0, 0.3);
-  background: white;
-  padding: 20px 20px;
-}
-                               */
 
 .card-header .dropdown {
-  /*
-  background-color: ...;
-   */
 }
 
 .card-body {
@@ -617,11 +606,9 @@ li.selectable[disabled] {
   }
 }
 
-/*
-.create_post-crate .dropzone .dz-image img {
-  width: 128px;
+.create_post-crate ::v-deep.swiper-slider {
+  padding: 0.5rem 1rem !important;
 }
- */
 
 .create_post-crate footer ul li {
   padding-left: 0.5em;
