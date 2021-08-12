@@ -65,7 +65,7 @@ export default {
         {
           label: 'Settings',
           icon: 'cog',
-          linkTo: { name: 'settings.profile' }
+          linkTo: { name: 'settings.default' }
         },
         {
           label: 'Fans',
@@ -130,13 +130,15 @@ export default {
 {
   "en": {
     "Admin Dashboard": "Admin Dashboard",
-    "My Profile": "My Profile",
-    "My Vault": "My Vault",
-    "Settings": "Settings",
-    "statements": "Statements",
-    "Payment Method": "Payment Method",
+    "Banking": "Banking",
+    "Fans": "Fans",
     "Lists": "Lists",
     "Logout": "Logout",
+    "My Profile": "My Profile",
+    "My Vault": "My Vault",
+    "Payment Method": "Payment Method",
+    "Settings": "Settings",
+    "statements": "Statements",
   }
 }
 </i18n>

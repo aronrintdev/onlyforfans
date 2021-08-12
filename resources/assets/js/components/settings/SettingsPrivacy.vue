@@ -1,6 +1,6 @@
 <template>
   <div v-if="!isLoading">
-    <b-card title="Privacy">
+    <b-card :title="mobile ? null : $t('title')">
       <b-card-text>
         <b-form @submit.prevent="submitPrivacy($event)" @reset="onReset">
           <fieldset :disabled="isSubmitting.formPrivacy">
@@ -156,6 +156,8 @@ export default {
   },
 
   computed: {
+    ...Vuex.mapState([ 'mobile' ]),
+
     isLoading() {
       return !this.session_user || !this.user_settings
     },
@@ -300,3 +302,10 @@ label {
 
 </style>
 
+<i18n lang="json5" scoped>
+{
+  "en": {
+    "title": "Privacy",
+  }
+}
+</i18n>

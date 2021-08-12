@@ -1,5 +1,5 @@
 <template>
-  <b-card v-if="!isLoading" class="settings-messages" title="Messages">
+  <b-card v-if="!isLoading" class="settings-messages" :title="mobile ? null : $t('title')">
     <b-card-text>
       <div class="pt-3 pb-2">
         <b-form-checkbox disabled switch v-model="user_settings.cattrs.message_with_tip_only" @change="onTipOnlyMessagesSettingChange">
@@ -16,6 +16,7 @@
 </template>
 
 <script>
+import Vuex from 'vuex'
 export default {
 
   props: {
@@ -24,6 +25,7 @@ export default {
   },
 
   computed: {
+    ...Vuex.mapState([ 'mobile' ]),
     isLoading() {
       return !this.session_user || !this.user_settings
     },
@@ -76,3 +78,10 @@ label {
 
 </style>
 
+<i18n lang="json5" scoped>
+{
+  "en": {
+    "title": "Messages",
+  }
+}
+</i18n>

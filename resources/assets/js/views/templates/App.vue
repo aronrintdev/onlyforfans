@@ -5,7 +5,7 @@
     </transition>
     <!-- Header -->
     <MainNavBar class="header" />
-    <div class="content flex-grow-1 d-flex" :class="{ 'p-3': !mobile }">
+    <div class="content flex-grow-1 d-flex" :class="{ 'p-3': !mobile, 'mobile': mobile }">
       <transition name="quick-fade" mode="out-in">
         <router-view />
       </transition>

@@ -1,14 +1,14 @@
 <template>
   <div v-if="!isLoading">
-    <b-card title="Account">
+    <b-card :title="mobile ? null : $t('title')">
       <b-card-text>
         <b-form @submit.prevent="submitGeneral($event)" @reset="onReset">
           <fieldset :disabled="isSubmitting.formGeneral">
             <b-row>
-              <b-col>
+              <b-col lg="6">
                 <FormTextInput ikey="username" v-model="formGeneral.username" label="Username" :verrors="verrors" :disabled="true"/>
               </b-col>
-              <b-col>
+              <b-col lg="6">
                 <FormTextInput ikey="email" v-model="formGeneral.email" label="E-mail" :verrors="verrors" :disabled="true" />
               </b-col>
             </b-row>
@@ -39,7 +39,7 @@
         <b-form @submit.prevent="submitLocalization($event)" @reset="onReset">
           <fieldset :disabled="isSubmitting.formLocalization">
             <b-row>
-              <b-col>
+              <b-col >
                 <FormSelectInput
                   ikey="localization.language"
                   v-model="formData.language"
@@ -111,6 +111,7 @@ export default {
   },
 
   computed: {
+    ...Vuex.mapState([ 'mobile' ]),
     isLoading() {
       return !this.session_user || !this.user_settings
     },
@@ -244,3 +245,10 @@ export default {
 <style scoped>
 </style>
 
+<i18n lang="json5" scoped>
+{
+  "en": {
+    "title": "Account",
+  }
+}
+</i18n>
