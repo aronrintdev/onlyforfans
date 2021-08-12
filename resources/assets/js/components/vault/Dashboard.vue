@@ -282,7 +282,7 @@
     <b-modal v-model="isSaveToStoryModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story">
       <section>
         <div class="box-image-preview text-center">
-          <b-img-lazy v-if="storyAttrs.selectedMediafile" fluid :src="storyAttrs.selectedMediafile.filepath"></b-img>
+          <b-img-lazy v-if="storyAttrs.selectedMediafile" fluid :src="storyAttrs.selectedMediafile.filepath"></b-img-lazy>
         </div>
       </section>
       <b-form v-on:submit.prevent class="mt-3">
