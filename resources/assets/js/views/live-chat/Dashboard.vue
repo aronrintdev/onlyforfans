@@ -1,5 +1,11 @@
 <template>
-  <WithSidebar v-if="!isLoading" id="view-livechat" :class="{ mobile: mobile }" :focusMain="threadOpen">
+  <WithSidebar
+    v-if="!isLoading"
+    id="view-livechat"
+    :class="{ mobile: mobile }"
+    :focusMain="threadOpen"
+    removeMobileMainNavTop
+  >
     <template #sidebar>
       <Sidebar :state="state" />
     </template>
