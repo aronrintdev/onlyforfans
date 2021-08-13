@@ -2,7 +2,7 @@
   <div class="wrapper">
     <div
       v-if="session_user"
-      class="mobile-sidebar"
+      class="mobile-sidebar pb-1"
       :class="{ 'show': show, 'from-left': !fromRight, 'from-right': fromRight }"
     >
       <!-- Header -->
@@ -22,8 +22,14 @@
             :to="item.linkTo || null"
             @click="(typeof item.action === 'function') ? item.action() : onClick"
             class="nav-item"
+            :class="{ active: item.selected }"
+            :active="item.selected"
           >
-            <fa-icon :icon="item.icon" class="icon mr-2" fixed-width />
+            <fa-icon
+              :icon="item.selected ? [ 'fas', item.icon ] : [ 'far', item.icon ]"
+              class="icon mr-2"
+              fixed-width
+            />
             <span class="label" v-text="$t(`label.${item.key}`)" />
           </b-nav-item>
         </div>
@@ -38,7 +44,11 @@
           @click="(typeof item.action === 'function') ? item.action() : onClick"
           class="nav-item"
         >
-          <fa-icon :icon="item.icon" class="icon mr-2" fixed-width />
+          <fa-icon
+            :icon="item.selected ? [ 'fas', item.icon ] : [ 'far', item.icon ]"
+            class="icon mr-2"
+            fixed-width
+          />
           <span class="label" v-text="$t(`label.${item.key}`)" />
         </b-nav-item>
 
@@ -113,14 +123,30 @@ export default {
         items.push(MenuItems.paymentMethod)
       }
 
+      for (var item of items) {
+        if (item.linkTo && item.linkTo.name === this.$route.name) {
+          item.selected = true
+        } else {
+          item.selected = false
+        }
+      }
+
       return items
     },
 
     bottomSection() {
-      return [
+      var items = [
         MenuItems.settings,
         MenuItems.logout(this.logout),
       ]
+      for (var item of items) {
+        if (item.linkTo && item.linkTo.name === this.$route.name) {
+          item.selected = true
+        } else {
+          item.selected = false
+        }
+      }
+      return items
     },
   },
 
@@ -149,11 +175,14 @@ export default {
   watch: {
     $route() {
       this.onClose()
+      this.$forceCompute('topSection')
+      this.$forceCompute('bottomSection')
     },
 
     show(value) {
       if (value) {
-        document.querySelector('html').classList.add('prevent-scrolling')
+        // TODO: Having some issues with resetting page scroll with this at the moment
+        // document.querySelector('html').classList.add('prevent-scrolling')
       } else {
         document.querySelector('html').classList.remove('prevent-scrolling')
       }
@@ -174,7 +203,7 @@ export default {
 .wrapper {
   position: fixed;
   top: 0;
-  bottom: 0;
+  bottom: 64px;
   left: 0;
   right: 0;
   z-index: 1000;
@@ -241,6 +270,9 @@ export default {
       font-size: 125%;
       .nav-link {
         color: rgba(0, 0, 0, 0.5);
+      }
+      &.active {
+        background-color: #cce5ff;
       }
       &:hover {
         color: rgba(0, 0, 0, 0.65);
