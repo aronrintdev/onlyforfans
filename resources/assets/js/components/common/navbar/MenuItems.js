@@ -22,7 +22,7 @@ export const menuItems = {
   },
 
   messages: {
-    key: 'notification',
+    key: 'messages',
     icon: 'envelope',
     linkTo: { name: 'chatthreads.dashboard', params: {} }
   },

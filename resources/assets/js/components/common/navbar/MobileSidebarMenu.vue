@@ -260,9 +260,13 @@ export default {
   "en": {
     "label": {
       "banking": "Banking",
+      "home": "Home",
       "earnings": "Earnings",
+      "explore": "Explore",
       "fans": "Fans",
       "logout": "Logout",
+      "messages": "Messages",
+      "notifications": "Notifications",
       "paymentMethod": "Payment Method",
       "profile": "My Profile",
       "settings": "Settings",
