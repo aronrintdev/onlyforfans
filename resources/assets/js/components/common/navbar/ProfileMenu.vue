@@ -11,7 +11,9 @@
     </component>
 
     <component
-      :is="dropdown ? 'b-dropdown-item' : 'b-nav-item'"
+      :is="dropdown
+        ? item.divider ? 'b-dropdown-divider' : 'b-dropdown-item'
+        : 'b-nav-item'"
       v-for="(item, i) in menuItems"
       :key="i"
       :to="item.linkTo || null"
@@ -55,7 +57,6 @@ export default {
       items = [ ...items,
         MenuItems.profile(this.timeline.slug),
         MenuItems.vault,
-        MenuItems.settings,
         MenuItems.fans,
       ]
 
@@ -78,6 +79,8 @@ export default {
         items.push(MenuItems.paymentMethod)
       }
 
+      items.push({ key: 'divider-bottom', divider: true })
+      items.push(MenuItems.settings)
       items.push(MenuItems.logout(this.logout))
 
       return items
