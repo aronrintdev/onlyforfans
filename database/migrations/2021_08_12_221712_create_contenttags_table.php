@@ -9,7 +9,7 @@ class CreateContenttagsTable extends Migration
     public function up()
     {
         Schema::create('contenttags', function (Blueprint $table) {
-            $table->increments('id'); // just use integer as this is a join table and sync, etc may not work with UUID %PSG
+            $table->uuid('id')->primary();
             $table->string('ctag', 127);
             $table->timestamps();
         });

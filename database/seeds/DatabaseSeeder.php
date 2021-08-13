@@ -37,6 +37,8 @@ class DatabaseSeeder extends Seeder
             MediafilesTableSeeder::class,
             PermissionsTableSeeder::class,
             StaffTableSeeder::class,
+
+            ContenttagsTableSeeder::class,
         ]);
     }
 

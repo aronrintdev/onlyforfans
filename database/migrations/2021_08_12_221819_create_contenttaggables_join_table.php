@@ -10,9 +10,14 @@ class CreateContenttaggablesJoinTable extends Migration
     {
         Schema::create('contenttaggables', function (Blueprint $table) {
             $table->increments('id'); // just use integer as this is a join table and sync, etc may not work with UUID %PSG
-            $table->uuid('contenttag_id')->comment("Tag with associted with the 'contenttaggable' resource");
+
+            $table->uuid('contenttag_id')->comment("Tag with associated with the 'contenttaggable' resource");
+            $table->foreign('contenttag_id')->references('id')->on('contenttags');
+
             $table->uuidMorphs('contenttaggable');
+
             $table->index(['contenttag_id', 'contenttaggable_id']);
+
             $table->timestamps();
         });
     }
