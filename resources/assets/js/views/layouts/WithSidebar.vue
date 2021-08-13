@@ -1,13 +1,25 @@
 <template>
-  <div class="container-fluid">
+  <div class="container-fluid h-100" :class="mobile ? 'px-0' : ''">
 
     <!-- Mobile view -->
     <section v-if="mobile" class="mobile h-100" :class="{ 'focus-main': focusMain }">
       <!-- <transition :name="focusMain ? 'slide-right' : 'slide-left'"> -->
         <div class="sidebar" key="sidebar">
+          <div class="header">
+            <slot name="mobileTitle"></slot>
+          </div>
           <slot name="sidebar"></slot>
         </div>
         <div class="main" key="main">
+          <div class="header">
+            <slot name="mobileMainNavTop">
+              <b-btn variant="link" size="lg" @click="$emit('back')">
+                <fa-icon icon="caret-left" fixed-width />
+                {{ $t('back') }}
+              </b-btn>
+              <slot name="mobileMainNavTopTitle"></slot>
+            </slot>
+          </div>
           <slot></slot>
         </div>
       <!-- </transition> -->
@@ -70,7 +82,16 @@ export default {
     width: 100vw;
     max-width: 100vw;
     height: 100%;
-    max-height: 100vh;
+    min-height: calc(100vh - 64px);
+    max-height: calc(100vh - 64px);
+    .header {
+      position: sticky;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background-color: white;
+    }
   }
 
   .sidebar {
@@ -104,6 +125,8 @@ export default {
 
 <i18n lang="json5" scoped>
 {
-  "en": {}
+  "en": {
+    "back": "Back"
+  }
 }
 </i18n>

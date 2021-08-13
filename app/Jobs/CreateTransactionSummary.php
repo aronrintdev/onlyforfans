@@ -13,8 +13,10 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use App\Models\Financial\TransactionSummary;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use App\Enums\Financial\TransactionSummaryTypeEnum;
+use App\Enums\Financial\TransactionTypeEnum;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 class CreateTransactionSummary implements ShouldQueue, ShouldBeUnique
 {
@@ -143,6 +145,32 @@ class CreateTransactionSummary implements ShouldQueue, ShouldBeUnique
 
         $summary->balance = $lastTrans->balance;
         $summary->balance_delta = $summary->credit_sum->subtract($summary->debit_sum);
+
+        // Detailed Stats
+        $stats = new Collection([]);
+
+        // Create stats grouped by type
+        $results = (clone $query)->select('type')
+            ->selectRaw('count(*) as total_count')
+            ->selectRaw('sum(credit_amount) as credit_sum')
+            ->selectRaw('sum(debit_amount) as debit_sum')
+            ->selectRaw('avg(credit_amount) as credit_avg')
+            ->selectRaw('avg(debit_amount) as debit_avg')
+            ->groupBy('type')->get();
+
+        foreach ($results as $result) {
+            if ($result->total_count > 0) {
+                $stats[$result->type] = [
+                    'count' => $result->total_count,
+                    'credit_sum' => $result->credit_sum,
+                    'debit_sum' => $result->debit_sum,
+                    'credit_avg' => round($result->credit_avg, 0, PHP_ROUND_HALF_EVEN),
+                    'debit_avg' => round($result->debit_avg, 0, PHP_ROUND_HALF_EVEN),
+                ];
+            }
+        }
+
+        $summary->stats = $stats;
 
         $summary->finalized = true;
         $summary->save();

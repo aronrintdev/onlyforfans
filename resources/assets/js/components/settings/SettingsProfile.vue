@@ -1,7 +1,7 @@
 <template>
   <div v-if="!isLoading">
 
-    <b-card title="Edit Profile">
+    <b-card :title="mobile ? null : $t('title')">
       <b-card-text>
         <b-form @submit.prevent="submitProfile($event)" @reset="onReset">
           <fieldset :disabled="isSubmitting.formProfile">
@@ -200,6 +200,7 @@ export default {
   },
 
   computed: {
+    ...Vuex.mapState([ 'mobile' ]),
     isLoading() {
       return !this.session_user || !this.user_settings || !this.timeline
     },
@@ -402,3 +403,10 @@ textarea#about {
 }
 </style>
 
+<i18n lang="json5" scoped>
+{
+  "en": {
+    "title": "Edit Profile",
+  }
+}
+</i18n>

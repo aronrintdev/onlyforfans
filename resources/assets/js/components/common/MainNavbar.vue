@@ -21,7 +21,7 @@
       </div>
     </ScrollCollapse>
 
-    <NavButtons v-if="mobile" :mobile-style="mobile" :unread-messages-count="unread_messages_count" class="w-100 mt-3" />
+    <!-- <NavButtons v-if="mobile" :mobile-style="mobile" :unread-messages-count="unread_messages_count" class="w-100 mt-3" /> -->
 
     <b-navbar-nav v-if="!mobile" class="search-nav">
       <SearchBar />

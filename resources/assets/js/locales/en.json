@@ -9,5 +9,18 @@
     "doNotDisturb": "Do Not Disturb",
     "offline": "Offline",
     "lastSeen": "Last seen {relativeTime} ago"
+  },
+  "menu": {
+    "label": {
+      "banking": "Banking",
+      "earnings": "Earnings",
+      "fans": "Fans",
+      "logout": "Logout",
+      "paymentMethod": "Payment Method",
+      "profile": "My Profile",
+      "settings": "Settings",
+      "statements": "Statements",
+      "vault": "My Vault"
+    }
   }
 }

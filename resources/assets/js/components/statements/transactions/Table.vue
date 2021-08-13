@@ -1,13 +1,5 @@
 <template>
   <div class="w-100">
-    <b-pagination
-      v-if="mobile"
-      v-model="page"
-      :total-rows="totalTransactions"
-      :per-page="take"
-      aria-controls="earnings-transactions-table"
-    />
-
     <div v-if="mobile">
       <transition-group name="quick-fade" mode="out-in">
         <TransactionCard
@@ -15,7 +7,7 @@
           :key="item.id"
           :value="item"
           :fields="fieldsObj"
-          class="mb-3"
+          class="mt-3"
           @preview="preview"
         />
       </transition-group>

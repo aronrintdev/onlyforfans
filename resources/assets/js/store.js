@@ -34,6 +34,7 @@ export default new Vuex.Store({
     iconStyle: 'fas',
     mobile: false,
     screenSize: 'xs',
+    mobileMenuOpen: false,
     vault: {},
     vaultfolder: {},
     breadcrumb: [],
@@ -66,6 +67,10 @@ export default new Vuex.Store({
 
     UPDATE_SCREEN_SIZE(state, payload) {
       state.screenSize = payload
+    },
+
+    UPDATE_MOBILE_MENU_OPEN(state, payload) {
+      state.mobileMenuOpen = payload
     },
 
     UPDATE_VAULT(state, payload) {

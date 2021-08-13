@@ -17,7 +17,7 @@ class CreateTransactionSummaries extends Command
      *
      * @var string
      */
-    protected $signature = 'financial:summary_start {type?}';
+    protected $signature = 'financial:summary_start {type?} {back?}';
 
     /**
      * The console command description.
@@ -54,6 +54,10 @@ class CreateTransactionSummaries extends Command
         if(!in_array($type, $this->types)) {
             $type = $this->choice('What type of summary are you creating?', $this->types, SummaryType::DAILY);
         }
+        $back = $this->argument('back');
+        if (!isset($back)) {
+            $back = $this->ask('How many units back are you creating?');
+        }
 
         $typeString = SummaryType::stringify($type);
         Log::info("Starting Summarize $typeString Transactions");
@@ -63,7 +67,7 @@ class CreateTransactionSummaries extends Command
         $queue = Config::get('transactions.summarizeQueue');
 
         $batch = Bus::batch([
-            new StartTransactionSummaryCreation($type)
+            new StartTransactionSummaryCreation($type, $back)
         ])->then(function (Batch $batch) use ($typeString) {
             Log::info("Summarize $typeString Transactions Finished");
             $finished = true;
