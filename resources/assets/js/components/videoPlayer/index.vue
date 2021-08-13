@@ -38,6 +38,9 @@ export default {
       {
         fluid: true,
         controls: true,
+        userActions: {
+          doubleClick: false
+        }
       },
       () => {
       }

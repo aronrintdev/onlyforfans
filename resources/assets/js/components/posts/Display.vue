@@ -72,22 +72,30 @@
         </section>
       </template>
 
-      <template v-if="post.access">
-        <div v-if="post.description" :class="{ 'tag-has-mediafiles': hasMediafiles }" class="py-3 text-wrap">
-          <b-card-text class="px-3 mb-0 tag-post_desc">
-            <VueMarkdown :html="false" :source="post.description || ''" />
-          </b-card-text>
+      <div class="post-crate-content">
+        <template v-if="post.access">
+          <div v-if="post.description" v-touch:tap="tapHandler" :class="{ 'tag-has-mediafiles': hasMediafiles }" class="py-3 text-wrap">
+            <b-card-text class="px-3 mb-0 tag-post_desc">
+              <VueMarkdown :html="false" :source="post.description || ''" />
+            </b-card-text>
+          </div>
+          <article v-if="hasMediafiles">
+            <MediaSlider :post="post" :key="post.id" :mediafiles="post.mediafiles" :session_user="session_user" :use_mid="use_mid" @doubleTap="tapHandler" />
+          </article>
+        </template>
+        <template v-else>
+          <PostCta :post="post" :session_user="session_user" :primary_mediafile="primaryMediafile" />
+        </template>
+        <div class="animation-box" :key="isLikedByMe" v-if="startLikeUnlikeAnime">
+          <fa-icon
+            :class="isLikedByMe ? 'text-danger' : 'text-secondary'"
+            :icon="'heart'"
+          />
         </div>
-        <article v-if="hasMediafiles">
-          <MediaSlider :mediafiles="post.mediafiles" :session_user="session_user" :use_mid="use_mid" />
-        </article>
-      </template>
-      <template v-else>
-        <PostCta :post="post" :session_user="session_user" :primary_mediafile="primaryMediafile" />
-      </template>
+      </div>
     
       <template #footer>
-        <PostFooter :key="post.id" :post="post" :session_user="session_user" />
+        <PostFooter :post="post" :isLikedByMe="isLikedByMe" :likeCount="likeCount" :session_user="session_user" @toggleLike="toggleLike" />
       </template>
 
     </b-card>
@@ -166,6 +174,7 @@ export default {
     use_mid: { type: Boolean, default: false }, // use mid-sized images instead of full
     is_feed: { type: Boolean, default: true }, // is in context of a feed?
     displayClose: { type: Boolean, default: false }, // Display a close button in right corner of title?
+    is_public_post: { type: Boolean, default: false }, // is in context of a feed?
   },
 
   computed: {
@@ -195,13 +204,22 @@ export default {
   data: () => ({
     showDeleteConfirmation: false,
     showCopyToClipboardModal: false,
+    isLikedByMe: false,
+    startLikeUnlikeAnime: false,
+    likeCount: 0,
+    tapped: 0,
   }),
 
-  mounted() { },
+  mounted() {
+    this.isLikedByMe = this.post.stats?.isLikedByMe
+    this.likeCount = this.post.stats?.likeCount
+  },
 
   created() {},
 
   methods: {
+    ...Vuex.mapMutations('posts', [ 'UPDATE_PUBLIC_POST', 'UPDATE_POST' ]),
+    ...Vuex.mapMutations([ 'UPDATE_FEEDDATA_POST' ]),
 
     renderFull() {
       if (this.post.access) {
@@ -237,6 +255,60 @@ export default {
     reportContent() {
       eventBus.$emit('open-modal', { key: 'report-post', data: { post: this.post } })
     },
+
+    async toggleLike() {
+      let response;
+        if (this.isLikedByMe) {
+          // unlike
+          response = await axios.post(`/likeables/${this.session_user.id}`, {
+            _method: 'delete',
+            likeable_type: 'posts',
+            likeable_id: this.post.id,
+          })
+        } else {
+          // like
+          response = await axios.put(`/likeables/${this.session_user.id}`, {
+            likeable_type: 'posts',
+            likeable_id: this.post.id,
+          })
+        }
+        this.isLikedByMe = !this.isLikedByMe
+        this.likeCount = response.data.like_count
+        const updatedPost = {
+          ...this.post,
+          stats: {
+            ...this.post.stats,
+            isLikedByMe: this.isLikedByMe,
+            likeCount: this.likeCount,
+          }
+        }
+
+        if (this.is_public_post) {
+          // Update explore page post
+          this.UPDATE_PUBLIC_POST({ post: updatedPost })
+        } else {
+          // Update timelines feeddata
+          this.UPDATE_FEEDDATA_POST({ post: updatedPost })
+        }
+    },
+
+    async tapHandler(e) {
+      this.startLikeUnlikeAnime = false
+      if (e) {
+        this.tapped += 1;
+        setTimeout(async () => {
+          if (this.tapped == 2) {
+            await this.toggleLike();
+            this.startLikeUnlikeAnime = true
+            e.preventDefault();
+          }
+          this.tapped = 0;
+        }, 500);
+      } else {
+        await this.toggleLike();
+        this.startLikeUnlikeAnime = true
+      }
+    }
   },
 
   watch: { },
@@ -244,7 +316,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 ul {
   margin: 0;
 }
@@ -296,6 +368,62 @@ ul {
 }
 .user-details ul > li:last-child {
   font-size: 14px;
+}
+
+.post-crate-content {
+  position: relative;
+}
+
+.post-crate-content-eventbox {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.01);
+  z-index: 11;
+}
+
+.animation-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  
+  svg {
+    animation-duration: 1500ms;
+    animation-name: like-heart-animation;
+    animation-timing-function: ease-in-out;
+    margin: 0 auto;
+    opacity: 0;
+    width: 80px;
+    height: auto;
+    transform: scale(0);
+    animation-play-state: initial;
+  }
+}
+
+@keyframes like-heart-animation {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  70% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0);
+  }
 }
 </style>
 

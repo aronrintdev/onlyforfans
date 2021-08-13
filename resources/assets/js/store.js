@@ -97,6 +97,16 @@ export default new Vuex.Store({
     UPDATE_FEEDDATA(state, payload) {
       state.feeddata = payload.hasOwnProperty('data') ? payload.data : {}
     },
+    UPDATE_FEEDDATA_POST(state, payload) {
+      const post = propSelect(payload, 'post')
+      const feeddataPosts = state.feeddata.data
+      const idx = feeddataPosts.findIndex(p => p.id === post.id)
+      feeddataPosts[idx] = post
+      state.feeddata = {
+        ...state.feeddata,
+        data: [...feeddataPosts]
+      }
+    },
     UPDATE_QUEUE_METADATA(state, payload) {
       state.queue_metadata = payload.hasOwnProperty('data') ? payload.data.meta : {}
     },

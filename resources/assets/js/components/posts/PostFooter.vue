@@ -32,7 +32,7 @@
       </ul>
     </div>
 
-    <div class="like-count">
+    <div class="like-count" :key="likeCount">
       <template v-if="likeCount===1"><span class="mr-2">{{ likeCount }} like</span></template>
       <template v-if="likeCount > 1"><span class="mr-2">{{ likeCount }} likes</span></template>
       <template v-if="commentCount===1"><span class="mr-2">{{ commentCount }} comment</span></template>
@@ -70,6 +70,8 @@ export default {
   props: {
     post: null,
     session_user: null,
+    likeCount: 0,
+    isLikedByMe: false,
   },
 
   computed: {
@@ -81,8 +83,6 @@ export default {
   data: () => ({
     comments: [], // %NOTE: rendered comments are loaded dynamically as they contain additional relation data,
     renderComments: false,
-    isLikedByMe: false,
-    likeCount: 0, // %FIXME INIT
     isFavoritedByMe: false,
     loadingComments: false,
     commentCount: 0,
@@ -90,8 +90,6 @@ export default {
   }),
 
   mounted() { 
-    this.isLikedByMe = this.post.stats?.isLikedByMe || false
-    this.likeCount = this.post.stats?.likeCount  || 0
     this.isFavoritedByMe = this.post.stats?.isFavoritedByMe || false
     this.commentCount = this.post.stats.commentCount || 0
   },
@@ -100,34 +98,8 @@ export default {
 
   methods: {
     ...Vuex.mapMutations('posts', [ 'UPDATE_PUBLIC_POST' ]),
-    async toggleLike() { // for Post
-      let response
-      if (this.isLikedByMe) {
-        // unlike
-        response = await axios.post(`/likeables/${this.session_user.id}`, {
-          _method: 'delete',
-          likeable_type: 'posts',
-          likeable_id: this.post.id,
-        })
-        this.isLikedByMe = false
-      } else {
-        // like
-        response = await axios.put(`/likeables/${this.session_user.id}`, {
-          likeable_type: 'posts',
-          likeable_id: this.post.id,
-        })
-        this.isLikedByMe = true
-      }
-      this.likeCount = response.data.like_count
-      const updatedPost = {
-        ...this.post,
-        stats: {
-          ...this.post.stats,
-          isLikedByMe: this.isLikedByMe,
-          likeCount: this.likeCount,
-        }
-      }
-      this.UPDATE_PUBLIC_POST({ post: updatedPost })
+    toggleLike() { // for Post
+      this.$emit('toggleLike')
     },
 
     share() {},
@@ -237,4 +209,7 @@ li {
   font-size: 0.80rem;
 }
 
+.panel-footer {
+  user-select: none;
+}
 </style>
