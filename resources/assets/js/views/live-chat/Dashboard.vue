@@ -279,7 +279,8 @@ export default {
     padding-right: 0;
   }
 
-  height: calc(100vh - 100px);
+  height: calc(100vh - 10rem);
+  max-height: calc(100vh - 10rem);
 
   .chatthread-list {
     height: calc(100vh - 350px);
