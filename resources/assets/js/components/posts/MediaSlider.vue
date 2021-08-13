@@ -4,7 +4,7 @@
       <VideoPlayer :source="mediafiles[0]" v-if="mediafiles[0].is_video"></VideoPlayer>
       <b-img-lazy
         v-if="mediafiles[0].is_image"
-        class="d-block"
+        class="d-block photoswipe-thumbnail"
         :src="use_mid && mediafiles[0].has_mid ? mediafiles[0].midFilepath : mediafiles[0].filepath"
         v-touch:tap="tapHandler"
       />
@@ -28,7 +28,7 @@
           <VideoPlayer :source="mf" v-if="mf.is_video"></VideoPlayer>
           <b-img-lazy
             v-if="mf.is_image"
-            class="d-block"
+            class="d-block photoswipe-thumbnail"
             :src="use_mid && mf.has_mid ? mf.midFilepath : mf.filepath"
           />
           <div class="background-preview" v-if="mf.is_image">

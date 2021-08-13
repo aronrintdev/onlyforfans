@@ -427,97 +427,104 @@ export default {
   .superbox-post {
     height: calc(100vh - 60px);
 
-    & > article {
+    .post-crate-content {
       flex: 1;
-      margin-bottom: 65px;
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
 
-      .media-slider {
-        height: 100%;
+      article {
+        flex: 1;
+        margin-bottom: 65px;
+        overflow: hidden;
 
-        .v-photoswipe-thumbnail {
-          pointer-events: none;
+        .media-slider {
           height: 100%;
-          width: auto;
-          margin: auto;
-          max-width: 100%;
-          object-fit: contain;
-          position: relative;
-          z-index: 2;
-        }
 
-        .single {
-          height: 100%;
-          position: relative;
-
-          video {
+          .photoswipe-thumbnail, .v-photoswipe-thumbnail {
+            pointer-events: none;
             height: 100%;
+            width: auto;
+            margin: auto;
+            max-width: 100%;
+            object-fit: contain;
+            position: relative;
+            z-index: 2;
           }
 
-          .background-preview {
-            background-color: rgba(0, 0, 0, 0.8);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
+          .single {
             height: 100%;
-            z-index: 0;
-            display: block;
-            overflow: hidden;
+            position: relative;
 
-            img {
-              object-fit: cover;
-              opacity: 0.4;
-              transform: scale(1.1);
+            video {
               height: 100%;
             }
+
+            .background-preview {
+              background-color: rgba(0, 0, 0, 0.8);
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              z-index: 0;
+              display: block;
+              overflow: hidden;
+
+              img {
+                object-fit: cover;
+                opacity: 0.4;
+                transform: scale(1.1);
+                height: 100%;
+              }
+            }
           }
-        }
 
-        .multiple {
-          height: 100%;
-
-          .media-slider-swiper {
+          .multiple {
             height: 100%;
 
-            .swiper-wrapper {
-              align-items: center;
+            .media-slider-swiper {
+              height: 100%;
 
-              @media (max-width: 600px) {
-                pointer-events: none;
-              }
+              .swiper-wrapper {
+                align-items: center;
 
-              video {
-                height: 100%;
-              }
+                @media (max-width: 600px) {
+                  pointer-events: none;
+                }
 
-              .v-photoswipe-thumbnail {
-                pointer-events: none;
-                height: 100%;
-                width: auto;
-                margin: auto;
-                max-width: 100%;
-                object-fit: contain;
-                position: relative;
-                z-index: 2;
-              }
+                // video {
+                //   height: 100%;
+                // }
 
-              .background-preview {
-                background-color: rgba(0, 0, 0, 0.8);
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                z-index: 0;
-                display: block;
-                overflow: hidden;
+                // .photoswipe-thumbnail, .v-photoswipe-thumbnail {
+                //   pointer-events: none;
+                //   height: 100%;
+                //   width: auto;
+                //   margin: auto;
+                //   max-width: 100%;
+                //   object-fit: contain;
+                //   position: relative;
+                //   z-index: 2;
+                // }
 
-                img {
-                  object-fit: cover;
-                  opacity: 0.4;
-                  transform: scale(1.1);
+                .background-preview {
+                  background-color: rgba(0, 0, 0, 0.8);
+                  position: absolute;
+                  top: 0;
+                  left: 0;
+                  width: 100%;
                   height: 100%;
+                  z-index: 0;
+                  display: block;
+                  overflow: hidden;
+
+                  img {
+                    object-fit: cover;
+                    opacity: 0.4;
+                    transform: scale(1.1);
+                    height: 100%;
+                  }
                 }
               }
             }
