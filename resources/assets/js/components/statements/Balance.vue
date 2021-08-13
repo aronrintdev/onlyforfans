@@ -1,6 +1,6 @@
 <template>
-  <b-card :title="$t('title')">
-    <b-list-group class="mb-3">
+  <b-card no-body>
+    <b-list-group flush>
       <b-list-group-item>
         <div class="d-flex">
           <span v-text="$t('available')" />
@@ -14,7 +14,7 @@
         </div>
       </b-list-group-item>
     </b-list-group>
-    <div class="d-flex">
+    <div class="d-flex p-3">
       <b-btn variant="primary" class="ml-auto" :disabled="!balances.balance || balances.balance.amount <= 0">
         {{ $t('request') }}
       </b-btn>

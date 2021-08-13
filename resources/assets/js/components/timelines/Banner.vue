@@ -38,7 +38,7 @@
       @mouseleave="toggleUploadAvatar(false)"
       class="avatar-img"
     >
-      <b-img
+      <b-img-lazy
         thumbnail
         rounded="circle"
         class="w-100 h-100"
@@ -62,7 +62,7 @@
               <fa-icon icon="check-circle" class="text-primary" />
             </span>
           </h2>
-          <p class="avatar-mail my-0 mr-3 text-secondary">
+          <p class="avatar-mail my-0 text-secondary">
             @{{ timeline.slug || 'TODO' }}
           </p>
           <div class="banner-online-status">
@@ -248,7 +248,6 @@ header.masthead .profile-ctrl.dropdown button {
 .banner-online-status {
   @media (max-width: 576px) {
     float: right;
-    margin-right: 1rem;
   }
 }
 

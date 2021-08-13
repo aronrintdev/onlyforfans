@@ -88,7 +88,7 @@ export default [
   },
   {
     name: 'settings.default',
-    component: settings.General,
+    // component: settings.General,
     path: '',
   },
 ]

@@ -1,15 +1,20 @@
 <template>
   <div v-if="!isLoading">
-    <b-card title="Account">
+    <b-card :title="mobile ? null : $t('title')">
       <b-card-text>
         <b-form @submit.prevent="submitGeneral($event)" @reset="onReset">
           <fieldset :disabled="isSubmitting.formGeneral">
             <b-row>
-              <b-col>
+              <b-col lg="6">
                 <FormTextInput ikey="username" v-model="formGeneral.username" label="Username" :verrors="verrors" :disabled="true"/>
               </b-col>
-              <b-col>
+              <b-col lg="6">
                 <FormTextInput ikey="email" v-model="formGeneral.email" label="E-mail" :verrors="verrors" :disabled="true" />
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col sm="12" md="6">
+                <FormTextInput ikey="slug" v-model="formGeneral.slug" label="Display Username (or handle)" :verrors="verrors" />
               </b-col>
             </b-row>
             <b-row>
@@ -19,7 +24,7 @@
             </b-row>
           </fieldset>
 
-          <!-- <b-row class="mt-3">
+          <b-row class="mt-3">
             <b-col>
               <div class="w-100 d-flex justify-content-end">
                 <b-button :disabled="isSubmitting.formGeneral" class="w-25 ml-3" type="submit" variant="primary">
@@ -28,7 +33,7 @@
                 </b-button>
               </div>
             </b-col>
-          </b-row> -->
+          </b-row>
 
         </b-form>
       </b-card-text>
@@ -39,7 +44,7 @@
         <b-form @submit.prevent="submitLocalization($event)" @reset="onReset">
           <fieldset :disabled="isSubmitting.formLocalization">
             <b-row>
-              <b-col>
+              <b-col >
                 <FormSelectInput
                   ikey="localization.language"
                   v-model="formData.language"
@@ -108,11 +113,13 @@ export default {
   props: {
     session_user: null,
     user_settings: null,
+    timeline: null,
   },
 
   computed: {
+    ...Vuex.mapState([ 'mobile' ]),
     isLoading() {
-      return !this.session_user || !this.user_settings
+      return !this.session_user || !this.user_settings || !this.timeline
     },
   },
 
@@ -125,10 +132,9 @@ export default {
     verrors: null,
 
     formGeneral: {
-      firstname: null,
-      lastname: null,
       username: null,
       email: null,
+      slug: null,
     },
     formData: { // cattrs
       language: null,
@@ -172,9 +178,8 @@ export default {
 
   created() {
     this.formGeneral.username = this.session_user.username || ''
-    this.formGeneral.firstname = this.session_user.firstname || ''
-    this.formGeneral.lastname = this.session_user.lastname || ''
     this.formGeneral.email = this.session_user.email || ''
+    this.formGeneral.slug = this.timeline.slug || ''
 
     if ( this.user_settings.cattrs.localization ) {
       this.formData = this.user_settings.cattrs.localization
@@ -244,3 +249,10 @@ export default {
 <style scoped>
 </style>
 
+<i18n lang="json5" scoped>
+{
+  "en": {
+    "title": "Account",
+  }
+}
+</i18n>

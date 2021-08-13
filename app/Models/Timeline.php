@@ -18,6 +18,7 @@ use App\Models\Traits\UsesShortUuid;
 use App\Models\Financial\Transaction;
 use App\Models\Traits\SluggableTraits;
 use App\Enums\ShareableAccessLevelEnum;
+use App\Enums\VerifyStatusTypeEnum;
 use App\Interfaces\Subscribable;
 use App\Interfaces\Tippable;
 use App\Models\Casts\Money;
@@ -97,6 +98,11 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     //         //: (object) ['filepath' => url('user/cover/default-' . $this->gender . '-cover.png')]; // %TODO %FIXME
     // }
 
+    // %FIXME [timelines].verified field should be deprecated (renamed then removed)
+    public function getVerifiedAttribute($value) {
+        return $this->user->verifyrequest && ($this->user->verifyrequest->vstatus===VerifyStatusTypeEnum::VERIFIED);
+    }
+
     public function toArray()
     {
         $array = parent::toArray();
@@ -109,7 +115,7 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     public function sluggable(): array
     {
         return ['slug' => [
-            'source' => [ 'user.username' ],
+            'source' => [ 'name' ],
         ]];
     }
 

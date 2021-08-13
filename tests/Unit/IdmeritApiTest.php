@@ -9,6 +9,8 @@ use Tests\TestCase;
 
 use App\Apis\IdMerit\Api as IdMeritApi;
 
+// $ IDMERIT_IS_SANDBOX=true php artisan test --group idmerit-api-unit
+
 class IdmeritApiTest extends TestCase
 {
     /**
@@ -43,7 +45,7 @@ class IdmeritApiTest extends TestCase
 	        //'callbackURL': 'https://devapp.idmvalidate.com/verify/endpoint/success'
         ];
         $api = IdMeritApi::create();
-        if ( !$api->hasToken ) {
+        if ( !$api->hasToken() ) {
             $response = $api->issueToken();
             $this->assertEquals( 200, $response->status() );
         }
@@ -77,7 +79,7 @@ class IdmeritApiTest extends TestCase
     public function test_should_poll_verify_request_status()
     {
         $api = IdMeritApi::create();
-        if ( !$api->hasToken ) {
+        if ( !$api->hasToken() ) {
             $response = $api->issueToken();
             $this->assertEquals( 200, $response->status() );
         }

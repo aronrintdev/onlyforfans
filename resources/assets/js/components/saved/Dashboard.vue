@@ -11,7 +11,7 @@
                 <li class="mb-3" v-for="(sv) in this.saves" :key="sv.guid">
                   <b-media class="mb-1">
                     <template #aside>
-                      <b-img class="tag-avatar" rounded="circle" :src="sv.user.avatar" width="64" height="64" alt="avatar"></b-img>
+                      <b-img-lazy class="tag-avatar" rounded="circle" :src="sv.user.avatar" width="64" height="64" alt="avatar"></b-img-lazy>
                     </template>
                     <h6 class="mt-0">{{ sv.user.name }}</h6>
                   </b-media>
@@ -29,7 +29,7 @@
                         <td>
                           <ul>
                           <li v-for="(i) in sv.images" :key="i.id">
-                            <img :key="i.id" :src="i.source" :alt="i.source" />
+                            <b-img-lazy :key="i.id" :src="i.source" :alt="i.source" />
                           </li>
                           </ul>
                         </td>
@@ -55,7 +55,7 @@
                 <li v-for="(mf) in this.shareables.mediafiles" :key="mf.guid">
                   <b-media class="mb-1">
                     <template #aside>
-                      <b-img class="tag-avatar" rounded="circle" :src="mf.owner.avatar" width="64" height="64" alt="avatar"></b-img>
+                      <b-img-lazy class="tag-avatar" rounded="circle" :src="mf.owner.avatar" width="64" height="64" alt="avatar"></b-img-lazy>
                     </template>
                     <h6 class="mt-0">{{ mf.owner.name }}</h6>
                   </b-media>

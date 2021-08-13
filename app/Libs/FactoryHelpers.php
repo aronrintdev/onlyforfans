@@ -34,7 +34,6 @@ class FactoryHelpers {
             'user_id'  => $user->id,
             'name'     => $attrs['name'],
             'about'    => $faker->text,
-            'verified' => 1,
             'is_follow_for_free' => $isFollowForFree,
             'price' => $isFollowForFree ? 0.00 : $faker->randomFloat(2, 1, 300),
         ]);

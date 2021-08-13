@@ -111,16 +111,21 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
             $model->checkUsername();
             $model->remember_token = str_random(10);
             $model->verification_code = str_random(10);
-            if ( empty($model->firstname) ) {
-                $model->firstname = $model->real_firstname;
-            }
-            if ( empty($model->lastname) ) {
-                $model->lastname = $model->real_lastname;
-            }
+            // if ( empty($model->firstname) ) {
+            //     $model->firstname = $model->real_firstname;
+            // }
+            // if ( empty($model->lastname) ) {
+            //     $model->lastname = $model->real_lastname;
+            // }
         });
         self::created(function ($model) {
             UserSetting::create([
                 'user_id' => $model->id,
+            ]);
+            Timeline::create([
+                'user_id' => $model->id,
+                'name'    => request()->name,
+                'about'   => '',
             ]);
         });
         self::updating(function ($model) {
@@ -372,14 +377,10 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
     // %NOTE: Use this as the 'display name'. 'Real name' fields will hold the real name
     public function getNameAttribute($value)
     {
-        if ( $this->firstname && $this->lastname ) {
-            return $this->firstname.' '.$this->lastname;
-        } else if ( $this->timeline && $this->timeline->name ) {
+        if ( $this->timeline && $this->timeline->name ) {
             return $this->timeline->name;
-        } else if ( $this->firstname ) {
-            return $this->firstname;
         } else { 
-            return $this->username;
+            return $this->timeline->slug;
         }
     }
 

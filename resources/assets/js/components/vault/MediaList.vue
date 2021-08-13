@@ -10,7 +10,7 @@
       />
     </b-col>
     <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3" role="button">
-      <b-img fluid @click="doNav(vf.id)" src="/images/tmp-placeholders/folder-icon.jpg" :alt="`Folder ${vf.slug}`"></b-img>
+      <b-img-lazy fluid @click="doNav(vf.id)" src="/images/tmp-placeholders/folder-icon.jpg" :alt="`Folder ${vf.slug}`"></b-img-lazy>
       <div class="text-center">{{ vf.name }}</div>
     </b-col>
     <b-modal v-model="isMediaLightboxModalVisible" id="modal-media-lightbox" title="" hide-footer body-class="p-0" size="xl">

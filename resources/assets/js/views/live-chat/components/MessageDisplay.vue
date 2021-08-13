@@ -54,7 +54,7 @@ export default {
 
   methods: {
     endVisible(isVisible) {
-      this.$emit('endVisible', isVisible)
+      this.$emit('endVisible', isVisible) // %NOTE: semantically: "is end (n) visible", *not* "end (v) visible" (noun not verb)
     },
 
     isDateBreak(idx) {

@@ -1,21 +1,22 @@
 <template>
   <div class="media-slider">
-    <div class="single" v-if="!hasMultipleImages">
-      <video v-if="mediafiles[0].is_video" controls="controls" poster="poster.png" class="d-block">
-        <source :src="mediafiles[0].filepath" type="video/webm" />
-        <source :src="mediafiles[0].filepath" type="video/mp4" />
-      </video>
-      <img
-        v-preview
+    <div class="single" v-if="!hasMultipleImages" v-touch:tap="tapHandler">
+      <VideoPlayer :source="mediafiles[0]" v-if="mediafiles[0].is_video"></VideoPlayer>
+      <b-img-lazy
         v-if="mediafiles[0].is_image"
-        class="d-block"
+        class="d-block photoswipe-thumbnail"
         :src="use_mid && mediafiles[0].has_mid ? mediafiles[0].midFilepath : mediafiles[0].filepath"
       />
-      <div class="background-preview" v-if="mediafiles[0].is_image">
-        <img
+      <div class="background-preview">
+        <b-img-lazy
+          v-if="mediafiles[0].is_image"
           class="d-block"
           :src="use_mid && mediafiles[0].has_mid ? mediafiles[0].midFilepath : mediafiles[0].filepath"
         />
+        <video v-if="mediafiles[0].is_video">
+          <source :src="`${mediafiles[0].filepath}#t=2`" type="video/mp4" />
+          <source :src="`${mediafiles[0].filepath}#t=2`" type="video/webm" />
+        </video>
       </div>
       <vue-plyr v-if="mediafiles[0].is_audio">
         <audio controls playsinline>
@@ -26,21 +27,17 @@
       </vue-plyr>
     </div>
     <div class="multiple position-relative" v-if="hasMultipleImages">
-      <swiper class="media-slider-swiper" :options="swiperOptions">
+      <swiper ref="mySwiper" class="media-slider-swiper" :options="swiperOptions">
         <swiper-slide class="slide" v-for="mf in visualMediafiles" :key="mf.id">
-          <video v-if="mf.is_video" controls="controls" poster="poster.png" class="d-block">
-            <source :src="mf.filepath" type="video/webm" />
-            <source :src="mf.filepath" type="video/mp4" />
-          </video>
-          <img
-            v-preview:[imageScope]="imageScope"
+          <VideoPlayer :source="mf" v-if="mf.is_video"></VideoPlayer>
+          <b-img
             v-if="mf.is_image"
-            class="d-block"
+            class="d-block swiper-lazy photoswipe-thumbnail"
             :src="use_mid && mf.has_mid ? mf.midFilepath : mf.filepath"
           />
           <div class="background-preview" v-if="mf.is_image">
-            <img
-              class="d-block"
+            <b-img
+              class="swiper-lazy d-block"
               :src="use_mid && mf.has_mid ? mf.midFilepath : mf.filepath"
             />
           </div>
@@ -58,7 +55,7 @@
         {{ visualMediafiles.length }}
       </div>
     </div>
-    <div class="audio-preview" v-if="hasMultipleImages && hasAudioFiles">
+    <div class="audio-preview" v-if="hasMultipleImages && hasAudioFiles" v-touch:tap="tapHandler">
       <template v-for="(audiofile, index) in mediafiles">
         <vue-plyr class="mx-2" v-if="audiofile.is_audio" :key="index">
           <audio controls playsinline>
@@ -73,30 +70,19 @@
 </template>
 
 <script>
-import PhotoSwipe from 'photoswipe/dist/photoswipe'
-import PhotoSwipeUI from 'photoswipe/dist/photoswipe-ui-default'
-import createPreviewDirective from 'vue-photoswipe-directive'
 import { eventBus } from '@/eventBus'
+import VideoPlayer from '@components/videoPlayer'
 
 export default {
   props: {
-    //post: null,
     //mediafile_count: null, // was post.mediafile_count
     mediafiles: null,
     session_user: null,
     use_mid: { type: Boolean, default: false }, // use mid-sized images instead of full
   },
 
-  directives: {
-    preview: createPreviewDirective(
-      {
-        showAnimationDuration: 0,
-        hideAnimationDuration: 0,
-        bgOpacity: 0.5,
-      },
-      PhotoSwipe,
-      PhotoSwipeUI
-    ),
+  components: {
+    VideoPlayer,
   },
 
   computed: {
@@ -111,6 +97,9 @@ export default {
     },
     hasAudioFiles() {
       return this.mediafiles.filter(file => file.is_audio).length > 1
+    },
+    swiper() {
+      return this.$refs.mySwiper && this.$refs.mySwiper.$swiper
     }
   },
 
@@ -128,13 +117,36 @@ export default {
         el: '.swiper-pagination',
       },
     },
+    tapCount: 0,
   }),
 
-  methods: {},
+  methods: {
+    tapHandler() {
+      this.tapCount++;
+      setTimeout(() => {
+        if (this.tapCount == 1) {
+          const imagefiles = this.mediafiles.filter(file => file.is_image)
+          const items = imagefiles.map(file => ({ src: file.filepath }))
+          this.$Pswp.open({
+            items,
+            options: {
+              showAnimationDuration: 0,
+              hideAnimationDuration: 0,
+              bgOpacity: 0.5
+            }
+          });
+        } else if (this.tapCount == 2) {
+          this.$emit('doubleTap');
+        }
+        this.tapCount = 0;
+      }, 500);
+    },
+  },
 
-  mounted() {},
+  mounted() {
+    this.swiper?.on('tap', this.tapHandler);
+  },
   created() {},
-  watch: {},
 }
 </script>
 

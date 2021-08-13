@@ -13,7 +13,7 @@
 
     <b-modal
       id="modal-tip"
-      size="lg"
+      size="md"
       title="Send a Tip"
       hide-footer
       body-class="p-0"
@@ -50,7 +50,7 @@
     <b-modal
       id="modal-follow"
       size="md"
-      :title="selectedTimeline && selectedTimeline.is_following ? 'Unfollow' : 'Follow'"
+      :title="followTimelineTitle"
       hide-footer
       body-class="p-0"
       @hide="closeModal('modal-follow')"
@@ -88,15 +88,16 @@
       </div>
       <div
         class="post-content"
-        v-touch:swipe.left="() => postModalAction('next')"
-        v-touch:swipe.right="() => postModalAction('prev')"
-        v-touch:start="startHandler"
+        v-touch:swipe.top="() => postModalAction('next')"
+        v-touch:swipe.bottom="() => postModalAction('prev')"
       >
         <PostDisplay
           ref="postDisplay"
           :session_user="session_user"
           :post="selectedResource"
+          :key="selectedResource && selectedResource.id"
           :is_feed="false"
+          :is_public_post="true"
         />
       </div>
       <div
@@ -224,7 +225,12 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState([ 'session_user', 'timeline', 'mobile' ]) // %TODO: may be able to drop timeline here (?)
+    ...Vuex.mapState([ 'session_user', 'timeline', 'mobile' ]), // %TODO: may be able to drop timeline here (?)
+
+    followTimelineTitle() {
+      if (this.selectedTimeline && this.selectedTimeline.is_following) return 'Unfollow'
+      else return 'Follow'
+    },
   },
 
   data: () => ({
@@ -251,7 +257,6 @@ export default {
     scheduled_at: null,
     is_for_edit: null,
     showPostArrows: false,
-    swipeEnabled: false,
   }),
 
   methods: {
@@ -334,22 +339,12 @@ export default {
 
     },
     postModalAction(action) {
-      console.log('----- swipeEnabled:', this.swipeEnabled);
-      if (this.swipeEnabled) {
-        eventBus.$emit('post-modal-actions', action);
-      }
+      eventBus.$emit('post-modal-actions', action);
     },
     closeModal(modalId) {
       this.$bvModal.hide(modalId)
       eventBus.$emit('close-modal');
     },
-    startHandler(event) {
-      if (event.srcElement.classList.contains('swiper-container')) {
-        this.swipeEnabled = false;
-      } else {
-        this.swipeEnabled = true;
-      }
-    }
   },
 
   created() {
@@ -427,97 +422,120 @@ export default {
   .superbox-post {
     height: calc(100vh - 60px);
 
-    & > article {
+    .post-crate-content {
       flex: 1;
-      margin-bottom: 65px;
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
 
-      .media-slider {
-        height: 100%;
+      article {
+        flex: 1;
+        margin-bottom: 65px;
+        overflow: hidden;
 
-        .v-photoswipe-thumbnail {
-          pointer-events: none;
+        .media-slider {
           height: 100%;
-          width: auto;
-          margin: auto;
-          max-width: 100%;
-          object-fit: contain;
-          position: relative;
-          z-index: 2;
-        }
 
-        .single {
-          height: 100%;
-          position: relative;
-
-          video {
+          .photoswipe-thumbnail, .v-photoswipe-thumbnail {
+            // pointer-events: none;
             height: 100%;
+            width: auto;
+            margin: auto;
+            max-width: 100%;
+            object-fit: contain;
+            position: relative;
+            z-index: 2;
           }
 
-          .background-preview {
-            background-color: rgba(0, 0, 0, 0.8);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
+          .single {
             height: 100%;
-            z-index: 0;
-            display: block;
-            overflow: hidden;
+            position: relative;
 
-            img {
-              object-fit: cover;
-              opacity: 0.4;
-              transform: scale(1.1);
+            .wrap {
+              position: relative;
+              z-index: 1;
+              max-width: 100vw;
+
+              .video-js.vjs-fluid {
+                width: 100%;
+                max-width: 100%;
+                max-height: 100%;
+                height: 100%;
+                padding-top: 0;
+                background: transparent;
+              }
+            }
+
+            .background-preview {
+              background-color: rgba(0, 0, 0, 0.8);
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
               height: 100%;
+              z-index: 0;
+              display: block;
+              overflow: hidden;
+
+              video, img {
+                object-fit: cover;
+                opacity: 0.4;
+                transform: scale(1.1);
+                height: 100%;
+              }
             }
           }
-        }
 
-        .multiple {
-          height: 100%;
-
-          .media-slider-swiper {
+          .multiple {
             height: 100%;
 
-            .swiper-wrapper {
-              align-items: center;
+            .media-slider-swiper {
+              height: 100%;
 
-              @media (max-width: 600px) {
-                pointer-events: none;
+              .swiper-button-next,
+              .swiper-button-prev {
+                display: none;
               }
 
-              video {
-                height: 100%;
-              }
+              .swiper-wrapper {
+                align-items: center;
 
-              .v-photoswipe-thumbnail {
-                pointer-events: none;
-                height: 100%;
-                width: auto;
-                margin: auto;
-                max-width: 100%;
-                object-fit: contain;
-                position: relative;
-                z-index: 2;
-              }
+                @media (max-width: 600px) {
+                  pointer-events: none;
+                }
 
-              .background-preview {
-                background-color: rgba(0, 0, 0, 0.8);
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                z-index: 0;
-                display: block;
-                overflow: hidden;
+                // video {
+                //   height: 100%;
+                // }
 
-                img {
-                  object-fit: cover;
-                  opacity: 0.4;
-                  transform: scale(1.1);
+                // .photoswipe-thumbnail, .v-photoswipe-thumbnail {
+                //   pointer-events: none;
+                //   height: 100%;
+                //   width: auto;
+                //   margin: auto;
+                //   max-width: 100%;
+                //   object-fit: contain;
+                //   position: relative;
+                //   z-index: 2;
+                // }
+
+                .background-preview {
+                  background-color: rgba(0, 0, 0, 0.8);
+                  position: absolute;
+                  top: 0;
+                  left: 0;
+                  width: 100%;
                   height: 100%;
+                  z-index: 0;
+                  display: block;
+                  overflow: hidden;
+
+                  img {
+                    object-fit: cover;
+                    opacity: 0.4;
+                    transform: scale(1.1);
+                    height: 100%;
+                  }
                 }
               }
             }
@@ -548,7 +566,7 @@ export default {
       }
     }
     .superbox-post {
-      height: calc(100vh - 160px);
+      height: calc(100vh - 100px);
     }
   }
 }

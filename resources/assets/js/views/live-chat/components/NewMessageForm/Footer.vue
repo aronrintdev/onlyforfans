@@ -1,39 +1,53 @@
 <template>
   <div class="toolbar d-flex">
-    <b-btn
-      v-for="item in buttons"
-      :key="item.key"
-      variant="link"
-      :disabled="item.disabled"
-      :class="item.class"
-      v-b-tooltip.hover
-      :title="item.tooltip"
-      @click="item.onClick"
-    >
-      <fa-icon
-        :icon="item.icon"
-        :size="iconSize"
-        fixed-width
-        :class="item.selected ? 'text-primary' : 'text-secondary'"
-      />
-    </b-btn>
-    <b-btn
-      variant="success"
-      class="ml-auto mr-3"
-      v-b-tooltip.hover
-      :title="$t('tooltips.sendWithTip')"
-    >
-      <fa-icon icon="dollar-sign" class="mr-2" />
-      {{ $t('sendWithTip') }}
-    </b-btn>
-    <div class="d-flex flex-column">
-      <div class="font-size-smaller text-muted text-right mr-2" v-text="$t('sendHint')" />
-      <b-btn variant="primary" class="submit" :disabled="false" @click="$emit('submit')">
-        {{ $t('send') }}
-        <fa-icon icon="arrow-right" class="ml-2" />
+    <div class="tool-items d-flex flex-shrink-1 py-2 mr-3">
+      <b-btn
+        v-for="item in buttons"
+        :key="item.key"
+        variant="link"
+        :disabled="item.disabled"
+        :class="item.class"
+        v-b-tooltip.hover
+        :title="item.tooltip"
+        @click="item.onClick"
+      >
+        <fa-icon
+          :icon="item.icon"
+          :size="iconSize"
+          fixed-width
+          :class="item.selected ? 'text-primary' : 'text-secondary'"
+        />
       </b-btn>
     </div>
-
+    <div class="py-2 ml-auto d-flex align-items-end">
+      <b-btn
+        variant="success"
+        class="mr-3 text-nowrap"
+        v-b-tooltip.hover="mobile ? null :$t('tooltips.sendWithTip')"
+      >
+        <fa-icon icon="dollar-sign" class="mr-2" />
+        <span v-if="!mobile">{{ $t('sendWithTip') }}</span>
+        <span v-else>
+          <fa-icon icon="arrow-right" class="ml-2" />
+        </span>
+      </b-btn>
+      <div class="d-flex flex-column">
+        <div
+          v-if="!mobile"
+          class="font-size-smaller text-muted text-right mr-2"
+          v-text="$t('sendHint')"
+        />
+        <b-btn
+          variant="primary"
+          class="submit text-nowrap"
+          :disabled="false"
+          @click="$emit('submit')"
+        >
+          <span v-if="!mobile">{{ $t('send') }}</span>
+          <fa-icon icon="arrow-right" class="ml-2" />
+        </b-btn>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -55,7 +69,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState(['screenSize']),
+    ...Vuex.mapState(['screenSize', 'mobile']),
 
     buttons() {
       return [
@@ -136,7 +150,10 @@ export default {
 
 <style lang="scss" scoped>
 .toolbar {
-  align-items: end
+  align-items: end;
+  .tool-items {
+    overflow-x: auto;
+  }
 }
 </style>
 

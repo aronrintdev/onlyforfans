@@ -409,6 +409,13 @@ export default {
         this.renderedPages.push(newVal.meta.current_page)
         this.renderedItems = this.renderedItems.concat(newVal.data) // the actual posts
         this.moreLoading = false
+      } else {
+        const items = [...this.renderedItems]
+        newVal.data.forEach(p => {
+          const idx = items.findIndex(it => it.id === p.id)
+          items[idx] = p
+        })
+        this.renderedItems = items
       }
     },
 

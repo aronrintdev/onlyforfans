@@ -22,7 +22,7 @@
               </div>
               <div class="gallery-list" v-if="mediafiles.length"> 
                 <div class="img-wrapper" v-for="media in mediafiles" :key="media.id">
-                  <img v-preview:scope-a v-if="media.is_image" :src="media.filepath" :alt="media.mfname" />
+                  <b-img-lazy v-preview:scope-a v-if="media.is_image" :src="media.filepath" :alt="media.mfname" />
                   <video v-if="media.is_video" @click="() => showMediaPopup(media)">
                     <source :src="media.filepath" type="video/mp4" />
                   </video>
@@ -38,7 +38,7 @@
                         c0,4.146,4.69,6.554,8.059,4.138l31.583-22.647C97.418,73.331,97.418,69.118,94.585,67.086z"/>
                     </g>
                   </svg>
-                  <img v-if="media.mimetype.indexOf('audio/') > -1" src="/images/audio-thumb.png" alt="" @click="showMediaPopup(media)" />
+                  <b-img-lazy v-if="media.mimetype.indexOf('audio/') > -1" src="/images/audio-thumb.png" alt="" @click="showMediaPopup(media)" />
                 </div>
               </div>
             </div>

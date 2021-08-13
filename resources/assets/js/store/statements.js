@@ -87,9 +87,13 @@ export const statements = {
 
   /* -------------------------------- ACTIONS ------------------------------- */
   actions: {
-    updateTotals({ commit }) {
+    updateTotals({ commit }, { ago, ago_unit }) {
       return new Promise((resolve, reject) => {
-        axios.get(route('earnings.index'))
+        const params = {
+          ago,
+          ago_unit,
+        }
+        axios.get(route('earnings.index'), { params })
           .then(response => {
             commit('UPDATE_TOTALS', response.data)
             resolve(response)

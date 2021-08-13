@@ -1,5 +1,5 @@
 <template>
-  <div class="container p-0">
+  <div v-if="!isLoading" class="container p-0">
     <b-card header-tag="header" footer-tag="footer" class="position-relative">
 
       <template #header>
@@ -13,13 +13,13 @@
         </section>
       </template>
 
-      <LoadingOverlay :loading="loading" />
-      <VaultSelectorComponent />
+      <LoadingOverlay :loading="isLoading" />
+      <VaultSelectorComponent @close="exit" :payload="payload" ref="vaultSelector" />
 
       <template #footer>
         <b-row>
           <b-col cols="12" class="d-flex justify-content-end">
-            <b-btn class="px-3" variant="primary" :disabled="!isSaveable" @click="save">{{ $t('save.button') }}</b-btn>
+            <b-btn class="px-3" variant="primary" :disabled="!isSaveable" @click="applySelection">Select</b-btn>
           </b-col>
         </b-row>
       </template>
@@ -28,45 +28,34 @@
   </div>
 </template>
 <script>
+
 import { eventBus } from '@/eventBus'
 import LoadingOverlay from '@components/common/LoadingOverlay'
 import VaultSelectorComponent from '@views/live-chat/components/ShowThread/VaultSelector'
 
 export default {
   props: {
-    post: { type: Object, default: () => ({}) },
+    payload: null,
   },
 
   computed: {
+    isLoading() {
+      return false
+    },
+
     isSaveable() {
-      return (this.loading) ? false  : (this.reason !== '')
+      return !this.isLoading
     }
   },
 
   data: () => ({
-    loading: false,
-    reason: '',
   }),
 
   methods: {
 
-    save(e) {
-      /*
-      this.loading = true
-      this.axios.post(this.$apiRoute('contentflags.store'), {
-        //flagger_id: this.flagger_id,
-        flaggable_id: this.post.id,
-        flaggable_type: 'posts',
-        notes: this.reason,
-      }).then(response => {
-        this.loading = false
-        //eventBus.$emit('update-posts', this.post.id)
-        this.exit()
-      }).catch(error => {
-        eventBus.$emit('error', { error, message: this.$t('save.error') })
-        this.loading = false
-      })
-      */
+    // %NOTE: this is coupled to the VaultSelector child component, essentially assumes its onSelect() method is 'public'
+    applySelection() {
+      this.$refs.vaultSelector.applySelection()
     },
 
     discard(e) {

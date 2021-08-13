@@ -128,19 +128,17 @@ class RestSettingTest extends TestCase
         $user = $timeline->user;
 
         $payload = [
-            'firstname' => $this->faker->firstName,
-            'lastname' => $this->faker->lastName,
             //'username' => $this->faker->userName,
             'email' => $this->faker->safeEmail,
+            'slug'  => $this->faker->slug,
         ];
         $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.update', [$user->id]), $payload);
         $response->assertStatus(200);
         $content = json_decode($response->content());
 
         $user2 = User::findOrFail($user->id);
-        $this->assertEquals($payload['firstname'], $user2->firstname);
-        $this->assertEquals($payload['lastname'], $user2->lastname);
         $this->assertEquals($payload['email'], $user2->email);
+        $this->assertEquals($payload['slug'], $user2->timeline->slug);
     }
 
     /**
@@ -152,24 +150,24 @@ class RestSettingTest extends TestCase
     {
         $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
         $user = $timeline->user;
-        $newLastname = $this->faker->lastName;
+        // $newLastname = $this->faker->lastName;
 
-        // Test empty required field (firstname)
-        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.update', [$user->id]), [
-            'firstname' => '', // test required
-            'lastname' => $newLastname,
-            'email' => $this->faker->safeEmail,
-        ]);
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors([
-            'firstname',
-        ]);
+        // // Test empty required field (firstname)
+        // $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.update', [$user->id]), [
+        //     'firstname' => '', // test required
+        //     'lastname' => $newLastname,
+        //     'email' => $this->faker->safeEmail,
+        // ]);
+        // $response->assertStatus(422);
+        // $response->assertJsonValidationErrors([
+        //     'firstname',
+        // ]);
 
-        // Update the new last name
-        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.update', [$user->id]), [
-            'lastname' => $newLastname,
-        ]);
-        $response->assertStatus(200);
+        // // Update the new last name
+        // $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.update', [$user->id]), [
+        //     'lastname' => $newLastname,
+        // ]);
+        // $response->assertStatus(200);
 
         // Test unchanged if not present
         $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.update', [$user->id]), [
@@ -177,7 +175,7 @@ class RestSettingTest extends TestCase
         ]);
         $response->assertStatus(200);
         $user2 = User::findOrFail($user->id);
-        $this->assertEquals($newLastname, $user2->lastname); // unchanged
+        // $this->assertEquals($newLastname, $user2->lastname); // unchanged
         //$content = json_decode($response->content());
 
         // Test empty required field (firstname)

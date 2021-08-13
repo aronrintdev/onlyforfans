@@ -129,6 +129,12 @@ body .list-component {
         .rounded-circle.img-thumbnail {
           padding: 0.11rem;
         }
+        .onlineStatus {
+          position: absolute;
+          bottom: 5px;
+          right: 0px;
+          z-index: 1;
+        }
       }
       .last-seen {
         color: #fff;
