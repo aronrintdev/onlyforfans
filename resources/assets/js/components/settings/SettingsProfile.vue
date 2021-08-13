@@ -7,13 +7,8 @@
           <fieldset :disabled="isSubmitting.formProfile">
             <b-row>
               <b-col sm="12" md="6">
-                <b-form-group id="group-firstname" label="First Name" label-for="firstname">
-                  <b-form-input id="firstname" v-model="formProfile.firstname" ></b-form-input>
-                </b-form-group>
-              </b-col>
-              <b-col sm="12" md="6">
-                <b-form-group id="group-lastname" label="Last Name" label-for="lastname">
-                  <b-form-input id="lastname" v-model="formProfile.lastname" ></b-form-input>
+                <b-form-group id="group-name" label="Name" label-for="name">
+                  <b-form-input id="name" v-model="formProfile.name" ></b-form-input>
                 </b-form-group>
               </b-col>
             </b-row>
@@ -217,8 +212,7 @@ export default {
     },
 
     formProfile: {
-      firstname: '',
-      lastname: '',
+      name: '',
       about: '',
       country: '',
       city: '',
@@ -340,8 +334,7 @@ export default {
   },
 
   created() {
-    this.formProfile.firstname = this.session_user.firstname || ''
-    this.formProfile.lastname = this.session_user.lastname || ''
+    this.formProfile.name = this.timeline.name || ''
     this.formProfile.about = this.timeline.about
     this.formProfile.country = this.user_settings.country
     this.formProfile.city = this.user_settings.city

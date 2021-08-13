@@ -13,7 +13,7 @@
 
     <b-modal
       id="modal-tip"
-      size="lg"
+      size="md"
       title="Send a Tip"
       hide-footer
       body-class="p-0"
@@ -50,7 +50,7 @@
     <b-modal
       id="modal-follow"
       size="md"
-      :title="selectedTimeline && selectedTimeline.is_following ? 'Unfollow' : 'Follow'"
+      :title="followTimelineTitle"
       hide-footer
       body-class="p-0"
       @hide="closeModal('modal-follow')"
@@ -224,7 +224,12 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState([ 'session_user', 'timeline', 'mobile' ]) // %TODO: may be able to drop timeline here (?)
+    ...Vuex.mapState([ 'session_user', 'timeline', 'mobile' ]), // %TODO: may be able to drop timeline here (?)
+
+    followTimelineTitle() {
+      if (this.selectedTimeline && this.selectedTimeline.is_following) return 'Unfollow'
+      else return 'Follow'
+    },
   },
 
   data: () => ({

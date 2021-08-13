@@ -47,18 +47,17 @@ class UsersController extends AppBaseController
         $this->authorize('update', $user);
 
         $request->validate([
-            'firstname' => 'required|sometimes|string',
-            'lastname' => 'required|sometimes|string',
+            'username' => 'required|sometimes|string',
             'email' => 'required|sometimes|email',
+            'slug' => 'required|sometimes|string',
         ]);
 
-        $user->fill($request->only([
-            'firstname',
-            'lastname',
-            'email',
+        $timeline = $user->timeline;
+        $timeline->fill($request->only([
+            'slug',
         ]));
 
-        $user->save();
+        $timeline->save();
 
         return new UserResource($user);
     }
@@ -122,8 +121,7 @@ class UsersController extends AppBaseController
     {
         $this->authorize('update', $user);
         $request->validate([
-            'firstname' => 'string|nullable',
-            'lastname' => 'string|nullable',
+            'name' => 'string|required',
             'subscriptions.price_per_1_months' => 'numeric',
             'subscriptions.price_per_3_months' => 'numeric|nullable',
             'subscriptions.price_per_6_months' => 'numeric|nullable',
@@ -158,17 +156,13 @@ class UsersController extends AppBaseController
         ]);
         $request->request->remove('username'); // disallow username updates for now
 
-        $user->fill($request->only([
-            'firstname',
-            'lastname',
-        ]));
-
-        $user->save();
-
         $userSetting = DB::transaction(function () use(&$user, &$request) {
 
             $timeline = $user->timeline;
             $timeline->about = $request->about;
+            $timeline->fill($request->only([
+                'name',
+            ]));
 
             // %TODO %FIXME: subscriptions should be in [timelines].cattrs, not user settings
 

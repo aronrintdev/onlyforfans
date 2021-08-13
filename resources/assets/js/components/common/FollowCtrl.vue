@@ -26,7 +26,7 @@
         <div :class="{ 'normal-view': !isFullVisiable }">
           <VueMarkdown :html="false" :source="timeline.about || ''" />
         </div>
-        <div v-if="!isFullVisiable && timeline.about && timeline.about.length > showChars" class="toggle-read-more text-primary text-right mr-3 mt-1" @click="isFullVisiable = !isFullVisiable">Read more</div>
+        <div v-if="!isFullVisiable && isOverLength" class="toggle-read-more text-primary text-right mr-3 mt-1" @click="isFullVisiable = !isFullVisiable">Read more</div>
         <ul class="list-unstyled">
           <li v-if="timeline.userstats.website">Website: <a :href="timeline.userstats.website" class="tag-website" target="_blank">{{ timeline.userstats.website }}</a></li>
           <li v-if="timeline.userstats.instagram">Instagram: <a :href="timeline.userstats.instagram" class="tag-instagram" target="_blank">{{ timeline.userstats.instagram }}</a></li>
@@ -58,12 +58,16 @@ export default {
   computed: {
     isLoading() {
       return !this.session_user || !this.timeline
-    }
+    },
+
+    isOverLength() {
+      if (this.timeline && this.timeline.about.length > 95) return true
+      return false
+    },
   },
 
   data: () => ({
     isFullVisiable: false,
-    showChars: 95,
   }),
 
   created() { },

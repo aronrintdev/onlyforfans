@@ -8,7 +8,7 @@
       <div id="circle-xxlarge"></div>
     </div>
     <div class="auth-container position-absolute row no-gutters">
-      <div class="col-md-6 text-center">
+      <div class="col-md-6 text-center auth-container-left">
         <div class="auth-description">
           <Branding type="text" size="3x" class="mb-3 signin-logo" />
           <swiper class="auth-slider-swiper" :options="swiperOptions">
@@ -183,7 +183,10 @@ export default {
     width: 350px;
   }
 }
-.logo-image {
-  width: 240px;
+.auth-container-left {
+  display: none;
+  @media (min-width: 576px) {
+    display: block;
+  }
 }
 </style>

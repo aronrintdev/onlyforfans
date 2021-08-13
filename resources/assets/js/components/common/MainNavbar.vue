@@ -1,22 +1,22 @@
 <template>
-  <b-navbar :toggleable="mobile" variant="light" sticky class="bg-white" :class="{ 'pb-0': mobile }" >
+  <b-navbar :toggleable="mobile" variant="light" class="bg-white" :class="{ 'pb-0': mobile }" >
     <b-navbar-brand :to="{ name: 'index' }" class="navbar-brand" :class="mobile ? 'mr-2' : 'mr-5'">
       <Branding :type="mobile ? 'text' : 'text'" :size="mobile ? 'lg' : 'lg'" :variant="mobile ? 'brand' : 'brand'" />
     </b-navbar-brand>
-    <b-navbar-toggle target="nav-collapse" class="ml-auto mb-1">
+    <div class="ml-auto mr-3" @click="showSearchBar">
+      <fa-icon v-if="mobile" icon="search" class="text-secondary" />
+    </div>
+    <b-navbar-toggle target="nav-collapse" class="mb-1 pr-0" :class="{'ml-auto': !mobile}">
       <ProfileButton />
     </b-navbar-toggle>
-    <div @click="showSearch = !showSearch">
-      <fa-icon v-if="mobile" icon="search" />
-    </div>
     <b-collapse v-if="mobile" id="nav-collapse" is-nav>
       <b-navbar-nav>
         <ProfileMenu v-if="session_user" />
       </b-navbar-nav>
     </b-collapse>
 
-    <ScrollCollapse v-if="mobile && showSearch" ref="scrollCollapse" class="w-100" :full-open="searchOpen" :full-open-height="openHeight">
-      <div class="d-flex flex-column justify-content-between h-100">
+    <ScrollCollapse v-if="mobile && enableSearch" ref="scrollCollapse" class="w-100" :full-open="searchOpen" :full-open-height="openHeight">
+      <div class="d-flex flex-column justify-content-between h-100 pb-3">
         <SearchBar class="w-100 mt-3" :mobile="true" @opening="searchOpen = true" @closing="searchOpen = false" @scroll="onScroll" />
       </div>
     </ScrollCollapse>
@@ -93,7 +93,7 @@ export default {
   data: () => ({
     searchOpen: false,
     screenWidth: null,
-    showSearch: false,
+    enableSearch: false,
   }),
 
   methods: {
@@ -101,6 +101,10 @@ export default {
       if (this.searchOpen) {
         this.$forceCompute('openHeight')
       }
+    },
+
+    showSearchBar() {
+      this.enableSearch = !this.enableSearch
     },
   },
 
@@ -159,10 +163,6 @@ export default {
   .form-inline {
     width: 100%;
   }
-}
-
-.nav-logo {
-  width: 154px;
 }
 
 </style>
