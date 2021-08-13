@@ -1,9 +1,9 @@
 <template>
-  <b-navbar :toggleable="mobile" variant="light" sticky class="bg-white" :class="{ 'pb-0': mobile }" >
+  <b-navbar :toggleable="mobile" variant="light" class="bg-white" :class="{ 'pb-0': mobile }" >
     <b-navbar-brand :to="{ name: 'index' }" class="navbar-brand" :class="mobile ? 'mr-2' : 'mr-5'">
       <Branding :type="mobile ? 'text' : 'text'" :size="mobile ? 'lg' : 'lg'" :variant="mobile ? 'brand' : 'brand'" />
     </b-navbar-brand>
-    <div class="ml-auto mr-0" @click="showSearch = !showSearch">
+    <div class="ml-auto mr-3" @click="showSearchBar">
       <fa-icon v-if="mobile" icon="search" class="text-secondary" />
     </div>
     <b-navbar-toggle target="nav-collapse" class="mb-1 pr-0" :class="{'ml-auto': !mobile}">
@@ -15,7 +15,7 @@
       </b-navbar-nav>
     </b-collapse>
 
-    <ScrollCollapse v-if="mobile && showSearch" ref="scrollCollapse" class="w-100" :full-open="searchOpen" :full-open-height="openHeight">
+    <ScrollCollapse v-if="mobile && enableSearch" ref="scrollCollapse" class="w-100" :full-open="searchOpen" :full-open-height="openHeight">
       <div class="d-flex flex-column justify-content-between h-100 pb-3">
         <SearchBar class="w-100 mt-3" :mobile="true" @opening="searchOpen = true" @closing="searchOpen = false" @scroll="onScroll" />
       </div>
@@ -93,7 +93,7 @@ export default {
   data: () => ({
     searchOpen: false,
     screenWidth: null,
-    showSearch: false,
+    enableSearch: false,
   }),
 
   methods: {
@@ -101,6 +101,10 @@ export default {
       if (this.searchOpen) {
         this.$forceCompute('openHeight')
       }
+    },
+
+    showSearchBar() {
+      this.enableSearch = !this.enableSearch
     },
   },
 
