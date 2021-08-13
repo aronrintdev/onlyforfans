@@ -274,9 +274,11 @@ export default {
     position: relative;
     top: 0;
     bottom: 0;
-    height: calc(100vh - 11rem);
+    height: calc(100vh - 64px);
+    max-height: calc(100vh - 64px);
     padding-left: 0;
     padding-right: 0;
+
   }
 
   height: calc(100vh - 10rem);
