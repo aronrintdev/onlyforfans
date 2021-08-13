@@ -72,15 +72,15 @@
         </section>
       </template>
 
-      <div class="post-crate-content" v-touch:tap="tapHandler">
+      <div class="post-crate-content">
         <template v-if="post.access">
-          <div v-if="post.description" :class="{ 'tag-has-mediafiles': hasMediafiles }" class="py-3 text-wrap">
+          <div v-if="post.description" v-touch:tap="tapHandler" :class="{ 'tag-has-mediafiles': hasMediafiles }" class="py-3 text-wrap">
             <b-card-text class="px-3 mb-0 tag-post_desc">
               <VueMarkdown :html="false" :source="post.description || ''" />
             </b-card-text>
           </div>
           <article v-if="hasMediafiles">
-            <MediaSlider :post="post" :mediafiles="post.mediafiles" :session_user="session_user" :use_mid="use_mid" @doubleTap="tapHandler" />
+            <MediaSlider :post="post" :key="post.id" :mediafiles="post.mediafiles" :session_user="session_user" :use_mid="use_mid" @doubleTap="tapHandler" />
           </article>
         </template>
         <template v-else>
@@ -174,6 +174,7 @@ export default {
     use_mid: { type: Boolean, default: false }, // use mid-sized images instead of full
     is_feed: { type: Boolean, default: true }, // is in context of a feed?
     displayClose: { type: Boolean, default: false }, // Display a close button in right corner of title?
+    is_public_post: { type: Boolean, default: false }, // is in context of a feed?
   },
 
   computed: {
@@ -281,21 +282,28 @@ export default {
             likeCount: this.likeCount,
           }
         }
-        // Update explore page post
-        this.UPDATE_PUBLIC_POST({ post: updatedPost })
-        // Update timelines feeddata
-        this.UPDATE_FEEDDATA_POST({ post: updatedPost })
+
+        if (this.is_public_post) {
+          // Update explore page post
+          this.UPDATE_PUBLIC_POST({ post: updatedPost })
+        } else {
+          // Update timelines feeddata
+          this.UPDATE_FEEDDATA_POST({ post: updatedPost })
+        }
     },
 
     async tapHandler(e) {
       this.startLikeUnlikeAnime = false
       if (e) {
-        this.tapped = e.detail
-        if (e.detail > 1) {
-          await this.toggleLike();
-          this.startLikeUnlikeAnime = true
-          e.preventDefault();
-        }
+        this.tapped += 1;
+        setTimeout(async () => {
+          if (this.tapped == 2) {
+            await this.toggleLike();
+            this.startLikeUnlikeAnime = true
+            e.preventDefault();
+          }
+          this.tapped = 0;
+        }, 500);
       } else {
         await this.toggleLike();
         this.startLikeUnlikeAnime = true

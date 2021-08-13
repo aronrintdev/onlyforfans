@@ -95,7 +95,7 @@
           ref="postDisplay"
           :session_user="session_user"
           :post="selectedResource"
-          :key="selectedResource.id"
+          :key="selectedResource && selectedResource.id"
           :is_feed="false"
           :is_public_post="true"
         />

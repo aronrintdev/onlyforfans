@@ -405,7 +405,6 @@ export default {
     },
 
     feeddata (newVal, oldVal) {
-      console.log('------- feed changed')
       if ( !this.renderedPages.includes(newVal.meta.current_page) ) {
         this.renderedPages.push(newVal.meta.current_page)
         this.renderedItems = this.renderedItems.concat(newVal.data) // the actual posts
