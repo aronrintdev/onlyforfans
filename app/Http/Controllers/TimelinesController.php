@@ -156,6 +156,8 @@ class TimelinesController extends AppBaseController
         $query->whereHasMorph( 'resource', [Post::class], function($q1) use(&$timeline) {
             $q1->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
         });
+        $query->orderByDesc(Post::select('created_at')
+            ->whereColumn('posts.id', 'resource_id'));
         $data = $query->paginate( $request->input('take', Config::get('collections.max.posts', 10)) );
         return new MediafileCollection($data);
     }
@@ -207,7 +209,6 @@ class TimelinesController extends AppBaseController
             ->whereHas('mediafiles', function($q1) {
                 $q1->isImage();
             })
-            ->withCount('comments')->orderBy('comments_count', 'desc')
             //->withCount('likes')->orderBy('likes_count', 'desc')
             ->where('active', 1)
             ->where(function ($query) {
