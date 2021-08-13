@@ -6,14 +6,17 @@
     >
 
       <template #mobileTitle>
-        <div class="h2 text-center py-2">
-          <fa-icon icon="cogs" fixed-width class="mr-2" />
+        <div class="h2 px-3 py-2 d-flex align-items-center">
+          <b-btn variant="link" :to="{ name: 'index' }" class="d-flex align-items-center">
+            <fa-icon icon="arrow-left" size="lg" fixed-width />
+          </b-btn>
+          <fa-icon icon="cogs" fixed-width class="ml-3 mr-2" />
           {{ $t('title.sidebar') }}
         </div>
       </template>
 
       <template #mobileMainNavTopTitle>
-        <span class="h4" v-if="currentRoute">
+        <span class="h4 mb-0" v-if="currentRoute">
           {{ $t(`title.${currentRoute.name}`) }}
         </span>
       </template>

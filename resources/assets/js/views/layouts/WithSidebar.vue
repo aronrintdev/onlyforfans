@@ -11,10 +11,10 @@
           <slot name="sidebar"></slot>
         </div>
         <div class="main" key="main">
-          <div class="header">
+          <div class="header pt-2">
             <slot name="mobileMainNavTop">
               <b-btn variant="link" size="lg" @click="$emit('back')">
-                <fa-icon icon="caret-left" fixed-width />
+                <fa-icon icon="arrow-left" fixed-width />
                 {{ $t('back') }}
               </b-btn>
               <slot name="mobileMainNavTopTitle"></slot>
