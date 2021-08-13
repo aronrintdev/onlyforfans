@@ -12,7 +12,6 @@
           <fa-icon icon="times" size="lg" fixed-width />
         </div>
       </div>
-      <hr />
 
       <b-nav class="nav-list flex-grow-1">
         <!-- Top Section -->
