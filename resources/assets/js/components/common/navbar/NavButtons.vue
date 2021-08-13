@@ -13,7 +13,7 @@
         <fa-layers-text
           v-if="button.alerts"
           counter
-          :value="button.alerts < 1000 ? button.alerts : $t('999+')"
+          :value="button.alerts < 1000 ? button.alerts.toString() : $t('999+')"
           position="top-right"
           class="alert-number"
         />
@@ -21,14 +21,6 @@
       <div v-if="mobileStyle" class="font-size-smaller">
         {{ $t(button.name) }}
       </div>
-      <b-badge
-        v-if="button.name == 'Messages'"
-        variant="danger"
-        class="unread-messages-count"
-        :class="unreadMessagesCount > 0 ? '' : 'd-none'"
-      >
-        {{unreadMessagesCount}}
-      </b-badge>
       <div v-if="showNames" class="label" v-text="$t(button.name)" />
     </b-nav-item>
   </b-navbar-nav>
@@ -40,7 +32,7 @@ import Vuex from 'vuex'
 export default {
   props: {
     mobileStyle: { type: Boolean, default: false },
-    unreadMessagesCount: { type: Number, default: 0 }
+    unreadMessagesCount: { type: Number, default: 0 },
   },
   computed: {
     ...Vuex.mapGetters([
@@ -82,7 +74,7 @@ export default {
             name: 'Messages',
             icon: 'envelope',
             to: { name: 'livechat.default' },
-            // alerts: 10000,
+            alerts: this.unreadMessagesCount,
           },
         ]
       }
@@ -90,6 +82,11 @@ export default {
     },
   },
 
+  watch: {
+    unread_messages_count() {
+      this.$forceCompute('buttons')
+    },
+  },
 
 }
 </script>
@@ -99,6 +96,7 @@ export default {
   transform: scale(0.5);
   right: -0.5rem;
   top: -0.5rem;
+  background-color: var(--danger);
 }
 .nav-item {
   margin-right: 0.25 * 1rem;
@@ -111,60 +109,6 @@ export default {
   .nav-link {
     display: flex;
     align-items: center;
-  }
-  .unread-messages-count {
-    position: absolute;
-    top: 7px;
-    right: 4px;
-    border-radius: 50%;
-    font-size: 9px;
-    font-weight: 400;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 15px;
-    height: 15px;
-    padding: 0px 0 0px 0;
-  }
-}
-
-.mobile {
-  // position: fixed;
-  // bottom: 0px;
-  // left: 0px;
-  width: 100vw;
-  background-color: var(--light);
-  .nav-item {
-    width: 20%;
-    flex-grow: 1;
-    margin-left: 0;
-    margin-right: 0;
-    color: rgba(0, 0, 0, 0.5);
-  }
-  .nav-link {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    align-content: center;
-    justify-content: center;
-    width: 100%;
-    color: rgba(0, 0, 0, 0.5);
-    // padding-left: 1rem;
-    // padding-right: 1rem;
-    // border: 1px var(--gray) solid;
-    // border-bottom: 0;
-    // border-top: 0;
-    // border-radius: 0.5rem 0.5rem 0 0;
-
-    svg {
-      margin-left:  auto;
-      margin-right: auto;
-    }
-
-    .label {
-      text-align: center;
-      font-size: 0.75rem;
-    }
   }
 }
 </style>

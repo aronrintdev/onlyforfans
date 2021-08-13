@@ -1,10 +1,17 @@
 <template>
   <OnlineStatus :user="user" v-slot="slotProps">
-    <b-media>
+    <b-media :class="centerAvatar ? 'force-center' : ''">
       <template #aside>
         <Avatar :user="user" :noLink="noLink" :size="size" :thumbnail="thumbnail" class="position-relative">
           <template #append>
             <StatusDot
+              v-if="noTooltip"
+              :variant="dotVariant(slotProps.status)"
+              class="online-dot"
+              :title="slotProps.message"
+            />
+            <StatusDot
+              v-else
               :variant="dotVariant(slotProps.status)"
               class="online-dot"
               v-b-tooltip:hover
@@ -46,8 +53,10 @@ export default {
   },
 
   props: {
+    centerAvatar: { type: Boolean, default: false },
     imageOnly: { type: Boolean, default: false },
     noLink: { type: Boolean, default: false },
+    noTooltip: { type: Boolean, default: false },
     size: { type: String, default: 'sm' },
     user: { type: Object, default: () => ({}) },
     thumbnail: { type: Boolean, default: true },
@@ -88,6 +97,11 @@ $spacer: 1rem;
   position: absolute;
   bottom: 0;
   right: 0;
+}
+.media.force-center {
+  .media-aside {
+    margin-right: 0 !important;
+  }
 }
 </style>
 

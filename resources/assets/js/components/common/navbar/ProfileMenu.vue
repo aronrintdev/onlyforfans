@@ -30,6 +30,7 @@
  */
 import Vuex from 'vuex'
 import ProfileButton from './ProfileButton'
+import MenuItems from './MenuItems'
 
 export default {
   name: 'ProfileMenu',
@@ -52,63 +53,32 @@ export default {
       var items = []
 
       items = [ ...items,
-        {
-          label: 'My Profile',
-          icon: 'user',
-          linkTo: { name: 'timeline.show', params: { slug: this.timeline.slug } }
-        },
-        {
-          label: 'My Vault',
-          icon: 'user',
-          linkTo: { name: 'vault.dashboard', params: { } },
-        },
-        {
-          label: 'Settings',
-          icon: 'cog',
-          linkTo: { name: 'settings.default' }
-        },
-        {
-          label: 'Fans',
-          icon: 'users',
-          linkTo: { name: 'lists.followers' }
-        },
+        MenuItems.profile(this.timeline.slug),
+        MenuItems.vault,
+        MenuItems.settings,
+        MenuItems.fans,
       ]
 
+      if ( true ) { // TODO: Verified
+        items.push(MenuItems.statements)
+      }
 
+      if ( true ) { // TODO: Verified and doesn't have bank account
+        items.push(MenuItems.banking)
+      }
 
-      items.push({
-        label: 'statements',
-        icon: 'receipt',
-        linkTo: { name: 'statements.dashboard' },
-      })
-
-      // if (this.uiFlags.isCreator && !this.uiFlags.hasBanking) {
-        items.push({
-          label: 'Banking',
-          icon: 'university',
-          linkTo: { name: 'settings.banking' }
-        })
+      // if (this.uiFlags.isCreator && this.uiFlags.hasEarnings) {
+      //   items.push({
+      //     label: 'Earnings',
+      //     icon: 'dollar-sign',
+      //     linkTo: { name: 'settings.earnings' }
+      //   })
       // }
-      if (this.uiFlags.isCreator && this.uiFlags.hasEarnings) {
-        items.push({
-          label: 'Earnings',
-          icon: 'dollar-sign',
-          linkTo: { name: 'settings.earnings' }
-        })
-      }
       if (this.uiFlags.hasPaymentMethod === false) {
-        items.push({
-          label: 'Payment Method',
-          icon: 'credit-card',
-          linkTo: { name: 'settings.payments' }
-        })
+        items.push(MenuItems.paymentMethod)
       }
 
-      items = [ ...items, {
-        label: 'Logout',
-        icon: 'sign-out-alt',
-        action: this.logout,
-      }]
+      items.push(MenuItems.logout(this.logout))
 
       return items
     }

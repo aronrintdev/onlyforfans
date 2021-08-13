@@ -82,7 +82,8 @@ export default {
     width: 100vw;
     max-width: 100vw;
     height: 100%;
-    max-height: calc(100vh - 3rem);
+    min-height: calc(100vh - 64px);
+    max-height: calc(100vh - 64px);
     .header {
       position: sticky;
       top: 0;
