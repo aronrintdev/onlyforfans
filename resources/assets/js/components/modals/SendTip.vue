@@ -27,13 +27,13 @@
     <transition name="quick-fade" mode="out-in">
       <b-form v-if="step === 'initial'" @submit="sendTip">
         <b-card-body>
-          <b-button variant="light" @click="formPayload.amount = 500">$5.00</b-button>
-          <b-button variant="light" @click="formPayload.amount = 1000">$10.00</b-button>
-          <b-button variant="light" @click="formPayload.amount = 2000">$20.00</b-button>
-          <b-button variant="light" @click="formPayload.amount = 5000">$50.00</b-button>
-          <b-button variant="light" @click="showCustomPrice = true">Other</b-button>
+          <b-button :variant="getVariant(500)" @click="setTipAmount(500)">$5.00</b-button>
+          <b-button :variant="getVariant(1000)" @click="setTipAmount(1000)">$10.00</b-button>
+          <b-button :variant="getVariant(2000)" @click="setTipAmount(2000)">$20.00</b-button>
+          <b-button :variant="getVariant(5000)" @click="setTipAmount(5000)">$50.00</b-button>
+          <b-button :variant="getVariant()" @click="showCustomPrice = true">Other</b-button>
 
-          <b-form-spinbutton
+          <!-- <b-form-spinbutton
             v-if="showCustomPrice"
             id="tip-amount"
             class="w-100 mx-auto tag-tip_amount mt-3"
@@ -42,13 +42,21 @@
             :min="config.min"
             :max="config.max"
             :step="config.step"
+          /> -->
+
+          <PriceSelector
+            v-if="showCustomPrice"
+            class="mt-2 mb-0"
+            label=" "
+            v-model="formPayload.amount"
           />
 
           <textarea
             v-model="formPayload.message"
             cols="60"
             rows="5"
-            class="w-100 tip-modal-text"
+            class="w-100 p-2 tip-modal-text"
+            :class="{'mt-3': !showCustomPrice}"
             placeholder="Write a message"
           ></textarea>
 
@@ -80,8 +88,8 @@
  * Send Tip Modal Content
  */
 import { eventBus } from '@/eventBus'
+import PriceSelector from '@components/common/PriceSelector';
 import PurchaseForm from '@components/payments/PurchaseForm'
-
 import PaymentsDisabled from '@components/payments/PaymentsDisabled'
 
 // Tip timeline on another user's timeline page / feed
@@ -91,6 +99,7 @@ export default {
   name: 'SendTip',
 
   components: {
+    PriceSelector,
     PaymentsDisabled,
     PurchaseForm,
   },
@@ -160,6 +169,16 @@ export default {
       this.step = 'payment'
     },
 
+    setTipAmount(value) {
+      this.formPayload.amount = value
+      this.showCustomPrice = false
+    },
+
+    getVariant(amount) {
+      if (amount === this.formPayload.amount && !this.showCustomPrice) return 'secondary'
+      if (!amount && this.showCustomPrice) return 'secondary'
+      return 'light'
+    }
   },
 
 }
@@ -189,7 +208,6 @@ body .user-avatar img {
 }
 .tip-modal-text {
   border: solid 1px #dfdfdf;
-  margin-top: 1rem;
 }
 </style>
 
