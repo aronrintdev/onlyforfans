@@ -88,15 +88,16 @@
       </div>
       <div
         class="post-content"
-        v-touch:swipe.left="() => postModalAction('next')"
-        v-touch:swipe.right="() => postModalAction('prev')"
-        v-touch:start="startHandler"
+        v-touch:swipe.top="() => postModalAction('next')"
+        v-touch:swipe.bottom="() => postModalAction('prev')"
       >
         <PostDisplay
           ref="postDisplay"
           :session_user="session_user"
           :post="selectedResource"
+          :key="selectedResource.id"
           :is_feed="false"
+          :is_public_post="true"
         />
       </div>
       <div
@@ -251,7 +252,6 @@ export default {
     scheduled_at: null,
     is_for_edit: null,
     showPostArrows: false,
-    swipeEnabled: false,
   }),
 
   methods: {
@@ -334,22 +334,12 @@ export default {
 
     },
     postModalAction(action) {
-      console.log('----- swipeEnabled:', this.swipeEnabled);
-      if (this.swipeEnabled) {
-        eventBus.$emit('post-modal-actions', action);
-      }
+      eventBus.$emit('post-modal-actions', action);
     },
     closeModal(modalId) {
       this.$bvModal.hide(modalId)
       eventBus.$emit('close-modal');
     },
-    startHandler(event) {
-      if (event.srcElement.classList.contains('swiper-container')) {
-        this.swipeEnabled = false;
-      } else {
-        this.swipeEnabled = true;
-      }
-    }
   },
 
   created() {
@@ -442,7 +432,7 @@ export default {
           height: 100%;
 
           .photoswipe-thumbnail, .v-photoswipe-thumbnail {
-            pointer-events: none;
+            // pointer-events: none;
             height: 100%;
             width: auto;
             margin: auto;
@@ -456,8 +446,19 @@ export default {
             height: 100%;
             position: relative;
 
-            video {
-              height: 100%;
+            .wrap {
+              position: relative;
+              z-index: 1;
+              max-width: 100vw;
+
+              .video-js.vjs-fluid {
+                width: 100%;
+                max-width: 100%;
+                max-height: 100%;
+                height: 100%;
+                padding-top: 0;
+                background: transparent;
+              }
             }
 
             .background-preview {
@@ -471,7 +472,7 @@ export default {
               display: block;
               overflow: hidden;
 
-              img {
+              video, img {
                 object-fit: cover;
                 opacity: 0.4;
                 transform: scale(1.1);
@@ -485,6 +486,11 @@ export default {
 
             .media-slider-swiper {
               height: 100%;
+
+              .swiper-button-next,
+              .swiper-button-prev {
+                display: none;
+              }
 
               .swiper-wrapper {
                 align-items: center;
@@ -555,7 +561,7 @@ export default {
       }
     }
     .superbox-post {
-      height: calc(100vh - 160px);
+      height: calc(100vh - 100px);
     }
   }
 }
