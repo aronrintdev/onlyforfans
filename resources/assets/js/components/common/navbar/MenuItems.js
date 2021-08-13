@@ -37,7 +37,8 @@ export const menuItems = {
   vault: {
     key: 'vault',
     label: 'My Vault',
-    icon: 'user',
+    // icon: 'user',
+    icon: 'photo-video',
     linkTo: { name: 'vault.dashboard', params: { } },
   },
 
