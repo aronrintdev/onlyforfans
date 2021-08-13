@@ -14,6 +14,8 @@ use App\Interfaces\Reportable;
 use App\Interfaces\Commentable;
 use App\Interfaces\HasPricePoints;
 use App\Interfaces\PricePoint;
+use App\Interfaces\Contenttaggable;
+use App\Models\Traits\ContenttaggableTraits;
 use App\Models\Traits\UsesUuid;
 use App\Models\Financial\Account;
 use Illuminate\Support\Collection;
@@ -45,6 +47,7 @@ class Post extends Model
         Deletable,
         Purchaseable,
         HasPricePoints,
+        Contenttaggable,
         Tippable,
         Likeable,
         Reportable,
@@ -55,6 +58,7 @@ class Post extends Model
     HasFactory,
     OwnableTraits,
     LikeableTraits,
+    ContenttaggableTraits,
     Sluggable,
     SluggableTraits,
     ShareableTraits,
@@ -208,6 +212,10 @@ class Post extends Model
     public function contentflags()
     {
         return $this->morphMany(Contentflag::class, 'flaggable');
+    }
+
+    public function contenttags() {
+        return $this->morphToMany(Contenttag::class, 'contenttaggable')->withTimestamps();
     }
 
     //--------------------------------------------

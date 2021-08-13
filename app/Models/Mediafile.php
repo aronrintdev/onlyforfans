@@ -56,7 +56,7 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Messagable, Cont
     }
 
     public function contenttags() {
-        return $this->morphToMany(Contenttag::class, 'contenttaggable');
+        return $this->morphToMany(Contenttag::class, 'contenttaggable')->withTimestamps();
     }
 
     //--------------------------------------------

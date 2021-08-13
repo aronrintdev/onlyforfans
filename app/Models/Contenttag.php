@@ -22,7 +22,19 @@ class Contenttag extends Model
     //--------------------------------------------
 
     public function mediafiles() {
-        return $this->morphByMany(Mediafile::class, 'contenttaggable');
+        return $this->morphedByMany(Mediafile::class, 'contenttaggable');
+    }
+
+    public function posts() {
+        return $this->morphedByMany(Post::class, 'contenttaggable');
+    }
+
+    public function stories() {
+        return $this->morphedByMany(Story::class, 'contenttaggable');
+    }
+
+    public function vaultfolders() {
+        return $this->morphedByMany(Vaultfolder::class, 'contenttaggable');
     }
 
 }

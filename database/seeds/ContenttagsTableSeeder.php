@@ -28,9 +28,25 @@ class ContenttagsTableSeeder extends Seeder
         }
     }
 
+    // used as callback in collection's each()
+    private $fAddTags;
+
     public function run()
     {
         $this->initSeederTraits('ContenttagsTableSeeder');
+
+        $this->fAddTags = function($o) {
+            static $iter = 1;
+            $hasTags = $this->faker->boolean(70);
+            if (!$hasTags) {
+                return false;
+            }
+            $tagCnt = $this->faker->numberBetween(1,5);
+            for ( $i = 0 ; $i < $tagCnt; $i++ ) {
+                $tag = $this->faker->randomElement($this->tagSet);
+                $o->addTag($tag);
+            }
+        };
 
         $this->buildSet();
 
@@ -51,106 +67,31 @@ class ContenttagsTableSeeder extends Seeder
             $this->output->writeln("  - Contenttags seeder: loaded ...");
         }
 
-        // ---
+        // -- Mediafiles --
 
         if ( $this->appEnv !== 'testing' ) {
             $this->output->writeln("     # mediafiles: ".$mediafiles->count() );
         }
-        $mediafiles->each( function($o) {
-            static $iter = 1;
-            $hasTags = $this->faker->boolean(70);
-            if (!$hasTags) {
-                return false;
-            }
-            $tagCnt = $this->faker->numberBetween(1,5);
-            for ( $i = 0 ; $i < $tagCnt; $i++ ) {
-                $tag = $this->faker->randomElement($this->tagSet);
-                $o->addTag($tag);
-            }
-        });
+        $mediafiles->each( $this->fAddTags );
 
-
-        // ---
-
-        /*
-
+        // -- Posts --
         if ( $this->appEnv !== 'testing' ) {
             $this->output->writeln("     # posts: ".$posts->count() );
         }
-        $posts->each( function($o) {
-            static $iter = 1;
-        });
+        $posts->each( $this->fAddTags );
 
+        // -- Stories --
         if ( $this->appEnv !== 'testing' ) {
             $this->output->writeln("     # stories: ".$stories->count() );
         }
-        $stories->each( function($o) {
-            static $iter = 1;
-        });
+        $stories->each( $this->fAddTags );
 
+        // -- Vaultfolders --
         if ( $this->appEnv !== 'testing' ) {
             $this->output->writeln("     # vaultfolders: ".$vaultfolders->count() );
         }
-        $vaultfolders->each( function($o) {
-            static $iter = 1;
-        });
+        $vaultfolders->each( $this->fAddTags );
 
-
-            $count = $this->faker->numberBetween(3,12);
-
-            collect(range(1,$count))->each( function() use(&$u) {
-
-                if ( $this->appEnv==='testing' ) {
-                    $stype = $this->faker->randomElement([
-                        StoryTypeEnum::TEXT, 
-                        StoryTypeEnum::TEXT, 
-                        StoryTypeEnum::TEXT, 
-                        StoryTypeEnum::PHOTO,
-                    ]);
-                } else {
-                    $stype = $this->faker->randomElement([
-                        StoryTypeEnum::TEXT, 
-                        StoryTypeEnum::PHOTO, 
-                        StoryTypeEnum::PHOTO,
-                    ]);
-                }
-
-                $attrs = [
-                    'content'     => $this->faker->text,
-                    'stype'       => $stype,
-                    'timeline_id' => $u->timeline->id,
-                ];
-                $story = Story::create($attrs);
-
-                // update to 'realistic' timestamps...
-                $ts = $this->faker->dateTimeBetween($startDate='-3 months', $endDate='now');
-                $story->created_at = $ts;
-                $story->updated_at = $ts;
-                $story->save();
-                $story->storyqueues->each( function($sq) use($ts) {
-                    $sq->created_at = $ts;
-                    $sq->updated_at = $ts;
-                    $sq->save();
-                });
-
-                switch ($stype) {
-                case 'text':
-                    break;
-                case 'image':
-                    $mf = FactoryHelpers::createImage(
-                        $story->getPrimaryOwner(),
-                        MediafileTypeEnum::STORY, 
-                        $story->id, 
-                        $this->doS3Upload
-                    );
-                    break;
-                }
-            });
-
-            $iter++;
-
-        });
-*/
     }
 
 }

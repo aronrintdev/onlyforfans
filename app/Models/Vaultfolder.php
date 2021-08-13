@@ -16,10 +16,12 @@ use App\Traits\OwnableFunctions;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Cviebrock\EloquentSluggable\Services\SlugService;
 use App\Models\Traits\SluggableTraits;
+use App\Interfaces\Contenttaggable;
+use App\Models\Traits\ContenttaggableTraits;
 
-class Vaultfolder extends BaseModel implements Guidable, Ownable
+class Vaultfolder extends BaseModel implements Guidable, Ownable, Contenttaggable
 {
-    use UsesUuid, SluggableTraits, HasFactory, OwnableFunctions, Sluggable, SoftDeletes;
+    use UsesUuid, SluggableTraits, HasFactory, OwnableFunctions, Sluggable, SoftDeletes, ContenttaggableTraits;
 
     protected $table = 'vaultfolders';
     protected $guarded = ['id', 'created_at', 'updated_at'];
@@ -88,6 +90,10 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable
 
     public function isSharePlaceholderFolder() { // this vaultfolder was created as a *result* (dst) of a share
         return $this->mediafilesharelogs->count();
+    }
+
+    public function contenttags() {
+        return $this->morphToMany(Contenttag::class, 'contenttaggable')->withTimestamps();
     }
 
     //--------------------------------------------

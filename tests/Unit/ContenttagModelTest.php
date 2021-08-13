@@ -39,5 +39,34 @@ class ContenttagModelTest extends TestCase
         $this->assertTrue( $mf->contenttags->contains($obj->id) );
     }
 
+    /**
+     * @group contenttag-model
+     * @group here0812
+     */
+    public function test_should_get_tags_for_mediafile()
+    {
+        $mf = Mediafile::has('contenttags')->firstOrFail();
+        $this->assertGreaterThan(0, $mf->contenttags->count());
+    }
+
+    /**
+     * @group contenttag-model
+     * @group here0812
+     */
+    public function test_should_get_tagged_resources_for_tag()
+    {
+        $ct = Contenttag::has('mediafiles')->firstOrFail();
+        $this->assertGreaterThan(0, $ct->mediafiles->count());
+
+        $ct = Contenttag::has('stories')->firstOrFail();
+        $this->assertGreaterThan(0, $ct->stories->count());
+
+        $ct = Contenttag::has('posts')->firstOrFail();
+        $this->assertGreaterThan(0, $ct->posts->count());
+
+        $ct = Contenttag::has('vaultfolders')->firstOrFail();
+        $this->assertGreaterThan(0, $ct->vaultfolders->count());
+    }
+
 
 }
