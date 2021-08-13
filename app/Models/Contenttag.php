@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
 use App\Models\Traits\UsesUuid;
+use App\Enums\ContenttagAccessLevelEnum;
 
 class Contenttag extends Model
 {

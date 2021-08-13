@@ -1,6 +1,7 @@
 <template>
   <div class="create_post-crate tag-crate">
 
+    <!-- %FILE: resources/assets/js/components/timelines/CreatePost.vue -->
     <section class="row">
       <div class="col">
 
@@ -154,6 +155,8 @@ import VideoRecorder from '@components/videoRecorder';
 import AudioRecorder from '@components/audioRecorder';
 
 export default {
+
+  comments: true, // %FIXME
 
   props: {
     session_user: null,

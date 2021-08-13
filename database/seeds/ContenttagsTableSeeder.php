@@ -28,25 +28,25 @@ class ContenttagsTableSeeder extends Seeder
         }
     }
 
+    private function addTags($o) {
+        $hasTags = $this->faker->boolean(70);
+        if (!$hasTags) {
+            return false;
+        }
+        $tagCnt = $this->faker->numberBetween(1,5);
+        for ( $i = 0 ; $i < $tagCnt; $i++ ) {
+            $tag = $this->faker->randomElement($this->tagSet);
+            $o->addTag($tag);
+        }
+    }
+
+
     // used as callback in collection's each()
     private $fAddTags;
 
     public function run()
     {
         $this->initSeederTraits('ContenttagsTableSeeder');
-
-        $this->fAddTags = function($o) {
-            static $iter = 1;
-            $hasTags = $this->faker->boolean(70);
-            if (!$hasTags) {
-                return false;
-            }
-            $tagCnt = $this->faker->numberBetween(1,5);
-            for ( $i = 0 ; $i < $tagCnt; $i++ ) {
-                $tag = $this->faker->randomElement($this->tagSet);
-                $o->addTag($tag);
-            }
-        };
 
         $this->buildSet();
 
@@ -72,25 +72,33 @@ class ContenttagsTableSeeder extends Seeder
         if ( $this->appEnv !== 'testing' ) {
             $this->output->writeln("     # mediafiles: ".$mediafiles->count() );
         }
-        $mediafiles->each( $this->fAddTags );
+        $mediafiles->each( function($o) {
+            $this->addTags($o);
+        });
 
         // -- Posts --
         if ( $this->appEnv !== 'testing' ) {
             $this->output->writeln("     # posts: ".$posts->count() );
         }
-        $posts->each( $this->fAddTags );
+        $posts->each( function($o) {
+            $this->addTags($o);
+        });
 
         // -- Stories --
         if ( $this->appEnv !== 'testing' ) {
             $this->output->writeln("     # stories: ".$stories->count() );
         }
-        $stories->each( $this->fAddTags );
+        $stories->each( function($o) {
+            $this->addTags($o);
+        });
 
         // -- Vaultfolders --
         if ( $this->appEnv !== 'testing' ) {
             $this->output->writeln("     # vaultfolders: ".$vaultfolders->count() );
         }
-        $vaultfolders->each( $this->fAddTags );
+        $vaultfolders->each( function($o) {
+            $this->addTags($o);
+        });
 
     }
 

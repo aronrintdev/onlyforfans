@@ -1,5 +1,6 @@
 <template>
   <div class="swiper-slider" v-if="files.length > 0">
+    <!-- %FILE: resources/assets/js/components/media/PreviewSlider.vue -->
     <swiper ref="mySwiper" :options="swiperOptions">
       <swiper-slide class="slide">
         <div>
@@ -65,6 +66,7 @@ import AudioPlayer from '@components/audioPlayer'
 import VideoPlayer from '@components/videoPlayer'
 
 export default {
+  comments: true, // %FIXME
   name: 'PreviewSlider',
 
   props: {
