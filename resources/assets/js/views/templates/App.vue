@@ -54,7 +54,7 @@ export default {
   mixins: [VueScreenSize.VueScreenSizeMixin],
 
   props: {
-    toggleMobileAt: { type: [String, Number], default: 'md', },
+    toggleMobileAt: { type: [String, Number], default: 'lg', },
     screenSizesTypes: { type: Object, default: () => ({ xs: 0, sm: 0, md: 0, lg: 0, xl: 0 }) }
   },
 
