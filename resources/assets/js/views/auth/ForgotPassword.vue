@@ -15,7 +15,7 @@
 
         <!-- Forgot Password Form -->
         <b-form @submit.prevent="sendForgotPassRequest">
-          <div class="login-form p-3">
+          <div class="login-form">
             <div class="text-left mt-2 mb-3">
               <div class="d-inline" v-text="`If you have an AllFans account, enter your email address below and you will receive a link to reset your password at this address.`" />
             </div>
@@ -37,7 +37,7 @@
             </b-alert>
           </div>
 
-          <div class="pl-3 pr-3 pb-3" v-if="state !== 'submitted'">
+          <div class="pb-3" v-if="state !== 'submitted'">
             <b-btn type="submit" class="p-2 cta-btn" :class="state === 'loading' ? 'loading' : ''" variant="primary" block :disabled="!form.email">
               <span v-if="state === 'form'">Send</span>
               <fa-icon v-else icon="spinner" spin />
