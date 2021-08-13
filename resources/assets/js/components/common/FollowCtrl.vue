@@ -22,6 +22,11 @@
               <span>Send Tip</span>
             </b-button>
           </li>
+          <li>
+            <b-button @click="renderSubscribeConfirm" :disabled="timeline.is_owner" variant="primary" class="w-100 mt-3">
+              <span>Subscribe - ${{ '12.00' }} per month</span>
+            </b-button>
+          </li>
         </ul>
         <div :class="{ 'normal-view': !isFullVisiable }">
           <VueMarkdown :html="false" :source="timeline.about || ''" />
@@ -38,6 +43,13 @@
       </b-card-text>
       <router-link v-if="timeline.is_owner" :to="{ name: 'settings.profile', params: { } }" class="float-right mr-3 cursor-pointer">Edit</router-link>
     </b-card>
+    <b-modal v-model="isSubscribeModalVisible" size="md" title="Confirm subscribe" >
+        <div class="m-0">Are you sure you want to subscribe?</div>
+        <template #modal-footer>
+            <b-button variant="secondary" @click="isSubscribeModalVisible=false">Cancel</b-button>
+            <b-button variant="primary" @click="isSubscribeModalVisible=false">Subscribe</b-button>
+        </template>
+    </b-modal>
   </div>
 </template>
 
@@ -68,6 +80,7 @@ export default {
 
   data: () => ({
     isFullVisiable: false,
+    isSubscribeModalVisible: false,
   }),
 
   created() { },
@@ -105,6 +118,9 @@ export default {
         name: 'chatthreads.dashboard',
       })
     },
+    renderSubscribeConfirm() {
+      this.isSubscribeModalVisible = true
+    }
   },
 
   components: {
