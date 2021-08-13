@@ -1,6 +1,6 @@
 <template>
   <div class="toolbar d-flex">
-    <div class="tool-items d-flex flex-shrink-1 py-2">
+    <div class="tool-items d-flex flex-shrink-1 py-2 mr-3">
       <b-btn
         v-for="item in buttons"
         :key="item.key"
@@ -19,7 +19,7 @@
         />
       </b-btn>
     </div>
-    <div class="py-2 ml-auto d-flex">
+    <div class="py-2 ml-auto d-flex align-items-end">
       <b-btn
         variant="success"
         class="mr-3 text-nowrap"
@@ -32,8 +32,17 @@
         </span>
       </b-btn>
       <div class="d-flex flex-column">
-        <div v-if="!mobile" class="font-size-smaller text-muted text-right mr-2" v-text="$t('sendHint')" />
-        <b-btn variant="primary" class="submit text-nowrap" :disabled="false" @click="$emit('submit')">
+        <div
+          v-if="!mobile"
+          class="font-size-smaller text-muted text-right mr-2"
+          v-text="$t('sendHint')"
+        />
+        <b-btn
+          variant="primary"
+          class="submit text-nowrap"
+          :disabled="false"
+          @click="$emit('submit')"
+        >
           <span v-if="!mobile">{{ $t('send') }}</span>
           <fa-icon icon="arrow-right" class="ml-2" />
         </b-btn>
