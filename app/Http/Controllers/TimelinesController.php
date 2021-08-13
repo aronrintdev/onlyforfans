@@ -209,7 +209,6 @@ class TimelinesController extends AppBaseController
             ->whereHas('mediafiles', function($q1) {
                 $q1->isImage();
             })
-            ->withCount('comments')
             //->withCount('likes')->orderBy('likes_count', 'desc')
             ->where('active', 1)
             ->where(function ($query) {
