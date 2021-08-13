@@ -10,7 +10,7 @@
         @update="doUpdate()" 
         :placeholder="placeholder" 
         :disabled="disabled"
-        :type="itype"
+        :type="itype==='currency' ? 'text' : itype"
       ></b-form-input>
       <b-form-invalid-feedback id="input-live-feedback">{{ vmsg }}</b-form-invalid-feedback>
     </b-input-group>
