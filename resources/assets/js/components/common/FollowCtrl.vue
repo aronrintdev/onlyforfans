@@ -3,7 +3,18 @@
     <b-card tag="article" class="OFF-mb-2">
       <b-card-text>
         <ul class="list-unstyled">
-          <li><b-button :disabled="timeline.is_owner" @click="renderMessage" variant="primary" class="w-100">Message</b-button></li>
+          <li>
+            <b-button
+              @click="renderSubscribeConfirm"
+              v-if="timeline.userstats.subscriptions && timeline.userstats.subscriptions.price_per_1_months"
+              :disabled="timeline.is_owner"
+              variant="primary"
+              class="w-100"
+            >
+              <span>Subscribe - ${{ timeline.userstats.subscriptions.price_per_1_months }} per month</span>
+            </b-button>
+          </li>
+          <li><b-button :disabled="timeline.is_owner" @click="renderMessage" variant="primary" class="w-100 mt-3">Message</b-button></li>
           <li v-if="timeline.is_following">
             <b-button v-if="timeline.is_subscribed" @click="renderSubscribe" :disabled="timeline.is_owner" variant="warning" class="w-100 mt-3">
               <span>Unsubscribe</span>
@@ -20,11 +31,6 @@
           <li>
             <b-button @click="renderTip" :disabled="timeline.is_owner" variant="primary" class="w-100 mt-3">
               <span>Send Tip</span>
-            </b-button>
-          </li>
-          <li>
-            <b-button @click="renderSubscribeConfirm" :disabled="timeline.is_owner" variant="primary" class="w-100 mt-3">
-              <span>Subscribe - ${{ '12.00' }} per month</span>
             </b-button>
           </li>
         </ul>
