@@ -99,6 +99,8 @@ class PostsController extends AppBaseController
             'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
             'expiration_period' => 'nullable|integer',
             'schedule_datetime' => 'sometimes|date',
+            'contenttags' => 'array',
+            'contenttags.*' => 'string|min:2|max:126',
         ];
 
         if ( !$request->has('mediafiles') ) {
@@ -124,6 +126,7 @@ class PostsController extends AppBaseController
             $attrs['expire_at'] = Carbon::now('UTC')->addDays($request->input('expiration_period'));
         }
 
+        // %TODO: DB transaction (?)
         $post = $timeline->posts()->create($attrs);
 
         if ( $request->has('mediafiles') ) {
@@ -141,6 +144,11 @@ class PostsController extends AppBaseController
                     );
             }
         }
+
+        if ( $request->has('contenttags') && count($request->contenttags) ) {
+            $post->addTag($request->contenttags);
+        }
+
         $post->refresh();
 
         return response()->json([

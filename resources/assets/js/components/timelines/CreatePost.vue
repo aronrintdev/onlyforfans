@@ -78,8 +78,16 @@
               @complete="audioRecordFinished"
             />
           </div>
+
           <template #footer>
+            <b-row v-if="isTagFormVisible" class="mb-1">
+              <b-col cols="12" md="8" class="d-flex">
+                <b-form-tags input-id="create-post-contenttags" v-model="contenttags"></b-form-tags>
+              </b-col>
+            </b-row>
+
             <b-row>
+
               <b-col cols="12" md="8" class="post-create-footer-ctrl d-flex">
                 <ul class="list-inline d-flex mb-0 OFF-border-right pt-1">
                   <li id="clickme_to-select" class="selectable select-pic">
@@ -113,20 +121,29 @@
                   <li @click="showCampaignModal()" class="selectable select-pic" title="Start Promotional Campaign">
                     <fa-icon :icon="showedModal === 'campaign' ? ['fas', 'hand-holding-usd'] : ['far', 'hand-holding-usd']" size="lg" :class="showedModal === 'campaign' ? 'text-primary' : 'text-secondary'" />
                   </li>
+                  <li @click="showTagForm()" class="selectable show-tagform" title="Add Tags">
+                    <fa-icon :icon="isTagFormVisible ? ['fas', 'tags'] : ['far', 'tags']" class="text-secondary" size="lg" />
+                  </li>
                 </ul>
               </b-col>
+
               <b-col cols="12" md="4">
                 <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
                   <li class="w-100 mx-0">
-                    <button :disabled="posting || (!description && ( selectedMediafiles && selectedMediafiles.length === 0 ))" @click="savePost()" class="btn btn-submit btn-primary w-100">
-                      <span v-if="posting" class="text-white spinner-border spinner-border-sm pr-2" role="status" aria-hidden="true"></span>
+                    <button :disabled="isBusy || (!description && ( selectedMediafiles && selectedMediafiles.length === 0 ))" @click="savePost()" class="btn btn-submit btn-primary w-100">
+                      <span v-if="isBusy" class="text-white spinner-border spinner-border-sm pr-2" role="status" aria-hidden="true"></span>
                       Post
                     </button>
                   </li>
                 </ul>
               </b-col>
+
             </b-row>
+
+                <p v-if="formErr!==null" class="text-danger">An error occured: {{ formErr }} </p>
+
           </template>
+
         </b-card>
       </div>
     </section>
@@ -138,21 +155,21 @@
 
 <script>
 import Vuex from 'vuex'
-import moment from 'moment';
-import { isAndroid, isIOS, osVersion } from 'mobile-device-detect';
+import moment from 'moment'
+import { isAndroid, isIOS, osVersion } from 'mobile-device-detect'
 
 import { eventBus } from '@/eventBus'
-import vue2Dropzone from 'vue2-dropzone';
-import 'vue2-dropzone/dist/vue2Dropzone.min.css';
-import EmojiIcon from '@components/common/icons/EmojiIcon.vue';
-import LocationPinIcon from '@components/common/icons/LocationPinIcon.vue';
-import TimerIcon from '@components/common/icons/TimerIcon.vue';
-import CalendarIcon from '@components/common/icons/CalendarIcon.vue';
+import vue2Dropzone from 'vue2-dropzone'
+import 'vue2-dropzone/dist/vue2Dropzone.min.css'
+import EmojiIcon from '@components/common/icons/EmojiIcon.vue'
+import LocationPinIcon from '@components/common/icons/LocationPinIcon.vue'
+import TimerIcon from '@components/common/icons/TimerIcon.vue'
+import CalendarIcon from '@components/common/icons/CalendarIcon.vue'
 
-import PriceSelector from '@components/common/PriceSelector';
-import UploadMediaPreview from '@components/posts/UploadMediaPreview';
-import VideoRecorder from '@components/videoRecorder';
-import AudioRecorder from '@components/audioRecorder';
+import PriceSelector from '@components/common/PriceSelector'
+import UploadMediaPreview from '@components/posts/UploadMediaPreview'
+import VideoRecorder from '@components/videoRecorder'
+import AudioRecorder from '@components/audioRecorder'
 
 export default {
 
@@ -165,7 +182,7 @@ export default {
 
   computed: {
     isIOS9PlusAndAndroid() {
-      return (isIOS && parseInt(osVersion.split('.')[0]) >= 9) || isAndroid;
+      return (isIOS && parseInt(osVersion.split('.')[0]) >= 9) || isAndroid
     },
 
     ...Vuex.mapState('vault', [
@@ -198,8 +215,9 @@ export default {
 
   data: () => ({
     moment,
-    description: '',
     newPostId: null,
+    description: '',
+    contenttags: [],
     selectedMedia: null, // 'pic',
     showedModal: null,
     postType: 'free',
@@ -214,10 +232,14 @@ export default {
 
     scheduled_at: null,
     //mediafiles: [],  use selectedMediafiles from store
-    posting: false,
+    isBusy: false, // disable button, form, etc due to post sending or some similar activity
     expirationPeriod: null,
     showVideoRec: false,
     showAudioRec: false,
+
+    isTagFormVisible: false,
+
+    formErr: null, // null if no error, otherwise string (error message)
 
   }), // data
 
@@ -236,33 +258,51 @@ export default {
 
     resetForm() {
       this.CLEAR_SELECTED_MEDIAFILES()
-      this.$refs.myVueDropzone.removeAllFiles();
-      this.description = '';
-      this.newPostId = null;
-      this.selectedMedia = 'pic';
-      this.ptype = 'free';
-      this.price = 0;
-      this.priceForPaidSubscribers = 0;
-      this.scheduled_at = null;
-      this.expirationPeriod = null;
+      this.$refs.myVueDropzone.removeAllFiles()
+      this.description = ''
+      document.getElementById('create-post-contenttags').value = '' // hack to workaround fact that any input will not be cleared via v-model
+      this.contenttags = []
+      this.newPostId = null
+      this.selectedMedia = 'pic'
+      this.ptype = 'free'
+      this.price = 0
+      this.priceForPaidSubscribers = 0
+      this.scheduled_at = null
+      this.expirationPeriod = null
     },
 
     async savePost() {
-      this.posting = true;
+      this.formErr = null // clear errors
+      this.isBusy = true
       console.log('CreatePost::savePost()')
       // (1) create the post
-      const response = await axios.post(this.$apiRoute('posts.store'), {
-        timeline_id: this.timeline.id,
-        description: this.description,
-        type: this.postType,
-        price: this.price,
-        price_for_subscribers: this.priceForPaidSubscribers,
-        currency: this.currency,
-        schedule_datetime: this.scheduled_at?.toDate(),
-        expiration_period: this.expirationPeriod,
-      })
+      let response = null
+      try { 
+        response = await axios.post(this.$apiRoute('posts.store'), {
+          timeline_id: this.timeline.id,
+          description: this.description,
+          type: this.postType,
+          price: this.price,
+          price_for_subscribers: this.priceForPaidSubscribers,
+          currency: this.currency,
+          schedule_datetime: this.scheduled_at?.toDate(),
+          expiration_period: this.expirationPeriod,
+          contenttags: this.contenttags,
+        })
+      } catch (e) {
+        //console.log('err', { e, })
+        if ( e.response?.status === 422 ) {
+          const firstKey = Object.keys(e.response.data.errors)[0]
+          const msg = e.response.data.errors[firstKey][0]
+          this.formErr = `Save failed, check input for errors: ${msg}`
+        } else {
+          this.formErr = `Save post failed, please try again (${e.message})`
+        }
+        this.isBusy = false
+        return
+      }
       this.$log.debug('savePost', { response })
-      const json = response.data;
+      const json = response.data
 
       // (2) upload & attach the mediafiles (in dropzone queue)
       if (json.post) {
@@ -277,19 +317,20 @@ export default {
           this.$refs.myVueDropzone.processQueue() // this will call createCompleted() via callback
         }  else {
           console.log('CreatePost::savePost() - nothing queued')
-          this.createCompleted();
+          this.createCompleted()
         }
 
       } else {
-        this.resetForm();
-        this.posting = false;
+        this.resetForm()
+        this.formErr = null // clear errors
+        this.isBusy = false
       }
     },
 
     // ------------ Dropzone ------------------------------------------------ //
 
     openDropzone() {
-      this.$refs.myVueDropzone.dropzone.hiddenFileInput.click();
+      this.$refs.myVueDropzone.dropzone.hiddenFileInput.click()
     },
 
     onDropzoneAdded(file) {
@@ -305,13 +346,13 @@ export default {
     // Dropzone: 'Modify the request and add addtional parameters to request before sending'
     onDropzoneSending(file, xhr, formData) {
       // %NOTE: file.name is the mediafile PKID
-      this.$log.debug('onDropzoneSending', { file, formData, xhr });
+      this.$log.debug('onDropzoneSending', { file, formData, xhr })
       if ( !this.newPostId ) {
-        throw new Error('Cancel upload, invalid post id');
+        throw new Error('Cancel upload, invalid post id')
       }
-      formData.append('resource_id', this.newPostId);
-      formData.append('resource_type', 'posts');
-      formData.append('mftype', 'post');
+      formData.append('resource_id', this.newPostId)
+      formData.append('resource_type', 'posts')
+      formData.append('mftype', 'post')
     },
 
     onDropzoneSuccess(file, response) {
@@ -339,7 +380,7 @@ export default {
       if ( !this.newPostId ) {
         return
       }
-      this.createCompleted();
+      this.createCompleted()
     },
 
     onDropzoneRemoved(file, error, xhr) {
@@ -401,8 +442,8 @@ export default {
       })
       // %TODO: find medaifile in selectedMediafiles and remove it
 
-      this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
-      this.$store.dispatch('getQueueMetadata');
+      this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId })
+      this.$store.dispatch('getQueueMetadata')
       // Show notification if scheduled post is succesfully created
       if (this.scheduled_at) {
         this.$root.$bvToast.toast('New scheduled post is created.', {
@@ -411,8 +452,8 @@ export default {
           solid: true,
         })
       }
-      this.resetForm();
-      this.posting = false;
+      this.resetForm()
+      this.isBusy = false
     },
 
     takePicture() { // %TODO
@@ -446,6 +487,10 @@ export default {
       })
     },
 
+    showTagForm() {
+      this.isTagFormVisible = !this.isTagFormVisible
+    },
+
     changeMediafiles(data) {
       this.UPDATE_SELECTED_MEDIAFILES([...data])
     },
@@ -458,13 +503,13 @@ export default {
     },
 
     closeSchedulePicker(e) {
-      this.scheduled_at = null;
-      e.stopPropagation();
+      this.scheduled_at = null
+      e.stopPropagation()
     },
 
     audioRecordFinished(file) {
       if (this.$refs.myVueDropzone) {
-        this.$refs.myVueDropzone.addFile(file);
+        this.$refs.myVueDropzone.addFile(file)
       }
     },
 
@@ -476,9 +521,9 @@ export default {
     },
 
     videoRecCompleted(file) {
-      this.showVideoRec = false;
+      this.showVideoRec = false
       if (this.$refs.myVueDropzone) {
-        this.$refs.myVueDropzone.addFile(file);
+        this.$refs.myVueDropzone.addFile(file)
       }
     },
 
@@ -486,12 +531,12 @@ export default {
 
   mounted() {
 
-    const self = this;
+    const self = this
     eventBus.$on('apply-schedule', function(data) {
-      self.scheduled_at = data;
+      self.scheduled_at = data
     })
     eventBus.$on('set-expiration-period', function(data) {
-      self.expirationPeriod = data;
+      self.expirationPeriod = data
     })
 
    if ( this.$route.params.context ) {
@@ -545,7 +590,11 @@ export default {
 
   watch: {
 
-    //selectedMediafiles(value) {
+    description(newVal, oldVal) {
+      if (newVal!==oldVal) {
+        this.formErr = null // clear errors
+      }
+    },
     //this.$log.debug('watch selectedMediafiles', { value })
     //},
 

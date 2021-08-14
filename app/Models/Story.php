@@ -12,17 +12,15 @@ use Laravel\Scout\Searchable;
 
 use App\Interfaces\Likeable;
 use App\Interfaces\Ownable;
-use App\Interfaces\Contenttaggable;
 
 use App\Models\Traits\UsesUuid;
 use App\Models\Traits\LikeableTraits;
 use App\Models\Traits\OwnableTraits;
 use App\Models\Traits\SluggableTraits;
-use App\Models\Traits\ContenttaggableTraits;
 
-class Story extends Model implements Likeable, Ownable, Contenttaggable
+class Story extends Model implements Likeable, Ownable
 {
-    use UsesUuid, HasFactory, LikeableTraits, SoftDeletes, Sluggable, SluggableTraits, OwnableTraits, Searchable, ContenttaggableTraits;
+    use UsesUuid, HasFactory, LikeableTraits, SoftDeletes, Sluggable, SluggableTraits, OwnableTraits, Searchable;
 
     protected $guarded = [ 'id', 'created_at', 'updated_at', ];
 
@@ -75,10 +73,6 @@ class Story extends Model implements Likeable, Ownable, Contenttaggable
 
     public function storyqueues() {
         return $this->hasMany(Storyqueue::class);
-    }
-
-    public function contenttags() {
-        return $this->morphToMany(Contenttag::class, 'contenttaggable')->withTimestamps();
     }
 
     //--------------------------------------------

@@ -30,10 +30,6 @@ class Contenttag extends Model
         return $this->morphedByMany(Post::class, 'contenttaggable');
     }
 
-    public function stories() {
-        return $this->morphedByMany(Story::class, 'contenttaggable');
-    }
-
     public function vaultfolders() {
         return $this->morphedByMany(Vaultfolder::class, 'contenttaggable');
     }

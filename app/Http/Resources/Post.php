@@ -27,6 +27,7 @@ class Post extends JsonResource
             'postable_type' => $this->postable_type,
             'timeline_slug' => $this->timeline->slug, // needed for links
             'description' =>  $this->when($hasAccess, $this->description),
+            'contenttags' =>  $this->contenttags,
 
             //'mediafiles' =>  $this->when($hasAccess, $this->mediafiles),
             // %TODO %NOTE vs above, we depend here on the caller not loading mediafiles relation where they shouldn't have access (eventually we want to send a blurred image in place when no access)
