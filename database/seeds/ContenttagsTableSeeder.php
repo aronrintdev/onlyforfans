@@ -7,7 +7,7 @@ use App\Libs\FactoryHelpers;
 use App\Models\Contenttag;
 use App\Models\Mediafile;
 use App\Models\Post;
-use App\Models\Story;
+//use App\Models\Story;
 use App\Models\Vaultfolder;
 use App\Models\User;
 
@@ -60,7 +60,7 @@ class ContenttagsTableSeeder extends Seeder
 
         $mediafiles = Mediafile::get();
         $posts = Post::get();
-        $stories = Story::get();
+        //$stories = Story::get();
         $vaultfolders = Vaultfolder::get();
 
         if ( $this->appEnv !== 'testing' ) {
@@ -84,6 +84,7 @@ class ContenttagsTableSeeder extends Seeder
             $this->addTags($o);
         });
 
+        /*
         // -- Stories --
         if ( $this->appEnv !== 'testing' ) {
             $this->output->writeln("     # stories: ".$stories->count() );
@@ -91,6 +92,7 @@ class ContenttagsTableSeeder extends Seeder
         $stories->each( function($o) {
             $this->addTags($o);
         });
+         */
 
         // -- Vaultfolders --
         if ( $this->appEnv !== 'testing' ) {

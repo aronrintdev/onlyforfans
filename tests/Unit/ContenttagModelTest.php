@@ -41,7 +41,6 @@ class ContenttagModelTest extends TestCase
 
     /**
      * @group contenttag-model
-     * @group here0812
      */
     public function test_should_get_tags_for_mediafile()
     {
@@ -51,21 +50,31 @@ class ContenttagModelTest extends TestCase
 
     /**
      * @group contenttag-model
-     * @group here0812
      */
     public function test_should_get_tagged_resources_for_tag()
     {
         $ct = Contenttag::has('mediafiles')->firstOrFail();
         $this->assertGreaterThan(0, $ct->mediafiles->count());
 
-        $ct = Contenttag::has('stories')->firstOrFail();
-        $this->assertGreaterThan(0, $ct->stories->count());
-
         $ct = Contenttag::has('posts')->firstOrFail();
         $this->assertGreaterThan(0, $ct->posts->count());
 
         $ct = Contenttag::has('vaultfolders')->firstOrFail();
         $this->assertGreaterThan(0, $ct->vaultfolders->count());
+    }
+
+    /**
+     * @group contenttag-model
+     */
+    public function test_should_get_open_tags()
+    {
+    }
+
+    /**
+     * @group contenttag-model
+     */
+    public function test_should_get_mgmtgroup_tags()
+    {
     }
 
 
