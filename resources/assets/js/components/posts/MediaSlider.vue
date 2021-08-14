@@ -30,14 +30,14 @@
       <swiper ref="mySwiper" class="media-slider-swiper" :options="swiperOptions">
         <swiper-slide class="slide" v-for="mf in visualMediafiles" :key="mf.id">
           <VideoPlayer :source="mf" v-if="mf.is_video"></VideoPlayer>
-          <b-img-lazy
+          <b-img
             v-if="mf.is_image"
-            class="d-block photoswipe-thumbnail"
+            class="d-block swiper-lazy photoswipe-thumbnail"
             :src="use_mid && mf.has_mid ? mf.midFilepath : mf.filepath"
           />
           <div class="background-preview" v-if="mf.is_image">
-            <b-img-lazy
-              class="d-block"
+            <b-img
+              class="swiper-lazy d-block"
               :src="use_mid && mf.has_mid ? mf.midFilepath : mf.filepath"
             />
           </div>

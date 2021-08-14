@@ -6,15 +6,25 @@
         <b-skeleton width="30px" class="mr-2" />
         <fa-icon icon="caret-down" />
       </template>
-      <b-avatar v-if="session_user && session_user.avatar.filepath" :src="session_user.avatar.filepath" class="mr-2" size="2rem" />
+      <b-avatar
+        v-if="session_user && session_user.avatar.filepath"
+        :src="session_user.avatar.filepath"
+        class="mr-2"
+        size="2rem"
+      />
       <b-avatar v-else class="mr-2" size="2rem" />
-      <span v-if="session_user && !mobile" class="mr-2" v-text="session_user.name || session_user.username" />
-      <fa-icon v-if="!mobile" icon="caret-down" />
+      <span
+        v-if="showName && session_user && !mobile"
+        v-text="session_user.name || session_user.username"
+      />
     </b-skeleton-wrapper>
   </div>
 </template>
 
 <script>
+/**
+ * resources/assets/js/components/common/navbar/ProfileButton.vue
+ */
 import Vuex from 'vuex'
 
 export default {
@@ -22,10 +32,9 @@ export default {
   computed: {
     ...Vuex.mapState(['mobile']),
     ...Vuex.mapGetters(['session_user', 'uiFlags']),
-  }
+  },
+  data: () => ({
+    showName: false,
+  }),
 }
 </script>
-
-<style lang="scss" scoped>
-
-</style>

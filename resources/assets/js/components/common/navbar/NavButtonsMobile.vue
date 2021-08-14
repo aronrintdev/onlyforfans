@@ -1,21 +1,14 @@
 <template>
   <b-navbar-nav class="nav-buttons flex-row justify-content-around">
-    <b-nav-item
-      v-if="session_user"
-      @click="sidebarToggle"
-      class="pt-2"
-    >
-      <AvatarWithStatus :user="session_user" centerAvatar noTooltip noLink imageOnly />
-    </b-nav-item>
+
     <b-nav-item
       v-for="button in buttons"
       :key="button.name"
       :to="button.to"
       :title="$t(button.name)"
-      class="pt-2"
     >
       <fa-layers fixed-width class="fa-lg">
-        <fa-icon :icon="button.icon" class="mx-auto" />
+        <fa-icon :icon="button.selected ? [ 'fas', button.icon ] : [ 'far', button.icon ]" class="mx-auto" />
         <fa-layers-text
           v-if="button.alerts"
           counter
@@ -29,6 +22,15 @@
       </div>
     </b-nav-item>
 
+    <b-nav-item
+      v-if="session_user"
+      @click="sidebarToggle"
+      class="menu-select"
+      :class="{ open: mobileMenuOpen}"
+    >
+      <AvatarWithStatus :user="session_user" centerAvatar noTooltip noLink imageOnly />
+    </b-nav-item>
+
   </b-navbar-nav>
 </template>
 
@@ -39,6 +41,7 @@
 import Vuex from 'vuex'
 
 import AvatarWithStatus from '@components/user/AvatarWithStatus'
+import { faTireRugged } from '@fortawesome/pro-duotone-svg-icons'
 
 export default {
   name: 'NavButtonsMobile',
@@ -50,7 +53,8 @@ export default {
   props: {},
 
   computed: {
-    ...Vuex.mapGetters([ 'session_user', 'unread_messages_count', 'mobileMenuOpen' ]),
+    ...Vuex.mapState([ 'mobileMenuOpen' ]),
+    ...Vuex.mapGetters([ 'session_user', 'unread_messages_count' ]),
 
     buttons() {
       var items = []
@@ -86,17 +90,23 @@ export default {
             key: 'messages',
             name: 'Messages',
             icon: 'envelope',
-            to: { name: 'livechat.default' },
+            to: { name: 'chatthreads.dashboard' },
             alerts: this.unread_messages_count,
           },
         ]
       }
+      for (var item of items) {
+        if (item.to && item.to.name === this.$route.name) {
+          item.selected = true
+        }
+      }
+
       return items
     },
   },
 
   data: () => ({
-    showNames: true,
+    showNames: false,
   }),
 
   methods: {
@@ -120,10 +130,13 @@ export default {
 .nav-buttons {
   position: fixed;
   bottom: 0;
-  z-index: 100;
+  z-index: 2000;
 
   width: 100vw;
   background-color: var(--light);
+
+  box-shadow: 0 -0.1rem 0.5rem 0 rgba(0, 0, 0, 0.2);
+
   .nav-item {
     width: 20%;
     flex-grow: 1;
@@ -164,6 +177,18 @@ export default {
     .label {
       text-align: center;
       font-size: 0.75rem;
+    }
+  }
+
+  .menu-select {
+    &::v-deep img {
+      transition: box-shadow 0.3s ease;
+      box-shadow: 0 0 0 0 var(--primary);
+    }
+    &.open {
+      &::v-deep img {
+        box-shadow: 0 0 1rem -0.25rem var(--primary);
+      }
     }
   }
 

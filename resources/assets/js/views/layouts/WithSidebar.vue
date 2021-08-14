@@ -11,7 +11,7 @@
           <slot name="sidebar"></slot>
         </div>
         <div class="main" key="main">
-          <div class="header pt-2">
+          <div v-if="!removeMobileMainNavTop" class="header pt-2">
             <slot name="mobileMainNavTop">
               <b-btn variant="link" size="lg" @click="$emit('back')">
                 <fa-icon icon="arrow-left" fixed-width />
@@ -51,6 +51,8 @@ export default {
   props: {
     // Switcher for mobile view
     focusMain: { type: Boolean, default: false },
+
+    removeMobileMainNavTop: { type: Boolean, default: false },
   },
 
   computed: {

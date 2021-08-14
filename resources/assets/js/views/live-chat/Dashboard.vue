@@ -1,5 +1,11 @@
 <template>
-  <WithSidebar v-if="!isLoading" id="view-livechat" :class="{ mobile: mobile }" :focusMain="threadOpen">
+  <WithSidebar
+    v-if="!isLoading"
+    id="view-livechat"
+    :class="{ mobile: mobile }"
+    :focusMain="threadOpen"
+    removeMobileMainNavTop
+  >
     <template #sidebar>
       <Sidebar :state="state" />
     </template>
@@ -268,12 +274,15 @@ export default {
     position: relative;
     top: 0;
     bottom: 0;
-    height: calc(100vh - 11rem);
+    height: calc(100vh - 64px);
+    max-height: calc(100vh - 64px);
     padding-left: 0;
     padding-right: 0;
+
   }
 
-  height: calc(100vh - 100px);
+  height: calc(100vh - 10rem);
+  max-height: calc(100vh - 10rem);
 
   .chatthread-list {
     height: calc(100vh - 350px);
