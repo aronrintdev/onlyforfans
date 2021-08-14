@@ -3,7 +3,18 @@
     <b-card tag="article" class="OFF-mb-2">
       <b-card-text>
         <ul class="list-unstyled">
-          <li><b-button :disabled="timeline.is_owner" @click="renderMessage" variant="primary" class="w-100">Message</b-button></li>
+          <li>
+            <b-button
+              @click="renderSubscribeConfirm"
+              v-if="timeline.userstats.subscriptions && timeline.userstats.subscriptions.price_per_1_months"
+              :disabled="timeline.is_owner"
+              variant="primary"
+              class="w-100"
+            >
+              <span>Subscribe - ${{ timeline.userstats.subscriptions.price_per_1_months }} per month</span>
+            </b-button>
+          </li>
+          <li><b-button :disabled="timeline.is_owner" @click="renderMessage" variant="primary" class="w-100 mt-3">Message</b-button></li>
           <li v-if="timeline.is_following">
             <b-button v-if="timeline.is_subscribed" @click="renderSubscribe" :disabled="timeline.is_owner" variant="warning" class="w-100 mt-3">
               <span>Unsubscribe</span>
@@ -38,6 +49,13 @@
       </b-card-text>
       <router-link v-if="timeline.is_owner" :to="{ name: 'settings.profile', params: { } }" class="float-right mr-3 cursor-pointer">Edit</router-link>
     </b-card>
+    <b-modal v-model="isSubscribeModalVisible" size="md" title="Confirm subscribe" >
+        <div class="m-0">Are you sure you want to subscribe?</div>
+        <template #modal-footer>
+            <b-button variant="secondary" @click="isSubscribeModalVisible=false">Cancel</b-button>
+            <b-button variant="primary" @click="isSubscribeModalVisible=false">Subscribe</b-button>
+        </template>
+    </b-modal>
   </div>
 </template>
 
@@ -68,6 +86,7 @@ export default {
 
   data: () => ({
     isFullVisiable: false,
+    isSubscribeModalVisible: false,
   }),
 
   created() { },
@@ -105,6 +124,9 @@ export default {
         name: 'chatthreads.dashboard',
       })
     },
+    renderSubscribeConfirm() {
+      this.isSubscribeModalVisible = true
+    }
   },
 
   components: {
