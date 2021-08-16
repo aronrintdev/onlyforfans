@@ -405,6 +405,7 @@ export default {
 #modal-post {
   
   .modal-header {
+    align-items: center;
     height: 0;
     padding: 0;
     border: none;
