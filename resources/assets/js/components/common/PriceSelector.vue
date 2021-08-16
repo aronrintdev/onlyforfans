@@ -7,6 +7,7 @@
     >
       <b-input-group :prepend="currencySymbol">
         <b-form-input
+          ref="price-input"
           class="input"
           v-model="price"
           v-mask="currencyMask"
@@ -58,6 +59,7 @@ export default {
     majorMark:  { type: Number, default: 1000 },
     currency:   { type: String, default: 'USD' },
     label:      { type: String },
+    autofocus:  { type: Boolean, default: false },
   },
 
   computed: {
@@ -194,6 +196,11 @@ export default {
       this.$emit('input', this.min)
     } else {
       this.price = this.formatNumber(this.value)
+    }
+    if (this.autofocus) {
+      setTimeout(() => {
+        this.$refs['price-input'].focus()
+      }, 500);
     }
   }
 
