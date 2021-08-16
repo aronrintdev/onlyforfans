@@ -226,11 +226,6 @@ export default {
 
   computed: {
     ...Vuex.mapState([ 'session_user', 'timeline', 'mobile' ]), // %TODO: may be able to drop timeline here (?)
-
-    followTimelineTitle() {
-      if (this.selectedTimeline && this.selectedTimeline.is_following) return 'Unfollow'
-      else return 'Follow'
-    },
   },
 
   data: () => ({
@@ -257,6 +252,7 @@ export default {
     scheduled_at: null,
     is_for_edit: null,
     showPostArrows: false,
+    followTimelineTitle: '',
   }),
 
   methods: {
@@ -282,6 +278,7 @@ export default {
           case 'render-follow':
             this.selectedTimeline = data.timeline
             this.subscribeOnly = false
+            this.followTimelineTitle = 'Follow'
             this.$bvModal.show('modal-follow')
             break
           case 'render-crop':
@@ -292,6 +289,7 @@ export default {
           case 'render-subscribe':
             this.selectedTimeline = data.timeline
             this.subscribeOnly = true
+            this.followTimelineTitle = 'Subscribe'
             this.$bvModal.show('modal-follow')
             break
           case 'render-tip':
@@ -402,10 +400,13 @@ export default {
 </style>
 
 <style lang="scss">
+.modal-header {
+  align-items: center;
+}
+
 #modal-post {
   
   .modal-header {
-    align-items: center;
     height: 0;
     padding: 0;
     border: none;

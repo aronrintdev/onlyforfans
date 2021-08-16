@@ -5,13 +5,13 @@
         <ul class="list-unstyled">
           <li>
             <b-button
-              @click="renderSubscribeConfirm"
+              @click="renderSubscribe"
               v-if="timeline.userstats.subscriptions && timeline.userstats.subscriptions.price_per_1_months"
               :disabled="timeline.is_owner"
               variant="primary"
               class="w-100"
             >
-              <span>Subscribe - ${{ timeline.userstats.subscriptions.price_per_1_months }} per month</span>
+              <span>Subscribe - {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} per month</span>
             </b-button>
           </li>
           <li v-if="!timeline.is_following && timeline.is_follow_for_free">
@@ -41,13 +41,6 @@
       </b-card-text>
       <router-link v-if="timeline.is_owner" :to="{ name: 'settings.profile', params: { } }" class="float-right mr-3 cursor-pointer">Edit</router-link>
     </b-card>
-    <b-modal v-model="isSubscribeModalVisible" size="md" title="Confirm subscribe" >
-        <div class="m-0">Are you sure you want to subscribe?</div>
-        <template #modal-footer>
-            <b-button variant="secondary" @click="isSubscribeModalVisible=false">Cancel</b-button>
-            <b-button variant="primary" @click="isSubscribeModalVisible=false">Subscribe</b-button>
-        </template>
-    </b-modal>
   </div>
 </template>
 
@@ -78,7 +71,6 @@ export default {
 
   data: () => ({
     isFullVisiable: false,
-    isSubscribeModalVisible: false,
   }),
 
   created() { },
@@ -116,8 +108,14 @@ export default {
         name: 'chatthreads.dashboard',
       })
     },
-    renderSubscribeConfirm() {
-      this.isSubscribeModalVisible = true
+    renderSubscribe() {
+      this.$log.debug('FollowCtrl.renderSubscribe() - emit');
+      eventBus.$emit('open-modal', {
+        key: 'render-subscribe',
+        data: {
+          timeline: this.timeline,
+        }
+      })
     }
   },
 
