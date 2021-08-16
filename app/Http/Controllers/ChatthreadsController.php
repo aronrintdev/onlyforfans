@@ -361,7 +361,7 @@ class ChatthreadsController extends AppBaseController
             // send notification
             foreach($chatthread->participants as $participant) {
                 // don't send notification to myself
-                if ($participant->id == $request->user()->id) {
+                if ($participant->id === $request->user()->id) {
                     continue;
                 }
 
