@@ -75,7 +75,7 @@
 
 <script>
 import Vuex from 'vuex'
-import OnlineStatus from '@components/user/OnlineStatus'
+import OnlineStatus from '@components/common/OnlineStatus'
 
 export default {
   props: {
