@@ -1,11 +1,12 @@
 <?php
 namespace App\Http\Resources;
 
-use App\Enums\PostTypeEnum;
+use Illuminate\Http\Resources\Json\JsonResource;
 use App\Models\Casts\Money as CastsMoney;
 use App\Models\Post as PostModel;
-use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\Mediafile as MediafileResource;
+use App\Enums\ContenttagAccessLevelEnum;
+use App\Enums\PostTypeEnum;
 
 class Post extends JsonResource
 {
@@ -27,7 +28,8 @@ class Post extends JsonResource
             'postable_type' => $this->postable_type,
             'timeline_slug' => $this->timeline->slug, // needed for links
             'description' =>  $this->when($hasAccess, $this->description),
-            'contenttags' =>  $this->contenttags,
+            //'contenttags' =>  $this->contenttags,
+            'contenttags' =>  $this->contenttags()->where('access_level', ContenttagAccessLevelEnum::OPEN)->pluck('ctag'),
 
             //'mediafiles' =>  $this->when($hasAccess, $this->mediafiles),
             // %TODO %NOTE vs above, we depend here on the caller not loading mediafiles relation where they shouldn't have access (eventually we want to send a blurred image in place when no access)
