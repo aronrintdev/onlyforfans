@@ -108,12 +108,12 @@
                   </li>
                 </ul>
                 <ul class="list-inline d-flex mb-0 pt-1">
-                  <li @click="togglePostPrice()" class="selectable select-pic" title="For Purchase Only">
+                  <li @click="togglePostPrice()" class="selectable select-pic" title="Set Price">
                     <fa-icon :icon="postType === 'price' ? ['fas', 'tag'] : ['far', 'tag']" size="lg" :class="postType === 'price' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
               </b-col>
-              <b-col cols="12" md="4">
+              <b-col cols="12" md="4" class="pr-0">
                 <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
                   <li class="mx-0">
                     <button @click="onHide && onHide()" v-if="data" class="btn btn-submit btn-secondary">

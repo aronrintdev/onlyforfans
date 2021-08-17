@@ -53,7 +53,7 @@
 import moment from 'moment'
 import { eventBus } from '@/eventBus'
 import PurchaseForm from '@components/payments/PurchaseForm'
-import OnlineStatus from '@components/user/OnlineStatus'
+import OnlineStatus from '@components/common/OnlineStatus'
 
 export default {
 

@@ -39,8 +39,9 @@
  */
 import Vuex from 'vuex'
 
+import OnlineStatus from '@components/common/OnlineStatus'
+
 import Avatar from './Avatar'
-import OnlineStatus from './OnlineStatus'
 import StatusDot from './StatusDot'
 
 export default {

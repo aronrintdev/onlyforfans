@@ -15,8 +15,8 @@
             <span class="text-secondary">{{ expireFromNow }}</span>
             <fa-icon :icon="['far', 'hourglass-half']" class="text-secondary ml-1 mr-2" />
           </div>
-          <div class="post-ctrl mr-2">
-            <b-dropdown right text="" class="m-md-2 post-header-menu" variant="outline-dark">
+          <div class="post-ctrl">
+            <b-dropdown right text="" class="post-header-menu" variant="outline-dark">
               <b-dropdown-item v-if="isPostOwnedBySessionUser" @click="showEditPost">
                 <fa-icon icon="edit" fixed-width class="mr-2" />
                 Edit
