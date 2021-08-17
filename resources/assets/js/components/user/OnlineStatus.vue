@@ -44,6 +44,7 @@ export default {
     s() {
       switch (this.size) {
         case 'sm': return '10px'
+        case 'md': return '16px'
         case 'lg': return '20px'
       }
     },

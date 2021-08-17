@@ -6,6 +6,7 @@
           :src="post.user.avatar.filepath"
           :title="post.user.name"
         ></b-img-lazy>
+      <OnlineStatus :user="post.user" size="md" :textInvisible="false" />
       </router-link>
     </section>
     <section class="user-details">
@@ -53,8 +54,12 @@
 <script>
 import { eventBus } from '@/eventBus'
 import moment from 'moment';
+import OnlineStatus from '@components/user/OnlineStatus'
 
 export default {
+  components: {
+    OnlineStatus,
+  },
 
   props: {
     post: null,
@@ -119,6 +124,7 @@ header.card-header {
 }
  */
 body .user-avatar {
+  position: relative;
   width: 40px;
   height: 40px;
   float: left;
@@ -128,6 +134,11 @@ body .user-avatar img {
   width: 100%;
   height: 100%;
   border-radius: 50%;
+}
+body .user-avatar .onlineStatus {
+  position: absolute;
+  top: 20px;
+  left: 25px;
 }
 body .user-details ul {
   padding-left: 50px;
