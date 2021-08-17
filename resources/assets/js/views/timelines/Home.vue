@@ -54,9 +54,9 @@ import Vuex from 'vuex';
 import { eventBus } from '@/eventBus'
 import PostFeed from '@components/timelines/PostFeed.vue';
 import StoryBar from '@components/timelines/StoryBar.vue';
-import CreatePost from '@components/timelines/CreatePost.vue';
 import MiniMyStatsWidget from '@components/user/MiniMyStatsWidget.vue';
 import SuggestedFeed from '@components/common/SuggestedFeed.vue';
+import CreatePost from '@components/common/CreatePost.vue';
 
 export default {
   components: {

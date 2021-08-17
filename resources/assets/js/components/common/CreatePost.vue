@@ -116,6 +116,11 @@
               </b-col>
               <b-col cols="12" md="4">
                 <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
+                  <li class="mx-0">
+                    <button @click="onHide && onHide()" v-if="data" class="btn btn-submit btn-secondary">
+                      Cancel
+                    </button>
+                  </li>
                   <li class="w-100 mx-0">
                     <button :disabled="posting || (!description && ( selectedMediafiles && selectedMediafiles.length === 0 ))" @click="savePost()" class="btn btn-submit btn-primary w-100">
                       <span v-if="posting" class="text-white spinner-border spinner-border-sm pr-2" role="status" aria-hidden="true"></span>
@@ -158,6 +163,8 @@ export default {
   props: {
     session_user: null,
     timeline: null,
+    data: null,
+    onHide: { type: Function },
   },
 
   computed: {
@@ -280,6 +287,10 @@ export default {
       } else {
         this.resetForm();
         this.posting = false;
+      }
+
+      if (this.onHide) {
+        this.onHide()
       }
     },
 
@@ -491,10 +502,12 @@ export default {
       self.expirationPeriod = data;
     })
 
-   if ( this.$route.params.context ) {
-     switch( this.$route.params.context ) {
+    const params = this.data || this.$route.params
+
+   if ( params.context ) {
+     switch( params.context ) {
        case 'send-selected-mediafiles-to-post': // we got here from the vault, likely with mediafiles to attach to a new post
-         const mediafileIds = this.$route.params.mediafile_ids || []
+         const mediafileIds = params.mediafile_ids || []
          if ( mediafileIds.length ) {
            // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
            const response = axios.get(this.$apiRoute('mediafiles.index'), {
