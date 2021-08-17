@@ -189,9 +189,10 @@ export default {
     this.feedType = this.is_schedulefeed ? 'schedule' : this.feedType;
 
     // Get photos & videos feed total count
-    axios.get(route('timelines.getPhotosVideosCount'))
+    axios.get(route('timelines.getPhotosVideosCount', this.timelineId))
       .then((response) => {
-        console.log('--------- response:', response.data)
+        this.totalPhotosCount = response.data.photos || 0;
+        this.totalVideosCount = response.data.videos || 0;
       })
 
     this.$store.dispatch('getFeeddata', { 
