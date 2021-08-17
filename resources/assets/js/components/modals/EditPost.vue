@@ -1,4 +1,3 @@
-
 <template>
   <div class="container p-0">
     <b-card header-tag="header" footer-tag="footer" class="position-relative">
@@ -39,6 +38,20 @@
         <textarea v-model="description" rows="8" class="w-100"></textarea>
       </div>
       <template #footer>
+
+        <b-row class="mb-1">
+          <b-col cols="12" md="8" class="d-flex">
+            Public:
+            <b-form-tags input-id="edit-post-contenttags" v-model="contenttags"></b-form-tags>
+          </b-col>
+        </b-row>
+        <b-row class="mb-1">
+          <b-col cols="12" md="8" class="d-flex">
+            Private:
+            <b-form-tags input-id="edit-post-contenttags_mgmt" v-model="contenttags_mgmt"></b-form-tags>
+          </b-col>
+        </b-row>
+
         <b-row>
           <b-col cols="4" md="4" class="d-flex">
             <ul class="list-inline d-flex mb-0">
@@ -89,6 +102,8 @@ export default {
           || this.post.price !== this.price
           || this.post.price_for_subscribers !== this.priceForPaidSubscribers
           || this.post.schedule_datetime !== this.schedule_datetime
+          || this.post.contenttags !== this.contenttags
+          || this.post.contenttags_mgmt !== this.contenttags_mgmt
       }
       return false
     }
@@ -96,6 +111,8 @@ export default {
   data: () => ({
     loading: false,
     description: '',
+    contenttags: [],
+    contenttags_mgmt: [],
     type: 'free',
     price: 0,
     priceForPaidSubscribers: 0,
@@ -109,9 +126,13 @@ export default {
     moment,
     schedule_datetime: null,
   }),
+
   methods: {
+
     fillFromProp() {
       this.description = this.post.description
+      this.contenttags = this.post.contenttags
+      this.contenttags_mgmt = this.post.contenttags_mgmt
       this.type = this.post.type
       this.price = this.post.price
       this.priceForPaidSubscribers = this.post.price_for_subscribers
@@ -120,19 +141,32 @@ export default {
         this.schedule_datetime = moment.utc(this.post.schedule_datetime)
       }
     },
+
     discard(e) {
       this.exit()
     },
+
     save(e) {
-      this.loading = true
-      this.axios.patch(this.$apiRoute('posts.update', { post: this.post.slug }), {
+      // tags are parsed out of the post's content body by the backend...so add them in here from the separate 'tag' form
+      //   ~ "fix" any tags prefixed with '#' by user (remove the '#')...since we add the '#' ourselves here before sending
+      //      That is the intended usage is  for the user to type in tags like "foo" rather than "#foo"
+      if ( this.contenttags.length > 0 ) {
+        this.description += ' #'+this.contenttags.map( ct => ct.replace(/^#/,'') ).join(' #')
+      }
+      if ( this.contenttags_mgmt.length > 0 ) {
+        // %FIXME: need to postfix with '!'
+        //this.description += ' #'+this.contenttags_mgmt.map( ct => ct.replace(/^#/,'') ).join(' #')
+      }
+      const payload = {
         description: this.description,
         type: this.type,
         price: this.price,
         price_for_subscribers: this.priceForPaidSubscribers,
         currency: this.currency,
         schedule_datetime: this.schedule_datetime,
-      }).then(response => {
+      }
+      this.loading = true
+      this.axios.patch(this.$apiRoute('posts.update', { post: this.post.slug }), payload ).then(response => {
         this.loading = false
         eventBus.$emit('update-posts', this.post.id)
         this.exit()
@@ -141,9 +175,11 @@ export default {
         this.loading = false
       })
     },
+
     exit() {
       this.$bvModal.hide('edit-post');
     },
+
     showSchedulePicker() {
       eventBus.$emit('open-modal', {
         key: 'show-schedule-datetime',
@@ -153,11 +189,14 @@ export default {
         }
       })
     },
+
     closeSchedulePicker(e) {
       this.schedule_datetime = null;
       e.stopPropagation();
     }
+
   },
+
   mounted() {
     this.fillFromProp()
     const self = this

@@ -82,14 +82,28 @@
           <template #footer>
 
             <b-row v-if="isTagFormVisible" class="mb-1">
-              <b-col cols="12" class="d-flex">
-                <b-form-tags v-model="hashtags" no-outer-focus class="mb-2">
+              <b-col cols="12" class="d-flex align-items-center">
+                <b-form-tags v-model="hashtags" no-outer-focus class="">
                   <template v-slot="{ tags, inputAttrs, inputHandlers, tagVariant, addTag, removeTag }">
                     <div class="d-inline-block">
-                      <b-form-tag v-for="tag in tags" @remove="removeTag(tag)" :key="tag" :title="tag" :variant="isHashtagPrivate(tag) ? 'danger' : 'secondary'" size="sm" class="mr-1" >{{ tag }}</b-form-tag>
+                      <b-form-tag v-for="tag in tags" 
+                        @remove="removeTag(tag)" 
+                        :key="tag" 
+                        :title="tag" 
+                        :variant="isHashtagPrivate(tag) ? 'danger' : 'secondary'" 
+                        size="sm" class="mr-1" 
+                      > 
+                        {{ tag }}
+                      </b-form-tag>
                     </div>
                   </template>
                 </b-form-tags>
+                <div class="ml-2" v-b-tooltip.hover.html="{title: 'Enter tags in post body, use hash at start for <em>#publictag</em> or hash and exclamation at end for <em>#privatetag!</em>', variant: 'info'}">
+                  <fa-icon :icon="['fas', 'info']" class="text-warning" />
+                </div>
+                <!--
+                <small>Enter tags in post body, use hash at start for <i>#publictag</i> or hash and exclamation at end for <i>#privatetag!</i></small>
+                -->
               </b-col>
             </b-row>
 
@@ -190,6 +204,7 @@ export default {
   computed: {
 
     hashtags: {
+      // tag representation in the create post footer (can be deleted here but not added)
       get: function () {
         return this.parseHashtags(this.description) || []
       },
@@ -239,8 +254,6 @@ export default {
     moment,
     newPostId: null,
     description: '',
-    //contenttags: [],
-    //contenttagsMgmt: [],
     selectedMedia: null, // 'pic',
     showedModal: null,
     postType: 'free',
@@ -284,10 +297,6 @@ export default {
       this.CLEAR_SELECTED_MEDIAFILES()
       this.$refs.myVueDropzone.removeAllFiles()
       this.description = ''
-      //document.getElementById('create-post-contenttags-public').value = '' // hack to workaround fact that any input will not be cleared via v-model
-      //document.getElementById('create-post-contenttags-mgmt').value = '' // hack to workaround fact that any input will not be cleared via v-model
-      //this.contenttags = []
-      //this.contenttagsMgmt = []
       this.newPostId = null
       this.selectedMedia = 'pic'
       this.ptype = 'free'
@@ -326,14 +335,6 @@ export default {
           schedule_datetime: this.scheduled_at?.toDate(),
           expiration_period: this.expirationPeriod,
       }
-        /*
-      if ( this.contenttags && this.contenttags.length ) {
-          payload.contenttags = this.contenttags
-      }
-      if ( this.contenttagsMgmt && this.contenttagsMgmt.length ) {
-          payload.contenttags_mgmt = this.contenttagsMgmt
-      }
-         */
 
       try { 
         response = await axios.post( this.$apiRoute('posts.store'), payload )

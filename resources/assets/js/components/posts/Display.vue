@@ -83,7 +83,12 @@
         </div>
         <div v-if="post.contenttags.length" class="py-3 text-wrap">
           <b-card-text class="px-3 mb-0 tag-post_tags">
-            {{ `#${post.contenttags.join(', #')}` }}
+            Public: {{ `#${post.contenttags.join(' #')}` }}
+          </b-card-text>
+        </div>
+        <div v-if="post.contenttags_mgmt.length" class="py-3 text-wrap">
+          <b-card-text class="px-3 mb-0 tag-post_tags">
+            Private: {{ `#${post.contenttags_mgmt.join(' #')}` }}
           </b-card-text>
         </div>
       </template>

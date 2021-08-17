@@ -106,10 +106,6 @@ class PostsController extends AppBaseController
             'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
             'expiration_period' => 'nullable|integer',
             'schedule_datetime' => 'sometimes|date',
-            //'contenttags' => 'array',
-            //'contenttags.*' => 'string|min:2|max:126',
-            //'contenttags_mgmt' => 'array',
-            //'contenttags_mgmt.*' => 'string|min:2|max:126',
         ];
 
         if ( !$request->has('mediafiles') ) {
@@ -194,9 +190,13 @@ class PostsController extends AppBaseController
             'schedule_datetime' => 'nullable|date',
         ]);
 
-        $post->fill($request->only([
-            'description',
-        ])); // %TODO
+        $alltags = collect();
+        if ( $request->has('description') ) { // extract & collect any tags
+            $regex = '/(#\w+!?)/';
+            $origStr = Str::of($request->description);
+            $alltags = $origStr->matchAll($regex);
+            $post->description = trim($origStr->remove($alltags->toArray(), false));
+        }
 
         if ($request->has('type')) {
             $post->type = $request->type;
@@ -237,6 +237,17 @@ class PostsController extends AppBaseController
         }
 
         $post->save();
+
+        // Since we are updating tags as a batch, to effect a 'delete' we first need to remove all attached tags, and then add
+        //   whatever is sent via the post, which is a complete set that includes any pre-existing tags that haven't been removed
+        $post->contenttags()->detach();
+        $alltags->each( function($str) use(&$post) {
+            $accessLevel = (substr($str,-1)==='!') ? ContenttagAccessLevelEnum::MGMTGROUP : ContenttagAccessLevelEnum::OPEN;
+            $str = trim($str, '#!'); // remove hashtag and possible '!' at end indicating private/mgmt tag
+            $post->addTag($str, $accessLevel); // add 1-by-1
+        });
+
+        $post->refresh();
 
         return response()->json([
             'post' => $post,
