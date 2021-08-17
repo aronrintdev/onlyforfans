@@ -20,6 +20,7 @@ export default {
       online: 'success',
       away: 'warning',
       doNotDisturb: 'danger',
+      offline: 'secondary',
     })},
     user: { type: Object, default: () => ({ id: '' }) },
     indicatorVisible: { default: true, type: Boolean },
@@ -44,6 +45,7 @@ export default {
     s() {
       switch (this.size) {
         case 'sm': return '10px'
+        case 'md': return '16px'
         case 'lg': return '20px'
       }
     },
@@ -169,7 +171,7 @@ export default {
   margin-right: 5px;
   border: solid 3px #fff;
   border-radius: 100%;
-  background: gray;
+  background: #d8d8d8;
 }
 .status-indicator.no-border {
   border: none;

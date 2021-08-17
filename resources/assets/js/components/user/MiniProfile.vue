@@ -52,6 +52,7 @@
                 :src="timeline.avatar.filepath"
                 :title="timeline.name"
               />
+              <OnlineStatus :user="timeline.user" size="md" :textInvisible="false" />
             </router-link>
           </div>
 
@@ -95,8 +96,13 @@
 
 <script>
 import { eventBus } from '@/eventBus'
+import OnlineStatus from '@components/common/OnlineStatus'
 
 export default {
+  components: {
+    OnlineStatus,
+  },
+
   props: {
     timeline: null, // { type: Object, default: () => ({ cover: {}, avatar: {} }) },
   },
@@ -140,6 +146,11 @@ export default {
           top: 90px; /* bg image height - 1/2*avatar height */
           width: 60px;
           height: 60px;
+          .onlineStatus {
+            position: absolute;
+            top: 35px;
+            right: 0;
+          }
       }
       .card-img-top {
         overflow: hidden;

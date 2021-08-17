@@ -3,7 +3,7 @@
     <b-card tag="article">
       <b-card-text>
         <b-row class="mx-0">
-          <h3 class="card-title my-2">Photos</h3>
+          <h3 class="card-title mb-2 px-1">Photos</h3>
         </b-row>
 
         <b-row class="mx-0">
@@ -22,9 +22,9 @@
               <div v-if="p.access" @click="renderPost(p)" :style="backgroundImg(p)" class="tag-thumb"></div>
             </article>
           </b-col>
-          <div v-if="previewposts.length === 0" class="p text-center w-100">No photos available</div>
+          <div v-if="previewposts.length === 0" class="p text-center text-secondary w-100">No photos available</div>
         </b-row>
-        <div v-if="previewposts.length > 5" class="view-more-photos text-primary text-right" @click="viewMorePhotos('photos')">View more photos</div>
+        <div v-if="previewposts.length > 5" class="view-more-photos text-primary text-right px-1" @click="viewMorePhotos('photos')">View more photos</div>
       </b-card-text>
     </b-card>
   </div>

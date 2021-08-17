@@ -35,6 +35,7 @@ body,
   height: 100%;
   margin: 0;
   padding: 0;
+  overflow: hidden;
 }
 
 html.prevent-scrolling {
@@ -51,6 +52,7 @@ html.prevent-scrolling {
 .app {
   position: relative;
   min-height: 100vh;
+  overflow: auto;
 }
 
 body {

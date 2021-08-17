@@ -176,6 +176,36 @@ class TimelinesController extends AppBaseController
         return new MediafileCollection($data);
     }
 
+    // 'Photos & Videos' Feed Count
+    // %TODO: move to mediafiles controller (?)
+    public function getPhotosVideosCount(Request $request, Timeline $timeline)
+    {
+        // Get Videos
+        $query1 = Mediafile::with('resource')
+            ->isVideo()
+            ->where('mftype', MediafileTypeEnum::POST);
+        $query1->whereHasMorph( 'resource', [Post::class], function($q1) use(&$timeline) {
+            $q1->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
+        });
+        $videos = $query1->count();
+
+        // Get Photos
+        $query2 = Mediafile::with('resource')
+            ->isImage()
+            //->whereIn('mimetype', ['image/jpeg', 'image/jpg', 'image/png'])
+            ->where('mftype', MediafileTypeEnum::POST);
+        $query2->whereHasMorph( 'resource', [Post::class], function($q1) use(&$timeline) {
+            $q1->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
+        });
+        $query2->orderByDesc(Post::select('created_at')
+            ->whereColumn('posts.id', 'resource_id'));
+        $photos = $query2->count();
+        return [
+            'photos' => $photos,
+            'videos' => $videos,
+        ];
+    }
+
     // Get suggested users (list/index)
     public function suggested(Request $request)
     {
