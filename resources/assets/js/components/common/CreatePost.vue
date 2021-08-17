@@ -10,9 +10,9 @@
               <div class="my-auto mr-3">
                 <h6 class="mb-0">Create a Post</h6>
               </div>
-              <div class="post_create-ctrl d-flex flex-grow-1">
+              <!-- <div class="post_create-ctrl d-flex flex-grow-1">
                 <b-form-select id="post-type" class="w-auto ml-auto" v-model="postType" :options="ptypes" required />
-              </div>
+              </div> -->
             </section>
           </template>
           <div>
@@ -31,14 +31,13 @@
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <div v-if="postType === 'price'" class="w-100 d-flex">
+            <div v-if="postType === 'price'" class="w-100 d-flex mt-3 ml-3">
               <PriceSelector
-                class="mb-3 mr-5"
+                class="mr-5"
                 :label="$t('priceForFollowers')"
                 v-model="price"
               />
               <PriceSelector
-                class="mb-3"
                 :label="$t('priceForSubscribers')"
                 v-model="priceForPaidSubscribers"
               />
@@ -109,8 +108,8 @@
                   </li>
                 </ul>
                 <ul class="list-inline d-flex mb-0 pt-1">
-                  <li @click="showCampaignModal()" class="selectable select-pic" title="Start Promotional Campaign">
-                    <fa-icon :icon="showedModal === 'campaign' ? ['fas', 'hand-holding-usd'] : ['far', 'hand-holding-usd']" size="lg" :class="showedModal === 'campaign' ? 'text-primary' : 'text-secondary'" />
+                  <li @click="togglePostPrice()" class="selectable select-pic" title="For Purchase Only">
+                    <fa-icon :icon="postType === 'price' ? ['fas', 'tag'] : ['far', 'tag']" size="lg" :class="postType === 'price' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
               </b-col>
@@ -490,6 +489,13 @@ export default {
       }
     },
 
+    togglePostPrice() {
+      if (this.postType === 'free') {
+        this.postType = 'price'
+      } else {
+        this.postType = 'free'
+      }
+    }
   },
 
   mounted() {
