@@ -3,10 +3,9 @@
     <b-card tag="article" class="OFF-mb-2">
       <b-card-text>
         <ul class="list-unstyled">
-          <li>
+          <li v-if="timeline.userstats.subscriptions && timeline.userstats.subscriptions.price_per_1_months">
             <b-button
               @click="renderSubscribe"
-              v-if="timeline.userstats.subscriptions && timeline.userstats.subscriptions.price_per_1_months"
               :disabled="timeline.is_owner"
               variant="primary"
               class="w-100"
@@ -26,15 +25,15 @@
             </b-button>
           </li>
         </ul>
-        <div :class="{ 'normal-view': !isFullVisiable }">
+        <div class="mt-3" v-if="timeline.about" :class="{ 'normal-view': !isFullVisiable }">
           <VueMarkdown :html="false" :source="timeline.about || ''" />
         </div>
         <div v-if="!isFullVisiable && isOverLength" class="toggle-read-more text-primary text-right mr-3 mt-1" @click="isFullVisiable = !isFullVisiable">Read more</div>
-        <ul class="list-unstyled">
+        <ul class="list-unstyled mt-3" v-if="timeline.userstats.website || timeline.userstats.instagram">
           <li v-if="timeline.userstats.website">Website: <a :href="timeline.userstats.website" class="tag-website" target="_blank">{{ timeline.userstats.website }}</a></li>
           <li v-if="timeline.userstats.instagram">Instagram: <a :href="timeline.userstats.instagram" class="tag-instagram" target="_blank">{{ timeline.userstats.instagram }}</a></li>
         </ul>
-        <ul class="list-unstyled list-details">
+        <ul class="list-unstyled list-details mt-3" v-if="timeline.userstats.city || timeline.userstats.country">
           <li v-if="timeline.userstats.city"><span><fa-icon icon="map-pin" class="map-pin-icon" /> {{ timeline.userstats.city }}</span></li>
           <li v-if="timeline.userstats.country"><span><fa-icon icon="globe" /> {{ timeline.userstats.country }}</span></li>
         </ul>
@@ -125,7 +124,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 
 body #modal-send_tip .modal-body {
   padding: 0;
@@ -136,6 +135,10 @@ body #modal-send_tip .modal-body {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+
+  p:last-child {
+    margin-bottom: 0;
+  }
 }
 
 li a.tag-website {
@@ -156,5 +159,12 @@ li a.tag-instagram {
   margin-right: 4px;
 }
 
+.list-unstyled {
+  margin: 0;
+
+  li:first-child button {
+    margin-top: 0 !important;
+  }
+}
 </style>
 
