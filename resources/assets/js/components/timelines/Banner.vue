@@ -56,7 +56,7 @@
     <b-container fluid>
       <b-row class="avatar-profile py-3">
         <b-col cols="12" md="4" offset-md="1" class="pl-5 avatar-details text-right text-md-left">
-          <h2 class="avatar-name my-0 text-secondary">
+          <h2 class="avatar-name my-0">
             {{ timeline.name }}
             <span v-if="timeline.verified" class="verified-badge">
               <fa-icon icon="check-circle" class="text-primary" />
