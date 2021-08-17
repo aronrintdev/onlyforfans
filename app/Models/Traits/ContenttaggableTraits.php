@@ -2,11 +2,12 @@
 namespace App\Models\Traits;
 
 use App\Models\Contenttag;
+use App\Enums\ContenttagAccessLevelEnum;
 
 trait ContenttaggableTraits
 {
     // $_ctag can be a string or array of tags...
-    public function addTag($_ctag)
+    public function addTag($_ctag, $accessLevel=ContenttagAccessLevelEnum::OPEN)
     {
         if ( is_string($_ctag) ) {
             $ctags = collect([$_ctag]);
@@ -17,12 +18,14 @@ trait ContenttaggableTraits
         }
 
         $ids = [];
-        $ctags->each( function($str) use (&$ids) {
+        $ctags->each( function($str) use (&$ids, $accessLevel) {
+            //$str = ltrim($str, '#');
+            //$str = rtrim($str, '!');
+            $str = trim($str, '#!');
             $ctrecord = Contenttag::where('ctag', $str)->firstOrCreate([
                 'ctag' => $str,
             ]);
-            $ids[] = $ctrecord->id;
-            //$this->contenttags()->syncWithoutDetaching($ctrecord->id);
+            $ids[$ctrecord->id] = [ 'access_level' => $accessLevel ];
         });
         $this->contenttags()->syncWithoutDetaching($ids);
     }
