@@ -80,9 +80,16 @@
           </div>
 
           <template #footer>
+
             <b-row v-if="isTagFormVisible" class="mb-1">
-              <b-col cols="12" md="8" class="d-flex">
-                <b-form-tags input-id="create-post-contenttags" v-model="contenttags"></b-form-tags>
+              <b-col cols="12" class="d-flex">
+                <b-form-tags v-model="hashtags" no-outer-focus class="mb-2">
+                  <template v-slot="{ tags, inputAttrs, inputHandlers, tagVariant, addTag, removeTag }">
+                    <div class="d-inline-block">
+                      <b-form-tag v-for="tag in tags" @remove="removeTag(tag)" :key="tag" :title="tag" :variant="isHashtagPrivate(tag) ? 'danger' : 'secondary'" size="sm" class="mr-1" >{{ tag }}</b-form-tag>
+                    </div>
+                  </template>
+                </b-form-tags>
               </b-col>
             </b-row>
 
@@ -122,7 +129,7 @@
                     <fa-icon :icon="showedModal === 'campaign' ? ['fas', 'hand-holding-usd'] : ['far', 'hand-holding-usd']" size="lg" :class="showedModal === 'campaign' ? 'text-primary' : 'text-secondary'" />
                   </li>
                   <li @click="showTagForm()" class="selectable show-tagform" title="Add Tags">
-                    <fa-icon :icon="isTagFormVisible ? ['fas', 'tags'] : ['far', 'tags']" class="text-secondary" size="lg" />
+                    <fa-icon :icon="isTagFormVisible ? ['fas', 'hashtag'] : ['far', 'hashtag']" class="text-secondary" size="lg" />
                   </li>
                 </ul>
               </b-col>
@@ -140,7 +147,7 @@
 
             </b-row>
 
-                <p v-if="formErr!==null" class="text-danger">An error occured: {{ formErr }} </p>
+            <p v-if="formErr!==null" class="text-danger">An error occured: {{ formErr }} </p>
 
           </template>
 
@@ -181,6 +188,21 @@ export default {
   },
 
   computed: {
+
+    hashtags: {
+      get: function () {
+        return this.parseHashtags(this.description) || []
+      },
+      set: function (newValue) {
+        const oldValue = this.parseHashtags(this.description) || []
+        const diffs = oldValue.filter( s => !newValue.includes(s) )
+        diffs.forEach( s => {
+          console.log(`replacing ${s}`)
+          this.description = this.description.replace('#'+s, '')
+        })
+      }
+    },
+
     isIOS9PlusAndAndroid() {
       return (isIOS && parseInt(osVersion.split('.')[0]) >= 9) || isAndroid
     },
@@ -217,7 +239,8 @@ export default {
     moment,
     newPostId: null,
     description: '',
-    contenttags: [],
+    //contenttags: [],
+    //contenttagsMgmt: [],
     selectedMedia: null, // 'pic',
     showedModal: null,
     postType: 'free',
@@ -238,6 +261,7 @@ export default {
     showAudioRec: false,
 
     isTagFormVisible: false,
+    isPublicTagFormSelected: true,
 
     formErr: null, // null if no error, otherwise string (error message)
 
@@ -260,8 +284,10 @@ export default {
       this.CLEAR_SELECTED_MEDIAFILES()
       this.$refs.myVueDropzone.removeAllFiles()
       this.description = ''
-      document.getElementById('create-post-contenttags').value = '' // hack to workaround fact that any input will not be cleared via v-model
-      this.contenttags = []
+      //document.getElementById('create-post-contenttags-public').value = '' // hack to workaround fact that any input will not be cleared via v-model
+      //document.getElementById('create-post-contenttags-mgmt').value = '' // hack to workaround fact that any input will not be cleared via v-model
+      //this.contenttags = []
+      //this.contenttagsMgmt = []
       this.newPostId = null
       this.selectedMedia = 'pic'
       this.ptype = 'free'
@@ -271,14 +297,26 @@ export default {
       this.expirationPeriod = null
     },
 
+    parseHashtags(searchText) {
+      //const regexp = /\B\#\w\w+\b/g
+      const regexp = /\B#\w\w+(!)?/g
+      const htList = searchText.match(regexp) || [];
+      return htList.map(s => s.slice(1))
+      // "#baz! #foo! #cat #bar!".match(/\B#\w\w+!\B/g) => [ "#baz!", "#foo!", "#bar!" ]
+      // "#baz! #foo! #cat #bar!".match(/\B#\w\w+\b/g) => [ "#baz", "#foo", "#cat", "#bar" ]
+    },
+
+    isHashtagPrivate(s) {
+      return s.endsWith('!')
+    },
+
     async savePost() {
       this.formErr = null // clear errors
       this.isBusy = true
       console.log('CreatePost::savePost()')
       // (1) create the post
       let response = null
-      try { 
-        response = await axios.post(this.$apiRoute('posts.store'), {
+      const payload = {
           timeline_id: this.timeline.id,
           description: this.description,
           type: this.postType,
@@ -287,8 +325,18 @@ export default {
           currency: this.currency,
           schedule_datetime: this.scheduled_at?.toDate(),
           expiration_period: this.expirationPeriod,
-          contenttags: this.contenttags,
-        })
+      }
+        /*
+      if ( this.contenttags && this.contenttags.length ) {
+          payload.contenttags = this.contenttags
+      }
+      if ( this.contenttagsMgmt && this.contenttagsMgmt.length ) {
+          payload.contenttags_mgmt = this.contenttagsMgmt
+      }
+         */
+
+      try { 
+        response = await axios.post( this.$apiRoute('posts.store'), payload )
       } catch (e) {
         //console.log('err', { e, })
         if ( e.response?.status === 422 ) {
@@ -539,25 +587,25 @@ export default {
       self.expirationPeriod = data
     })
 
-   if ( this.$route.params.context ) {
-     switch( this.$route.params.context ) {
-       case 'send-selected-mediafiles-to-post': // we got here from the vault, likely with mediafiles to attach to a new post
-         const mediafileIds = this.$route.params.mediafile_ids || []
-         if ( mediafileIds.length ) {
-           // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
-           const response = axios.get(this.$apiRoute('mediafiles.index'), {
-             params: {
-               mediafile_ids: mediafileIds,
-             },
-           }).then( response => {
-             response.data.data.forEach( mf => {
-               this.ADD_SELECTED_MEDIAFILES(mf)
-             })
-           })
-         }
-         break
-     } // switch
-   }
+    if ( this.$route.params.context ) {
+      switch( this.$route.params.context ) {
+        case 'send-selected-mediafiles-to-post': // we got here from the vault, likely with mediafiles to attach to a new post
+          const mediafileIds = this.$route.params.mediafile_ids || []
+          if ( mediafileIds.length ) {
+            // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
+            const response = axios.get(this.$apiRoute('mediafiles.index'), {
+              params: {
+                mediafile_ids: mediafileIds,
+              },
+            }).then( response => {
+              response.data.data.forEach( mf => {
+                this.ADD_SELECTED_MEDIAFILES(mf)
+              })
+            })
+          }
+          break
+      } // switch
+    }
 
   }, // mounted
 
@@ -590,13 +638,16 @@ export default {
 
   watch: {
 
+    hashtags(newVal, oldVal) {
+      this.isTagFormVisible = this.hashtags.length > 0
+    },
+
     description(newVal, oldVal) {
       if (newVal!==oldVal) {
         this.formErr = null // clear errors
       }
     },
     //this.$log.debug('watch selectedMediafiles', { value })
-    //},
 
   }, // watch
 
@@ -691,10 +742,10 @@ li.selectable[disabled] {
 </style>
 
 <i18n lang="json5" scoped>
-{
-  "en": {
-    "priceForFollowers": "Price for free followers",
-    "priceForSubscribers": "Price for paid subscribers",
+  {
+    "en": {
+      "priceForFollowers": "Price for free followers",
+      "priceForSubscribers": "Price for paid subscribers",
+    }
   }
-}
-</i18n>
+  </i18n>

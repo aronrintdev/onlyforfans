@@ -78,9 +78,14 @@
             <VueMarkdown :html="false" :source="post.description || ''" />
           </b-card-text>
         </div>
-        <article v-if="hasMediafiles">
+        <div v-if="hasMediafiles">
           <MediaSlider :mediafiles="post.mediafiles" :session_user="session_user" :use_mid="use_mid" />
-        </article>
+        </div>
+        <div v-if="post.contenttags.length" class="py-3 text-wrap">
+          <b-card-text class="px-3 mb-0 tag-post_tags">
+            {{ `#${post.contenttags.join(', #')}` }}
+          </b-card-text>
+        </div>
       </template>
       <template v-else>
         <PostCta :post="post" :session_user="session_user" :primary_mediafile="primaryMediafile" />
