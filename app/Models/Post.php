@@ -40,6 +40,7 @@ use Laravel\Scout\Searchable;
 use Money\Money as Money;
 
 use App\Models\Likeable as LikeableModel;
+use App\Models\Contenttaggable as ContenttaggableModel;
 
 class Post extends Model
     implements
@@ -89,6 +90,9 @@ class Post extends Model
             }
             // delete the Likeables, not the 'likes' relation, which is actually the liker (user) !!
             $likeables = LikeableModel::where('likeable_type', 'posts')->where('likeable_id', $model->id)->delete();
+
+            // delete the Contenttagables (join table records)
+            $contenttaggales = ContenttaggableModel::where('contenttaggable_type', 'posts')->where('contenttaggable_id', $model->id)->delete();
         });
     }
 
@@ -214,8 +218,8 @@ class Post extends Model
         return $this->morphMany(Contentflag::class, 'flaggable');
     }
 
-    public function contenttags() {
-        return $this->morphToMany(Contenttag::class, 'contenttaggable')->withTimestamps();
+    public function contenttags() { // all content tags
+        return $this->morphToMany(Contenttag::class, 'contenttaggable')->withPivot('access_level')->withTimestamps();
     }
 
     //--------------------------------------------
