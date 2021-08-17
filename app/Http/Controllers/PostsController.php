@@ -1,23 +1,30 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\Post;
-use App\Rules\InEnum;
-use App\Models\Comment;
-use App\Models\Favorite;
-use App\Models\Timeline;
-use App\Models\Mediafile;
-use App\Enums\PostTypeEnum;
-use Illuminate\Http\Request;
-use App\Enums\MediafileTypeEnum;
-use App\Payments\PaymentGateway;
-use App\Models\Financial\Account;
-use App\Http\Resources\PostCollection;
-use Illuminate\Support\Facades\Config;
-use App\Models\Casts\Money as CastsMoney;
-use App\Http\Resources\Post as PostResource;
-use App\Models\Tip;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Str;
+
+use App\Models\Favorite;
+use App\Models\Comment;
+use App\Models\Financial\Account;
+use App\Models\Mediafile;
+use App\Models\Post;
+use App\Models\Timeline;
+use App\Models\Tip;
+use App\Models\Casts\Money as CastsMoney;
+
+use App\Enums\ContenttagAccessLevelEnum;
+use App\Enums\PostTypeEnum;
+use App\Enums\MediafileTypeEnum;
+
+use App\Rules\InEnum;
+
+use App\Http\Resources\PostCollection;
+use App\Http\Resources\Post as PostResource;
+
+use App\Payments\PaymentGateway;
 
 class PostsController extends AppBaseController
 {
@@ -99,8 +106,10 @@ class PostsController extends AppBaseController
             'mediafiles.*.*' => 'integer|uuid|exists:mediafiles',
             'expiration_period' => 'nullable|integer',
             'schedule_datetime' => 'sometimes|date',
-            'contenttags' => 'array',
-            'contenttags.*' => 'string|min:2|max:126',
+            //'contenttags' => 'array',
+            //'contenttags.*' => 'string|min:2|max:126',
+            //'contenttags_mgmt' => 'array',
+            //'contenttags_mgmt.*' => 'string|min:2|max:126',
         ];
 
         if ( !$request->has('mediafiles') ) {
@@ -113,10 +122,19 @@ class PostsController extends AppBaseController
 
         $this->authorize('update', $timeline); // create post considered timeline update
 
-        $attrs = $request->except('timeline_id'); // timeline_id is now postable
+        $attrs = $request->except(['timeline_id', 'description']); // timeline_id is now postable
         $attrs['user_id'] = $timeline->user->id; // %FIXME: remove this field, redundant
         $attrs['active'] = $request->input('active', 1);
         $attrs['type'] = $request->input('type', PostTypeEnum::FREE);
+
+        $alltags = collect();
+        if ( $request->has('description') ) { // extract & collect any tags
+            //$regex = '/\B#\w\w+(!)?/';
+            $regex = '/(#\w+!?)/';
+            $origStr = Str::of($request->description);
+            $alltags = $origStr->matchAll($regex);
+            $attrs['description'] = trim($origStr->remove($alltags->toArray(), false));
+        }
    
         if ($request->input('schedule_datetime')) {
             $attrs['schedule_datetime'] = $request->input('schedule_datetime');
@@ -145,9 +163,11 @@ class PostsController extends AppBaseController
             }
         }
 
-        if ( $request->has('contenttags') && count($request->contenttags) ) {
-            $post->addTag($request->contenttags);
-        }
+        $alltags->each( function($str) use(&$post) {
+            $accessLevel = (substr($str,-1)==='!') ? ContenttagAccessLevelEnum::MGMTGROUP : ContenttagAccessLevelEnum::OPEN;
+            $str = trim($str, '#!'); // remove hashtag and possible '!' at end indicating private/mgmt tag
+            $post->addTag($str, $accessLevel); // add 1-by-1
+        });
 
         $post->refresh();
 
