@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Financial;
 
 use Illuminate\Bus\Batch;
 use Illuminate\Console\Command;

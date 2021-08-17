@@ -10,7 +10,7 @@
       </template>
 
       <template #mobileTitle>
-        <div class="h2 text-center py-2">
+        <div class="h2 ml-2 py-2">
           <fa-icon icon="receipt" fixed-width class="mr-2" />
           {{ $t('title.sidebar') }}
         </div>

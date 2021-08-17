@@ -379,9 +379,11 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
     {
         if ( $this->timeline && $this->timeline->name ) {
             return $this->timeline->name;
-        } else { 
+        }
+        if ($this->timeline) {
             return $this->timeline->slug;
         }
+        return $this->username;
     }
 
     public function getAvatarAttribute($value)

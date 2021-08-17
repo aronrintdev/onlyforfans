@@ -61,7 +61,8 @@ class TipsTableSeeder extends Seeder
             $this->output->writeln("  - Tips seeder: loaded " . $timelines->count() . " timelines...");
         }
 
-        $timelines->take(17)->each( function($t) {
+        // $timelines->take(17)->each( function($t) {
+        $timelines->each(function ($t) {
 
             static $iter = 1;
 
@@ -85,6 +86,11 @@ class TipsTableSeeder extends Seeder
                     if ( $this->appEnv !== 'testing' ) {
                         $this->output->writeln("  - Tips seeder: tipping timeline " . $t->slug);
                     }
+
+                    // Set fake time to make tip
+                    $ts = $this->faker->dateTimeBetween($startDate = '-28 day', $endDate = 'now');
+                    Carbon::setTestNow(new Carbon($ts)); // Sets mocked time
+
                     try {
                         $tipAmount = $this->faker->numberBetween(1, 20) * 500;
                         $tip = Tip::create([
@@ -107,6 +113,9 @@ class TipsTableSeeder extends Seeder
                             $this->output->writeln("Exception while tipping Timeline [{$t->getKey()}] | {$exceptionClass} | {$e->getMessage()}");
                         }
                     }
+
+                    Carbon::setTestNow(); // Clears mocked time
+
                 }, $this->eventsToDelayOnPurchase);
 
                 // Tip some posts...
@@ -116,6 +125,10 @@ class TipsTableSeeder extends Seeder
                         if ( $this->appEnv !== 'testing' ) {
                             $this->output->writeln("  - Tips seeder: tipping post " . $p->slug);
                         }
+
+                        $ts = $this->faker->dateTimeBetween($startDate = '-28 day', $endDate = 'now');
+                        Carbon::setTestNow(new Carbon($ts)); // Sets mocked time
+
                         try {
                             $tipAmount = $this->faker->numberBetween(1, 20) * 500;
                             $tip = Tip::create([
@@ -138,6 +151,9 @@ class TipsTableSeeder extends Seeder
                                 $this->output->writeln("Exception while tipping Post [{$p->getKey()}] | {$exceptionClass} | {$e->getMessage()}");
                             }
                         }
+
+                        Carbon::setTestNow(); // Clears mocked time
+
                     }, $this->eventsToDelayOnPurchase);
                 }); // $posts->each( ... )
 

@@ -6,10 +6,11 @@ use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-
 use App\Jobs\StartTransactionSummaryCreation;
+
+use App\Jobs\Financial\StartUpdatePendingBalances;
 use App\Enums\Financial\TransactionSummaryTypeEnum;
+use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel
 {
@@ -19,7 +20,6 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        \App\Console\Commands\CreateTransactionSummaries::class,
         \App\Console\Commands\DeleteMediafileAssets::class,
         \App\Console\Commands\MakeBlurs::class,
         \App\Console\Commands\MakeThumbnails::class,
@@ -36,10 +36,14 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\PushTestEvent::class,
         \App\Console\Commands\SetmfSize::class,
         \App\Console\Commands\SetTimestamps::class,
-        \App\Console\Commands\SettleFinancialAccounts::class,
         \App\Console\Commands\UpdateStoryqueues::class,
 
         \App\Console\Commands\Dev\PopulateChargebacks::class,
+
+        // Financial Commands
+        \App\Console\Commands\Financial\CreateTransactionSummaries::class,
+        \App\Console\Commands\Financial\SettleFinancialAccounts::class,
+        \App\Console\Commands\Financial\UpdatePendingBalances::class,
     ];
 
     /**
@@ -53,6 +57,13 @@ class Kernel extends ConsoleKernel
     {
         Log::info('Schedule is being run');
         // Transaction Summaries Creations
+
+        /* -------------------------------------------------------------------------- */
+        /*                       TRANSACTION SUMMARIES CREATIONS                      */
+        /* -------------------------------------------------------------------------- */
+        #region Transaction summaries
+
+        /* ---------------------------------- DAILY --------------------------------- */
         $schedule->call(function () {
             $queue = Config::get('transactions.summarizeQueue');
             $batch = Bus::batch([
@@ -62,6 +73,7 @@ class Kernel extends ConsoleKernel
             })->name('Summarize Daily Transactions')->onQueue("$queue-low");
         })->dailyAt('0:01');
 
+        /* --------------------------------- WEEKLY --------------------------------- */
         $schedule->call(function () {
             $queue = Config::get('transactions.summarizeQueue');
             $batch = Bus::batch([
@@ -71,6 +83,7 @@ class Kernel extends ConsoleKernel
             })->name('Summarize Weekly Transactions')->onQueue("$queue-low");
         })->weeklyOn(0, '0:01');
 
+        /* --------------------------------- MONTHLY -------------------------------- */
         $schedule->call(function () {
             $queue = Config::get('transactions.summarizeQueue');
             $batch = Bus::batch([
@@ -80,6 +93,7 @@ class Kernel extends ConsoleKernel
             })->name('Summarize Monthly Transactions')->onQueue("$queue-low");
         })->monthlyOn(1, '0:01');
 
+        /* --------------------------------- YEARLY --------------------------------- */
         $schedule->call(function () {
             $queue = Config::get('transactions.summarizeQueue');
             $batch = Bus::batch([
@@ -88,6 +102,26 @@ class Kernel extends ConsoleKernel
                 Log::info('Summarize Yearly Transactions Finished');
             })->name('Summarize Yearly Transactions')->onQueue("$queue-low");
         })->yearlyOn(1, 1, '0:01');
+
+        #endregion Transaction Summaries
+        /* -------------------------------------------------------------------------- */
+
+
+        /* -------------------------------------------------------------------------- */
+        /*                       ACCOUNT PENDING BALANCES UPDATE                      */
+        /* -------------------------------------------------------------------------- */
+        $schedule->call(function () {
+            $queue = Config::get('transactions.summarizeQueue');
+            $batch = Bus::batch([
+                new StartUpdatePendingBalances()
+            ])->then(function (Batch $batch) {
+                Log::info('Update Pending Balances Finished');
+            })->name('Update Pending Balances')->onQueue("$queue-low");
+
+        // TODO: Determine reasonable interval
+        })->everyFifteenMinutes();
+        /* -------------------------------------------------------------------------- */
+
 
         // $schedule->command('subscription:update-canceled')->everyHour();
         // $schedule->command('send:schdule-messages')->everyMinute()->appendOutputTo(storage_path('logs/publish_posts.log'))->runInBackground();
