@@ -13,15 +13,15 @@ trait ContenttaggableTraits
             $ctags = collect([$_ctag]);
         } else if ( is_array($_ctag) ) {
             $ctags = collect($_ctag);
+        } else if ( $_ctag instanceof \Illuminate\Support\Collection ) {
+            $ctags = $_ctag;
         } else {
             return;
         }
 
         $ids = [];
         $ctags->each( function($str) use (&$ids, $accessLevel) {
-            //$str = ltrim($str, '#');
-            //$str = rtrim($str, '!');
-            $str = trim($str, '#!');
+            $str = trim($str, '#!'); // remove hashtag and possible '!' at end indicating private/mgmt tag
             $ctrecord = Contenttag::where('ctag', $str)->firstOrCreate([
                 'ctag' => $str,
             ]);

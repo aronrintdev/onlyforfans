@@ -81,16 +81,18 @@
         <div v-if="hasMediafiles">
           <MediaSlider :mediafiles="post.mediafiles" :session_user="session_user" :use_mid="use_mid" />
         </div>
+        <!--
         <div v-if="post.contenttags.length" class="py-3 text-wrap">
           <b-card-text class="px-3 mb-0 tag-post_tags">
             Public: {{ `#${post.contenttags.join(' #')}` }}
           </b-card-text>
         </div>
-        <div v-if="post.contenttags_mgmt.length" class="py-3 text-wrap">
+        <div v-if="post.contenttags && post.contenttags_mgmt.length" class="py-3 text-wrap">
           <b-card-text class="px-3 mb-0 tag-post_tags">
             Private: {{ `#${post.contenttags_mgmt.join(' #')}` }}
           </b-card-text>
         </div>
+        -->
       </template>
       <template v-else>
         <PostCta :post="post" :session_user="session_user" :primary_mediafile="primaryMediafile" />
