@@ -70,7 +70,7 @@
           </div>
         </b-col>
 
-        <b-col cols="12" md="4" offset-md="3" class="tag-stats mt-2">
+        <b-col cols="12" md="4" offset-md="3" class="tag-stats">
           <Stats :stats="timeline.userstats" />
         </b-col>
       </b-row>
@@ -305,5 +305,10 @@ header.masthead .profile-ctrl.dropdown button {
   p {
     font-size: 16px;
   }
+}
+
+.tag-stats {
+  margin-top: -0.5em;
+  cursor: default;
 }
 </style>
