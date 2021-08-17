@@ -13,8 +13,8 @@
         <section v-if="!is_schedulefeed" class="feed-ctrl mt-3 px-2 py-2 d-flex flex-column flex-md-row justify-content-center justify-content-md-between">
           <b-nav v-if="!is_homefeed" pills>
             <b-nav-item @click="setFeedType('default')" :active="feedType==='default'">All</b-nav-item>
-            <b-nav-item @click="setFeedType('photos')" :active="feedType==='photos'">Photos</b-nav-item>
-            <b-nav-item @click="setFeedType('videos')" :active="feedType==='videos'">Videos</b-nav-item>
+            <b-nav-item @click="setFeedType('photos')" :active="feedType==='photos'">Photos({{ totalPhotosCount }})</b-nav-item>
+            <b-nav-item @click="setFeedType('videos')" :active="feedType==='videos'">Videos({{ totalVideosCount }})</b-nav-item>
           </b-nav>
           <article v-else>
             <!-- empty placeholder to preserve justify arrangment in flex area -->
@@ -79,10 +79,10 @@
         />
       </article>
       <article class="load-more-item col-sm-12 my-3">
-        <b-card :class="{ 'cursor-pointer': !moreLoading && !isLastPage }" @click="onLoadMoreClick">
-          <div class="w-100 d-flex my-3 justify-content-center" >
+        <b-card :class="{ 'cursor-pointer': !moreLoading && !isLastPage }" class="load-more-item-content" @click="onLoadMoreClick">
+          <div class="w-100 d-flex my-3 text-secondary justify-content-center" >
             <fa-icon v-if="moreLoading" icon="spinner" spin size="lg" />
-            <span v-else-if="isLastPage">End Of Content</span>
+            <span v-else-if="isLastPage">End of content</span>
             <span v-else>Load More</span>
           </div>
         </b-card>
@@ -173,7 +173,8 @@ export default {
     feedType: 'default',
 
     isFavoritedByMe: false, // is timeline/feed a favorite
-
+    totalPhotosCount: 0,
+    totalVideosCount: 0,
   }),
 
   mounted() {
@@ -186,12 +187,20 @@ export default {
 
   created() {
     this.feedType = this.is_schedulefeed ? 'schedule' : this.feedType;
+
+    // Get photos & videos feed total count
+    axios.get(route('timelines.getPhotosVideosCount', this.timelineId))
+      .then((response) => {
+        this.totalPhotosCount = response.data.photos || 0;
+        this.totalVideosCount = response.data.videos || 0;
+      })
+
     this.$store.dispatch('getFeeddata', { 
       feedType: this.feedType,
       timelineId: this.timelineId,  // only valid if not home feed
       isHomefeed: this.is_homefeed,
       page: 1, 
-      limit: this.limit, 
+      limit: this.limit,
     })
 
     eventBus.$on('update-posts', postId => {
@@ -426,19 +435,27 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .feed-ctrl {
   background: #fff;
   border: solid #dfdfdf 1px;
   border-radius: 3px;
+  .btn {
+    font-size: 1.2rem;
+  }
 }
-.feed-ctrl .btn {
-  font-size: 1.2rem;
-}
+
 .tag-debug {
   display: none;
   /*
    */
+}
+
+.load-more-item {
+  &-content {
+    background-color: transparent;
+    border: none;
+  }
 }
 
 </style>
