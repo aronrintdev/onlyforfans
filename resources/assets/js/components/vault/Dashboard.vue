@@ -44,7 +44,11 @@
       </aside>
 
       <main class="col-md-9">
-
+        <b-row v-if="isCreatePostFormVisible" class="mb-3">
+          <b-col>
+            <CreatePost :session_user="session_user" :timeline="timeline" :data="createPostData" :onHide="hideCreatePost" />
+          </b-col>
+        </b-row>
         <!-- +++ File Thumbnails / Dropzone File Uploader +++ -->
         <b-row>
           <b-col>
@@ -342,6 +346,7 @@ import MediaLightbox from '@components/vault/MediaLightbox'
 import TreeItem from '@components/vault/TreeItem'
 import VideoRecorder from '@components/videoRecorder'
 import AudioRecorder from '@components/audioRecorder'
+import CreatePost from '@components/common/CreatePost.vue';
 
 export default {
 
@@ -362,6 +367,7 @@ export default {
     ...Vuex.mapState(['vaultfolder']),
     ...Vuex.mapState(['breadcrumb']),
     ...Vuex.mapState(['shares']),
+    ...Vuex.mapState(['timeline']),
 
     isLoading() {
       return !this.vault_pkid || !this.vaultfolder_pkid || !this.vault || !this.vaultfolder || !this.foldertree || !this.session_user
@@ -433,11 +439,14 @@ export default {
     isMediaLightboxModalVisible: false,
     isApproveSharedModalVisible: false,
     isDownloadFilesModalVisible: false,
+    isCreatePostFormVisible: false,
 
     selectedVfToApprove: null,
     selectedVfToDelete: null,
 
     lightboxSelection: null,
+
+    createPostData: null,
 
     createForm: {
       name: '',
@@ -493,6 +502,10 @@ export default {
     addItem() {
     },
 
+    hideCreatePost() {
+      this.isCreatePostFormVisible = false
+    },
+
     sendSelected(resourceType) {
       // send (share) selected files to a post, story, or message
       // %TODO: as part of AF-492 deprecate this code 20210806 -- No actually we need it to send from vault to other areas (eg post create form)
@@ -521,7 +534,9 @@ export default {
           break
         case 'post':
           params.context = 'send-selected-mediafiles-to-post' // 'mediafiles-selected-in-vault'
-          this.$router.replace({ name: 'index', params })
+          this.createPostData = params
+          this.isCreatePostFormVisible = true
+          this.isSendFilesModalVisible = false
           break
         case 'message':
           params.context = 'send-selected-mediafiles-to-message' // 'mediafiles-selected-in-vault'
@@ -920,6 +935,7 @@ export default {
     MediaLightbox,
     VideoRecorder,
     AudioRecorder,
+    CreatePost,
   },
 }
 /*

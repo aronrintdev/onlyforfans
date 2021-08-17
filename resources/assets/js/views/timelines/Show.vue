@@ -13,6 +13,7 @@
         <PreviewUpgrade :session_user="session_user" :timeline="timeline" :viewMorePhotos="setCurrentFeedType" :key="timeline.id" />
       </aside>
       <main :class="mainClass">
+        <CreatePost v-if="isOwner" :session_user="session_user" :timeline="timeline" class="mt-3" />
         <PostFeed
           :session_user="session_user"
           :timeline="timeline"
@@ -32,6 +33,7 @@ import { eventBus } from '@/eventBus'
 import PostFeed from '@components/timelines/PostFeed.vue'
 import StoryBar from '@components/timelines/StoryBar.vue'
 import Banner from '@components/timelines/Banner.vue'
+import CreatePost from '@components/common/CreatePost.vue';
 import FollowCtrl from '@components/common/FollowCtrl.vue'
 import PreviewUpgrade from '@components/common/PreviewUpgrade.vue'
 
@@ -42,6 +44,7 @@ export default {
     Banner,
     FollowCtrl,
     PreviewUpgrade,
+    CreatePost,
   },
 
   props: {
@@ -61,6 +64,10 @@ export default {
 
     isLoading() {
       return !this.slug || !this.timeline
+    },
+
+    isOwner() {
+      return this.session_user.id === this.timeline.user.id
     }
   },
 
