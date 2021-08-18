@@ -12,14 +12,16 @@ use App\Models\Traits\UsesUuid;
 use App\Enums\MediafileTypeEnum;
 use App\Http\Resources\Mediafile as ResourcesMediafile;
 use App\Interfaces\Messagable;
+use App\Interfaces\Contenttaggable;
 use App\Models\Traits\SluggableTraits;
 use App\Traits\OwnableFunctions;
+use App\Models\Traits\ContenttaggableTraits;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Intervention\Image\Facades\Image;
 
-class Mediafile extends BaseModel implements Guidable, Ownable, Messagable
+class Mediafile extends BaseModel implements Guidable, Ownable, Messagable, Contenttaggable
 {
-    use UsesUuid, SoftDeletes, HasFactory, OwnableFunctions, Sluggable, SluggableTraits;
+    use UsesUuid, SoftDeletes, HasFactory, OwnableFunctions, Sluggable, SluggableTraits, ContenttaggableTraits;
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
     protected $appends = ['filepath', 'name', 'mimetype', 'has_blur', 'is_image', 'is_audio', 'is_video'];
@@ -51,6 +53,10 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Messagable
 
     public function contentflags() {
         return $this->morphMany(Contentflag::class, 'flaggable');
+    }
+
+    public function contenttags() {
+        return $this->morphToMany(Contenttag::class, 'contenttaggable')->withTimestamps();
     }
 
     //--------------------------------------------
@@ -262,7 +268,6 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Messagable
 
     #endregion Messagable
     /* ---------------------------------------------------------------------- */
-
 
     // %%% --- Other ---
 

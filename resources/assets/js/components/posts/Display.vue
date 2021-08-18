@@ -99,6 +99,7 @@
       </template>
 
     </b-card>
+
     <b-modal
       v-model="showDeleteConfirmation"
       size="md"

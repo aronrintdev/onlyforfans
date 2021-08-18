@@ -14,6 +14,8 @@ use App\Interfaces\Reportable;
 use App\Interfaces\Commentable;
 use App\Interfaces\HasPricePoints;
 use App\Interfaces\PricePoint;
+use App\Interfaces\Contenttaggable;
+use App\Models\Traits\ContenttaggableTraits;
 use App\Models\Traits\UsesUuid;
 use App\Models\Financial\Account;
 use Illuminate\Support\Collection;
@@ -38,6 +40,7 @@ use Laravel\Scout\Searchable;
 use Money\Money as Money;
 
 use App\Models\Likeable as LikeableModel;
+use App\Models\Contenttaggable as ContenttaggableModel;
 
 class Post extends Model
     implements
@@ -45,6 +48,7 @@ class Post extends Model
         Deletable,
         Purchaseable,
         HasPricePoints,
+        Contenttaggable,
         Tippable,
         Likeable,
         Reportable,
@@ -55,6 +59,7 @@ class Post extends Model
     HasFactory,
     OwnableTraits,
     LikeableTraits,
+    ContenttaggableTraits,
     Sluggable,
     SluggableTraits,
     ShareableTraits,
@@ -85,6 +90,9 @@ class Post extends Model
             }
             // delete the Likeables, not the 'likes' relation, which is actually the liker (user) !!
             $likeables = LikeableModel::where('likeable_type', 'posts')->where('likeable_id', $model->id)->delete();
+
+            // delete the Contenttagables (join table records)
+            $contenttaggales = ContenttaggableModel::where('contenttaggable_type', 'posts')->where('contenttaggable_id', $model->id)->delete();
         });
     }
 
@@ -208,6 +216,10 @@ class Post extends Model
     public function contentflags()
     {
         return $this->morphMany(Contentflag::class, 'flaggable');
+    }
+
+    public function contenttags() { // all content tags
+        return $this->morphToMany(Contenttag::class, 'contenttaggable')->withPivot('access_level')->withTimestamps();
     }
 
     //--------------------------------------------
