@@ -46,43 +46,28 @@
 
       <template #footer>
 
-        <!--
-        <b-row class="mb-1">
-          <b-col cols="12" md="8" class="d-flex">
-            Public:
-            <b-form-tags input-id="edit-post-contenttags" v-model="contenttags"></b-form-tags>
-          </b-col>
-        </b-row>
-        <b-row class="mb-1">
-          <b-col cols="12" md="8" class="d-flex">
-            Private:
-            <b-form-tags input-id="edit-post-contenttags_mgmt" v-model="contenttags_mgmt"></b-form-tags>
-          </b-col>
-        </b-row>
-        -->
-            <b-row v-if="true || isTagFormVisible" class="mb-1">
-              <b-col cols="12" class="d-flex align-items-center">
-                <b-form-tags v-model="hashtags" no-outer-focus class="">
-                  <template v-slot="{ tags, inputAttrs, inputHandlers, tagVariant, addTag, removeTag }">
-                    <div class="d-inline-block">
-                      <b-form-tag v-for="tag in tags" 
-                        @remove="removeTag(tag)" 
-                        :key="tag" 
-                        :title="tag" 
-                        :variant="isHashtagPrivate(tag) ? 'danger' : 'secondary'" 
-                        size="sm" class="mr-1" 
-                      > 
-                        {{ tag }}
-                      </b-form-tag>
-                    </div>
-                  </template>
-                </b-form-tags>
-                <div class="ml-2" v-b-tooltip.hover.html="{title: 'Enter tags in post body, use hash at start for <em>#publictag</em> or hash and exclamation at end for <em>#privatetag!</em>', variant: 'info'}">
-                  <fa-icon :icon="['fas', 'info']" class="text-warning" />
+        <b-row v-if="isTagFormVisible" class="mb-1">
+          <b-col cols="12" class="d-flex align-items-center">
+            <b-form-tags v-model="hashtags" no-outer-focus class="">
+              <template v-slot="{ tags, inputAttrs, inputHandlers, tagVariant, addTag, removeTag }">
+                <div class="d-inline-block">
+                  <b-form-tag v-for="tag in tags" 
+                    @remove="removeTag(tag)" 
+                    :key="tag" 
+                    :title="tag" 
+                    :variant="isHashtagPrivate(tag) ? 'danger' : 'secondary'" 
+                    size="sm" class="mr-1" 
+                  > 
+                    {{ tag }}
+                  </b-form-tag>
                 </div>
-                <!-- <small>Enter tags in post body, use hash at start for <i>#publictag</i> or hash and exclamation at end for <i>#privatetag!</i></small> -->
-              </b-col>
-            </b-row>
+              </template>
+            </b-form-tags>
+            <div class="ml-2" v-b-tooltip.hover.html="{title: 'Enter tags in post body, use hash at start for <em>#publictag</em> or hash and exclamation at end for <em>#privatetag!</em>', variant: 'info'}">
+              <fa-icon :icon="['fas', 'info']" class="text-warning" />
+            </div>
+          </b-col>
+        </b-row>
 
         <b-row>
           <b-col cols="4" md="4" class="d-flex">
@@ -158,8 +143,6 @@ export default {
           || this.post.price !== this.price
           || this.post.price_for_subscribers !== this.priceForPaidSubscribers
           || this.post.schedule_datetime !== this.schedule_datetime
-        //|| this.post.contenttags !== this.contenttags
-        //|| this.post.contenttags_mgmt !== this.contenttags_mgmt
       }
       return false
     }
@@ -168,8 +151,6 @@ export default {
   data: () => ({
     loading: false,
     description: '',
-    //contenttags: [],
-    //contenttags_mgmt: [],
     type: 'free',
     price: 0,
     priceForPaidSubscribers: 0,
@@ -182,6 +163,7 @@ export default {
     postSchedule: {},
     moment,
     schedule_datetime: null,
+    isTagFormVisible: true,
   }),
 
   methods: {
@@ -191,19 +173,6 @@ export default {
     },
 
     save(e) {
-      // tags are parsed out of the post's content body by the backend...so add them in here from the separate 'tag' form
-      //   ~ "fix" any tags prefixed with '#' by user (remove the '#')...since we add the '#' ourselves here before sending
-      //      That is the intended usage is  for the user to type in tags like "foo" rather than "#foo"
-      /*
-      const tmp = this.description
-      if ( this.contenttags.length > 0 ) {
-        this.description += ' #'+this.contenttags.map( ct => ct.replace(/^#/,'') ).join(' #')
-      }
-      if ( this.contenttags_mgmt.length > 0 ) {
-        // %FIXME: need to postfix with '!'
-        //this.description += ' #'+this.contenttags_mgmt.map( ct => ct.replace(/^#/,'') ).join(' #')
-      }
-       */
       const payload = {
         description: this.description,
         type: this.type,
@@ -214,8 +183,6 @@ export default {
       }
       console.log('save', { 
         payload,
-        //tags: this.contenttags,
-        //tmp,
         desc: this.description,
       })
       this.loading = true
@@ -282,21 +249,6 @@ export default {
     })
   },
 
-  watch: {
-
-    /*
-    hashtags(newVal, oldVal) {
-      this.isTagFormVisible = this.hashtags.length > 0
-    },
-
-    description(newVal, oldVal) {
-      if (newVal!==oldVal) {
-        this.formErr = null // clear errors
-      }
-    },
-     */
-
-  }, // watch
 }
 </script>
 
