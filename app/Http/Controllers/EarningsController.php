@@ -52,7 +52,7 @@ class EarningsController extends Controller
                 TransactionTypeEnum::TIP,
                 TransactionTypeEnum::SUBSCRIPTION,
             ])
-            ->whereBetween('settled_at', [ $from, $to ])
+            ->whereBetween('created_at', [ $from, $to ])
             ->groupBy('type')
             ->get();
 
@@ -65,7 +65,7 @@ class EarningsController extends Controller
                 TransactionTypeEnum::CHARGEBACK_PARTIAL,
                 TransactionTypeEnum::CREDIT,
             ])
-            ->whereBetween('settled_at', [$from, $to])
+            ->whereBetween('created_at', [$from, $to])
             ->groupBy('type')
             ->get();
 
@@ -124,6 +124,7 @@ class EarningsController extends Controller
         $account = $user->getEarningsAccount($system, $currency);
 
         return [
+            'account' => $account,
             'balance' => $account->balance->subtract($account->pending),
             'balance_last_updated_at' => $account->balance_last_updated_at,
             'pending' => $account->pending,

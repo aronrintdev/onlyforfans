@@ -28,4 +28,13 @@ class SystemOwner extends Model implements HasFinancialAccounts
     }
 
     #endregion
+
+    /**
+     * For `HasFinancialAccountsTrait` to name account correctly
+     * @return string
+     */
+    public function getUsernameAttribute()
+    {
+        return "$this->system System $this->name";
+    }
 }
