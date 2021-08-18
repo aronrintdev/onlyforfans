@@ -56,7 +56,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 //import { eventBus } from '@/app'
 import { eventBus } from '@/eventBus'
-import moment from 'moment'
+import { DateTime } from 'luxon'
 
 import LoadingOverlay from '@components/common/LoadingOverlay'
 import PostDisplay from '@components/posts/Display'
@@ -97,7 +97,8 @@ export default {
           label: this.$t('table.label.date'),
           formatter: (value, key, item) => {
             // return value
-            return moment(value).format('MMMM Do, YYYY HH:mm')
+            // return moment(value).format('MMMM Do, YYYY HH:mm')
+            return DateTime.fromISO(value).toLocaleString(DateTime.DATETIME_MED);
           }
         },
         {

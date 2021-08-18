@@ -1,7 +1,7 @@
 <template>
   <div v-if="!isLoading" class="h-100 d-flex flex-column" :key="this.id">
 
-    <section class="chatthread-header" :class="{ mobile: mobile }">
+    <section class="chatthread-header pt-3" :class="{ mobile: mobile }">
       <div class="d-flex align-items-center">
         <b-btn variant="link" class="" @click="onBackClicked">
           <fa-icon :icon="['fas', 'arrow-left']" class="fa-lg" />

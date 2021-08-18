@@ -30,7 +30,7 @@
       <aside class="sidebar mr-3">
         <slot name="sidebar"></slot>
       </aside>
-      <main class="main flex-fill h-100 py-3">
+      <main class="main flex-fill h-100">
         <slot></slot>
       </main>
     </section>

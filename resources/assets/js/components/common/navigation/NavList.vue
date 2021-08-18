@@ -3,7 +3,7 @@
     <b-list-group-item
       v-for="(item, index) in items"
       :key="item.key"
-      :selected="selected === item.key || selected === index"
+      :active="selected === item.key || selected === index"
       class="cursor-pointer d-flex align-items-center"
       @click="$emit('select', item)"
     >

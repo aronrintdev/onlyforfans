@@ -38,11 +38,13 @@
       <template #sidebar>
         <TopEarners class="mb-3" />
         <Balance class="mb-3" />
-        <Statistics class="mb-3" />
+
+        <NavList :selected="focus" :items="navItems" @select="item => focus = item.key" />
       </template>
 
-      <b-card class="w-100" title="Transactions">
-        <TransactionsTable class="w-100" />
+      <b-card class="w-100 h-100" :class="[ focus ]">
+        <TransactionsTable v-if="focus === 'transactions'" class="w-100" />
+        <Statistics v-if="focus === 'stats'" class="mb-3 h-100" />
       </b-card>
     </WithSidebar>
 
@@ -90,8 +92,29 @@ export default {
     focus: 'sidebar', // sidebar | stats | transactions
   }),
 
+  watch: {
+    mobile(value) {
+      if (!value) {
+        this.focus = 'stats'
+      }
+    },
+  },
+
+  mounted() {
+    if (!this.mobile) {
+      this.focus = 'stats'
+    }
+  },
+
 }
 </script>
+
+<style lang="scss" scoped>
+.stats {
+  max-height: calc(100vh - 10rem);
+  overflow-y: auto;
+}
+</style>
 
 <i18n lang="json5" scoped>
 {
