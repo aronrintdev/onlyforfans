@@ -57,7 +57,7 @@ class ShareablesTableSeeder extends Seeder
         }
 
         // Remove a few timelines so we have some without any followers for testing...
-        //   ~ [ ] %TODO: timelines w/ followers but not subcribers, & vice-versa
+        //   ~ [ ] %TODO: timelines w/ followers but not subscribers, & vice-versa
         $timelines->pop();
         $timelines->pop();
         $timelines->pop();
