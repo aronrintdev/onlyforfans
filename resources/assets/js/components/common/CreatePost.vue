@@ -245,6 +245,10 @@ export default {
         thumbnailWidth: 100,
         clickable: '#clickme_to-select',
         maxFilesize: 5000, // 5 GB
+
+        // https://stackoverflow.com/questions/46379917/dropzone-js-upload-with-php-failed-after-30-seconds-upload
+        timeout: 0, // disables timeout
+
         addRemoveLinks: true,
         removeType: 'client',
         headers: {
@@ -417,7 +421,6 @@ export default {
     },
 
     onDropzoneTotalUploadProgress(totalUploadProgress, totalBytes, totalBytesSent) {
-      console.log('Total Upload Progress', { totalUploadProgress, totalBytes, totalBytesSent })
       this.uploadProgress = totalUploadProgress
     },
 
