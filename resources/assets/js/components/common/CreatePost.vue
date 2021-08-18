@@ -57,6 +57,7 @@
               @vdropzone-success="onDropzoneSuccess"
               @vdropzone-error="onDropzoneError"
               @vdropzone-queue-complete="onDropzoneQueueComplete"
+              @vdropzone-total-upload-progress="onDropzoneTotalUploadProgress"
               class="dropzone"
             >
               <div class="dz-custom-content">
@@ -76,6 +77,8 @@
               @close="showAudioRec=false;selectedMedia=null"
               @complete="audioRecordFinished"
             />
+
+            <b-progress v-if="isBusy" :value="uploadProgress" max="100" animated />
           </div>
 
           <template #footer>
@@ -281,6 +284,8 @@ export default {
 
     formErr: null, // null if no error, otherwise string (error message)
 
+    uploadProgress: 0,
+
   }), // data
 
   methods: {
@@ -409,6 +414,11 @@ export default {
       formData.append('resource_id', this.newPostId)
       formData.append('resource_type', 'posts')
       formData.append('mftype', 'post')
+    },
+
+    onDropzoneTotalUploadProgress(totalUploadProgress, totalBytes, totalBytesSent) {
+      console.log('Total Upload Progress', { totalUploadProgress, totalBytes, totalBytesSent })
+      this.uploadProgress = totalUploadProgress
     },
 
     onDropzoneSuccess(file, response) {
