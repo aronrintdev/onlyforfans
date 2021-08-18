@@ -39,6 +39,17 @@ use Illuminate\Support\Facades\Log;
  * @property Carbon       $created_at
  * @property Carbon       $updated_at
  *
+ *
+ * @method static static|Builder inRange(array $range) - [ 'from', 'to' ]
+ * @method static static|Builder settled()
+ * @method static static|Builder notSettled()
+ * @method static static|Builder failed()
+ * @method static static|Builder pending()
+ * @method static static|Builder isDebit()
+ * @method static static|Builder isCredit()
+ * @method static static|Builder type(string $type)
+ * @method static static|Builder isTip()
+ *
  * @package App\Models\Financial
  */
 class Transaction extends Model
@@ -165,6 +176,17 @@ class Transaction extends Model
     public function scopeSettled($query)
     {
         return $query->whereNotNull('settled_at');
+    }
+
+    /**
+     * Transactions that have NOT been settled.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeNotSettled($query)
+    {
+        return $query->whereNull('settled_at');
     }
 
     /**

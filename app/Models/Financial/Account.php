@@ -67,6 +67,18 @@ use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon $deleted_at
  *
+ * @method static static|Builder isEarnings()
+ * @method static static|Builder isWallet()
+ * @method static static|Builder financialSystem(string $system, string $currency)
+ * @method static static|Builder currency(string $currency)
+ * @method static static|Builder system(string $system)
+ * @method static static|Builder type(string $type)
+ * @method static static|Builder isIn()
+ * @method static static|Builder isInternal()
+ * @method static static|Builder isOut()
+ * @method static static|Builder hasPending()
+ * @method static static|Builder hasPendingTransactions()
+ *
  * @package App\Models\Financial
  */
 class Account extends Model implements Ownable
@@ -221,6 +233,17 @@ class Account extends Model implements Ownable
     public function scopeHasPending($query)
     {
         return $query->where('pending', '!=', 0);
+    }
+
+    /**
+     * Account has transactions that are pending settling
+     * `$account->hasPendingTransactions()`
+     */
+    public function scopeHasPendingTransactions($query)
+    {
+        return $query->whereHas('transactions', function ($query) {
+            return $query->pending();
+        });
     }
 
     #endregion Scopes
