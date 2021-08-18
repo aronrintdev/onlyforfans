@@ -20,6 +20,8 @@
           </main>
           <aside v-if="!isGridLayout" class="col-md-5 col-lg-4">
             <MiniMyStatsWidget :session_user="session_user" :timeline="timeline" />
+            <!-- CompaniesWidget -->
+            <Companies :session_user="session_user" />
             <!--
             <SuggestedFeed :session_user="session_user" :timeline="timeline" class="mt-3" />
             -->
@@ -51,12 +53,14 @@
 
 <script>
 import Vuex from 'vuex';
+import axios from 'axios';
 import { eventBus } from '@/eventBus'
 import PostFeed from '@components/timelines/PostFeed.vue';
 import StoryBar from '@components/timelines/StoryBar.vue';
 import MiniMyStatsWidget from '@components/user/MiniMyStatsWidget.vue';
 import SuggestedFeed from '@components/common/SuggestedFeed.vue';
 import CreatePost from '@components/common/CreatePost.vue';
+import Companies from '@components/common/Companies.vue';
 
 export default {
   components: {
@@ -65,6 +69,7 @@ export default {
     CreatePost,
     MiniMyStatsWidget,
     SuggestedFeed,
+    Companies,
   },
 
   computed: {
@@ -108,7 +113,9 @@ export default {
 
   },
 
-  mounted() { },
+  mounted() {
+    
+  },
 
   methods: {
     ...Vuex.mapActions(['getStories']),
