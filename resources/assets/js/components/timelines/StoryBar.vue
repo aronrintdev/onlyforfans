@@ -68,8 +68,8 @@
     <b-modal v-model="isPreviewModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="OFF-p-0">
       <section>
         <div class="box-image-preview text-center">
-          <b-img-lazy v-if="storyAttrs.selectedMediafile" fluid :src="selectedFileUrl" />
-          <b-img-lazy v-else-if="fileInput" fluid :src="selectedFileUrl" />
+          <b-img-lazy v-if="storyAttrs.selectedMediafile" :src="selectedFileUrl" />
+          <b-img-lazy v-else-if="fileInput" :src="selectedFileUrl" />
         </div>
       </section>
 
@@ -396,7 +396,9 @@ body {
   }
 
   .box-image-preview img {
-    height: 450px;
+    max-width: 100%;
+    //max-height: calc(100vh - 290px);
+    max-height: calc(100vh - 17rem);
   }
 }
 </style>

@@ -106,6 +106,9 @@ Route::group(['middleware' => ['auth']], function () {
     // -- contentflags --
     Route::resource('contentflags', 'ContentflagsController', [ 'except' => [ 'create', 'edit' ] ]);
 
+    // -- contenttags --
+    Route::resource('contenttags', 'ContenttagsController', [ 'only' => [ 'index', 'show' ] ]);
+
     // -- mycontacts --
     // apiResource Routes:
     // https://laravel.com/docs/8.x/controllers#actions-handled-by-resource-controller
