@@ -130,7 +130,9 @@ export default {
 .nav-buttons {
   position: fixed;
   bottom: 0;
-  z-index: 2000;
+  // z-index 1000 is where $zindex-dropdown for bootstrap begins
+  // See 'bootstrap'/scss/_variables:680 for bootstrap Z-index master list
+  z-index: 999;
 
   width: 100vw;
   background-color: var(--light);

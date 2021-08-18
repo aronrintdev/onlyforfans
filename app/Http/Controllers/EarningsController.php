@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\Financial\TransactionSummaryTypeEnum;
-use App\Enums\Financial\TransactionTypeEnum;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Config;
-use App\Http\Resources\TransactionCollection;
-use App\Models\Financial\Transaction;
-use App\Models\Financial\TransactionSummary;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Financial\Transaction;
+use Illuminate\Support\Facades\Config;
+use App\Enums\Financial\TransactionTypeEnum;
+use App\Models\Financial\TransactionSummary;
+use App\Http\Resources\TransactionCollection;
+use App\Enums\Financial\TransactionSummaryTypeEnum;
 
 class EarningsController extends Controller
 {
@@ -105,14 +106,25 @@ class EarningsController extends Controller
         ];
     }
 
+    /**
+     * Retrieves the balances for the current logged in user.
+     */
     public function balances(Request $request)
     {
         [ $system, $currency ] = $this->systemAndCurrency($request);
 
-        $account = $request->user()->getEarningsAccount($system, $currency);
+        $user = $request->user();
+        if ($request->user()->isAdmin()) {
+            $request->validate(['user_id' => 'uuid|exists:users,id' ]);
+            if ($request->has('user_id')) {
+                $user = User::find($request->user_id);
+            }
+        }
+
+        $account = $user->getEarningsAccount($system, $currency);
 
         return [
-            'balance' => $account->balance,
+            'balance' => $account->balance->subtract($account->pending),
             'balance_last_updated_at' => $account->balance_last_updated_at,
             'pending' => $account->pending,
             'pending_last_updated_at' => $account->pending_last_updated_at,

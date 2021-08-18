@@ -4,7 +4,7 @@
       <b-list-group-item>
         <div class="d-flex">
           <span v-text="$t('available')" />
-          <span class="ml-auto">{{ balances.balance | niceCurrency }}</span>
+          <span class="ml-auto">{{ (balances.balance) | niceCurrency }}</span>
         </div>
       </b-list-group-item>
       <b-list-group-item>

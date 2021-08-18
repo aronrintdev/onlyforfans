@@ -206,7 +206,9 @@ export default {
   bottom: 64px;
   left: 0;
   right: 0;
-  z-index: 1000;
+  // z-index 1000 is where $zindex-dropdown for bootstrap begins
+  // See 'bootstrap'/scss/_variables:680 for bootstrap Z-index master list
+  z-index: 999;
 
   pointer-events: none;
 

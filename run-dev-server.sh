@@ -5,10 +5,11 @@ trap quitjobs INT
 quitjobs() {
   echo ""
   pkill -P $$
-  echo "Killed all running jobs".
+  echo " => Killed all running jobs".
   scriptCancelled="true"
   trap - INT
-  exit
+  ## Update: exit was exiting open terminal
+  # exit
 }
 
 ### Wait for cancceled trap loop ###
@@ -16,7 +17,7 @@ scriptCancelled="false"
 waitforcancel() {
   while :
   do
-    if [ "$scriptCanceled" == "true"]; then
+    if [ "$scriptCanceled" == "true" ]; then
       return
     fi
     sleep 1
