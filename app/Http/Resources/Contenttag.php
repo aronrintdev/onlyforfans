@@ -8,18 +8,9 @@ class Contenttag extends JsonResource
 {
     public function toArray($request)
     {
-        $counts = [
-            'mediafiles' => $this->mediafiles->count(),
-            'posts' => $this->posts->count(),
-            'vaultfolders' => $this->vaultfolders->count(),
-        ];
-        $total = array_sum($counts);
-        $counts['total'] = $total;
-
         return [
             'id' => $this->id,
             'ctag' => $this->ctag,
-            'counts' => $counts,
             'mediafiles_count' => $this->mediafiles_count,
             'posts_count' => $this->posts_count,
             'vaultfolders_count' => $this->vaultfolders_count,

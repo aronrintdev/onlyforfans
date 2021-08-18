@@ -173,13 +173,6 @@ class PostsController extends AppBaseController
 
         $post->addTag($publicTags, ContenttagAccessLevelEnum::OPEN); // batch add
         $post->addTag($privateTags, ContenttagAccessLevelEnum::MGMTGROUP); // batch add
-        /*
-        $allTags->each( function($str) use(&$post) {
-            $accessLevel = (substr($str,-1)==='!') ? ContenttagAccessLevelEnum::MGMTGROUP : ContenttagAccessLevelEnum::OPEN;
-            $str = trim($str, '#!'); // remove hashtag and possible '!' at end indicating private/mgmt tag
-            $post->addTag($str, $accessLevel); // add 1-by-1
-        });
-         */
 
         $post->refresh();
 
