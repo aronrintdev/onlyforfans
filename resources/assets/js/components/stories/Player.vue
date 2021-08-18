@@ -227,10 +227,12 @@ export default {
 
     handleTouchStart() {
       //console.log('handleTouchStart()')
+      document.body.style.webkitUserSelect = "none"
       this.stopPlayback()
     },
     handleTouchEnd() {
       //console.log('handleTouchEnd()')
+      document.body.style.webkitUserSelect = null
       if (this.isAutoplay) {
         this.startPlayback()
       }
