@@ -136,7 +136,7 @@ export default {
   },
 
   created() {
-    if (this.$route.name.indexOf('messages') > -1) {
+    if (this.$route.name && this.$route.name.indexOf('messages') > -1) {
       this.isFooterHidden = true;
     }
     if (!this.session_user) {
