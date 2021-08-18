@@ -9,6 +9,9 @@
         <b-badge variant="success" v-else-if="data.item.active">Active</b-badge>
         <b-badge variant="secondary" v-else class="text-white">Inactive</b-badge>
       </template>
+      <template #cell(permissions)="data">
+        <b-badge v-b-tooltip.hover variant="primary" class="mr-2 permission" :title="permission.description" v-for="permission in data.item.permissions" :key="permission.id">{{ permission.name }}</b-badge>
+      </template>
       <template #cell(actions)="data">
         <div class="text-right">
           <b-button class="actions-btn" variant="secondary" size="sm" @click="changeActive(data.index)"
@@ -90,11 +93,8 @@
           }
         },
         {
-          key: 'last_login_at',
-          label: 'Last Login',
-          formatter: (value, key, item) => {
-            return value ? moment.utc(value).local().fromNow() : '';
-          }
+          key: 'permissions',
+          label: 'Permissions',
         },
         {
           key: 'actions',
@@ -164,6 +164,9 @@
     padding: 5px;
     height: auto;
     cursor: pointer;
+  }
+  .permission {
+    cursor: pointer; 
   }
 </style>
 
