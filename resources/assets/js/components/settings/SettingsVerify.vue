@@ -251,6 +251,8 @@ export default {
 
   created() {
     this.form.hasAllowedNSFW = Boolean(this.user_settings.has_allowed_nsfw)
+    this.form.firstname = this.session_user.real_firstname
+    this.form.lastname = this.session_user.real_lastname
     this.getMe()
   },
 

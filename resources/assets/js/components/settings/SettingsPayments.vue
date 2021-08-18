@@ -1,9 +1,9 @@
 <template>
-  <b-card :title="$t('PaymentMethods')">
-    Save Payment Methods:
+  <b-card :title="mobile ? null : $t('PaymentMethods')">
+    {{ $t('Save Payment Methods') }}
     <b-row class="align-items-stretch">
       <b-col v-if="savedPaymentMethods.length === 0">
-        You have no save payment methods.
+        {{ $t('You have no save payment methods.') }}
       </b-col>
       <b-col lg="6" v-else>
         <b-list-group class="my-2">
@@ -161,13 +161,17 @@ export default {
 <i18n lang="json5">
 {
   "en": {
+    "title": "Payment Methods",
     "PaymentMethods": "Payment Methods",
     "SetAsDefaultButton": "Set as default payment method",
     "IsYouDefault": "This is your default payment method.",
     "RemoveButton": "Remove payment method",
     "DeleteMessageTitle": "Are You Sure?",
     "DeleteMessage": "Are you sure you want to remove this payment method? This action can not be undone.",
-    "DeleteButton": "Yes, Delete"
+    "DeleteButton": "Yes, Delete",
+
+    "Save Payment Methods": "Save Payment Methods:",
+    "You have no save payment methods.": "You have no save payment methods."
   }
 }
 </i18n>

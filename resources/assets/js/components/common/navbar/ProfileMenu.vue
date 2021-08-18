@@ -11,7 +11,9 @@
     </component>
 
     <component
-      :is="dropdown ? 'b-dropdown-item' : 'b-nav-item'"
+      :is="dropdown
+        ? item.divider ? 'b-dropdown-divider' : 'b-dropdown-item'
+        : 'b-nav-item'"
       v-for="(item, i) in menuItems"
       :key="i"
       :to="item.linkTo || null"
@@ -30,6 +32,7 @@
  */
 import Vuex from 'vuex'
 import ProfileButton from './ProfileButton'
+import MenuItems from './MenuItems'
 
 export default {
   name: 'ProfileMenu',
@@ -52,63 +55,33 @@ export default {
       var items = []
 
       items = [ ...items,
-        {
-          label: 'My Profile',
-          icon: 'user',
-          linkTo: { name: 'timeline.show', params: { slug: this.timeline.slug } }
-        },
-        {
-          label: 'My Vault',
-          icon: 'user',
-          linkTo: { name: 'vault.dashboard', params: { } },
-        },
-        {
-          label: 'Settings',
-          icon: 'cog',
-          linkTo: { name: 'settings.profile' }
-        },
-        {
-          label: 'Fans',
-          icon: 'users',
-          linkTo: { name: 'lists.followers' }
-        },
+        MenuItems.profile(this.timeline.slug),
+        MenuItems.vault,
+        MenuItems.fans,
       ]
 
+      if ( true ) { // TODO: Verified
+        items.push(MenuItems.statements)
+      }
 
+      if ( true ) { // TODO: Verified and doesn't have bank account
+        items.push(MenuItems.banking)
+      }
 
-      items.push({
-        label: 'statements',
-        icon: 'receipt',
-        linkTo: { name: 'statements.dashboard' },
-      })
-
-      // if (this.uiFlags.isCreator && !this.uiFlags.hasBanking) {
-        items.push({
-          label: 'Banking',
-          icon: 'university',
-          linkTo: { name: 'settings.banking' }
-        })
+      // if (this.uiFlags.isCreator && this.uiFlags.hasEarnings) {
+      //   items.push({
+      //     label: 'Earnings',
+      //     icon: 'dollar-sign',
+      //     linkTo: { name: 'settings.earnings' }
+      //   })
       // }
-      if (this.uiFlags.isCreator && this.uiFlags.hasEarnings) {
-        items.push({
-          label: 'Earnings',
-          icon: 'dollar-sign',
-          linkTo: { name: 'settings.earnings' }
-        })
-      }
       if (this.uiFlags.hasPaymentMethod === false) {
-        items.push({
-          label: 'Payment Method',
-          icon: 'credit-card',
-          linkTo: { name: 'settings.payments' }
-        })
+        items.push(MenuItems.paymentMethod)
       }
 
-      items = [ ...items, {
-        label: 'Logout',
-        icon: 'sign-out-alt',
-        action: this.logout,
-      }]
+      items.push({ key: 'divider-bottom', divider: true })
+      items.push(MenuItems.settings)
+      items.push(MenuItems.logout(this.logout))
 
       return items
     }
@@ -130,13 +103,15 @@ export default {
 {
   "en": {
     "Admin Dashboard": "Admin Dashboard",
-    "My Profile": "My Profile",
-    "My Vault": "My Vault",
-    "Settings": "Settings",
-    "statements": "Statements",
-    "Payment Method": "Payment Method",
+    "Banking": "Banking",
+    "Fans": "Fans",
     "Lists": "Lists",
     "Logout": "Logout",
+    "My Profile": "My Profile",
+    "My Vault": "My Vault",
+    "Payment Method": "Payment Method",
+    "Settings": "Settings",
+    "statements": "Statements",
   }
 }
 </i18n>

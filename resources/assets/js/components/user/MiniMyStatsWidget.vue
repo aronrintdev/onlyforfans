@@ -19,6 +19,7 @@
               :alt="timeline.name"
               :title="timeline.name"
             ></b-img-lazy>
+            <OnlineStatus :user="session_user" size="lg" :textInvisible="false" />
           </a>
         </div>
 
@@ -74,6 +75,7 @@
 
 <script>
 import Vuex from 'vuex'
+import OnlineStatus from '@components/common/OnlineStatus'
 
 export default {
   props: {
@@ -97,7 +99,9 @@ export default {
 
   methods: {},
 
-  components: {},
+  components: {
+    OnlineStatus,
+  },
 }
 </script>
 
@@ -109,14 +113,19 @@ body .card.background {
   position: relative;
 }
 body .card.background .avatar-details {
-  margin-left: 58px;
+  margin-left: 80px;
 }
 body .card.background .avatar-img {
   position: absolute;
   left: 8px;
-  top: 90px; /* bg image height - 1/2*avatar height */
-  width: 60px;
-  height: 60px;
+  top: 75px; /* bg image height - 1/2*avatar height */
+  width: 80px;
+  height: 80px;
+}
+body .card.background .avatar-img .onlineStatus {
+  position: absolute;
+  top: 50px;
+  right: 0;
 }
 body .card.background .avatar-img img {
 }
@@ -148,7 +157,7 @@ body .card .activity-list .list-group-item a {
   text-decoration: none;
 }
 body .card .activity-list .list-group-item .activity-name {
-  font-size: 12px;
+  font-size: 15px;
   color: #4a5568;
   text-transform: uppercase;
   text-align: center;

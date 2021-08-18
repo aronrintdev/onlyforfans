@@ -15,8 +15,9 @@
         <swiper-slide v-for="tl in timelines" :key="tl.id" class="story slide tag-followed_timeline">
           <router-link :to="isMyTimeline(tl) ? '' : { name: 'stories.player', params: { timeline_id: tl.id } }" class="box-story" @click.native="renderSelectFileModal">
             <div class="avatar-container" :class="{ 'my-story-avatar': isMyTimeline(tl) && sessionUserHasActiveStories, 'my-story-avatar-no-story': isMyTimeline(tl) && !sessionUserHasActiveStories, 'all-viewed': tl.allViewed }">
-              <b-img-lazy
-                rounded="circle" 
+              <b-img
+                class="swiper-lazy"
+                rounded="circle"
                 :src="tl.avatar.filepath"
               />
             </div>

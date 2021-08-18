@@ -10,13 +10,13 @@
             v-for="(media, index) in files"
             :key="index"
           >
-            <b-img-lazy
+            <b-img
               v-if="media.is_image && media.access"
               class="swiper-lazy"
               :src="media.filepath || media.src"
               @click="openPhotoSwipe(index)"
             />
-            <b-img-lazy
+            <b-img
               v-if="media.is_image && !media.access"
               class="swiper-lazy"
               :src="media.blurFilepath"

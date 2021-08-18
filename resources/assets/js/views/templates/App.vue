@@ -4,20 +4,23 @@
       <SiteLoading v-if="loading" key="loading" />
     </transition>
     <!-- Header -->
-    <MainNavBar class="header" />
-    <div class="content flex-grow-1 d-flex" :class="{ 'p-3': !mobile }">
+    <MainNavBar v-if="!mobile" class="header" />
+
+    <div class="content flex-grow-1 d-flex" :class="{ 'p-3': !mobile, 'mobile': mobile }">
+      <MobileSidebarMenu v-if="mobile" :show="mobileMenuOpen" fromRight @change="onMobileMenuChange" />
       <transition name="quick-fade" mode="out-in">
         <router-view />
       </transition>
     </div>
+
+    <NavButtonsMobile v-if="mobile" :mobile-style="mobile" class="bottom-nav" />
+    <SiteFooter v-if="!isFooterHidden && !mobile" />
 
     <Modals />
 
     <Toaster />
 
     <EventUpdater />
-
-    <SiteFooter v-if="!isFooterHidden" />
   </div>
 </template>
 
@@ -29,6 +32,8 @@ import VueScreenSize from 'vue-screen-size'
 import EventUpdater from '@components/EventUpdater'
 import MainNavBar from '@components/common/MainNavbar'
 import Modals from '@components/Modals'
+import MobileSidebarMenu from '@components/common/navbar/MobileSidebarMenu'
+import NavButtonsMobile from '@components/common/navbar/NavButtonsMobile'
 import SiteFooter from '@views/templates/SiteFooter'
 import SiteLoading from '@components/common/SiteLoading'
 import Toaster from '@components/Toaster'
@@ -39,6 +44,8 @@ export default {
     EventUpdater,
     MainNavBar,
     Modals,
+    MobileSidebarMenu,
+    NavButtonsMobile,
     SiteFooter,
     SiteLoading,
     Toaster,
@@ -52,7 +59,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState(['session_user', 'mobile', 'screenSize']),
+    ...Vuex.mapState(['session_user', 'mobile', 'mobileMenuOpen', 'screenSize', 'unread_messages_count']),
 
     mobileWidth() {
       if (typeof this.toggleMobileAt === 'number') {
@@ -80,7 +87,7 @@ export default {
 
   methods: {
     ...Vuex.mapActions(['getMe', 'getUnreadMessagesCount']),
-    ...Vuex.mapMutations([ 'UPDATE_MOBILE', 'UPDATE_SCREEN_SIZE' ]),
+    ...Vuex.mapMutations([ 'UPDATE_MOBILE', 'UPDATE_SCREEN_SIZE', 'UPDATE_MOBILE_MENU_OPEN' ]),
     startOnlineMonitor() {
       if (this.session_user) {
         this.onlineMonitor = this.$echo.join(`user.status.${this.session_user.id}`)
@@ -89,6 +96,10 @@ export default {
             this.getUnreadMessagesCount();
           });
       }
+    },
+
+    onMobileMenuChange(value) {
+      this.UPDATE_MOBILE_MENU_OPEN(value)
     },
 
     updateScreenSize(value) {
@@ -140,5 +151,8 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+.content.mobile {
+  padding-bottom: 64px;
+}
 </style>

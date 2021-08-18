@@ -17,7 +17,7 @@
           </span>
         </div>
         <div>
-          <router-link :to="tippedTimelineUrl" class="tag-username">@{{ tippedTimeline.slug }}</router-link>
+          <span class="text-secondary">@{{ tippedTimeline.slug }}</span>
         </div>
       </section>
     </b-card-header>
@@ -26,24 +26,19 @@
 
     <transition name="quick-fade" mode="out-in">
       <b-form v-if="step === 'initial'" @submit="sendTip">
-        <b-card-body>
-          <b-form-spinbutton
-            id="tip-amount"
-            class="w-100 mx-auto tag-tip_amount"
+        <b-card-body class="pt-2">
+          <PriceSelector
+            class="mb-0"
+            label=" "
             v-model="formPayload.amount"
-            :formatter-fn="$options.filters.niceCurrency"
-            :min="config.min"
-            :max="config.max"
-            :step="config.step"
+            autofocus
           />
-
-          <p class="text-center"><small><span v-if="renderDetails">{{ renderDetails }}</span></small></p>
 
           <textarea
             v-model="formPayload.message"
             cols="60"
             rows="5"
-            class="w-100"
+            class="w-100 p-2 tip-modal-text"
             placeholder="Write a message"
           ></textarea>
 
@@ -75,8 +70,8 @@
  * Send Tip Modal Content
  */
 import { eventBus } from '@/eventBus'
+import PriceSelector from '@components/common/PriceSelector';
 import PurchaseForm from '@components/payments/PurchaseForm'
-
 import PaymentsDisabled from '@components/payments/PaymentsDisabled'
 
 // Tip timeline on another user's timeline page / feed
@@ -86,6 +81,7 @@ export default {
   name: 'SendTip',
 
   components: {
+    PriceSelector,
     PaymentsDisabled,
     PurchaseForm,
   },
@@ -130,7 +126,7 @@ export default {
     config: {
       min: 500,   // $  5.00
       max: 10000, // $100.00
-      step: 500,  // $  5.00
+      step: 100,  // $  1.00
     },
 
     formPayload: {
@@ -153,6 +149,11 @@ export default {
       this.step = 'payment'
     },
 
+    getVariant(amount) {
+      if (amount === this.formPayload.amount && !this.showCustomPrice) return 'secondary'
+      if (!amount && this.showCustomPrice) return 'secondary'
+      return 'light'
+    }
   },
 
 }
@@ -180,10 +181,8 @@ body .user-avatar img {
   height: 100%;
   border-radius: 50%;
 }
-
-body .user-details .tag-username {
-  color: #859AB5;
-  text-transform: capitalize;
+.tip-modal-text {
+  border: solid 1px #dfdfdf;
 }
 </style>
 

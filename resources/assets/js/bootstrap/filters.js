@@ -21,6 +21,19 @@ Vue.filter('niceCurrency', function (value, currency = 'USD') {
   return formatter.format(value / currencyModifier)
 })
 
+Vue.filter('niceCurrencyRounded', function (value, currency = 'USD') {
+  if (typeof value === 'object') {
+    currency = value.currency || 'USD'
+    value = value.amount
+  }
+
+  let currencyDigits = currencyCodes.code(currency).digits
+  let currencyModifier = Math.pow(10, currencyDigits)
+  let formatter = new Intl.NumberFormat(navigator.languages, { style: 'currency', currency })
+
+  return formatter.format(value / currencyModifier).replace('.00', '')
+})
+
 Vue.filter('niceGuid', function (v) {
   if ( typeof v === 'string' ) {
     return v ? v.slice(0, 8) : ''

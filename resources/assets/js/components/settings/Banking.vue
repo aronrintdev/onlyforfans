@@ -1,6 +1,5 @@
 <template>
-  <b-card :title="$t('title')">
-
+  <b-card :title="mobile ? null : $t('title')">
 
     <b-row>
       <b-col lg="6">
@@ -16,14 +15,20 @@
 
 <script>
 /**
+ * resources/assets/js/components/settings/Banking.vue
  * Settings Banking Page
  */
+import Vuex from 'vuex'
 import AccountList from '@components/banking/accounts/List'
 export default {
   name: 'Banking',
 
   components: {
     AccountList,
+  },
+
+  computed: {
+    ...Vuex.mapState([ 'mobile' ]),
   },
 
 }

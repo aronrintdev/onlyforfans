@@ -56,13 +56,13 @@
     <b-container fluid>
       <b-row class="avatar-profile py-3">
         <b-col cols="12" md="4" offset-md="1" class="pl-5 avatar-details text-right text-md-left">
-          <h2 class="avatar-name my-0 text-secondary">
+          <h2 class="avatar-name my-0">
             {{ timeline.name }}
             <span v-if="timeline.verified" class="verified-badge">
               <fa-icon icon="check-circle" class="text-primary" />
             </span>
           </h2>
-          <p class="avatar-mail my-0 mr-3 text-secondary">
+          <p class="avatar-mail my-0 text-secondary">
             @{{ timeline.slug || 'TODO' }}
           </p>
           <div class="banner-online-status">
@@ -70,7 +70,7 @@
           </div>
         </b-col>
 
-        <b-col cols="12" md="4" offset-md="3" class="tag-stats mt-2">
+        <b-col cols="12" md="4" offset-md="3" class="tag-stats">
           <Stats :stats="timeline.userstats" />
         </b-col>
       </b-row>
@@ -81,7 +81,7 @@
 <script>
 import Vuex from 'vuex'
 import { eventBus } from '@/eventBus'
-import OnlineStatus from '@components/user/OnlineStatus'
+import OnlineStatus from '@components/common/OnlineStatus'
 import Stats from './banner/Stats'
 
 export default {
@@ -248,7 +248,6 @@ header.masthead .profile-ctrl.dropdown button {
 .banner-online-status {
   @media (max-width: 576px) {
     float: right;
-    margin-right: 1rem;
   }
 }
 
@@ -306,5 +305,10 @@ header.masthead .profile-ctrl.dropdown button {
   p {
     font-size: 16px;
   }
+}
+
+.tag-stats {
+  margin-top: -0.5em;
+  cursor: default;
 }
 </style>

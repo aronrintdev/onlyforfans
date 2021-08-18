@@ -44,7 +44,11 @@
       </aside>
 
       <main class="col-md-9">
-
+        <b-row v-if="isCreatePostFormVisible" class="mb-3">
+          <b-col>
+            <CreatePost :session_user="session_user" :timeline="timeline" :data="createPostData" :onHide="hideCreatePost" />
+          </b-col>
+        </b-row>
         <!-- +++ File Thumbnails / Dropzone File Uploader +++ -->
         <b-row>
           <b-col>
@@ -91,7 +95,10 @@
                 <div class="">
                   <b-button @click="renderSendForm()" variant="primary" class="mr-1">Send To</b-button>
                   <b-button @click="renderShareForm()" variant="primary" class="mr-1">Share</b-button>
-                  <b-button @click="renderDownloadForm()" variant="primary" class="mr-1">Download</b-button>
+                  <b-button @click="renderDownloadForm()" variant="primary" class="mr-1" :disabled="isDownloading" >
+                    <b-spinner small v-if="isDownloading"></b-spinner>
+                    Download
+                  </b-button>
                   <b-button @click="renderDeleteForm()" variant="danger" class="mr-1">Delete</b-button>
                 </div>
               </div>
@@ -134,7 +141,7 @@
                 </div>
               </div>
               <div v-else class="tag-folder img-box">
-                <b-img-lazy fluid @click="doNav(vf.id)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img-lazy>
+                <b-img fluid @click="doNav(vf.id)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
                 <div class="file-count">
                   <b-badge variant="warning" class="p-2">{{ vf.mediafiles.length + vf.vfchildren.length }}</b-badge>
                 </div>
@@ -312,14 +319,17 @@
     <VideoRecorder v-if="showVideoRec" @close="showVideoRec=false;" @complete="recordCompleted" />
 
     <!-- Modal for downloading selected files or folders -->
-    <b-modal v-model="isDownloadFilesModalVisible" size="md" title="Confirm Download" >
+    <b-modal v-model="isDownloadFilesModalVisible" size="md" title="Confirm Download" no-close-on-backdrop>
         <p>Are you sure you want to download the following {{ selectedMediafiles.length }} files?</p>
         <b-list-group class="download-list">
           <b-list-group-item v-for="(mf) in selectedMediafiles" :key="mf.id">{{ mf.mfname }}</b-list-group-item>
         </b-list-group>
         <template #modal-footer>
             <b-button variant="secondary" @click="isDownloadFilesModalVisible=false">Cancel</b-button>
-            <b-button variant="primary" @click="downloadSelectedFiles">Download Files</b-button>
+            <b-button variant="primary" :disabled="isDownloading" @click="downloadSelectedFiles">
+              <b-spinner small v-if="isDownloading"></b-spinner>
+              Download Files
+            </b-button>
         </template>
     </b-modal>
   </div>
@@ -336,6 +346,7 @@ import MediaLightbox from '@components/vault/MediaLightbox'
 import TreeItem from '@components/vault/TreeItem'
 import VideoRecorder from '@components/videoRecorder'
 import AudioRecorder from '@components/audioRecorder'
+import CreatePost from '@components/common/CreatePost.vue';
 
 export default {
 
@@ -356,6 +367,7 @@ export default {
     ...Vuex.mapState(['vaultfolder']),
     ...Vuex.mapState(['breadcrumb']),
     ...Vuex.mapState(['shares']),
+    ...Vuex.mapState(['timeline']),
 
     isLoading() {
       return !this.vault_pkid || !this.vaultfolder_pkid || !this.vault || !this.vaultfolder || !this.foldertree || !this.session_user
@@ -427,11 +439,14 @@ export default {
     isMediaLightboxModalVisible: false,
     isApproveSharedModalVisible: false,
     isDownloadFilesModalVisible: false,
+    isCreatePostFormVisible: false,
 
     selectedVfToApprove: null,
     selectedVfToDelete: null,
 
     lightboxSelection: null,
+
+    createPostData: null,
 
     createForm: {
       name: '',
@@ -476,6 +491,7 @@ export default {
     fileUploading: false,
     showAudioRec: false,
     isAllSelected: false,
+    isDownloading: false,
   }), // data
 
   methods: {
@@ -484,6 +500,10 @@ export default {
     makeFolder() { // %FIXME ?? redudant?
     },
     addItem() {
+    },
+
+    hideCreatePost() {
+      this.isCreatePostFormVisible = false
     },
 
     sendSelected(resourceType) {
@@ -514,7 +534,9 @@ export default {
           break
         case 'post':
           params.context = 'send-selected-mediafiles-to-post' // 'mediafiles-selected-in-vault'
-          this.$router.replace({ name: 'index', params })
+          this.createPostData = params
+          this.isCreatePostFormVisible = true
+          this.isSendFilesModalVisible = false
           break
         case 'message':
           params.context = 'send-selected-mediafiles-to-message' // 'mediafiles-selected-in-vault'
@@ -675,10 +697,29 @@ export default {
     },
 
 
-    async downloadSelectedFiles() {
-      this.isDownloadFilesModalVisible = false
-      this.clearSelected()
-      this.$root.$bvToast.toast( `Successfully downloaded ${this.selectedMediafiles.length} files)`, {toaster: 'b-toaster-top-center', variant: 'success'} )
+    downloadSelectedFiles() {
+      const promises = [];
+      this.isDownloading = true;
+      this.selectedMediafiles.forEach(file => {
+        const p = this.axios
+          .get(route('mediafiles.show', file.id), { responseType: 'blob' })
+          .then(response => {
+              const blob = new Blob([response.data])
+              const link = document.createElement('a')
+              link.href = URL.createObjectURL(blob)
+              link.download = file.mfname
+              link.click()
+              URL.revokeObjectURL(link.href)
+            }).catch(console.error)
+        promises.push(p)
+      });
+
+      Promise.all(promises).then((values) => {
+        this.isDownloading = false
+        this.isDownloadFilesModalVisible = false
+        this.clearSelected()
+        this.$root.$bvToast.toast( `Successfully downloaded ${this.selectedMediafiles.length} files)`, {toaster: 'b-toaster-top-center', variant: 'success'} )
+      })
     },
 
     // --- New Vault Folder Form methods ---
@@ -894,6 +935,7 @@ export default {
     MediaLightbox,
     VideoRecorder,
     AudioRecorder,
+    CreatePost,
   },
 }
 /*

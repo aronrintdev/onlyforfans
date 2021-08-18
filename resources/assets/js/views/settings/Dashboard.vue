@@ -1,15 +1,28 @@
 <template>
-  <div v-if="!isLoading" class="container-fluid" id="view-settings">
+  <div v-if="!isLoading" class="container-fluid" :class="mobile ? 'px-0' : ''" id="view-settings">
+    <WithSidebar
+      :focusMain="$route.name !== 'settings.default'"
+      @back="onBack"
+    >
 
-    <section class="row">
-      <article class="col-sm-12">
-      </article>
-    </section>
+      <template #mobileTitle>
+        <div class="h2 px-3 py-2 d-flex align-items-center">
+          <b-btn variant="link" :to="{ name: 'index' }" class="d-flex align-items-center">
+            <fa-icon icon="arrow-left" size="lg" fixed-width />
+          </b-btn>
+          <fa-icon icon="cogs" fixed-width class="ml-3 mr-2" />
+          {{ $t('title.sidebar') }}
+        </div>
+      </template>
 
-    <section class="row">
+      <template #mobileMainNavTopTitle>
+        <span class="h4 mb-0" v-if="currentRoute">
+          {{ $t(`title.${currentRoute.name}`) }}
+        </span>
+      </template>
 
-      <aside class="col-md-3 col-lg-2">
-        <b-list-group>
+      <template #sidebar>
+        <b-list-group :flush="mobile">
           <b-list-group-item
             v-for="(link, i) in routes"
             :key="i"
@@ -21,31 +34,37 @@
             <fa-icon icon="caret-right" class="ml-auto" />
           </b-list-group-item>
         </b-list-group>
-      </aside>
+      </template>
 
-      <main class="col-md-9 col-lg-10">
-        <transition mode="out-in" name="quick-fade">
-          <router-view :session_user="session_user" :user_settings="user_settings" :timeline="timeline" />
-        </transition>
-      </main>
-
-    </section>
-
+      <transition mode="out-in" name="quick-fade">
+        <router-view
+          :session_user="session_user"
+          :user_settings="user_settings"
+          :timeline="timeline"
+          :class="mobile ? '' : ''"
+        />
+      </transition>
+    </WithSidebar>
   </div>
 </template>
 
 <script>
-import Vuex from 'vuex';
+import Vuex from 'vuex'
+import helpers from '@helpers'
+
+import WithSidebar from '@views/layouts/WithSidebar'
 
 export default {
   name: 'SettingsDashboard',
 
   components: {
+    WithSidebar,
   },
 
   computed: {
     ...Vuex.mapGetters(['session_user', 'user_settings', 'timeline']),
     ...Vuex.mapState({
+      mobile: state => state.mobile,
       subscriptionCount: state => state.subscriptions.count
     }),
 
@@ -58,19 +77,19 @@ export default {
         {
           name: 'Profile',
           to: { name: 'settings.profile', params: {} },
-        }, 
+        },
         {
           name: 'Account',
           to: { name: 'settings.general', params: {} },
-        }, 
+        },
         {
           name: 'Notifications',
           to: { name: 'settings.notifications', params: {} },
-        }, 
+        },
         {
           name: 'Privacy',
           to: { name: 'settings.privacy', params: {} },
-        }, 
+        },
         {
           name: 'Security',
           to: { name: 'settings.security', params: {} },
@@ -143,8 +162,14 @@ export default {
       }))
 
       return routes
-    }
+    },
 
+    currentRoute() {
+      if (!this.$route) {
+        return {}
+      }
+      return helpers.firstWhere(this.routes, o => this.checkActive(o) )
+    }
   },
 
   data: () => ({}),
@@ -154,6 +179,10 @@ export default {
   mounted() {
     this.getMe()
     this['subscriptions/updateCount']()
+    if (this.$route.name === 'settings.default' && !this.mobile) {
+      this.$router.push({ name: 'settings.profile' })
+      this.$forceCompute('routes')
+    }
   },
 
   methods: {
@@ -174,11 +203,20 @@ export default {
       }
       return false
     },
+
+    onBack() {
+      this.$router.push({ name: 'settings.default' })
+    },
   },
 
   watch: {
     $route() {
+      if (this.$route.name === 'settings.default' && !this.mobile) {
+        this.$router.push({ name: 'settings.profile' })
+      }
       this.$forceCompute('routes')
+      this.$forceCompute('currentRoute')
+
     },
 
     session_user(value) {
@@ -196,19 +234,48 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
-    "General": "General",
-    "Profile": "Profile",
-    "Privacy": "Privacy",
-    "Security": "Security",
-    "Payment Methods": "Payment Methods",
-    "Earnings": "Earnings",
-    "My Subscriptions": "My Subscriptions",
-    "Subscription and promotions": "Subscription and promotions",
+    "title": {
+      "sidebar": "Settings",
+      "Account": "Account",
+      "Banking": "Banking",
+      "Bookmarks": "Bookmarks",
+      "Earnings": "Earnings",
+      "General": "General",
+      "Login Sessions": "Login Sessions",
+      "Message with Tip Only": "Message with Tip Only",
+      "My Subscriptions": "My Subscriptions",
+      "Managers": "Managers",
+      "Messages": "Messages",
+      "Notifications": "Notifications",
+      "Payment Methods": "Payment Methods",
+      "Privacy": "Privacy",
+      "Profile": "Edit Profile",
+      "Referrals": "Referrals",
+      "Security": "Security",
+      "Subscription and promotions": "Subscriptions",
+      "Subscription and Promotions": "Subscriptions",
+      "Verification": "Verification"
+    },
+
+    "Account": "Account",
     "Banking": "Banking",
-    "Login Sessions": "Login Sessions",
-    "Referrals": "Referrals",
     "Bookmarks": "Bookmarks",
-    "Message with Tip Only": "Message with Tip Only"
+    "Earnings": "Earnings",
+    "General": "General",
+    "Login Sessions": "Login Sessions",
+    "Message with Tip Only": "Message with Tip Only",
+    "My Subscriptions": "My Subscriptions",
+    "Managers": "Managers",
+    "Messages": "Messages",
+    "Notifications": "Notifications",
+    "Payment Methods": "Payment Methods",
+    "Privacy": "Privacy",
+    "Profile": "Profile",
+    "Referrals": "Referrals",
+    "Security": "Security",
+    "Subscription and promotions": "Subscription and promotions",
+    "Subscription and Promotions": "Subscription and Promotions",
+    "Verification": "Verification"
   }
 }
 </i18n>
