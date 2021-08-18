@@ -1,23 +1,30 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\Post;
-use App\Rules\InEnum;
-use App\Models\Comment;
-use App\Models\Favorite;
-use App\Models\Timeline;
-use App\Models\Mediafile;
-use App\Enums\PostTypeEnum;
-use Illuminate\Http\Request;
-use App\Enums\MediafileTypeEnum;
-use App\Payments\PaymentGateway;
-use App\Models\Financial\Account;
-use App\Http\Resources\PostCollection;
-use Illuminate\Support\Facades\Config;
-use App\Models\Casts\Money as CastsMoney;
-use App\Http\Resources\Post as PostResource;
-use App\Models\Tip;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Str;
+
+use App\Models\Favorite;
+use App\Models\Comment;
+use App\Models\Financial\Account;
+use App\Models\Mediafile;
+use App\Models\Post;
+use App\Models\Timeline;
+use App\Models\Tip;
+use App\Models\Casts\Money as CastsMoney;
+
+use App\Enums\ContenttagAccessLevelEnum;
+use App\Enums\PostTypeEnum;
+use App\Enums\MediafileTypeEnum;
+
+use App\Rules\InEnum;
+
+use App\Http\Resources\PostCollection;
+use App\Http\Resources\Post as PostResource;
+
+use App\Payments\PaymentGateway;
 
 class PostsController extends AppBaseController
 {
@@ -115,10 +122,31 @@ class PostsController extends AppBaseController
             abort(403, 'Authorize Error');
         }
 
-        $attrs = $request->except('timeline_id'); // timeline_id is now postable
+        $attrs = $request->except(['timeline_id', 'description']); // timeline_id is now postable
         $attrs['user_id'] = $timeline->user->id; // %FIXME: remove this field, redundant
         $attrs['active'] = $request->input('active', 1);
         $attrs['type'] = $request->input('type', PostTypeEnum::FREE);
+
+        $privateTags = collect();
+        $publicTags = collect();
+        if ( $request->has('description') ) { // extract & collect any tags
+            //$regex = '/\B#\w\w+(!)?/';
+            $regex = '/(#\w+!?)/';
+            $origStr = Str::of($request->description);
+            $allTags = $origStr->matchAll($regex);
+            $allTags->each( function($str) use(&$privateTags, &$publicTags) {
+                $accessLevel = (substr($str,-1)==='!') ? ContenttagAccessLevelEnum::MGMTGROUP : ContenttagAccessLevelEnum::OPEN;
+                switch ( $accessLevel ) {
+                    case ContenttagAccessLevelEnum::MGMTGROUP:
+                        $privateTags->push($str);
+                        break;
+                    case ContenttagAccessLevelEnum::OPEN:
+                        $publicTags->push($str);
+                        break;
+                }
+            });
+            $attrs['description'] = trim($origStr->remove($privateTags->toArray(), false)); // keep public, remove private tags
+        }
    
         if ($request->input('schedule_datetime')) {
             $attrs['schedule_datetime'] = $request->input('schedule_datetime');
@@ -128,6 +156,7 @@ class PostsController extends AppBaseController
             $attrs['expire_at'] = Carbon::now('UTC')->addDays($request->input('expiration_period'));
         }
 
+        // %TODO: DB transaction (?)
         $post = $timeline->posts()->create($attrs);
 
         if ( $request->has('mediafiles') ) {
@@ -145,6 +174,17 @@ class PostsController extends AppBaseController
                     );
             }
         }
+
+        $post->addTag($publicTags, ContenttagAccessLevelEnum::OPEN); // batch add
+        $post->addTag($privateTags, ContenttagAccessLevelEnum::MGMTGROUP); // batch add
+        /*
+        $allTags->each( function($str) use(&$post) {
+            $accessLevel = (substr($str,-1)==='!') ? ContenttagAccessLevelEnum::MGMTGROUP : ContenttagAccessLevelEnum::OPEN;
+            $str = trim($str, '#!'); // remove hashtag and possible '!' at end indicating private/mgmt tag
+            $post->addTag($str, $accessLevel); // add 1-by-1
+        });
+         */
+
         $post->refresh();
 
         return response()->json([
@@ -170,9 +210,25 @@ class PostsController extends AppBaseController
             'schedule_datetime' => 'nullable|date',
         ]);
 
-        $post->fill($request->only([
-            'description',
-        ])); // %TODO
+        $privateTags = collect();
+        $publicTags = collect();
+        if ( $request->has('description') ) { // extract & collect any tags
+            $regex = '/(#\w+!?)/';
+            $origStr = Str::of($request->description);
+            $allTags = $origStr->matchAll($regex);
+            $allTags->each( function($str) use(&$privateTags, &$publicTags) {
+                $accessLevel = (substr($str,-1)==='!') ? ContenttagAccessLevelEnum::MGMTGROUP : ContenttagAccessLevelEnum::OPEN;
+                switch ( $accessLevel ) {
+                    case ContenttagAccessLevelEnum::MGMTGROUP:
+                        $privateTags->push($str);
+                        break;
+                    case ContenttagAccessLevelEnum::OPEN:
+                        $publicTags->push($str);
+                        break;
+                }
+            });
+            $post->description = trim($origStr->remove($privateTags->toArray(), false));
+        }
 
         if ($request->has('type')) {
             $post->type = $request->type;
@@ -202,7 +258,7 @@ class PostsController extends AppBaseController
                         'New Post', // $mfname - could be optionally passed as a query param %TODO
                         MediafileTypeEnum::POST // $mftype
                     );
-                $post->refresh();
+                $post->refresh(); // %FIXME: is this necessary here? Is done below
             }
         }
 
@@ -213,6 +269,14 @@ class PostsController extends AppBaseController
         }
 
         $post->save();
+
+        // Since we are updating tags as a batch, to effect a 'delete' we first need to remove all attached tags, and then add
+        //   whatever is sent via the post, which is a complete set that includes any pre-existing tags that haven't been removed
+        $post->contenttags()->detach();
+        $post->addTag($publicTags, ContenttagAccessLevelEnum::OPEN); // batch add
+        $post->addTag($privateTags, ContenttagAccessLevelEnum::MGMTGROUP); // batch add
+
+        $post->refresh();
 
         return response()->json([
             'post' => $post,

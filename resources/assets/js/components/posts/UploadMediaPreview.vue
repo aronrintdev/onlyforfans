@@ -1,7 +1,10 @@
 <template>
   <div class="swiper-slider">
-    <!-- resources/assets/js/components/posts/UploadMediaPreview.vue -->
+
+    <!-- %FILE: resources/assets/js/components/posts/UploadMediaPreview.vue -->
+
     <div v-if="isDragListVisible">
+
       <draggable class="sort-change-div" v-model="files" :group="'column.components'" handle=".handle"
         ghost-class="ghost">
         <div v-for="(element, index) in files" :key="index" class="drag-element">
@@ -19,6 +22,7 @@
           </div>
         </div>
       </draggable>
+
       <div class="sort-action-btns">
         <div>
           <button :disabled="!applyBtnEnabled" class="btn btn-secondary btn-sm h-100 mb-3" @click="applyMediafilesSort">
@@ -30,19 +34,21 @@
           <fa-icon :icon="['far', 'check']" class="text-white" size="lg" />
         </button>
       </div>
+
     </div>
-    <swiper ref="mySwiper" :options="swiperOptions" v-if="files.length">
+
+    <swiper ref="mySwiper" :options="swiperOptions" v-if="files.length"> <!-- vue-awesome-swiper -->
       <swiper-slide class="slide">
         <div v-if="!isDragListVisible">
-          <div class="swiper-image-wrapper" v-for="(media, index) in files" :key="index">
-            <b-img-lazy @click="openPhotoSwipe(index)" class="swiper-lazy" :src="media.filepath || media.src" v-if="media.type && media.type.indexOf('image/') > -1" />
-            <div class="swiper-lazy video" @click="openPhotoSwipe(index)" v-if="media.type && media.type.indexOf('video/') > -1">
+          <div class="swiper-image-wrapper" v-for="(mf, index) in files" :key="mf.id">
+            <b-img @click="openPhotoSwipe(index)" class="swiper-lazy tag-image" :src="mf.filepath || mf.src" v-if="mf.type && mf.type.indexOf('image/') > -1" />
+            <div class="swiper-lazy video tag-video" @click="openPhotoSwipe(index)" v-if="mf.type && mf.type.indexOf('video/') > -1">
               <video>
-                <source :src="media.filepath" :type="media.type" />
+                <source :src="mf.filepath" :type="mf.type" />
               </video>
               <fa-icon :icon="['far', 'play-circle']" class="text-white icon-play" />
             </div>
-            <button class="btn btn-primary icon-close" @click="removeMediafile(media)">
+            <button class="btn btn-primary icon-close" @click="removeMediafile(mf)">
               <fa-icon :icon="['far', 'times']" class="text-white" size="sm" />
             </button>
           </div>
@@ -56,6 +62,7 @@
         </div>
       </swiper-slide>
     </swiper>
+
     <div class="audio-file-viewer" v-if="audioFiles.length">
       <div class="audio" v-for="(audio, index) in audioFiles" :key="index">
         <vue-plyr>
@@ -70,6 +77,7 @@
         </button>
       </div>
     </div>
+
   </div>
 </template>
 
@@ -81,6 +89,7 @@ import VideoPlayer from "@components/videoPlayer";
 
 export default {
   name: "UploadMediaPreview",
+  comments: true, // %FIXME
 
   props: {
     mediafiles: { type: Array, default: () => ([]) },
@@ -141,6 +150,7 @@ export default {
   },
 
   methods: {
+
     onSelectMediafile(index, status) {
       const temp = [...this.files];
       temp[index].selected = status;
@@ -181,17 +191,21 @@ export default {
     openFileUpload() {
       this.$emit('openFileUpload');
     },
+
     openPhotoSwipe(index) {
+      console.log('openPhotoSwipe', {
+        index
+      })
       this.$Pswp.open({
         items: this.files.map(file => {
           if (file.type.indexOf('video/') > -1) {
             return ({
               html: new Vue({
-                  ...VideoPlayer,
-                  propsData: {
-                    source: file
-                  }
-                }).$mount().$el,
+                ...VideoPlayer,
+                propsData: {
+                  source: file
+                }
+              }).$mount().$el,
             })
           }
           return ({

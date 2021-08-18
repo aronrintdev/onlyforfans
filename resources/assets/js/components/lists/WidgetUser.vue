@@ -97,7 +97,7 @@
 import { eventBus } from '@/eventBus'
 //import { DateTime } from 'luxon'
 import moment from 'moment'
-import OnlineStatus from '@components/user/OnlineStatus'
+import OnlineStatus from '@components/common/OnlineStatus'
 
 export default {
 

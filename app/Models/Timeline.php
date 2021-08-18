@@ -334,7 +334,7 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         return ( $notViewedCount === 0 );
     }
 
-    // No viewable stories within last time period 'window'
+    // No viewable stories within last time period 'window' for *this* timeline
     public function isStoryqueueEmpty() : bool
     {
         $daysWindow = Config::get('stories.window_days');

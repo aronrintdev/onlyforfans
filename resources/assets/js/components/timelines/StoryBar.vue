@@ -57,8 +57,10 @@
         -->
         <b-button block variant="primary" class="" @click="renderVaultSelector()">Add from Vault</b-button>
         <b-button block variant="primary" class="" @click="selectTextOnly">Add Text Only</b-button>
-        <hr />
-        <b-button block variant="primary" class="" :to="{ name: 'stories.player', params: { timeline_id: timeline.id } }">View My Stories</b-button>
+        <template v-if="!timeline.is_storyqueue_empty">
+          <hr />
+          <b-button block variant="primary" class="" :to="{ name: 'stories.player', params: { timeline_id: timeline.id } }">View My Stories</b-button>
+        </template>
       </div>
     </b-modal>
 
@@ -70,14 +72,20 @@
           <b-img-lazy v-else-if="fileInput" fluid :src="selectedFileUrl" />
         </div>
       </section>
+
       <b-form v-on:submit.prevent class="mt-3">
         <b-form-group v-if="!storyAttrs.selectedMediafile && !fileInput" label="Story Text" label-for="story-contents-1">
           <b-form-textarea id="story-contents" v-model="storyAttrs.contents" placeholder="Enter text for your new story..." rows="5" ></b-form-textarea>
         </b-form-group>
-        <b-form-group label='"Swipe Up" Link (optional)' label-for="swipe-up-link">
-          <b-form-input id="swipe-up-link" type="url" v-model="storyAttrs.link" :state="urlState" placeholder="http://example.com"></b-form-input>
-        </b-form-group>
+
+        <div>
+          <label @click="isSwipeUpLinkVisible=!isSwipeUpLinkVisible" class="clickable" style="cursor: pointer" for="swipe-up-link">Swipe Up Link (optional)</label>
+          <b-form-group>
+            <b-form-input v-if="isSwipeUpLinkVisible" id="swipe-up-link" type="url" v-model="storyAttrs.link" :state="urlState" placeholder="http://example.com"></b-form-input>
+          </b-form-group>
+        </div>
       </b-form>
+
       <template #modal-footer>
         <b-button variant="secondary" @click="isPreviewModalVisible=false">Cancel</b-button>
         <b-button variant="primary" @click="storeStory()">Save</b-button>
@@ -144,6 +152,8 @@ export default {
       spaceBetween: 12,
       //direction: 'vertical',
     },
+
+    isSwipeUpLinkVisible: false, // in modal
   }),
 
   methods: {

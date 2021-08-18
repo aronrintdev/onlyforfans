@@ -10,7 +10,7 @@
 
     <b-row>
       <b-col>
-        <section v-if="!is_schedulefeed" class="feed-ctrl mt-3 px-2 py-2 d-flex flex-column flex-md-row justify-content-center justify-content-md-between">
+        <section v-if="!is_schedulefeed" class="mt-3 px-2 py-2 d-flex flex-column flex-md-row justify-content-center justify-content-md-between" :class="{ 'feed-ctrl': !is_homefeed }">
           <b-nav v-if="!is_homefeed" pills>
             <b-nav-item @click="setFeedType('default')" :active="feedType==='default'">All</b-nav-item>
             <b-nav-item @click="setFeedType('photos')" :active="feedType==='photos'">Photos({{ totalPhotosCount }})</b-nav-item>
