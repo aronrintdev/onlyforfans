@@ -1,6 +1,8 @@
 <template>
   <div class="container p-0">
+
     <b-card header-tag="header" footer-tag="footer" class="position-relative">
+
       <template #header>
         <section class="d-flex edit-post-header">
           <div class="my-auto mr-3">
@@ -12,7 +14,9 @@
           </div>
         </section>
       </template>
+
       <LoadingOverlay :loading="loading" />
+
       <div>
         <div class="alert alert-secondary py-1 px-2" role="alert" v-if="schedule_datetime" @click="showSchedulePicker()">
           <fa-icon size="lg" :icon="['far', 'calendar-check']" class="text-primary mr-1" />
@@ -22,6 +26,7 @@
           </button>
           <strong class="float-right mr-3">{{ moment.utc(schedule_datetime).local().format('MMM DD, h:mm a') }}</strong>
         </div>
+
         <div v-if="type === 'price'" class="d-flex w-100">
           <PriceSelector
             class="mb-3 mr-5"
@@ -36,9 +41,12 @@
           <hr />
         </div>
         <textarea v-model="description" rows="8" class="w-100"></textarea>
+
       </div>
+
       <template #footer>
 
+        <!--
         <b-row class="mb-1">
           <b-col cols="12" md="8" class="d-flex">
             Public:
@@ -51,6 +59,30 @@
             <b-form-tags input-id="edit-post-contenttags_mgmt" v-model="contenttags_mgmt"></b-form-tags>
           </b-col>
         </b-row>
+        -->
+            <b-row v-if="true || isTagFormVisible" class="mb-1">
+              <b-col cols="12" class="d-flex align-items-center">
+                <b-form-tags v-model="hashtags" no-outer-focus class="">
+                  <template v-slot="{ tags, inputAttrs, inputHandlers, tagVariant, addTag, removeTag }">
+                    <div class="d-inline-block">
+                      <b-form-tag v-for="tag in tags" 
+                        @remove="removeTag(tag)" 
+                        :key="tag" 
+                        :title="tag" 
+                        :variant="isHashtagPrivate(tag) ? 'danger' : 'secondary'" 
+                        size="sm" class="mr-1" 
+                      > 
+                        {{ tag }}
+                      </b-form-tag>
+                    </div>
+                  </template>
+                </b-form-tags>
+                <div class="ml-2" v-b-tooltip.hover.html="{title: 'Enter tags in post body, use hash at start for <em>#publictag</em> or hash and exclamation at end for <em>#privatetag!</em>', variant: 'info'}">
+                  <fa-icon :icon="['fas', 'info']" class="text-warning" />
+                </div>
+                <!-- <small>Enter tags in post body, use hash at start for <i>#publictag</i> or hash and exclamation at end for <i>#privatetag!</i></small> -->
+              </b-col>
+            </b-row>
 
         <b-row>
           <b-col cols="4" md="4" class="d-flex">
@@ -68,10 +100,14 @@
             </div>
           </b-col>
         </b-row>
+
       </template>
+
     </b-card>
+
   </div>
 </template>
+
 <script>
 /**
  * js/views/posts/Edit
@@ -85,16 +121,36 @@ import LoadingOverlay from '@components/common/LoadingOverlay'
 import CalendarIcon from '@components/common/icons/CalendarIcon.vue'
 
 export default {
+
   name: "EditPost",
+
   components: {
     LoadingOverlay,
     PriceSelector,
     CalendarIcon,
   },
+
   props: {
     post: { type: Object, default: () => ({}) },
   },
+
   computed: {
+
+    hashtags: {
+      // tag representation in the create post footer (can be deleted here but not added)
+      get: function () {
+        return this.parseHashtags(this.description) || []
+      },
+      set: function (newValue) {
+        const oldValue = this.parseHashtags(this.description) || []
+        const diffs = oldValue.filter( s => !newValue.includes(s) )
+        diffs.forEach( s => {
+          console.log(`replacing ${s}`)
+          this.description = this.description.replace('#'+s, '')
+        })
+      }
+    },
+
     changed() {
       if (!this.loading) {
         return this.post.description !== this.description
@@ -102,17 +158,18 @@ export default {
           || this.post.price !== this.price
           || this.post.price_for_subscribers !== this.priceForPaidSubscribers
           || this.post.schedule_datetime !== this.schedule_datetime
-          || this.post.contenttags !== this.contenttags
-          || this.post.contenttags_mgmt !== this.contenttags_mgmt
+        //|| this.post.contenttags !== this.contenttags
+        //|| this.post.contenttags_mgmt !== this.contenttags_mgmt
       }
       return false
     }
   },
+
   data: () => ({
     loading: false,
     description: '',
-    contenttags: [],
-    contenttags_mgmt: [],
+    //contenttags: [],
+    //contenttags_mgmt: [],
     type: 'free',
     price: 0,
     priceForPaidSubscribers: 0,
@@ -129,27 +186,16 @@ export default {
 
   methods: {
 
-    fillFromProp() {
-      this.description = this.post.description
-      this.contenttags = this.post.contenttags
-      this.contenttags_mgmt = this.post.contenttags_mgmt
-      this.type = this.post.type
-      this.price = this.post.price
-      this.priceForPaidSubscribers = this.post.price_for_subscribers
-      // this.currency = this.post.currency
-      if (this.post.schedule_datetime) {
-        this.schedule_datetime = moment.utc(this.post.schedule_datetime)
-      }
-    },
-
     discard(e) {
-      this.exit()
+      this.$bvModal.hide('edit-post');
     },
 
     save(e) {
       // tags are parsed out of the post's content body by the backend...so add them in here from the separate 'tag' form
       //   ~ "fix" any tags prefixed with '#' by user (remove the '#')...since we add the '#' ourselves here before sending
       //      That is the intended usage is  for the user to type in tags like "foo" rather than "#foo"
+      /*
+      const tmp = this.description
       if ( this.contenttags.length > 0 ) {
         this.description += ' #'+this.contenttags.map( ct => ct.replace(/^#/,'') ).join(' #')
       }
@@ -157,6 +203,7 @@ export default {
         // %FIXME: need to postfix with '!'
         //this.description += ' #'+this.contenttags_mgmt.map( ct => ct.replace(/^#/,'') ).join(' #')
       }
+       */
       const payload = {
         description: this.description,
         type: this.type,
@@ -165,19 +212,21 @@ export default {
         currency: this.currency,
         schedule_datetime: this.schedule_datetime,
       }
+      console.log('save', { 
+        payload,
+        //tags: this.contenttags,
+        //tmp,
+        desc: this.description,
+      })
       this.loading = true
       this.axios.patch(this.$apiRoute('posts.update', { post: this.post.slug }), payload ).then(response => {
         this.loading = false
         eventBus.$emit('update-posts', this.post.id)
-        this.exit()
+        this.$bvModal.hide('edit-post');
       }).catch(error => {
         eventBus.$emit('error', { error, message: this.$t('save.error') })
         this.loading = false
       })
-    },
-
-    exit() {
-      this.$bvModal.hide('edit-post');
     },
 
     showSchedulePicker() {
@@ -193,19 +242,64 @@ export default {
     closeSchedulePicker(e) {
       this.schedule_datetime = null;
       e.stopPropagation();
-    }
+    },
+
+    parseHashtags(searchText) {
+      const regexp = /\B#\w\w+(!)?/g
+      const htList = searchText.match(regexp) || [];
+      return htList.map(s => s.slice(1))
+    },
+
+    isHashtagPrivate(s) {
+      return s.endsWith('!')
+    },
 
   },
 
+  created() {
+    this.type = this.post.type
+    this.price = this.post.price
+    this.priceForPaidSubscribers = this.post.price_for_subscribers
+    // this.currency = this.post.currency
+
+    if ( this.post.contenttags_mgmt.length > 0 ) {
+      const str = this.post.contenttags_mgmt.map( ct => `#${ct}!`).join(' ')
+      // embed private tags at end of post for editing (public tags are already in post body as saved in DB)
+      this.description = this.post.description + ' ' + this.post.contenttags_mgmt.map( ct => `#${ct}!`).join(' ')
+    } else {
+      this.description = this.post.description
+    }
+  },
+
   mounted() {
-    this.fillFromProp()
+    if (this.post.schedule_datetime) {
+      this.schedule_datetime = moment.utc(this.post.schedule_datetime)
+    }
+
     const self = this
     eventBus.$on('edit-apply-schedule', function(data) {
       self.schedule_datetime = data
     })
   },
+
+  watch: {
+
+    /*
+    hashtags(newVal, oldVal) {
+      this.isTagFormVisible = this.hashtags.length > 0
+    },
+
+    description(newVal, oldVal) {
+      if (newVal!==oldVal) {
+        this.formErr = null // clear errors
+      }
+    },
+     */
+
+  }, // watch
 }
 </script>
+
 <style lang="scss" scoped>
 textarea,
 .dropzone,

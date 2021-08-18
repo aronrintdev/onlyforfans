@@ -130,7 +130,7 @@ class PostsController extends AppBaseController
             $regex = '/(#\w+!?)/';
             $origStr = Str::of($request->description);
             $allTags = $origStr->matchAll($regex);
-            $allTags->each( function($str) use(&$post, &$privateTags, &$publicTags) {
+            $allTags->each( function($str) use(&$privateTags, &$publicTags) {
                 $accessLevel = (substr($str,-1)==='!') ? ContenttagAccessLevelEnum::MGMTGROUP : ContenttagAccessLevelEnum::OPEN;
                 switch ( $accessLevel ) {
                     case ContenttagAccessLevelEnum::MGMTGROUP:
@@ -206,12 +206,24 @@ class PostsController extends AppBaseController
             'schedule_datetime' => 'nullable|date',
         ]);
 
-        $allTags = collect();
+        $privateTags = collect();
+        $publicTags = collect();
         if ( $request->has('description') ) { // extract & collect any tags
             $regex = '/(#\w+!?)/';
             $origStr = Str::of($request->description);
             $allTags = $origStr->matchAll($regex);
-            $post->description = trim($origStr->remove($allTags->toArray(), false));
+            $allTags->each( function($str) use(&$privateTags, &$publicTags) {
+                $accessLevel = (substr($str,-1)==='!') ? ContenttagAccessLevelEnum::MGMTGROUP : ContenttagAccessLevelEnum::OPEN;
+                switch ( $accessLevel ) {
+                    case ContenttagAccessLevelEnum::MGMTGROUP:
+                        $privateTags->push($str);
+                        break;
+                    case ContenttagAccessLevelEnum::OPEN:
+                        $publicTags->push($str);
+                        break;
+                }
+            });
+            $post->description = trim($origStr->remove($privateTags->toArray(), false));
         }
 
         if ($request->has('type')) {
@@ -242,7 +254,7 @@ class PostsController extends AppBaseController
                         'New Post', // $mfname - could be optionally passed as a query param %TODO
                         MediafileTypeEnum::POST // $mftype
                     );
-                $post->refresh();
+                $post->refresh(); // %FIXME: is this necessary here? Is done below
             }
         }
 
@@ -257,11 +269,8 @@ class PostsController extends AppBaseController
         // Since we are updating tags as a batch, to effect a 'delete' we first need to remove all attached tags, and then add
         //   whatever is sent via the post, which is a complete set that includes any pre-existing tags that haven't been removed
         $post->contenttags()->detach();
-        $allTags->each( function($str) use(&$post) {
-            $accessLevel = (substr($str,-1)==='!') ? ContenttagAccessLevelEnum::MGMTGROUP : ContenttagAccessLevelEnum::OPEN;
-            $str = trim($str, '#!'); // remove hashtag and possible '!' at end indicating private/mgmt tag
-            $post->addTag($str, $accessLevel); // add 1-by-1
-        });
+        $post->addTag($publicTags, ContenttagAccessLevelEnum::OPEN); // batch add
+        $post->addTag($privateTags, ContenttagAccessLevelEnum::MGMTGROUP); // batch add
 
         $post->refresh();
 

@@ -101,9 +101,7 @@
                 <div class="ml-2" v-b-tooltip.hover.html="{title: 'Enter tags in post body, use hash at start for <em>#publictag</em> or hash and exclamation at end for <em>#privatetag!</em>', variant: 'info'}">
                   <fa-icon :icon="['fas', 'info']" class="text-warning" />
                 </div>
-                <!--
-                <small>Enter tags in post body, use hash at start for <i>#publictag</i> or hash and exclamation at end for <i>#privatetag!</i></small>
-                -->
+                <!-- <small>Enter tags in post body, use hash at start for <i>#publictag</i> or hash and exclamation at end for <i>#privatetag!</i></small> -->
               </b-col>
             </b-row>
 
