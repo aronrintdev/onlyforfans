@@ -15,6 +15,8 @@ class RenameFirstnameLastnameInUsers extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->renameColumn('firstname', 'deprecated_firstname');
+        });
+        Schema::table('users', function (Blueprint $table) {
             $table->renameColumn('lastname', 'deprecated_lastname');
         });
     }
@@ -28,6 +30,8 @@ class RenameFirstnameLastnameInUsers extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->renameColumn('deprecated_firstname', 'firstname');
+        });
+        Schema::table('users', function (Blueprint $table) {
             $table->renameColumn('deprecated_lastname', 'lastname');
         });
     }
