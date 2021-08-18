@@ -108,6 +108,10 @@ export default {
         this.UPDATE_SCREEN_SIZE(screenSize)
       }
     },
+
+    scrollToTop() {
+      this.$el.scrollTo(0, 0)
+    },
   },
 
   watch: {
@@ -128,6 +132,9 @@ export default {
       if (newVal.name.indexOf('messages') > -1) {
         this.isFooterHidden = true;
       }
+
+      // whenever the route changes, go to the top of the new page
+      this.scrollToTop()
     }
   },
 
@@ -136,7 +143,7 @@ export default {
   },
 
   created() {
-    if (this.$route.name.indexOf('messages') > -1) {
+    if (this.$route.name && this.$route.name.indexOf('messages') > -1) {
       this.isFooterHidden = true;
     }
     if (!this.session_user) {
