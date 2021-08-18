@@ -381,10 +381,6 @@ export default {
       if (this.onHide) {
         this.onHide()
       }
-
-      if (this.onHide) {
-        this.onHide()
-      }
     },
 
     // ------------ Dropzone ------------------------------------------------ //
