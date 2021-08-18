@@ -1,9 +1,9 @@
 <template>
   <div>
-    <AdminTable :fields="fields" indexRouteName="contentflags.index" @table-event=handleTableEvent />
+    <AdminTable :fields="fields" indexRouteName="contenttags.index" @table-event=handleTableEvent />
 
     <!-- Show Modal -->
-    <b-modal v-model="isShowModalVisible" id="modal-show-contentflag" size="lg" title="Flag Details" body-class="OFF-p-0">
+    <b-modal v-model="isShowModalVisible" id="modal-show-contenttag" size="lg" title="Tag Details" body-class="OFF-p-0">
       <section v-if="modalSelection" class="OFF-d-flex">
         <div class="box-details">
           <pre>{{ JSON.stringify(modalSelection, null, 2) }}</pre>
@@ -33,10 +33,15 @@ export default {
   data: () => ({
     fields: [
       { key: 'id', label: 'ID', formatter: (v, k, i) => Vue.options.filters.niceGuid(v) },
-      { key: 'cfstatus', label: 'Status', sortable: true, },
-      { key: 'flaggable_type', label: 'Flagged Type', sortable: true, },
-      { key: 'flaggable_id', label: 'Flagged ID', sortable: false, },
-      { key: 'notes', label: 'Notes', sortable: false, },
+      { key: 'ctag', label: 'Tag', sortable: true, },
+      { key: 'vaultfolders_count', label: 'Vault Folders', sortable: true },
+      { key: 'posts_count', label: 'Posts', sortable: true },
+      { key: 'mediafiles_count', label: 'Mediafiles', sortable: true },
+      //{ key: 'counts.mediafiles', label: 'Mediafiles', sortable: true, formatter: v => vcounts.mediafiles },
+      //{ key: 'counts.total', label: 'Total', sortable: true },
+      //{ key: 'counts.mediafiles', label: 'Mediafiles', sortable: true },
+      //{ key: 'counts.posts', label: 'Posts', sortable: true },
+      //{ key: 'counts.vaultfolders', label: 'Vault Folders', sortable: true },
       { key: 'created_at', label: 'Created', sortable: true, formatter: v => Vue.options.filters.niceDate(v) },
       { key: 'ctrls', label: '', sortable: false, },
     ],
@@ -81,15 +86,9 @@ export default {
     AdminTable,
   },
 
-  name: 'ListContentflag',
+  name: 'ListContenttag',
 }
 </script>
 
 <style lang="scss" scoped>
-::v-deep td.tag-desc {
-  max-width: 12rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 </style>

@@ -32,7 +32,7 @@
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <div v-if="postType === 'price'" class="w-100 d-flex mt-3 ml-3">
+            <div v-if="postType === 'price'" class="w-100 d-flex pt-3 pl-3 price-select-container">
               <PriceSelector
                 class="mr-5"
                 :label="$t('priceForFollowers')"
@@ -765,6 +765,10 @@ li.selectable[disabled] {
 
 #post-type {
   font-size: 14px;
+}
+
+.price-select-container {
+  border-bottom: 1px solid rgba(0,0,0,.125)
 }
 </style>
 
