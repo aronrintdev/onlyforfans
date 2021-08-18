@@ -58,6 +58,7 @@
               :options="dropzoneOptions"
               v-on:vdropzone-sending="sendingEvent"
               v-on:vdropzone-success="successEvent"
+              @vdropzone-total-upload-progress="onDropzoneTotalUploadProgress"
               :useCustomSlot="true"
             >
               <div class="dropzone-custom-content">
@@ -65,6 +66,7 @@
                 <span>Drop files here to upload, or click to browse.</span>
               </div>
             </vue-dropzone>
+            <b-progress v-if="fileUploading" :value="uploadProgress" max="100" animated />
           </b-col>
         </b-row>
         
@@ -480,6 +482,10 @@ export default {
       paramName: 'mediafile',
       thumbnailHeight: 128,
       maxFilesize: 5000, // 5 GB
+
+      // https://stackoverflow.com/questions/46379917/dropzone-js-upload-with-php-failed-after-30-seconds-upload
+      timeout: 0, // disables timeout
+
       headers: { 
         'X-Requested-With': 'XMLHttpRequest', 
         'X-CSRF-TOKEN': document.head.querySelector('[name=csrf-token]').content,
@@ -489,6 +495,7 @@ export default {
 
     showVideoRec: false,
     fileUploading: false,
+    uploadProgress: 0,
     showAudioRec: false,
     isAllSelected: false,
     isDownloading: false,
@@ -792,6 +799,10 @@ export default {
     successEvent(file, response) {
       this.fileUploading = false
       this.$store.dispatch('getVaultfolder', this.currentFolderId)
+    },
+
+    onDropzoneTotalUploadProgress(totalUploadProgress, totalBytes, totalBytesSent) {
+      this.uploadProgress = totalUploadProgress
     },
 
     // Preload the mediafiles in the current folder (pwd)
