@@ -144,7 +144,6 @@
                   </li>
                 </ul>
               </b-col>
-
               <b-col cols="12" md="4" class="pr-0">
                 <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
                   <li class="mx-0">
@@ -382,6 +381,10 @@ export default {
       if (this.onHide) {
         this.onHide()
       }
+
+      if (this.onHide) {
+        this.onHide()
+      }
     },
 
     // ------------ Dropzone ------------------------------------------------ //
@@ -605,25 +608,25 @@ export default {
 
     const params = this.data || this.$route.params
 
-     if ( params.context ) {
-      switch( params.context ) {
-        case 'send-selected-mediafiles-to-post': // we got here from the vault, likely with mediafiles to attach to a new post
-          const mediafileIds = params.mediafile_ids || []
-          if ( mediafileIds.length ) {
-            // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
-            const response = axios.get(this.$apiRoute('mediafiles.index'), {
-              params: {
-                mediafile_ids: mediafileIds,
-              },
-            }).then( response => {
-              response.data.data.forEach( mf => {
-                this.ADD_SELECTED_MEDIAFILES(mf)
-              })
-            })
-          }
-          break
-      } // switch
-    }
+   if ( params.context ) {
+     switch( params.context ) {
+       case 'send-selected-mediafiles-to-post': // we got here from the vault, likely with mediafiles to attach to a new post
+         const mediafileIds = params.mediafile_ids || []
+         if ( mediafileIds.length ) {
+           // Retrieve any 'pre-loaded' mediafiles, and add to dropzone...be sure to tag as 'ref-only' or something
+           const response = axios.get(this.$apiRoute('mediafiles.index'), {
+             params: {
+               mediafile_ids: mediafileIds,
+             },
+           }).then( response => {
+             response.data.data.forEach( mf => {
+               this.ADD_SELECTED_MEDIAFILES(mf)
+             })
+           })
+         }
+         break
+     } // switch
+   }
 
   }, // mounted
 

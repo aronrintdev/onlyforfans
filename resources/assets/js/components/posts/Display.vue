@@ -73,29 +73,25 @@
       </template>
 
       <div class="post-crate-content">
-
         <template v-if="post.access">
-          <section v-if="post.description" v-touch:tap="tapHandler" :class="{ 'tag-has-mediafiles': hasMediafiles }" class="py-3 text-wrap">
+          <div v-if="post.description" v-touch:tap="tapHandler" :class="{ 'tag-has-mediafiles': hasMediafiles }" class="py-3 text-wrap">
             <b-card-text class="px-3 mb-0 tag-post_desc">
               <VueMarkdown :html="false" :source="post.description || ''" />
             </b-card-text>
-          </section>
+          </div>
           <article v-if="hasMediafiles">
             <MediaSlider :post="post" :key="post.id" :mediafiles="post.mediafiles" :session_user="session_user" :use_mid="use_mid" @doubleTap="tapHandler" />
           </article>
         </template>
-
         <template v-else>
           <PostCta :post="post" :session_user="session_user" :primary_mediafile="primaryMediafile" />
         </template>
-
-        <section class="animation-box" :key="isLikedByMe" v-if="startLikeUnlikeAnime">
+        <div class="animation-box" :key="isLikedByMe" v-if="startLikeUnlikeAnime">
           <fa-icon
             :class="isLikedByMe ? 'text-danger' : 'text-secondary'"
             :icon="'heart'"
           />
-        </section>
-
+        </div>
       </div>
     
       <template #footer>
