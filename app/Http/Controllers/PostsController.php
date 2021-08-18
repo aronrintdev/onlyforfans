@@ -119,7 +119,7 @@ class PostsController extends AppBaseController
 
         // $this->authorize('update', $timeline); // create post considered timeline update
         if ($sessionUser->id !== $timeline->user_id && $sessionUser->canCreatePostForTimeline($timeline) == false) {
-            abort(403, 'Authorize Error');
+            abort(403, 'This action is unauthorized.');
         }
 
         $attrs = $request->except(['timeline_id', 'description']); // timeline_id is now postable
@@ -194,7 +194,11 @@ class PostsController extends AppBaseController
 
     public function update(Request $request, Post $post)
     {
-        $this->authorize('update', $post);
+        // $this->authorize('update', $post);
+        $sessionUser = $request->user();
+        if ($sessionUser->id !== $post->timeline->user_id && $sessionUser->canEditPostForTimeline($post->timeline) == false) {
+            abort(403, 'This action is unauthorized.');
+        }
 
         if ($post->price->isPositive() && $post->sharees()->count() > 0) {
             abort(403, 'Post has sharees');

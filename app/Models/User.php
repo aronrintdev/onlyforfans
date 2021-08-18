@@ -607,8 +607,29 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
         $result = false;
         foreach( $models as $model) {
             $timeline = Timeline::where('user_id', $model->creator_id)->where('id', $timeline->id)->first();
+            
             if ($timeline) {
-                $result = true;
+                foreach($model->permissions as $permission) {
+                    if (array_search('Post.create', $permission)) {
+                        $result = true;
+                    }
+                }
+            }
+        }
+        return $result;
+    }
+
+    public function canEditPostForTimeline(Timeline $timeline) {
+        $models = Staff::with('permissions')->where('user_id', $this->id)->where('role', 'staff')->get();
+        $result = false;
+        foreach( $models as $model) {
+            $timeline = Timeline::where('user_id', $model->creator_id)->where('id', $timeline->id)->first();
+            if ($timeline) {
+                foreach($model->permissions as $permission) {
+                    if ($permission->name == 'Post.edit') {
+                        $result = true;
+                    }
+                }
             }
         }
         return $result;

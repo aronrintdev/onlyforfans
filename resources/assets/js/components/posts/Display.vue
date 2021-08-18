@@ -17,7 +17,7 @@
           </div>
           <div class="post-ctrl">
             <b-dropdown right text="" class="post-header-menu" variant="outline-dark">
-              <b-dropdown-item v-if="isPostOwnedBySessionUser" @click="showEditPost">
+              <b-dropdown-item v-if="isPostOwnedBySessionUser || canEditPostAsStaff" @click="showEditPost">
                 <fa-icon icon="edit" fixed-width class="mr-2" />
                 Edit
               </b-dropdown-item>
@@ -200,6 +200,10 @@ export default {
     isPostOwnedBySessionUser() {
       return this.session_user.id === this.post.user.id
     },
+    canEditPostAsStaff() {
+      const index = this.session_user.companies.findIndex(company => company.id == this.post.timeline.id);
+      return index > -1 && this.session_user.companies[index].permissions.findIndex(permission => permission.name   == 'Post.edit') > -1
+    }
   },
 
   data: () => ({
