@@ -111,12 +111,17 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
             $model->checkUsername();
             $model->remember_token = str_random(10);
             $model->verification_code = str_random(10);
-            // if ( empty($model->firstname) ) {
-            //     $model->firstname = $model->real_firstname;
-            // }
-            // if ( empty($model->lastname) ) {
-            //     $model->lastname = $model->real_lastname;
-            // }
+
+            // Make a guess at real first & last names...can be updated later. Need
+            // this on create in order to set an initial timeline name (and thus slug) below
+            if ( empty($model->real_firstname) ) {
+                list($first,$last) = User::parseName($model->name);
+                $model->real_firstname = $first;
+            }
+            if ( empty($model->real_lastname) ) {
+                list($first,$last) = User::parseName($model->name);
+                $model->real_lastname = $last;
+            }
         });
         self::created(function ($model) {
             UserSetting::create([
@@ -124,7 +129,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
             ]);
             Timeline::create([
                 'user_id' => $model->id,
-                'name'    => request()->name,
+                'name'    => $model->real_firstname,
                 'about'   => '',
             ]);
         });
@@ -602,6 +607,16 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
         }) : $query->whereHas('roles', function($q) {
             $q->whereIn('name', ['super-admin', 'admin']);
         }));
+    }
+
+    // Takes a single string that could be a first name or 
+    //   a full name and parses into distinct fields
+    public static function parseName(string $name) : string 
+    {
+        $name = trim($name);
+        $last = (strpos($name, ' ') === false) ? '' : preg_replace('#.*\s([\w-]*)$#', '$1', $name);
+        $first = trim( preg_replace('#'.preg_quote($last,'#').'#', '', $name ) );
+        return [$first, $last];
     }
 
 }

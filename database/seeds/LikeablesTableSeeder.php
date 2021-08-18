@@ -30,7 +30,7 @@ class LikeablesTableSeeder extends Seeder
 
         // +++ Create ... +++
 
-        $timelines = Timeline::get();
+        $timelines = Timeline::has('posts')->get();
 
         if ( $this->appEnv !== 'testing' ) {
             $this->output->writeln("  - Likeables seeder: loaded ".$timelines->count()." timelines...");
