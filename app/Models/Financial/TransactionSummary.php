@@ -2,11 +2,13 @@
 
 namespace App\Models\Financial;
 
-use App\Models\Traits\UsesUuid;
-use App\Enums\Financial\TransactionSummaryTypeEnum;
+use Carbon\Carbon;
 use App\Models\Casts\Money;
+use App\Models\Traits\UsesUuid;
 use App\Models\Financial\Traits\HasCurrency;
 use App\Models\Financial\Traits\HasSystemByAccount;
+use App\Enums\Financial\TransactionSummaryTypeEnum as Type;
+use Illuminate\Support\Collection;
 
 class TransactionSummary extends Model
 {
@@ -31,6 +33,7 @@ class TransactionSummary extends Model
         'debit_sum'      => Money::class,
         'credit_average' => Money::class,
         'debit_average'  => Money::class,
+        'stats'          => 'collection',
     ];
 
     public function getCurrencyAttribute()
@@ -64,6 +67,22 @@ class TransactionSummary extends Model
 
     #endregion
 
+    /* ------------------------------- Scopes ------------------------------- */
+    #region Scopes
+
+    public function scopeType($query, $type) {
+        return $query->where('type', $type);
+    }
+
+    public function scopeIsAccount($query, $account) {
+        if ($account instanceof Account) {
+            return $query->where('account_id', $account->id);
+        }
+        return $query->where('account_id', $account);
+    }
+
+    #endregion Scopes
+
     /* ------------------------------ Functions ----------------------------- */
     #region Functions
 
@@ -71,11 +90,11 @@ class TransactionSummary extends Model
      * Creates a new un-finalized Transaction Summary
      *
      * @param  Account  $account
-     * @param  TransactionSummaryTypeEnum  $type
+     * @param  Type  $type
      * @param  array  $options
      * @return  TransactionSummary
      */
-    public static function start(Account $account, $type = TransactionSummaryTypeEnum::CUSTOM, $options = [] ): TransactionSummary
+    public static function start(Account $account, $type = Type::CUSTOM, $options = [] ): TransactionSummary
     {
         return TransactionSummary::create(array_merge([
             'account_id' => $account->getKey(),
@@ -97,6 +116,58 @@ class TransactionSummary extends Model
             ->where('finalized', true)
             ->orderByDesc(Transaction::getTableName() . '.settled_at')
             ->limit(1);
+    }
+
+    public static function getBatch(Account $account, string $unit, Carbon $from, Carbon $to)
+    {
+        // TODO
+    }
+
+    /**
+     * Gets an amount of TransactionsSummaries from type unit
+     *
+     * @param Account $account
+     * @param string $unit
+     * @param int $amount
+     * @return Collection Collection of the items
+     */
+    public static function getBatchAgo(Account $account, string $unit, int $amount)
+    {
+        $type = static::switchUnitToEnum($unit);
+
+        switch ($type) {
+            case Type::DAILY:
+                $start = Carbon::now()->startOfDay()->subDays($amount);
+                break;
+            case Type::WEEKLY:
+                $start = Carbon::now()->startOfWeek()->startOfDay()->subWeeks($amount);
+                break;
+            case Type::MONTHLY:
+                $start = Carbon::now()->startOfMonth()->startOfDay()->subMonths($amount);
+                break;
+            case Type::YEARLY:
+                $start = Carbon::now()->startOfYear()->startOfDay()->subYear($amount);
+                break;
+            default:
+                $start = Carbon::now();
+        }
+
+        return TransactionSummary::isAccount($account)->type($type)->where('from', '>=', $start)->get();
+    }
+
+    /**
+     * Switch Carbon units to TransactionSummaryTypeEnum values
+     */
+    public static function switchUnitToEnum(string $unit): string
+    {
+        switch ($unit) {
+            case 'day': return Type::DAILY;
+            case 'week': return Type::WEEKLY;
+            case 'month': return Type::MONTHLY;
+            case 'year': return Type::YEARLY;
+            // If Enum value was passed in
+            default: return $unit;
+        }
     }
 
     #endregion

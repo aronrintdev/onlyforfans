@@ -156,6 +156,8 @@ class TimelinesController extends AppBaseController
         $query->whereHasMorph( 'resource', [Post::class], function($q1) use(&$timeline) {
             $q1->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
         });
+        $query->orderByDesc(Post::select('created_at')
+            ->whereColumn('posts.id', 'resource_id'));
         $data = $query->paginate( $request->input('take', Config::get('collections.max.posts', 10)) );
         return new MediafileCollection($data);
     }
@@ -172,6 +174,36 @@ class TimelinesController extends AppBaseController
         });
         $data = $query->paginate( $request->input('take', Config::get('collections.max.posts', 10)) );
         return new MediafileCollection($data);
+    }
+
+    // 'Photos & Videos' Feed Count
+    // %TODO: move to mediafiles controller (?)
+    public function getPhotosVideosCount(Request $request, Timeline $timeline)
+    {
+        // Get Videos
+        $query1 = Mediafile::with('resource')
+            ->isVideo()
+            ->where('mftype', MediafileTypeEnum::POST);
+        $query1->whereHasMorph( 'resource', [Post::class], function($q1) use(&$timeline) {
+            $q1->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
+        });
+        $videos = $query1->count();
+
+        // Get Photos
+        $query2 = Mediafile::with('resource')
+            ->isImage()
+            //->whereIn('mimetype', ['image/jpeg', 'image/jpg', 'image/png'])
+            ->where('mftype', MediafileTypeEnum::POST);
+        $query2->whereHasMorph( 'resource', [Post::class], function($q1) use(&$timeline) {
+            $q1->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
+        });
+        $query2->orderByDesc(Post::select('created_at')
+            ->whereColumn('posts.id', 'resource_id'));
+        $photos = $query2->count();
+        return [
+            'photos' => $photos,
+            'videos' => $videos,
+        ];
     }
 
     // Get suggested users (list/index)
@@ -207,7 +239,6 @@ class TimelinesController extends AppBaseController
             ->whereHas('mediafiles', function($q1) {
                 $q1->isImage();
             })
-            ->withCount('comments')->orderBy('comments_count', 'desc')
             //->withCount('likes')->orderBy('likes_count', 'desc')
             ->where('active', 1)
             ->where(function ($query) {

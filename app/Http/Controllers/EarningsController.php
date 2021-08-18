@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Financial\TransactionSummaryTypeEnum;
 use App\Enums\Financial\TransactionTypeEnum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use App\Http\Resources\TransactionCollection;
 use App\Models\Financial\Transaction;
+use App\Models\Financial\TransactionSummary;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -79,6 +81,8 @@ class EarningsController extends Controller
         $chargeback['total'] += $chargebackPartial['total'];
         $chargeback['count'] += $chargebackPartial['count'];
 
+        $summaries = TransactionSummary::getBatchAgo($account, $ago_unit, $ago);
+
         return [
             'credits' => [
                 TransactionTypeEnum::SALE =>
@@ -95,13 +99,14 @@ class EarningsController extends Controller
             ],
             'from' => $from,
             'to' => $to,
+            'ago' => $ago,
+            'ago_unit' => $ago_unit,
+            'summaries' => $summaries,
         ];
     }
 
     public function balances(Request $request)
     {
-
-
         [ $system, $currency ] = $this->systemAndCurrency($request);
 
         $account = $request->user()->getEarningsAccount($system, $currency);
