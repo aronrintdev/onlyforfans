@@ -90,6 +90,7 @@ class PostsController extends AppBaseController
 
     public function store(Request $request)
     {
+        $sessionUser = $request->user();
         $vrules = [
             'timeline_id' => 'required|uuid|exists:timelines,id',
             'type' => [ 'sometimes', 'required', new InEnum(new PostTypeEnum()) ],
@@ -109,7 +110,10 @@ class PostsController extends AppBaseController
 
         $timeline = Timeline::find($request->timeline_id); // timeline being posted on
 
-        $this->authorize('update', $timeline); // create post considered timeline update
+        // $this->authorize('update', $timeline); // create post considered timeline update
+        if ($sessionUser->id !== $timeline->user_id && $sessionUser->canCreatePostForTimeline($timeline) == false) {
+            abort(403, 'Authorize Error');
+        }
 
         $attrs = $request->except('timeline_id'); // timeline_id is now postable
         $attrs['user_id'] = $timeline->user->id; // %FIXME: remove this field, redundant

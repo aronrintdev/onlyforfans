@@ -292,6 +292,16 @@ class UsersController extends AppBaseController
         $timeline->userstats = $sessionUser->getStats();
         $timeline->is_storyqueue_empty = $timeline->isStoryqueueEmpty();
 
+        // get companies
+        $models = Staff::with('permissions')->where('user_id', $sessionUser->id)->where('role', 'staff')->get();
+        $companies = [];
+        foreach( $models as $model) {
+            $user = Timeline::with(['cover', 'avatar'])->where('user_id', $model->creator_id)->first()->makeVisible(['user']);
+            $user->permissions = $model->permissions;
+            array_push($companies, $user);
+        }
+        $sessionUser->companies = $companies;
+
         /** Flags for the common UI elements */
         $uiFlags = [
             'isAdmin'          => $sessionUser->can('admin.dashboard'),

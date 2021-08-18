@@ -602,6 +602,18 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
         }));
     }
 
+    public function canCreatePostForTimeline(Timeline $timeline) {
+        $models = Staff::with('permissions')->where('user_id', $this->id)->where('role', 'staff')->get();
+        $result = false;
+        foreach( $models as $model) {
+            $timeline = Timeline::where('user_id', $model->creator_id)->where('id', $timeline->id)->first();
+            if ($timeline) {
+                $result = true;
+            }
+        }
+        return $result;
+    }
+
 }
 
     /*
