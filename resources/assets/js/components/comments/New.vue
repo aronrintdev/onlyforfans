@@ -1,6 +1,7 @@
 <template>
   <b-form @submit="submit">
     <b-form-input
+      autocomplete="off"
       class="new-comment"
       v-model="description"
       placeholder="Write a comment...press enter to post"
