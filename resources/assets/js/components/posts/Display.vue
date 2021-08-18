@@ -21,7 +21,7 @@
                 <fa-icon icon="edit" fixed-width class="mr-2" />
                 Edit
               </b-dropdown-item>
-              <b-dropdown-item v-if="isPostOwnedBySessionUser" @click="showDeleteConfirmation = true">
+              <b-dropdown-item v-if="isPostOwnedBySessionUser || canDeletePostAsStaff" @click="showDeleteConfirmation = true">
                 <fa-icon icon="trash" fixed-width class="mr-2" />
                 Delete
               </b-dropdown-item>
@@ -203,6 +203,10 @@ export default {
     canEditPostAsStaff() {
       const index = this.session_user.companies.findIndex(company => company.id == this.post.timeline.id);
       return index > -1 && this.session_user.companies[index].permissions.findIndex(permission => permission.name   == 'Post.edit') > -1
+    },
+    canDeletePostAsStaff() {
+      const index = this.session_user.companies.findIndex(company => company.id == this.post.timeline.id);
+      return index > -1 && this.session_user.companies[index].permissions.findIndex(permission => permission.name   == 'Post.delete') > -1
     }
   },
 
@@ -242,7 +246,7 @@ export default {
     },
 
     deletePost() {
-      const is = this.isPostOwnedBySessionUser // Check permissions
+      const is = this.isPostOwnedBySessionUser || this.canDeletePostAsStaff // Check permissions
       if (!is) {
         return
       }

@@ -17,7 +17,7 @@ class Post extends JsonResource
         $hasAccess = $sessionUser->can('contentView', $model);
         $isOwner = $model->getPrimaryOwner()->id === $sessionUser->id;
         $isAdmin = $sessionUser->isAdmin();
-        $isCollaborator = $sessionUser->canEditPostForTimeline($this->timeline);
+        $isEditableCollaborator = $sessionUser->canChangePostForTimeline($this->timeline, 'Post.edit');
 
         return [
             'id' => $this->id,
@@ -35,7 +35,7 @@ class Post extends JsonResource
             //'contenttags' =>  $this->contenttags,
 
             'contenttags' =>  $this->contenttags()->where('access_level', ContenttagAccessLevelEnum::OPEN)->pluck('ctag'),
-            'contenttags_mgmt' =>  $this->when($isOwner||$isAdmin||$isCollaborator, function() {
+            'contenttags_mgmt' =>  $this->when($isOwner||$isAdmin||$isEditableCollaborator, function() {
                 return $this->contenttags()->where('access_level', ContenttagAccessLevelEnum::MGMTGROUP)->pluck('ctag');
             }),
 

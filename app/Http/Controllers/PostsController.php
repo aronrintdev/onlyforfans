@@ -118,7 +118,7 @@ class PostsController extends AppBaseController
         $timeline = Timeline::find($request->timeline_id); // timeline being posted on
 
         // $this->authorize('update', $timeline); // create post considered timeline update
-        if ($sessionUser->id !== $timeline->user_id && $sessionUser->canCreatePostForTimeline($timeline) == false) {
+        if ($sessionUser->id !== $timeline->user_id && $sessionUser->canChangePostForTimeline($timeline, 'Post.create') == false) {
             abort(403, 'This action is unauthorized.');
         }
 
@@ -196,7 +196,7 @@ class PostsController extends AppBaseController
     {
         // $this->authorize('update', $post);
         $sessionUser = $request->user();
-        if ($sessionUser->id !== $post->timeline->user_id && $sessionUser->canEditPostForTimeline($post->timeline) == false) {
+        if ($sessionUser->id !== $post->timeline->user_id && $sessionUser->canChangePostForTimeline($post->timeline, 'Post.edit') == false) {
             abort(403, 'This action is unauthorized.');
         }
 
@@ -289,7 +289,12 @@ class PostsController extends AppBaseController
 
     public function destroy(Request $request, Post $post)
     {
-        $this->authorize('delete', $post);
+        // $this->authorize('delete', $post);
+        $sessionUser = $request->user();
+        if ($sessionUser->id !== $post->timeline->user_id && $sessionUser->canChangePostForTimeline($post->timeline, 'Post.delete') == false) {
+            abort(403, 'This action is unauthorized.');
+        }
+
         if ($post->sharees()->count() > 0 ) {
             abort(403, 'Post has sharees');
         }
