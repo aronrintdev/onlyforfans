@@ -1,6 +1,7 @@
 <template>
   <div class="create_post-crate tag-crate">
 
+    <!-- %FILE: resources/assets/js/components/timelines/CreatePost.vue -->
     <section class="row">
       <div class="col">
 
@@ -76,8 +77,35 @@
               @complete="audioRecordFinished"
             />
           </div>
+
           <template #footer>
+
+            <b-row v-if="isTagFormVisible" class="mb-1">
+              <b-col cols="12" class="d-flex align-items-center">
+                <b-form-tags v-model="hashtags" no-outer-focus class="">
+                  <template v-slot="{ tags, inputAttrs, inputHandlers, tagVariant, addTag, removeTag }">
+                    <div class="d-inline-block">
+                      <b-form-tag v-for="tag in tags" 
+                        @remove="removeTag(tag)" 
+                        :key="tag" 
+                        :title="tag" 
+                        :variant="isHashtagPrivate(tag) ? 'danger' : 'secondary'" 
+                        size="sm" class="mr-1" 
+                      > 
+                        {{ tag }}
+                      </b-form-tag>
+                    </div>
+                  </template>
+                </b-form-tags>
+                <div class="ml-2" v-b-tooltip.hover.html="{title: 'Enter tags in post body, use hash at start for <em>#publictag</em> or hash and exclamation at end for <em>#privatetag!</em>', variant: 'info'}">
+                  <fa-icon :icon="['fas', 'info']" class="text-warning" />
+                </div>
+                <!-- <small>Enter tags in post body, use hash at start for <i>#publictag</i> or hash and exclamation at end for <i>#privatetag!</i></small> -->
+              </b-col>
+            </b-row>
+
             <b-row>
+
               <b-col cols="12" md="8" class="post-create-footer-ctrl d-flex">
                 <ul class="list-inline d-flex mb-0 OFF-border-right pt-1">
                   <li id="clickme_to-select" class="selectable select-pic">
@@ -111,6 +139,9 @@
                   <li @click="togglePostPrice()" class="selectable select-pic" title="Set Price">
                     <fa-icon :icon="postType === 'price' ? ['fas', 'tag'] : ['far', 'tag']" size="lg" :class="postType === 'price' ? 'text-primary' : 'text-secondary'" />
                   </li>
+                  <li @click="showTagForm()" class="selectable show-tagform" title="Add Tags">
+                    <fa-icon :icon="isTagFormVisible ? ['fas', 'hashtag'] : ['far', 'hashtag']" class="text-secondary" size="lg" />
+                  </li>
                 </ul>
               </b-col>
               <b-col cols="12" md="4" class="pr-0">
@@ -121,15 +152,20 @@
                     </button>
                   </li>
                   <li class="w-100 mx-0">
-                    <button :disabled="posting || (!description && ( selectedMediafiles && selectedMediafiles.length === 0 ))" @click="savePost()" class="btn btn-submit btn-primary w-100">
-                      <span v-if="posting" class="text-white spinner-border spinner-border-sm pr-2" role="status" aria-hidden="true"></span>
+                    <button :disabled="isBusy || (!description && ( selectedMediafiles && selectedMediafiles.length === 0 ))" @click="savePost()" class="btn btn-submit btn-primary w-100">
+                      <span v-if="isBusy" class="text-white spinner-border spinner-border-sm pr-2" role="status" aria-hidden="true"></span>
                       Post
                     </button>
                   </li>
                 </ul>
               </b-col>
+
             </b-row>
+
+            <p v-if="formErr!==null" class="text-danger">An error occured: {{ formErr }} </p>
+
           </template>
+
         </b-card>
       </div>
     </section>
@@ -141,23 +177,25 @@
 
 <script>
 import Vuex from 'vuex'
-import moment from 'moment';
-import { isAndroid, isIOS, osVersion } from 'mobile-device-detect';
+import moment from 'moment'
+import { isAndroid, isIOS, osVersion } from 'mobile-device-detect'
 
 import { eventBus } from '@/eventBus'
-import vue2Dropzone from 'vue2-dropzone';
-import 'vue2-dropzone/dist/vue2Dropzone.min.css';
-import EmojiIcon from '@components/common/icons/EmojiIcon.vue';
-import LocationPinIcon from '@components/common/icons/LocationPinIcon.vue';
-import TimerIcon from '@components/common/icons/TimerIcon.vue';
-import CalendarIcon from '@components/common/icons/CalendarIcon.vue';
+import vue2Dropzone from 'vue2-dropzone'
+import 'vue2-dropzone/dist/vue2Dropzone.min.css'
+import EmojiIcon from '@components/common/icons/EmojiIcon.vue'
+import LocationPinIcon from '@components/common/icons/LocationPinIcon.vue'
+import TimerIcon from '@components/common/icons/TimerIcon.vue'
+import CalendarIcon from '@components/common/icons/CalendarIcon.vue'
 
-import PriceSelector from '@components/common/PriceSelector';
-import UploadMediaPreview from '@components/posts/UploadMediaPreview';
-import VideoRecorder from '@components/videoRecorder';
-import AudioRecorder from '@components/audioRecorder';
+import PriceSelector from '@components/common/PriceSelector'
+import UploadMediaPreview from '@components/posts/UploadMediaPreview'
+import VideoRecorder from '@components/videoRecorder'
+import AudioRecorder from '@components/audioRecorder'
 
 export default {
+
+  comments: true, // %FIXME
 
   props: {
     session_user: null,
@@ -167,8 +205,24 @@ export default {
   },
 
   computed: {
+
+    hashtags: {
+      // tag representation in the create post footer (can be deleted here but not added)
+      get: function () {
+        return this.parseHashtags(this.description) || []
+      },
+      set: function (newValue) {
+        const oldValue = this.parseHashtags(this.description) || []
+        const diffs = oldValue.filter( s => !newValue.includes(s) )
+        diffs.forEach( s => {
+          console.log(`replacing ${s}`)
+          this.description = this.description.replace('#'+s, '')
+        })
+      }
+    },
+
     isIOS9PlusAndAndroid() {
-      return (isIOS && parseInt(osVersion.split('.')[0]) >= 9) || isAndroid;
+      return (isIOS && parseInt(osVersion.split('.')[0]) >= 9) || isAndroid
     },
 
     ...Vuex.mapState('vault', [
@@ -201,8 +255,8 @@ export default {
 
   data: () => ({
     moment,
-    description: '',
     newPostId: null,
+    description: '',
     selectedMedia: null, // 'pic',
     showedModal: null,
     postType: 'free',
@@ -217,10 +271,15 @@ export default {
 
     scheduled_at: null,
     //mediafiles: [],  use selectedMediafiles from store
-    posting: false,
+    isBusy: false, // disable button, form, etc due to post sending or some similar activity
     expirationPeriod: null,
     showVideoRec: false,
     showAudioRec: false,
+
+    isTagFormVisible: false,
+    isPublicTagFormSelected: true,
+
+    formErr: null, // null if no error, otherwise string (error message)
 
   }), // data
 
@@ -239,33 +298,63 @@ export default {
 
     resetForm() {
       this.CLEAR_SELECTED_MEDIAFILES()
-      this.$refs.myVueDropzone.removeAllFiles();
-      this.description = '';
-      this.newPostId = null;
-      this.selectedMedia = 'pic';
-      this.ptype = 'free';
-      this.price = 0;
-      this.priceForPaidSubscribers = 0;
-      this.scheduled_at = null;
-      this.expirationPeriod = null;
+      this.$refs.myVueDropzone.removeAllFiles()
+      this.description = ''
+      this.newPostId = null
+      this.selectedMedia = 'pic'
+      this.ptype = 'free'
+      this.price = 0
+      this.priceForPaidSubscribers = 0
+      this.scheduled_at = null
+      this.expirationPeriod = null
+    },
+
+    parseHashtags(searchText) {
+      //const regexp = /\B\#\w\w+\b/g
+      const regexp = /\B#\w\w+(!)?/g
+      const htList = searchText.match(regexp) || [];
+      return htList.map(s => s.slice(1))
+      // "#baz! #foo! #cat #bar!".match(/\B#\w\w+!\B/g) => [ "#baz!", "#foo!", "#bar!" ]
+      // "#baz! #foo! #cat #bar!".match(/\B#\w\w+\b/g) => [ "#baz", "#foo", "#cat", "#bar" ]
+    },
+
+    isHashtagPrivate(s) {
+      return s.endsWith('!')
     },
 
     async savePost() {
-      this.posting = true;
+      this.formErr = null // clear errors
+      this.isBusy = true
       console.log('CreatePost::savePost()')
       // (1) create the post
-      const response = await axios.post(this.$apiRoute('posts.store'), {
-        timeline_id: this.timeline.id,
-        description: this.description,
-        type: this.postType,
-        price: this.price,
-        price_for_subscribers: this.priceForPaidSubscribers,
-        currency: this.currency,
-        schedule_datetime: this.scheduled_at?.toDate(),
-        expiration_period: this.expirationPeriod,
-      })
+      let response = null
+      const payload = {
+          timeline_id: this.timeline.id,
+          description: this.description,
+          type: this.postType,
+          price: this.price,
+          price_for_subscribers: this.priceForPaidSubscribers,
+          currency: this.currency,
+          schedule_datetime: this.scheduled_at?.toDate(),
+          expiration_period: this.expirationPeriod,
+      }
+
+      try { 
+        response = await axios.post( this.$apiRoute('posts.store'), payload )
+      } catch (e) {
+        //console.log('err', { e, })
+        if ( e.response?.status === 422 ) {
+          const firstKey = Object.keys(e.response.data.errors)[0]
+          const msg = e.response.data.errors[firstKey][0]
+          this.formErr = `Save failed, check input for errors: ${msg}`
+        } else {
+          this.formErr = `Save post failed, please try again (${e.message})`
+        }
+        this.isBusy = false
+        return
+      }
       this.$log.debug('savePost', { response })
-      const json = response.data;
+      const json = response.data
 
       // (2) upload & attach the mediafiles (in dropzone queue)
       if (json.post) {
@@ -280,12 +369,13 @@ export default {
           this.$refs.myVueDropzone.processQueue() // this will call createCompleted() via callback
         }  else {
           console.log('CreatePost::savePost() - nothing queued')
-          this.createCompleted();
+          this.createCompleted()
         }
 
       } else {
-        this.resetForm();
-        this.posting = false;
+        this.resetForm()
+        this.formErr = null // clear errors
+        this.isBusy = false
       }
 
       if (this.onHide) {
@@ -296,7 +386,7 @@ export default {
     // ------------ Dropzone ------------------------------------------------ //
 
     openDropzone() {
-      this.$refs.myVueDropzone.dropzone.hiddenFileInput.click();
+      this.$refs.myVueDropzone.dropzone.hiddenFileInput.click()
     },
 
     onDropzoneAdded(file) {
@@ -312,13 +402,13 @@ export default {
     // Dropzone: 'Modify the request and add addtional parameters to request before sending'
     onDropzoneSending(file, xhr, formData) {
       // %NOTE: file.name is the mediafile PKID
-      this.$log.debug('onDropzoneSending', { file, formData, xhr });
+      this.$log.debug('onDropzoneSending', { file, formData, xhr })
       if ( !this.newPostId ) {
-        throw new Error('Cancel upload, invalid post id');
+        throw new Error('Cancel upload, invalid post id')
       }
-      formData.append('resource_id', this.newPostId);
-      formData.append('resource_type', 'posts');
-      formData.append('mftype', 'post');
+      formData.append('resource_id', this.newPostId)
+      formData.append('resource_type', 'posts')
+      formData.append('mftype', 'post')
     },
 
     onDropzoneSuccess(file, response) {
@@ -346,7 +436,7 @@ export default {
       if ( !this.newPostId ) {
         return
       }
-      this.createCompleted();
+      this.createCompleted()
     },
 
     onDropzoneRemoved(file, error, xhr) {
@@ -408,8 +498,8 @@ export default {
       })
       // %TODO: find medaifile in selectedMediafiles and remove it
 
-      this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId });
-      this.$store.dispatch('getQueueMetadata');
+      this.$store.dispatch('unshiftPostToTimeline', { newPostId: this.newPostId })
+      this.$store.dispatch('getQueueMetadata')
       // Show notification if scheduled post is succesfully created
       if (this.scheduled_at) {
         this.$root.$bvToast.toast('New scheduled post is created.', {
@@ -418,8 +508,8 @@ export default {
           solid: true,
         })
       }
-      this.resetForm();
-      this.posting = false;
+      this.resetForm()
+      this.isBusy = false
     },
 
     takePicture() { // %TODO
@@ -453,6 +543,10 @@ export default {
       })
     },
 
+    showTagForm() {
+      this.isTagFormVisible = !this.isTagFormVisible
+    },
+
     changeMediafiles(data) {
       this.UPDATE_SELECTED_MEDIAFILES([...data])
     },
@@ -465,13 +559,13 @@ export default {
     },
 
     closeSchedulePicker(e) {
-      this.scheduled_at = null;
-      e.stopPropagation();
+      this.scheduled_at = null
+      e.stopPropagation()
     },
 
     audioRecordFinished(file) {
       if (this.$refs.myVueDropzone) {
-        this.$refs.myVueDropzone.addFile(file);
+        this.$refs.myVueDropzone.addFile(file)
       }
     },
 
@@ -483,9 +577,9 @@ export default {
     },
 
     videoRecCompleted(file) {
-      this.showVideoRec = false;
+      this.showVideoRec = false
       if (this.$refs.myVueDropzone) {
-        this.$refs.myVueDropzone.addFile(file);
+        this.$refs.myVueDropzone.addFile(file)
       }
     },
 
@@ -500,12 +594,12 @@ export default {
 
   mounted() {
 
-    const self = this;
+    const self = this
     eventBus.$on('apply-schedule', function(data) {
-      self.scheduled_at = data;
+      self.scheduled_at = data
     })
     eventBus.$on('set-expiration-period', function(data) {
-      self.expirationPeriod = data;
+      self.expirationPeriod = data
     })
 
     const params = this.data || this.$route.params
@@ -561,9 +655,16 @@ export default {
 
   watch: {
 
-    //selectedMediafiles(value) {
+    hashtags(newVal, oldVal) {
+      this.isTagFormVisible = this.hashtags.length > 0
+    },
+
+    description(newVal, oldVal) {
+      if (newVal!==oldVal) {
+        this.formErr = null // clear errors
+      }
+    },
     //this.$log.debug('watch selectedMediafiles', { value })
-    //},
 
   }, // watch
 
@@ -658,10 +759,10 @@ li.selectable[disabled] {
 </style>
 
 <i18n lang="json5" scoped>
-{
-  "en": {
-    "priceForFollowers": "Price for free followers",
-    "priceForSubscribers": "Price for paid subscribers",
+  {
+    "en": {
+      "priceForFollowers": "Price for free followers",
+      "priceForSubscribers": "Price for paid subscribers",
+    }
   }
-}
-</i18n>
+  </i18n>
