@@ -157,4 +157,10 @@ return [
 
     ],
 
+
+    // UUID Settings
+    'uuid' => [
+        'useTrueRandom' => env('DB_UUID_USE_TRUE_RANDOM', false),
+    ],
+
 ];
