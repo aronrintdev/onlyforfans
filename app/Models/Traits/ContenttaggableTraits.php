@@ -7,6 +7,7 @@ use App\Enums\ContenttagAccessLevelEnum;
 trait ContenttaggableTraits
 {
     // $_ctag can be a string or array of tags...
+    // $NOTE: this will not remove any tags, that is the responsibility of the caller
     public function addTag($_ctag, $accessLevel=ContenttagAccessLevelEnum::OPEN)
     {
         if ( is_string($_ctag) ) {

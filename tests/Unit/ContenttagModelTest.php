@@ -45,7 +45,6 @@ class ContenttagModelTest extends TestCase
 
     /**
      * @group contenttag-model
-     * @group here0818
      */
     public function test_should_add_batch_of_tags_to_post()
     {
@@ -84,6 +83,43 @@ class ContenttagModelTest extends TestCase
         }, 0);
         $this->assertEquals($privateTags->count(), $num);
     }
+
+    /**
+     * @group contenttag-model
+     * @group here0818
+     */
+    public function test_should_remove_tag_from_post()
+    {
+        $max = 5;
+        $publicTags = collect();
+        collect(range(0,$max))->each( function() use(&$publicTags) {
+            $publicTags->push( $this->faker->slug.'-'.$this->faker->numberBetween(10000,99999) );
+        });
+
+        $post = Post::first();
+
+        $origCount = $post->contenttags->count();
+
+        $post->addTag($publicTags, ContenttagAccessLevelEnum::OPEN); // batch add as collection
+
+        $expectedCount = $origCount + $publicTags->count();
+        $removedTagStr = $publicTags->pop();
+        $post->contenttags()->detach(); // %NOTE: must do manually to effect a remove of single tag
+        $post->addTag($publicTags, ContenttagAccessLevelEnum::OPEN); // batch add as collection
+        $expectedCount -= 1;
+
+        $post->refresh();
+
+        $this->assertEquals($expectedCount, $post->contenttags->count());
+        $this->assertFalse( $post->contenttags->contains( function($ct) use($removedTagStr) {
+            return $ct->ctag === $removedTagStr;
+        }) );
+    }
+
+    // [ ] public tag
+
+    // [ ] private tag
+
 
     /**
      * @group contenttag-model
