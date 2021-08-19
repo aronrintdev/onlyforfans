@@ -126,15 +126,17 @@ export default {
       setTimeout(() => {
         if (this.tapCount == 1) {
           const imagefiles = this.mediafiles.filter(file => file.is_image)
-          const items = imagefiles.map(file => ({ src: file.filepath }))
-          this.$Pswp.open({
-            items,
-            options: {
-              showAnimationDuration: 0,
-              hideAnimationDuration: 0,
-              bgOpacity: 0.5
-            }
-          });
+          if (imagefiles.length > 0) {
+            const items = imagefiles.map(file => ({ src: file.filepath }))
+            this.$Pswp.open({
+              items,
+              options: {
+                showAnimationDuration: 0,
+                hideAnimationDuration: 0,
+                bgOpacity: 0.5
+              }
+            });
+          }
         } else if (this.tapCount == 2) {
           this.$emit('doubleTap');
         }
