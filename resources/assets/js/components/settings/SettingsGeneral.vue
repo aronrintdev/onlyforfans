@@ -13,11 +13,6 @@
               </b-col>
             </b-row>
             <b-row>
-              <b-col sm="12" md="6">
-                <FormTextInput ikey="slug" v-model="formGeneral.slug" label="Display Username (or handle)" :verrors="verrors" />
-              </b-col>
-            </b-row>
-            <b-row>
               <b-col>
                 <small class="text-secondary">* Changing the username or email is disabled during the beta testing phase.</small>
               </b-col>
@@ -134,7 +129,6 @@ export default {
     formGeneral: {
       username: null,
       email: null,
-      slug: null,
     },
     formData: { // cattrs
       language: null,
@@ -179,7 +173,6 @@ export default {
   created() {
     this.formGeneral.username = this.session_user.username || ''
     this.formGeneral.email = this.session_user.email || ''
-    this.formGeneral.slug = this.timeline.slug || ''
 
     if ( this.user_settings.cattrs.localization ) {
       this.formData = this.user_settings.cattrs.localization
