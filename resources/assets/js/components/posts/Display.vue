@@ -10,7 +10,7 @@
     >
       <template #header>
         <PostHeader :post="post" :session_user="session_user"/>
-        <section class="d-flex align-items-center">
+        <section class="d-flex align-items-center mr-3">
           <div class="expire_at" v-if="post.expire_at">
             <span class="text-secondary">{{ expireFromNow }}</span>
             <fa-icon :icon="['far', 'hourglass-half']" class="text-secondary ml-1 mr-2" />
