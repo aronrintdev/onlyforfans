@@ -18,7 +18,7 @@
         </div>
       </section>
     </b-card-header>
-    <transition name="quick-fade" mode="out-in">
+    <transition v-if="!paymentsDisabled" name="quick-fade" mode="out-in">
       <b-card-body>
         <div>
           <b-row>
@@ -46,6 +46,7 @@
         </div>
       </b-card-body>
     </transition>
+    <PaymentsDisabled class="mx-4 mt-4 mb-2" v-if="paymentsDisabled" />
   </b-card>
 </template>
 
@@ -54,12 +55,14 @@ import moment from 'moment'
 import { eventBus } from '@/eventBus'
 import PurchaseForm from '@components/payments/PurchaseForm'
 import OnlineStatus from '@components/common/OnlineStatus'
+import PaymentsDisabled from '@components/payments/PaymentsDisabled'
 
 export default {
 
   components: {
     PurchaseForm,
     OnlineStatus,
+    PaymentsDisabled,
   },
 
   props: {
@@ -118,6 +121,7 @@ export default {
     step: 'initial',
     userCampaign: null,
     isInProcess: false,
+    paymentsDisabled: false,
   }),
 
   methods: {
@@ -146,7 +150,7 @@ export default {
     async doSubscribe(e) {
       e.preventDefault()
       this.step = 'payment'
-      this.$bvModal.hide('modal-follow')
+      this.paymentsDisabled = true;
 
       // const response = await this.axios.put( route('timelines.subscribe', this.timeline.id), {
       //   sharee_id: this.session_user.id,

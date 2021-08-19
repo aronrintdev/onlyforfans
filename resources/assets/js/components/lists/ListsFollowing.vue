@@ -26,7 +26,7 @@
 
             <b-button class="mb-1" variant="primary">Message</b-button>
             <b-button class="mb-1" @click="renderTip(s.shareable, 'timelines')" variant="primary">Tip</b-button>
-            <b-button class="mb-1" v-if="s.access_level==='default' && s.shareable.userstats.subscriptions.price_per_1_months" @click="renderSubscribe(s.shareable)" variant="primary">Subscribe</b-button>
+            <b-button class="mb-1" v-if="s.access_level==='default' && s.shareable.userstats.subscriptions.price_per_1_months" @click="renderSubscribeModal(s.shareable)" variant="primary">Subscribe</b-button>
             <b-button class="mb-1" @click="showUnfollowConfirmation=true;timeline=s.shareable" variant="primary">
               Unfollow
             </b-button>
@@ -233,6 +233,14 @@ export default {
        eventBus.$emit('update-timelines', this.timeline.id)
     },
 
+    renderSubscribeModal(timeline) {
+      eventBus.$emit('open-modal', {
+        key: 'render-subscribe', 
+        data: {
+          timeline,
+        }
+      })
+    },
 
   },
 
