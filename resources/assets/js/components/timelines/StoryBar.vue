@@ -70,7 +70,7 @@
 
         <template v-if="fileInput">
           <b-img v-if="isFileImage(fileInput)" :src="selectedFileUrl" />
-          <video v-else-if="isFileVideo(fileInput)">
+          <video v-else-if="isFileVideo(fileInput)" controls>
             <source :src="selectedFileUrl" :type="fileInput.type" />
           </video>
           <div v-else>Preview Not Available</div>
@@ -78,7 +78,7 @@
 
         <template v-else-if="storyAttrs.selectedMediafile">
           <b-img v-if="storyAttrs.selectedMediafile.is_image" :src="selectedFileUrl" />
-          <video v-else-if="storyAttrs.selectedMediafile.is_video">
+          <video v-else-if="storyAttrs.selectedMediafile.is_video" controls>
             <source :src="`${selectedFileUrl}#t=2`" :type="storyAttrs.selectedMediafile.mimetype" />
           </video>
           <div v-else>Preview Not Available</div>
