@@ -108,6 +108,7 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         $array = parent::toArray();
         // Localize Price
         $array['price_display'] = static::formatMoney($this->price);
+        $array['userstats'] = $this->getUserstats();
         return $array;
     }
 
@@ -320,6 +321,11 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
             //->where('viewer_id', $viewer->id)
             ->orderBy('created_at', 'desc')->get();
         return ($stories->count()>0) ? $stories[0] : null;
+    }
+
+    public function getUserstats()
+    {
+        return $this->user->getStats();
     }
 
     // Has the viewer seen all 'active' slides in this timeline's story (?)

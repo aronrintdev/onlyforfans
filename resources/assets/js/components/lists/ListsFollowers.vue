@@ -14,7 +14,7 @@
       <CtrlBar @apply-filters="applyFilters($event)" />
 
       <b-row class="mt-2">
-        <b-col lg="4" v-for="(s,idx) in shareables" :key="s.id" > 
+        <b-col lg="4" v-for="s in shareables" :key="s.id" > 
           <!-- %NOTE: we're using WidgetUser here because users, not the timelines are following me -->
           <WidgetUser :session_user="session_user" :user="s.sharee" :timeline_id="s.sharee_timeline_id" :slug="s.sharee_timeline_slug" :access_level="s.access_level" :created_at="s.created_at" :is_favorited="s.is_favorited" :shareable_id="s.id" :current_notes="s.notes" />
         </b-col>

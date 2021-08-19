@@ -28,10 +28,7 @@ class Timeline extends JsonResource
             'mediafiles' =>  $this->when($hasAccess, $this->mediafiles),
             'stories' =>  $this->when($hasAccess, $this->stories),
             //'storyqueues' =>  $this->when($hasAccess, $this->storyqueues), // if included, limit to viewers?
-            'user' => [
-                'id' => $this->user_id,
-                'last_logged' => $this->user->last_logged,
-            ],
+            'user' => $this->user,
             'userstats' => $this->user->getStats(),
             'is_owner' => $sessionUser->id === $this->user->id,
             'is_following' => $this->followers->contains($sessionUser->id),
