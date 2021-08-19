@@ -28,10 +28,11 @@
     </div>
     <div class="multiple position-relative" v-if="hasMultipleImages">
       <swiper ref="mySwiper" class="media-slider-swiper" :options="swiperOptions">
-        <swiper-slide class="slide" v-for="mf in visualMediafiles" :key="mf.id">
+        <swiper-slide class="slide" v-for="(mf, index) in visualMediafiles" :key="mf.id">
           <VideoPlayer :source="mf" v-if="mf.is_video"></VideoPlayer>
           <b-img
             v-if="mf.is_image"
+            :data-index="index"
             class="d-block swiper-lazy photoswipe-thumbnail"
             :src="use_mid && mf.has_mid ? mf.midFilepath : mf.filepath"
           />
@@ -42,10 +43,10 @@
             />
           </div>
         </swiper-slide>
-        <div class="swiper-button-prev" slot="button-prev">
+        <div class="swiper-button-prev" slot="button-prev" @click="preventEvent()">
           <fa-icon icon="chevron-circle-left" size="2x" color="text-primary" />
         </div>
-        <div class="swiper-button-next" slot="button-next">
+        <div class="swiper-button-next" slot="button-next" @click="preventEvent()">
           <fa-icon icon="chevron-circle-right" size="2x" color="text-primary" />
         </div>
         <div class="swiper-pagination" slot="pagination"></div>
@@ -121,20 +122,22 @@ export default {
   }),
 
   methods: {
-    tapHandler() {
+    tapHandler(params) {
       this.tapCount++;
       setTimeout(() => {
         if (this.tapCount == 1) {
           const imagefiles = this.mediafiles.filter(file => file.is_image)
           if (imagefiles.length > 0) {
+            const index = $(params.target).data('index') || 0;
             const items = imagefiles.map(file => ({ src: file.filepath }))
             this.$Pswp.open({
               items,
               options: {
                 showAnimationDuration: 0,
                 hideAnimationDuration: 0,
-                bgOpacity: 0.5
-              }
+                bgOpacity: 0.5,
+                index,
+              },
             });
           }
         } else if (this.tapCount == 2) {
@@ -143,6 +146,9 @@ export default {
         this.tapCount = 0;
       }, 500);
     },
+    preventEvent() {
+      this.tapCount = 0;
+    }
   },
 
   mounted() {
