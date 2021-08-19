@@ -3,7 +3,7 @@
 
     <b-card-header>
       <section class="user-avatar">
-        <router-link :to="timelineUrl"><b-img-lazy :src="timeline.avatar.filepath" :alt="timeline.name" :title="timeline.name"></b-img-lazy></router-link>
+        <router-link :to="timelineUrl"><b-img-lazy :src="timeline.user.avatar.filepath" :alt="timeline.name" :title="timeline.name"></b-img-lazy></router-link>
         <OnlineStatus :user="timeline.user" size="lg" :textInvisible="false" />
       </section>
       <section class="user-details">
@@ -26,7 +26,7 @@
               <p v-if="!subscribe_only"><fa-icon :icon="['fas', 'check']" /> Get access to purchase content</p>
               <p v-else><fa-icon :icon="['fas', 'check']" /> Get access to premium content</p>
               <p v-if="!subscribe_only"><fa-icon :icon="['fas', 'check']" /> Upgrade to full access anytime</p>
-              <p v-else><fa-icon :icon="['fas', 'check']" /> Full access for {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} monthly</p>
+              <p v-if="subscribe_only"><fa-icon :icon="['fas', 'check']" /> Full access for {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} monthly</p>
               <p><fa-icon :icon="['fas', 'check']" /> Quick and easy cancellation</p>
               <p><fa-icon :icon="['fas', 'check']" /> Safe and secure transaction</p>
               <p><fa-icon :icon="['fas', 'check']" /> Ability to Message with {{ timeline.name }}</p>
@@ -35,11 +35,11 @@
               <!-- <p><small class="text-muted">For {{ campaignAudience }} • ends {{ campaignExpDate }} • left {{ userCampaign.subscriber_count }}</small></p> -->
             </b-col>
           </b-row>
-          <b-button v-if="subscribe_only" @click="doFollow" :disabled="isInProcess" variant="primary" class="w-100 mb-3">
+          <b-button v-if="subscribe_only" @click="doSubscribe" :disabled="isInProcess" variant="primary" class="w-100 mb-3">
             <b-spinner small v-if="isInProcess" class="mr-2"></b-spinner>
             Subscribe for {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} per month now
           </b-button>
-          <b-button v-else @click="doFollow" :disabled="isInProcess" variant="primary" class="w-100 mb-3">
+          <b-button v-if="!subscribe_only" @click="doFollow" :disabled="isInProcess" variant="primary" class="w-100 mb-3">
             <b-spinner small v-if="isInProcess" class="mr-2"></b-spinner>
             Follow Now
           </b-button>
@@ -146,6 +146,7 @@ export default {
     async doSubscribe(e) {
       e.preventDefault()
       this.step = 'payment'
+      this.$bvModal.hide('modal-follow')
 
       // const response = await this.axios.put( route('timelines.subscribe', this.timeline.id), {
       //   sharee_id: this.session_user.id,
