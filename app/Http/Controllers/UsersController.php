@@ -122,7 +122,6 @@ class UsersController extends AppBaseController
         $this->authorize('update', $user);
         $request->validate([
             'name' => 'string|required',
-            'slug' => 'string|required',
             'subscriptions.price_per_1_months' => 'numeric',
             'subscriptions.price_per_3_months' => 'numeric|nullable',
             'subscriptions.price_per_6_months' => 'numeric|nullable',
@@ -163,7 +162,6 @@ class UsersController extends AppBaseController
             $timeline->about = $request->about;
             $timeline->fill($request->only([
                 'name',
-                'slug',
             ]));
 
             // %TODO %FIXME: subscriptions should be in [timelines].cattrs, not user settings
