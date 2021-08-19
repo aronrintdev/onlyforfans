@@ -107,7 +107,9 @@ Vue.use(VueCroppie);
  * vue2-touch-events
  */
 import Vue2TouchEvents from 'vue2-touch-events';
-Vue.use(Vue2TouchEvents);
+Vue.use(Vue2TouchEvents, {
+  tapTolerance: 100,
+});
 
 import VueAwesomeSwiper from 'vue-awesome-swiper';
 import 'swiper/css/swiper.css';
