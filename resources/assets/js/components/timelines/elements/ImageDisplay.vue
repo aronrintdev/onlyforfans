@@ -10,11 +10,12 @@
     >
 
       <template v-if="mediafile.access">
-        <b-img-lazy v-if="mediafile.is_image" 
-          @click="renderFull"
-          class="d-block"
-          :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
-          :alt="mediafile.mfname" />
+        <div class="image-preview" @click="renderFull" v-if="mediafile.is_image" >
+          <b-img-lazy 
+            class="d-block"
+            :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
+            :alt="mediafile.mfname" />
+        </div>
         <MediaSlider v-else-if="mediafile.is_video" 
           @click="renderFull"
           :mediafiles="[mediafile]" 
@@ -183,5 +184,20 @@ ul {
 }
 .user-details ul > li:last-child {
   font-size: 14px;
+}
+.image-preview {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-top: 100%;
+}
+
+.image-preview img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 </style>

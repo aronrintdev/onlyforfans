@@ -125,7 +125,7 @@ export default {
       return {
         'col-sm-12': !this.isGridLayout,
         'col-sm-4': this.isGridLayout,
-        'mt-3': true,
+        'mt-4': true,
       }
     },
 
