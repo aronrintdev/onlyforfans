@@ -30,6 +30,7 @@ class Timeline extends JsonResource
             //'storyqueues' =>  $this->when($hasAccess, $this->storyqueues), // if included, limit to viewers?
             'user' => [
                 'id' => $this->user_id,
+                'last_logged' => $this->user->last_logged,
             ],
             'userstats' => $this->user->getStats(),
             'is_owner' => $sessionUser->id === $this->user->id,

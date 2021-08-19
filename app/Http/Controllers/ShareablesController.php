@@ -144,7 +144,7 @@ class ShareablesController extends AppBaseController
         $sessionUser = $request->user();
         $sessionTimeline = $sessionUser->timeline;
 
-        $query = ShareableModel::with([ 'sharee', 'shareable', 'shareable.avatar', 'shareable.cover' ]); // init
+        $query = ShareableModel::with([ 'sharee', 'shareable', 'shareable.avatar', 'shareable.cover', 'shareable.user' ]); // init
         $query->where('shareable_type', 'timelines');
         $query->where('sharee_id', $sessionUser->id);
 
