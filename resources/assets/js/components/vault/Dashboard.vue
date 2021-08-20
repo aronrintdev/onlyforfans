@@ -81,7 +81,7 @@
         </b-row>
 
         <!-- +++ Minor Nav +++ -->
-        <b-row class="py-3">
+        <b-row class="minor-nav py-3">
 
           <b-col>
             <section class="d-md-flex justify-content-between align-items-center">
@@ -90,18 +90,17 @@
                 <b-breadcrumb-item v-for="(bc, index) in breadcrumbNav" :key="bc.pkid" @click="doNav(bc.pkid)" :active="bc.active">{{ bc.text }}</b-breadcrumb-item>
               </b-breadcrumb>
         
-              <div v-if="this.selectedMediafiles.length" class="d-flex align-items-center">
-                <div class="mr-3">{{ this.selectedMediafiles.length }} selected</div>
+              <div class="d-flex align-items-center">
+                <div v-if="this.selectedMediafiles.length" class="mr-3">{{ this.selectedMediafiles.length }} selected</div>
                 <div class="mr-5" v-if="isAllSelected"><b-button @click="clearSelected()" variant="light">Clear Selection</b-button></div>
                 <div class="mr-5" v-else><b-button @click="selectAll()" variant="secondary">Select All</b-button></div>
                 <div class="">
-                  <b-button @click="renderSendForm()" variant="primary" class="mr-1">Send To</b-button>
-                  <b-button @click="renderShareForm()" variant="primary" class="mr-1">Share</b-button>
-                  <b-button @click="renderDownloadForm()" variant="primary" class="mr-1" :disabled="isDownloading" >
-                    <b-spinner small v-if="isDownloading"></b-spinner>
-                    Download
+                  <b-button @click="renderSendForm()" variant="primary" class="mr-1" :disabled="!this.selectedMediafiles.length">Send To</b-button>
+                  <b-button @click="renderShareForm()" variant="primary" class="mr-1"  :disabled="!this.selectedMediafiles.length">Share</b-button>
+                  <b-button @click="renderDownloadForm()" variant="primary" class="mr-1" :disabled="isDownloading || !this.selectedMediafiles.length" >
+                    <b-spinner small v-if="isDownloading"></b-spinner> Download
                   </b-button>
-                  <b-button @click="renderDeleteForm()" variant="danger" class="mr-1">Delete</b-button>
+                  <b-button @click="renderDeleteForm()" variant="danger" class="mr-1" :disabled="!this.selectedMediafiles.length">Delete</b-button>
                 </div>
               </div>
 
@@ -284,7 +283,7 @@
 
     <!-- 'Lightbox' modal for image preview when clicking on a file in the vault grid/list -->
     <b-modal v-model="isMediaLightboxModalVisible" id="modal-media-lightbox" centered title="" hide-footer body-class="p-0" size="lg">
-      <MediaLightbox :session_user="session_user" :mediafile="lightboxSelection" />
+      <MediaLightbox @close="isMediaLightboxModalVisible=false" :session_user="session_user" :mediafile="lightboxSelection" />
     </b-modal>
 
     <!-- Form modal for image preview before saving to story (%FIXME DRY: see StoryBar.vue) -->
@@ -949,74 +948,6 @@ export default {
     CreatePost,
   },
 }
-/*
-      <b-row>
-        <b-col v-for="(mf) in mediafiles" :key="mf.guid" 
-          role="button" 
-          v-bind:class="{ 'tag-shared': isShareMode && isSelectedToShare({shareable_type: 'mediafiles', shareable_id: mf.id}) }"
-        >
-          <div class="position-relative">
-            <img class="OFF-img-fluid" height="64" :src="mf.filepath" />
-            <b-form-checkbox ref="checkbox" size="lg" :checked="contact.selected" :value="true" @change="onSelect" />
-          </div>
-          <span>{{ mf.orig_filename }}</span>
-          <span v-if="isShared('mediafiles', mf.id)"><b-icon icon="share"></b-icon></span>
-          <span v-if="isShareMode"><button @click="toggleSelectedToShare($event, 'mediafiles', mf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
-        </b-col>
-      </b-row>
-      <b-list-group-item v-for="(vf, index) in children" :key="vf.guid" 
-        @click="doNav($event, vf.id)"
-        role="button" 
-        v-bind:class="{ 'tag-shared': isShareMode && isSelectedToShare({shareable_type: 'vaultfolders', shareable_id: vf.id}) }"
-      >
-        {{ vf.name }} 
-        <span v-if="isShared('vaultfolders', vf.id)"><b-icon icon="share"></b-icon></span>
-        <span v-if="isShareMode"><button @click="toggleSelectedToShare($event, 'vaultfolders', vf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
-      </b-list-group-item>
- */
-/*
-      if ( this.contactsSelectedLength < this.contactsLength ) {
-      this.selectIndeterminate = true
-      }
-      if ( this.contactsSelectedLength === this.contactsLength ) {
-      this.selectIndeterminate = false
-      this.selectAll = true
-      }
-      if (this.contactsSelectedLength === 0) {
-      this.selectIndeterminate = false
-      this.selectAll = false
-      }
- */
-/*
-      async getContacts() {
-      let params = {
-      page: this.currentPage,
-      take: this.perPage,
-        //participant_id: this.session_user.id,
-      }
-      params = { ...params, ...this.filters }
-      this.$log.debug('getContacts', {
-      filters: this.filters,
-      params: params,
-      })
-      if ( this.sortBy ) {
-      params.sortBy = this.sortBy
-      }
-      const response = await axios.get( this.$apiRoute('mycontacts.index'), { params } )
-
-      const selected = _.keys(this.filters).length > 0 ? true : false
-
-      this.mycontacts = _.keyBy(response.data.data.map(o => ({ ...o, selected })), 'id')
-
-      if (selected) {
-      this.selectAll = true
-      this.selectIndeterminate = false
-      } else {
-      this.selectAll = false
-      }
-      this.meta = response.meta
-      },
- */
 </script>
 
 <style lang="scss" >
