@@ -14,6 +14,7 @@
           :favorited="isFavorite"
           :muted="!!isMuted"
           @tip="tip"
+          @addNotes="addNotes"
           @toggleMute="toggleMute"
           @toggleFavorite="toggleFavorite"
         />
@@ -111,6 +112,15 @@
       @toggleVaultSelect="vaultSelectionOpen = !vaultSelectionOpen"
     />
 
+    <b-modal id="modal-notes" hide-footer body-class="p-0" v-model="isNotesModalVisible" size="md" title="Add Notes" >
+      <AddNotes
+        :timeline="timeline"
+        :notes="notes"
+        :onClose="hideNotesModal"
+        :onUpdate="updateNotes"
+      />
+    </b-modal>
+
   </div>
 </template>
 
@@ -125,6 +135,7 @@ import _ from 'lodash'
 import moment from 'moment'
 
 import AvatarWithStatus from '@components/user/AvatarWithStatus'
+import AddNotes from '@components/common/AddNotes'
 import Gallery from './Gallery'
 import MessageDisplay from '@views/live-chat/components/MessageDisplay'
 import MessageForm from '@views/live-chat/components/NewMessageForm'
@@ -145,11 +156,13 @@ export default {
     SearchInput,
     TypingIndicator,
     VaultSelector,
+    AddNotes,
   },
 
   props: {
     timeline: null,
     id: null, // the chatthread PKID
+    currentNotes: null,
   },
 
   computed: {
@@ -208,10 +221,13 @@ export default {
 
     vaultSelectionOpen: false,
 
+    isNotesModalVisible: false,
+    notes: null,
   }), // data
 
   created() {
     this.search = _.debounce(this._search, this.debounceAmount)
+    this.notes = this.currentNotes
   },
 
   mounted() {
@@ -395,6 +411,18 @@ export default {
           resource_type: 'timelines',
         },
       })
+    },
+
+    addNotes() {
+      this.isNotesModalVisible = true
+    },
+
+    hideNotesModal() {
+      this.isNotesModalVisible = false
+    },
+
+    updateNotes(notes) {
+      this.notes = notes
     },
 
     toggleFavorite() {

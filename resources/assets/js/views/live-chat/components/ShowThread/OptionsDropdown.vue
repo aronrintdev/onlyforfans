@@ -9,6 +9,11 @@
       {{ $t('tip', { name: participant.username }) }}
     </b-dropdown-item>
 
+    <b-dropdown-item @click="$emit('addNotes')">
+      <fa-icon icon="pencil" fixed-width />
+      {{ $t('addNotes') }}
+    </b-dropdown-item>
+
     <b-dropdown-item @click="$emit('rename')">
       <fa-icon icon="edit" fixed-width />
       {{ $t('rename', { name: participant.username }) }}
@@ -88,6 +93,7 @@ export default {
 {
   "en": {
     "tip": "Send @{name} a tip",
+    "addNotes": "Add Notes",
     "deleteThread": "Delete conversation",
     "rename": "Rename alias for @{name}",
     "favorite": "Favorite Chat Thread",

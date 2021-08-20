@@ -10,6 +10,10 @@ class Shareable extends Model
 {
     protected $guarded = [ 'created_at', 'updated_at' ];
 
+    protected $append = [
+        'note',
+    ];
+
     //--------------------------------------------
     // Boot
     //--------------------------------------------
@@ -99,6 +103,12 @@ class Shareable extends Model
         return $query;
     }
      */
+
+    public function getNoteAttribute($value) {
+        return Note::where('user_id', $this->shareable->user_id)
+            ->where('noticed_id', $this->sharee->timeline->id)
+            ->first();
+    }
 
 }
 

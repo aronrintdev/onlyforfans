@@ -147,6 +147,11 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => ['index'],
     ]);
 
+    // -- notes: --
+    Route::resource('notes', 'NotesController', [
+        'only' => ['store', 'update', 'destroy'],
+    ]);
+
     // -- mediafiles: likeable | shareable | commentable (?) | tippable | purchaseable --
     //Route::post('/mediafiles/{mediafile}/doClone', ['as'=>'mediafiles.doClone', 'uses' => 'MediafilesController@doClone']);
     Route::get('/mediafiles/match', ['as'=>'mediafiles.match', 'uses' => 'MediafilesController@match']);

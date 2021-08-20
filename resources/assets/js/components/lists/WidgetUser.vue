@@ -43,7 +43,7 @@
         <OnlineStatus :user="user" :indicatorVisible="false" />
       </div>
 
-      <b-card-text v-if="notes" class="mt-2 mb-2"><pre>{{ notes }}</pre></b-card-text>
+      <b-card-text v-if="notes" class="mt-2 mb-2"><pre>{{ notes.notes || '' }}</pre></b-card-text>
 
       <b-card-text class="mb-2 clickable" @click="toggleFavorite">
         <fa-icon v-if="isFavoritedByMe" fixed-width :icon="['fas', 'star']" style="color:#007bff" />
@@ -62,32 +62,13 @@
 
     </b-card-body>
 
-    <b-modal id="modal-notes" class="modal-notes" v-model="isNotesModalVisible" size="md" title="Add Notes" >
-      <div class="user-details">
-        <div class="avatar-img">
-          <router-link :to="{ name: 'timeline.show', params: { slug } }">
-            <b-img-lazy thumbnail rounded="circle" class="w-100 h-100" :src="user.avatar.filepath" :alt="user.username" :title="user.name" />
-          </router-link>
-        </div>
-        <div class="sharee-id">
-          <b-card-title class="mb-1">
-            <router-link :to="{ name: 'timeline.show', params: { slug } }">{{ user.name }}</router-link>
-            <fa-icon v-if="access_level==='premium'" fixed-width :icon="['fas', 'rss-square']" style="color:#138496; font-size: 16px;" />
-          </b-card-title>
-          <b-card-sub-title class="mb-1">
-            <router-link :to="{ name: 'timeline.show', params: { slug } }">@{{ user.username }}</router-link>
-          </b-card-sub-title>
-        </div>
-      </div>
-      <b-form-group class="flex-fill mt-3">
-        <b-form-textarea v-model="notesInput" placeholder="Notes" maxlength="500" rows="4" />
-        <small class="text-muted float-right mt-1">{{ notesInput.length }} / 500</small>
-      </b-form-group>
-      <template #modal-footer>
-        <b-button v-if="notes" @click="clearNotes(shareable_id)" type="cancel" variant="danger">Clear</b-button>
-        <b-button @click="hideNotesModal" type="cancel" variant="secondary">Cancel</b-button>
-        <b-button @click="saveNotes(shareable_id)" :disabled="!notesInput" variant="primary">Save</b-button>
-      </template>
+    <b-modal id="modal-notes" hide-footer body-class="p-0" v-model="isNotesModalVisible" size="md" title="Add Notes" >
+      <AddNotes
+        :timeline="timeline"
+        :notes="notes"
+        :onClose="hideNotesModal"
+        :onUpdate="updateNotes"
+      />
     </b-modal>
 
   </b-card>
@@ -97,6 +78,7 @@
 import { eventBus } from '@/eventBus'
 //import { DateTime } from 'luxon'
 import moment from 'moment'
+import AddNotes from '@components/common/AddNotes'
 import OnlineStatus from '@components/common/OnlineStatus'
 
 export default {
@@ -125,13 +107,21 @@ export default {
 
       return 'Notes'
     },
+
+    timeline() {
+      return {
+        id: this.timeline_id,
+        name: this.user.name,
+        avatar: this.user.avatar,
+        slug: this.slug,
+      }
+    },
   },
 
   data: () => ({
     moment: moment,
     isNotesModalVisible: false,
-    notes: '',
-    notesInput: '',
+    notes: null,
 
     isFavoritedByMe: false, // is timeline/feed a favorite
   }),
@@ -163,41 +153,8 @@ export default {
       this.isNotesModalVisible = false
     },
 
-    handleNotesChange(value) {
-      if (value.length > 10) {
-        this.notesInput = this.notesInput.substring(0, 10)
-      }
-    },
-
-    async saveNotes(id) {
-      let isEdit = false
-      if (this.notes) isEdit = true
-      else isEdit = false
-      this.notes = this.notesInput
-      const response = await this.axios.patch(`/shareables/${id}`, {
-        notes: this.notes,
-      });
-      this.hideNotesModal()
-
-      const msg = isEdit ? 'Notes was successfully updated.' : 'Notes was successfully added.'
-      this.$root.$bvToast.toast(msg, {
-        toaster: 'b-toaster-top-center',
-        title: 'Success!',
-        variant: 'success',
-      })
-    },
-
-    async clearNotes(id) {
-      this.notes = ''
-      this.notesInput = ''
-      const response = await this.axios.put(`/shareables/${id}/clearnotes`);
-      this.hideNotesModal()
-
-      this.$root.$bvToast.toast('Notes was successfully removed.', {
-        toaster: 'b-toaster-top-center',
-        title: 'Success!',
-        variant: 'success',
-      })
+    updateNotes(notes) {
+      this.notes = notes
     },
 
     async toggleFavorite() {
@@ -220,12 +177,12 @@ export default {
 
   mounted() {
     this.isFavoritedByMe = this.is_favorited;
-    this.notes = this.current_notes || '';
-    this.notesInput = this.notes;
+    this.notes = this.current_notes;
   },
   created() { },
   components: {
     OnlineStatus,
+    AddNotes,
   },
 
 }

@@ -44,7 +44,7 @@ class Chatthread extends Model implements UuidId
     // %%% Accessors/Mutators | Casts
     //------------------------------------------------------------------------//
 
-    protected $appends = ['isFavoritedByMe'];
+    protected $appends = ['isFavoritedByMe', 'note'];
 
     public function getIsFavoritedByMeAttribute($value)
     {
@@ -57,6 +57,17 @@ class Chatthread extends Model implements UuidId
         ->where('favoritable_type', 'posts')
             ->first();
         return $exists ? true : false;
+    }
+
+    public function getNoteAttribute($value) {
+        $sessionUser = Auth::user();
+        $otherUser = $this->participants->filter( function($u) use(&$sessionUser) {
+            return $u->id !== $sessionUser->id;
+        })->first();
+
+        return Note::where('user_id', $sessionUser->id)
+            ->where('noticed_id', $otherUser->timeline->id)
+            ->first();
     }
 
     //------------------------------------------------------------------------//
