@@ -287,7 +287,12 @@
 
     <!-- 'Lightbox' modal for image preview when clicking on a file in the vault grid/list -->
     <b-modal v-model="isMediaLightboxModalVisible" id="modal-media-lightbox" centered title="" hide-footer body-class="p-0" size="lg">
-      <MediaLightbox @close="isMediaLightboxModalVisible=false" :session_user="session_user" :mediafile="lightboxSelection" />
+      <MediaLightbox 
+        @close="isMediaLightboxModalVisible=false" 
+        @reload="doReload" 
+        context="vault-dashboard" 
+        :session_user="session_user" 
+        :mediafile="lightboxSelection" />
     </b-modal>
 
     <!-- Form modal for image preview before saving to story (%FIXME DRY: see StoryBar.vue) -->
@@ -785,12 +790,6 @@ export default {
       this.$root.$bvToast.toast( `Deleted folder ( Total of ${deleteResponse.data.number_of_items_deleted} items deleted)`, {toaster: 'b-toaster-top-center', variant: 'success'} )
     },
 
-    //getLink(e, mediafileId) {
-    //  axios.get(`/mediafiles/${mediafileId}`).then( (response) => {
-    //    console.log('response', { response })
-    //  })
-    //},
-
     // for dropzone
     sendingEvent(file, xhr, formData) {
       this.fileUploading = true
@@ -911,6 +910,11 @@ export default {
       this.$store.dispatch('getVaultfolder', this.currentFolderId);
       this.fileUploading = false;
     },
+
+    doReload() {
+      this.$store.dispatch('getVaultfolder', this.currentFolderId)
+    },
+
   },
 
   created() {
@@ -921,18 +925,6 @@ export default {
       this.foldertree = response.data.foldertree || null
       this.$store.dispatch('getVaultfolder', this.vaultfolder_pkid)
     })
-
-      /*
-    // %HERE %FIXME act on any special context params passed from Vue router
-    if ( this.$route.params.context ) {
-      switch( this.$route.params.context ) {
-        case 'storybar': // we got here from the storybar, so instead of sending the story directly, return to story bar (!)
-          this.sendChannels = ['story']
-          this.sendAction = 'storybar'
-          break
-      }
-    }
-    */
   },
 
   watch: {

@@ -31,7 +31,7 @@
       <template footer>
         <section class="panel-footer">
 
-          <div class="p-3">
+          <div v-if="context==='vault-dashboard'" class="crate-tag_mgmt p-3">
             <b-form-tags v-model="contenttags" separator=" ," no-outer-focus class="mb-2">
 
               <template v-slot="{ tags, inputAttrs, inputHandlers, tagVariant, addTag, removeTag }">
@@ -79,6 +79,7 @@ import MediaSlider from '@components/posts/MediaSlider'
 
 export default {
   props: {
+    context: null, // to determine which UI elements to show conditionally
     mediafile: null,
     session_user: null,
     use_mid: { type: Boolean, default: false }, // use mid-sized images instead of full
@@ -112,11 +113,12 @@ export default {
       try { 
         console.log('updateTags', { payload })
         response = await axios.patch( this.$apiRoute('mediafiles.updateTags', this.mediafile.id), payload )
+        this.$emit('reload')
+        this.$emit('close')
       } catch (e) {
         console.log('err', { e, })
         return
       }
-      this.$emit('close')
       this.contenttags = []
     },
 

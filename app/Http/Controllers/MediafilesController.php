@@ -272,8 +272,8 @@ class MediafilesController extends AppBaseController
                     'mftype' => $mf->mftype,
                     'num_sharees' => $mf->sharees->count(),
                     'resource_type' => $mf->resource_type,
-                    'resource_name' => $mf->resource->slug,
-                    'num_resource_likes' => $mf->resource->likes ? $mf->resource->likes->count() : '-',
+                    'resource_name' => $mf->resource->slug ?? '-',
+                    'num_resource_likes' => ($mf->resource && $mf->resource->likes) ? $mf->resource->likes->count() : '-',
                 ];
             });
         }
