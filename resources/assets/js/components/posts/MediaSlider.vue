@@ -80,6 +80,7 @@ export default {
     mediafiles: null,
     session_user: null,
     use_mid: { type: Boolean, default: false }, // use mid-sized images instead of full
+    imageIndex: 0,
   },
 
   components: {
@@ -101,23 +102,27 @@ export default {
     },
     swiper() {
       return this.$refs.mySwiper && this.$refs.mySwiper.$swiper
+    },
+    swiperOptions() {
+      console.log("this.imageIndex", this.imageIndex)
+      return {
+        lazy: true,
+        slidesPerView: 'auto',
+        observer: true,
+        observeParents: true,
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        },
+        pagination: {
+          el: '.swiper-pagination',
+        },
+        initialSlide: this.imageIndex,
+      }
     }
   },
 
   data: () => ({
-    swiperOptions: {
-      lazy: true,
-      slidesPerView: 'auto',
-      observer: true,
-      observeParents: true,
-      navigation: {
-        nextEl: '.swiper-button-next',
-        prevEl: '.swiper-button-prev',
-      },
-      pagination: {
-        el: '.swiper-pagination',
-      },
-    },
     tapCount: 0,
   }),
 

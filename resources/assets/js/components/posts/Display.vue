@@ -10,7 +10,7 @@
     >
       <template #header>
         <PostHeader :post="post" :session_user="session_user"/>
-        <section class="d-flex align-items-center mr-3">
+        <section class="d-flex align-items-center mr-0 mr-md-3">
           <div class="expire_at" v-if="post.expire_at">
             <span class="text-secondary">{{ expireFromNow }}</span>
             <fa-icon :icon="['far', 'hourglass-half']" class="text-secondary ml-1 mr-2" />
@@ -80,7 +80,7 @@
             </b-card-text>
           </div>
           <article v-if="hasMediafiles">
-            <MediaSlider :post="post" :key="post.id" :mediafiles="post.mediafiles" :session_user="session_user" :use_mid="use_mid" @doubleTap="tapHandler" />
+            <MediaSlider :post="post" :key="post.id" :mediafiles="post.mediafiles" :imageIndex="imageIndex" :session_user="session_user" :use_mid="use_mid" @doubleTap="tapHandler" />
           </article>
         </template>
         <template v-else>
@@ -176,6 +176,7 @@ export default {
     is_feed: { type: Boolean, default: true }, // is in context of a feed?
     displayClose: { type: Boolean, default: false }, // Display a close button in right corner of title?
     is_public_post: { type: Boolean, default: false }, // is in context of a feed?
+    imageIndex: 0,
   },
 
   computed: {
