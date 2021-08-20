@@ -62,7 +62,7 @@
 
     </b-card-body>
 
-    <b-modal id="modal-notes" hide-footer body-class="p-0" v-model="isNotesModalVisible" size="md" title="Add Notes" >
+    <b-modal id="modal-notes" hide-footer body-class="p-0" v-model="isNotesModalVisible" size="md" :title="modalTitle" >
       <AddNotes
         :timeline="timeline"
         :notes="notes"
@@ -116,6 +116,14 @@ export default {
         slug: this.slug,
       }
     },
+
+    modalTitle() {
+      if (this.current_notes) {
+        return 'Edit Notes'
+      } else {
+        return 'Add Notes'
+      }
+    }
   },
 
   data: () => ({

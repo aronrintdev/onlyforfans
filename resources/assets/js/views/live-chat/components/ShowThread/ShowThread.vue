@@ -112,7 +112,7 @@
       @toggleVaultSelect="vaultSelectionOpen = !vaultSelectionOpen"
     />
 
-    <b-modal id="modal-notes" hide-footer body-class="p-0" v-model="isNotesModalVisible" size="md" title="Add Notes" >
+    <b-modal id="modal-notes" hide-footer body-class="p-0" v-model="isNotesModalVisible" size="md" :title="modalTitle" >
       <AddNotes
         :timeline="timeline"
         :notes="notes"
@@ -192,6 +192,14 @@ export default {
     thread() {
       return this._thread()(this.id)
     },
+
+    modalTitle() {
+      if (this.notes) {
+        return 'Edit Notes'
+      } else {
+        return 'Add Notes'
+      }
+    }
 
   },
 
