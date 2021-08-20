@@ -76,7 +76,7 @@ class VaultfoldersController extends AppBaseController
     {
         $this->authorize('view', $vaultfolder);
 
-        $vaultfolder->load(['vfchildren', 'vfparent', 'mediafiles', 'sharees', 'mediafilesharelogs']);
+        $vaultfolder->load(['vfchildren', 'vfparent', 'mediafiles.contenttags', 'sharees', 'mediafilesharelogs']);
         //$vaultfolder->load(['vfchildren', 'vfparent', 'mediafiles']);
 
         $breadcrumb = $vaultfolder->getBreadcrumb();
