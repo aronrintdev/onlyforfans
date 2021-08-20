@@ -1,38 +1,21 @@
 <?php
 namespace Database\Seeders;
 
-use DB;
-use Exception;
-use Carbon\Carbon;
-use App\Models\Post;
+use App\Models\Tip;
 use App\Models\User;
-use App\Libs\UserMgr;
 use RuntimeException;
 use App\Models\Timeline;
-use App\Libs\UuidGenerator;
-use App\Libs\FactoryHelpers;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Mail;
-
-use App\Enums\ShareableAccessLevelEnum;
-use App\Enums\Financial\AccountTypeEnum;
-use App\Enums\Financial\TransactionTypeEnum;
 use App\Enums\PostTypeEnum;
-use App\Enums\PaymentTypeEnum;
-use App\Enums\MediafileTypeEnum;
-
 use App\Events\AccessGranted;
 use App\Events\AccessRevoked;
 use App\Events\ItemPurchased;
-use App\Jobs\Financial\UpdateAccountBalance;
-use App\Models\Financial\Account;
-use App\Models\Tip;
-use App\Notifications\TimelineFollowed;
-use App\Notifications\TimelineSubscribed;
-use App\Notifications\TipReceived;
+use Illuminate\Support\Carbon;
 use App\Payments\PaymentGateway;
-use Symfony\Component\Console\Output\ConsoleOutput;
+use App\Models\Financial\Account;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Event;
+use App\Enums\Financial\AccountTypeEnum;
+use App\Jobs\Financial\UpdateAccountBalance;
 
 class TipsTableSeeder extends Seeder
 {
@@ -61,7 +44,9 @@ class TipsTableSeeder extends Seeder
             $this->output->writeln("  - Tips seeder: loaded " . $timelines->count() . " timelines...");
         }
 
-        $timelines->take(17)->each( function($t) {
+        // Was not generating tips on enough timelines with just 17, switched to all timelines with followers
+        // $timelines->take(17)->each( function($t) {
+        $timelines->each(function ($t) {
 
             static $iter = 1;
 
@@ -85,6 +70,11 @@ class TipsTableSeeder extends Seeder
                     if ( $this->appEnv !== 'testing' ) {
                         $this->output->writeln("  - Tips seeder: tipping timeline " . $t->slug);
                     }
+
+                    // Set fake time to make tip
+                    $ts = $this->faker->dateTimeBetween($startDate = '-28 day', $endDate = 'now');
+                    Carbon::setTestNow(new Carbon($ts)); // Sets mocked time
+
                     try {
                         $tipAmount = $this->faker->numberBetween(1, 20) * 500;
                         $tip = Tip::create([
@@ -107,6 +97,9 @@ class TipsTableSeeder extends Seeder
                             $this->output->writeln("Exception while tipping Timeline [{$t->getKey()}] | {$exceptionClass} | {$e->getMessage()}");
                         }
                     }
+
+                    Carbon::setTestNow(); // Clears mocked time
+
                 }, $this->eventsToDelayOnPurchase);
 
                 // Tip some posts...
@@ -116,6 +109,10 @@ class TipsTableSeeder extends Seeder
                         if ( $this->appEnv !== 'testing' ) {
                             $this->output->writeln("  - Tips seeder: tipping post " . $p->slug);
                         }
+
+                        $ts = $this->faker->dateTimeBetween($startDate = '-28 day', $endDate = 'now');
+                        Carbon::setTestNow(new Carbon($ts)); // Sets mocked time
+
                         try {
                             $tipAmount = $this->faker->numberBetween(1, 20) * 500;
                             $tip = Tip::create([
@@ -138,6 +135,9 @@ class TipsTableSeeder extends Seeder
                                 $this->output->writeln("Exception while tipping Post [{$p->getKey()}] | {$exceptionClass} | {$e->getMessage()}");
                             }
                         }
+
+                        Carbon::setTestNow(); // Clears mocked time
+
                     }, $this->eventsToDelayOnPurchase);
                 }); // $posts->each( ... )
 

@@ -1,7 +1,7 @@
 <template>
   <b-card no-body class="background mb-5"> 
     <!-- widget: Timeline -->
-    <b-card-img :src="timeline.cover.filepath" alt="timeline.slug" top></b-card-img>
+    <b-card-img :src="coverImage" alt="timeline.slug" top></b-card-img>
 
     <b-card-body class="py-1">
 
@@ -19,9 +19,9 @@
       </div>
       <div class="avatar-img">
         <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
-          <b-img-lazy thumbnail rounded="circle" class="w-100 h-100" :src="timeline.avatar.filepath" :alt="timeline.slug" :title="timeline.name" />
+          <b-img-lazy thumbnail rounded="circle" class="w-100 h-100" :src="avatarImage" :alt="timeline.slug" :title="timeline.name" />
         </router-link>
-        <OnlineStatus :user="{ id: timeline.user_id }" size="lg" :textInvisible="false" />
+        <OnlineStatus :user="timeline.user" size="lg" :textInvisible="false" />
       </div>
 
       <div class="shareable-id">
@@ -36,7 +36,7 @@
         <b-card-sub-title class="mb-1">
           <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">@{{ timeline.slug }}</router-link>
         </b-card-sub-title>
-        <OnlineStatus :user="{ id: timeline.user_id }" :indicatorVisible="false" />
+        <OnlineStatus :user="timeline.user" :indicatorVisible="false" />
       </div>
 
       <slot></slot>
@@ -55,7 +55,7 @@
 import { eventBus } from '@/eventBus'
 //import { DateTime } from 'luxon'
 import moment from 'moment'
-import OnlineStatus from '@components/user/OnlineStatus'
+import OnlineStatus from '@components/common/OnlineStatus'
 
 export default {
 
@@ -68,6 +68,16 @@ export default {
   computed: {
     isLoading() {
       return !this.timeline || !this.access_level || !this.created_at
+    },
+
+    coverImage() {
+      const { cover } = this.timeline
+      return cover ? cover.filepath : '/images/locked_post.png'
+    },
+
+    avatarImage() {
+      const { avatar } = this.timeline
+      return avatar ? avatar.filepath : '/images/default_avatar.png'
     },
   },
 

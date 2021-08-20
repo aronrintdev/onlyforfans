@@ -3,7 +3,7 @@
     <AdminTable :fields="fields" indexRouteName="contentflags.index" @table-event=handleTableEvent />
 
     <!-- Show Modal -->
-    <b-modal v-model="isShowModalVisible" id="modal-show-mediafile" size="lg" title="Post Details" body-class="OFF-p-0">
+    <b-modal v-model="isShowModalVisible" id="modal-show-contentflag" size="lg" title="Flag Details" body-class="OFF-p-0">
       <section v-if="modalSelection" class="OFF-d-flex">
         <div class="box-details">
           <pre>{{ JSON.stringify(modalSelection, null, 2) }}</pre>

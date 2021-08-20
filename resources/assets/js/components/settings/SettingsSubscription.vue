@@ -6,10 +6,10 @@
           <fieldset :disabled="isSubmitting.formSubscriptions">
             <b-row>
               <b-col>
-                <FormTextInput itype="currency" ikey="subscriptions.price_per_1_months"  v-model="formSubscriptions.subscriptions.price_per_1_months"  label="Price per Month" :verrors="verrors" />
-                <FormTextInput itype="currency" ikey="subscriptions.price_per_3_months"  v-model="formSubscriptions.subscriptions.price_per_3_months"  label="Price per 3 Months" :verrors="verrors" disabled />
-                <FormTextInput itype="currency" ikey="subscriptions.price_per_6_months"  v-model="formSubscriptions.subscriptions.price_per_6_months"  label="Price per 6 Months" :verrors="verrors" disabled />
-                <FormTextInput itype="currency" ikey="subscriptions.price_per_12_months" v-model="formSubscriptions.subscriptions.price_per_12_months" label="Price per Year" :verrors="verrors" disabled />
+                <FormTextInput itype="currency" ikey="subscriptions.price_per_1_months"  v-model="subscriptions.price_per_1_months"  label="Price per Month" :verrors="verrors" />
+                <FormTextInput itype="currency" ikey="subscriptions.price_per_3_months"  v-model="subscriptions.price_per_3_months"  label="Price per 3 Months" :verrors="verrors" disabled />
+                <FormTextInput itype="currency" ikey="subscriptions.price_per_6_months"  v-model="subscriptions.price_per_6_months"  label="Price per 6 Months" :verrors="verrors" disabled />
+                <FormTextInput itype="currency" ikey="subscriptions.price_per_12_months" v-model="subscriptions.price_per_12_months" label="Price per Year" :verrors="verrors" disabled />
               </b-col>
               <b-col>
                 <b-form-group id="group-is_follow_for_free" label="Allow Follow for Free" label-for="is_follow_for_free">
@@ -77,6 +77,7 @@ export default {
   props: {
     session_user: null,
     user_settings: null,
+    timeline: null,
   },
 
   computed: {
@@ -122,16 +123,15 @@ export default {
     },
 
     verrors: null,
-
+    subscriptions: { // cattrs
+      price_per_1_months: null,
+      price_per_3_months: null,
+      price_per_6_months: null,
+      price_per_12_months: null,
+      referral_rewards: '',
+    },
     formSubscriptions: {
       is_follow_for_free: null,
-      subscriptions: { // cattrs
-        price_per_1_months: null,
-        price_per_3_months: null,
-        price_per_6_months: null,
-        price_per_12_months: null,
-        referral_rewards: '',
-      },
     },
 
     activeCampaign: null,
@@ -141,7 +141,7 @@ export default {
   watch: {
     user_settings(newVal) {
       if ( newVal.cattrs.subscriptions ) {
-        this.formSubscriptions.subscriptions = newVal.cattrs.subscriptions
+        this.subscriptions = newVal.cattrs.subscriptions
       }
       if ( newVal.hasOwnProperty('is_follow_for_free') ) {
         this.formSubscriptions.is_follow_for_free = newVal.is_follow_for_free ? 1 : 0
@@ -153,8 +153,10 @@ export default {
   },
 
   created() {
-    if ( this.user_settings.cattrs.subscriptions ) {
-      this.formSubscriptions.subscriptions = this.user_settings.cattrs.subscriptions
+    if ( this.user_settings.cattrs.subscriptions) {
+      this.subscriptions = {
+        ...this.user_settings.cattrs.subscriptions
+      }
     }
     if ( this.user_settings.hasOwnProperty('is_follow_for_free') ) {
       this.formSubscriptions.is_follow_for_free = this.user_settings.is_follow_for_free ? 1 : 0
@@ -168,13 +170,18 @@ export default {
   },
 
   methods: {
-    ...Vuex.mapActions(['getMe']),
+    ...Vuex.mapActions(['getUserSettings', 'getMe']),
 
     async submitSubscriptions(e) {
       this.isSubmitting.formSubscriptions = true
-
       try {
-        const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formSubscriptions)
+        const response = await axios.patch(`/users/${this.session_user.id}/settings`, {
+          ...this.formSubscriptions,
+          name: this.timeline.name,
+          subscriptions: this.subscriptions,
+        })
+
+        this.getUserSettings({ userId: this.session_user.id })
         this.verrors = null
         this.onSuccess()
       } catch(err) {

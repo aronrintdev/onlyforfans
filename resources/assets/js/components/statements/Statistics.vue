@@ -1,5 +1,5 @@
 <template>
-  <b-card :title="$t('title')" class="mb-1 position-relative" v-if="!isLoading" no-body>
+  <div class="statistics mb-1 position-relative" v-if="!isLoading">
     <RangeSelector class="p-3" @select="onRangeSelect" />
 
     <!-- From: {{ DateTime().fromISO(totals.from).toLocaleString(DateTime().DATETIME_MED) }} <br/> -->
@@ -66,7 +66,7 @@
     </b-list-group>
 
     <LoadingOverlay :loading="loading" />
-  </b-card>
+  </div>
 </template>
 
 <script>
@@ -132,6 +132,12 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+// .statistics {
+//   height: 100%;
+// }
+</style>
 
 <i18n lang="json5" scoped>
 {

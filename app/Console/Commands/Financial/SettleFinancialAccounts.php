@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Financial;
 
 use Illuminate\Console\Command;
 use App\Models\Financial\Account;
@@ -12,14 +12,14 @@ class SettleFinancialAccounts extends Command
      *
      * @var string
      */
-    protected $signature = 'financial:settle_accounts';
+    protected $signature = 'financial:settle-accounts';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Settles the entire systems accounts';
+    protected $description = 'Settles the systems accounts that have pending transactions';
 
     /**
      * Create a new command instance.
@@ -38,11 +38,16 @@ class SettleFinancialAccounts extends Command
      */
     public function handle()
     {
-        $count = Account::where('owner_type', '!=', 'financial_system_owner')->count();
+        $query = Account::where('owner_type', '!=', 'financial_system_owner')
+            ->whereHas('transactions', function ($q) {
+                $q->pending();
+            }
+        );
+        $count = $query->count();
         $this->output->writeln('');
         $this->output->writeln(" == Settling the balances of $count user accounts ==");
         $this->output->writeln('');
-        Account::where('owner_type', '!=', 'financial_system_owner')->get()->each(function ($account) use ($count) {
+        $query->get()->each(function ($account) use ($count) {
             static $iter = 1;
             $this->output->writeln("({$iter} of {$count}): Updating Balance for {$account->name}");
             $account->settleBalance();

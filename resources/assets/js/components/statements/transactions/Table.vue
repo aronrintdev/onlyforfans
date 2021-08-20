@@ -56,7 +56,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 //import { eventBus } from '@/app'
 import { eventBus } from '@/eventBus'
-import moment from 'moment'
+import { DateTime } from 'luxon'
 
 import LoadingOverlay from '@components/common/LoadingOverlay'
 import PostDisplay from '@components/posts/Display'
@@ -81,54 +81,78 @@ export default {
     },
 
     fields() {
-      return [{
-          key: 'id',
-          label: this.$t('table.label.id'),
-          formatter: (value, key, item) => {
-            if (this.spliceId) {
-              return this.encoder.encode(value.slice(15))
-            }
-            return this.encoder.encode(value)
-          }
-        }, {
+      return [
+        // {
+        //   key: 'id',
+        //   label: this.$t('table.label.id'),
+        //   formatter: (value, key, item) => {
+        //     if (this.spliceId) {
+        //       return this.encoder.encode(value.slice(15))
+        //     }
+        //     return this.encoder.encode(value)
+        //   }
+        // },
+        {
           key: 'created_at',
           label: this.$t('table.label.date'),
           formatter: (value, key, item) => {
             // return value
-            return moment(value).format('MMMM Do, YYYY')
+            // return moment(value).format('MMMM Do, YYYY HH:mm')
+            return DateTime.fromISO(value).toLocaleString(DateTime.DATETIME_MED);
           }
-        }, {
+        },
+        {
           key: 'credit_amount',
           label: this.$t('table.label.gross'),
           formatter: (value, key, item) => {
             return Vue.options.filters.niceCurrency(value)
           }
-        }, {
+        },
+        {
           key: 'fees',
           label: this.$t('table.label.fees'),
           formatter: (value, key, item) => {
             return Vue.options.filters.niceCurrency(
               _.sum(_.flatMap(value, v => parseInt(v)))
             )
-          }
-        }, {
+          },
+        },
+        {
           key: 'net_amount',
           label: this.$t('table.label.net'),
           formatter: (value, key, item) => {
             return Vue.options.filters.niceCurrency(
               parseInt(item.credit_amount) - _.sum(_.flatMap(item.fees, v => parseInt(v)))
             )
-          }
-        }, {
+          },
+        },
+        {
           key: 'type',
-          label: this.$t('table.label.type')
-        }, {
+          label: this.$t('table.label.type'),
+          formatter: (value, key, item) => {
+            switch (value) {
+              case 'sale': return 'Sale'
+              case 'tip': return 'Tip'
+              case 'subscription': return 'Subscription'
+            }
+          },
+        },
+        {
           key: 'resource_type',
           label: this.$t('table.label.itemType'),
-        }, {
+          formatter: (value, key, item) => {
+            switch (value) {
+              case 'posts': return 'Post'
+              case 'timeline': return 'Subscription'
+              case 'tip': return 'Tip'
+            }
+          },
+        },
+        {
           key: 'resource',
           label: this.$t('table.label.view'),
-        }, {
+        },
+        {
           key: 'purchaser',
           label: this.$t('table.label.purchaser'),
         },

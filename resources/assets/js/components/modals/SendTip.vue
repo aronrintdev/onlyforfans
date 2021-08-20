@@ -26,29 +26,12 @@
 
     <transition name="quick-fade" mode="out-in">
       <b-form v-if="step === 'initial'" @submit="sendTip">
-        <b-card-body>
-          <b-button :variant="getVariant(500)" @click="setTipAmount(500)">$5.00</b-button>
-          <b-button :variant="getVariant(1000)" @click="setTipAmount(1000)">$10.00</b-button>
-          <b-button :variant="getVariant(2000)" @click="setTipAmount(2000)">$20.00</b-button>
-          <b-button :variant="getVariant(5000)" @click="setTipAmount(5000)">$50.00</b-button>
-          <b-button :variant="getVariant()" @click="showCustomPrice = true">Other</b-button>
-
-          <!-- <b-form-spinbutton
-            v-if="showCustomPrice"
-            id="tip-amount"
-            class="w-100 mx-auto tag-tip_amount mt-3"
-            v-model="formPayload.amount"
-            :formatter-fn="$options.filters.niceCurrency"
-            :min="config.min"
-            :max="config.max"
-            :step="config.step"
-          /> -->
-
+        <b-card-body class="pt-2">
           <PriceSelector
-            v-if="showCustomPrice"
-            class="mt-2 mb-0"
+            class="mb-0"
             label=" "
             v-model="formPayload.amount"
+            autofocus
           />
 
           <textarea
@@ -56,7 +39,6 @@
             cols="60"
             rows="5"
             class="w-100 p-2 tip-modal-text"
-            :class="{'mt-3': !showCustomPrice}"
             placeholder="Write a message"
           ></textarea>
 
@@ -152,8 +134,6 @@ export default {
       currency: 'USD',
       message: '',
     },
-
-    showCustomPrice: false,
   }),
 
   created() {
@@ -167,11 +147,6 @@ export default {
     sendTip(e) {
       e.preventDefault()
       this.step = 'payment'
-    },
-
-    setTipAmount(value) {
-      this.formPayload.amount = value
-      this.showCustomPrice = false
     },
 
     getVariant(amount) {

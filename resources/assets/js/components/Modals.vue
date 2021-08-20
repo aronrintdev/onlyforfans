@@ -98,6 +98,7 @@
           :key="selectedResource && selectedResource.id"
           :is_feed="false"
           :is_public_post="true"
+          :imageIndex="imageIndex"
         />
       </div>
       <div
@@ -226,11 +227,6 @@ export default {
 
   computed: {
     ...Vuex.mapState([ 'session_user', 'timeline', 'mobile' ]), // %TODO: may be able to drop timeline here (?)
-
-    followTimelineTitle() {
-      if (this.selectedTimeline && this.selectedTimeline.is_following) return 'Unfollow'
-      else return 'Follow'
-    },
   },
 
   data: () => ({
@@ -257,6 +253,8 @@ export default {
     scheduled_at: null,
     is_for_edit: null,
     showPostArrows: false,
+    followTimelineTitle: '',
+    imageIndex: 0,
   }),
 
   methods: {
@@ -282,6 +280,7 @@ export default {
           case 'render-follow':
             this.selectedTimeline = data.timeline
             this.subscribeOnly = false
+            this.followTimelineTitle = 'Follow'
             this.$bvModal.show('modal-follow')
             break
           case 'render-crop':
@@ -292,6 +291,7 @@ export default {
           case 'render-subscribe':
             this.selectedTimeline = data.timeline
             this.subscribeOnly = true
+            this.followTimelineTitle = 'Subscribe'
             this.$bvModal.show('modal-follow')
             break
           case 'render-tip':
@@ -301,6 +301,7 @@ export default {
           case 'show-post':
             this.selectedResource = data.post
             this.showPostArrows = data.showArrows
+            this.imageIndex = data.imageIndex
             this.$bvModal.show('modal-post')
             break
           case 'show-photo':
@@ -402,6 +403,10 @@ export default {
 </style>
 
 <style lang="scss">
+.modal-header {
+  align-items: center;
+}
+
 #modal-post {
   
   .modal-header {

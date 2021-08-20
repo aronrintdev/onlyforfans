@@ -57,27 +57,49 @@
         -->
         <b-button block variant="primary" class="" @click="renderVaultSelector()">Add from Vault</b-button>
         <b-button block variant="primary" class="" @click="selectTextOnly">Add Text Only</b-button>
-        <hr />
-        <b-button block variant="primary" class="" :to="{ name: 'stories.player', params: { timeline_id: timeline.id } }">View My Stories</b-button>
+        <template v-if="!timeline.is_storyqueue_empty">
+          <hr />
+          <b-button block variant="primary" class="" :to="{ name: 'stories.player', params: { timeline_id: timeline.id } }">View My Stories</b-button>
+        </template>
       </div>
     </b-modal>
 
     <!-- Form modal for story preview (incl. image) before saving -->
     <b-modal v-model="isPreviewModalVisible" id="modal-save-to-story-form" size="lg" title="Save to Story" body-class="OFF-p-0">
-      <section>
-        <div class="box-image-preview text-center">
-          <b-img-lazy v-if="storyAttrs.selectedMediafile" fluid :src="selectedFileUrl" />
-          <b-img-lazy v-else-if="fileInput" fluid :src="selectedFileUrl" />
-        </div>
+      <section class="box-media-preview text-center">
+
+        <template v-if="fileInput">
+          <b-img v-if="isFileImage(fileInput)" :src="selectedFileUrl" />
+          <video v-else-if="isFileVideo(fileInput)" controls>
+            <source :src="selectedFileUrl" :type="fileInput.type" />
+          </video>
+          <div v-else>Preview Not Available</div>
+        </template>
+
+        <template v-else-if="storyAttrs.selectedMediafile">
+          <b-img v-if="storyAttrs.selectedMediafile.is_image" :src="selectedFileUrl" />
+          <video v-else-if="storyAttrs.selectedMediafile.is_video" controls>
+            <source :src="`${selectedFileUrl}#t=2`" :type="storyAttrs.selectedMediafile.mimetype" />
+          </video>
+          <div v-else>Preview Not Available</div>
+        </template>
+
+        <div v-else>Preview Not Available</div>
       </section>
+
       <b-form v-on:submit.prevent class="mt-3">
         <b-form-group v-if="!storyAttrs.selectedMediafile && !fileInput" label="Story Text" label-for="story-contents-1">
           <b-form-textarea id="story-contents" v-model="storyAttrs.contents" placeholder="Enter text for your new story..." rows="5" ></b-form-textarea>
         </b-form-group>
-        <b-form-group label='"Swipe Up" Link (optional)' label-for="swipe-up-link">
-          <b-form-input id="swipe-up-link" type="url" v-model="storyAttrs.link" :state="urlState" placeholder="http://example.com"></b-form-input>
-        </b-form-group>
+
+        <div>
+          <label @click="isSwipeUpLinkVisible=!isSwipeUpLinkVisible" class="clickable" style="cursor: pointer" for="swipe-up-link">Swipe Up Link (optional)</label>
+          <b-form-group>
+            <b-form-input v-if="isSwipeUpLinkVisible" id="swipe-up-link" type="url" v-model="storyAttrs.link" :state="urlState" placeholder="http://example.com"></b-form-input>
+          </b-form-group>
+        </div>
       </b-form>
+
       <template #modal-footer>
         <b-button variant="secondary" @click="isPreviewModalVisible=false">Cancel</b-button>
         <b-button variant="primary" @click="storeStory()">Save</b-button>
@@ -144,6 +166,8 @@ export default {
       spaceBetween: 12,
       //direction: 'vertical',
     },
+
+    isSwipeUpLinkVisible: false, // in modal
   }),
 
   methods: {
@@ -167,6 +191,18 @@ export default {
 
     selectFromFiles() {
       this.$refs.fileInput.$el.childNodes[0].click()
+    },
+
+    // %TODO: move to common library
+    isFileVideo(file) { // for form input File type
+      const is = file.type && file.type.startsWith('video/')
+      console.log('isFileVideo', { file, is })
+      return is
+    },
+    isFileImage(file) { // for form input File type
+      const is = file.type && file.type.startsWith('image/')
+      console.log('isFileImage', { file, is })
+      return is
     },
 
     renderVaultSelector() {
@@ -217,10 +253,10 @@ export default {
       let stype = 'text' // default, if vault or diskfile is attached set to 'image' below
       if ( this.storyAttrs.selectedMediafile ) {
         payload.append('mediafile_id', this.storyAttrs.selectedMediafile.id)
-        stype = 'image'
+        stype = 'image' // %NOTE includes video?
       } else if (this.fileInput) {
         payload.append('mediafile', this.fileInput)
-        stype = 'image'
+        stype = 'image' // %NOTE includes video?
       }
       payload.append('stype', stype)
 
@@ -385,8 +421,11 @@ body {
     margin-right: 0;
   }
 
-  .box-image-preview img {
-    height: 450px;
+  .box-media-preview video,
+  .box-media-preview img {
+    max-width: 100%;
+    //max-height: calc(100vh - 290px);
+    max-height: calc(100vh - 17rem);
   }
 }
 </style>

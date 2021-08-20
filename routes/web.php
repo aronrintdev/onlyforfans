@@ -106,6 +106,9 @@ Route::group(['middleware' => ['auth']], function () {
     // -- contentflags --
     Route::resource('contentflags', 'ContentflagsController', [ 'except' => [ 'create', 'edit' ] ]);
 
+    // -- contenttags --
+    Route::resource('contenttags', 'ContenttagsController', [ 'only' => [ 'index', 'show' ] ]);
+
     // -- mycontacts --
     // apiResource Routes:
     // https://laravel.com/docs/8.x/controllers#actions-handled-by-resource-controller
@@ -219,6 +222,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/timelines/{timeline}/photos', ['as'=>'timelines.photos', 'uses' => 'TimelinesController@photos']); // photos feed
     Route::get('/timelines/{timeline}/videos', ['as'=>'timelines.videos', 'uses' => 'TimelinesController@videos']); // videos feed
     Route::get('/timelines/{timeline}/preview-posts', ['as'=>'timelines.previewPosts', 'uses' => 'TimelinesController@previewPosts']);
+    Route::get('/timelines/{timeline}/photos-videos-count', ['as'=>'timelines.getPhotosVideosCount', 'uses' => 'TimelinesController@getPhotosVideosCount']);
 
     Route::put('/timelines/{timeline}/tip', ['as'=>'timelines.tip', 'uses' => 'TimelinesController@tip']);
 

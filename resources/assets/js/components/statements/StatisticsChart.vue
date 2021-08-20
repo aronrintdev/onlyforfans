@@ -1,5 +1,7 @@
 <template>
-  <canvas ref="chart" id="statistics-chart" width="400" height="200"></canvas>
+  <div class="statistics-chart wrapper">
+    <canvas ref="chart" id="statistics-chart" width="400" height="200"></canvas>
+  </div>
 </template>
 
 <script>
@@ -145,10 +147,10 @@ export default {
           sets.net.data.push((summaries[index].credit_sum - summaries[index].debit_sum + payoutAmount))
 
           for( var type of creditTypes ) {
-            summaries[index].stats[type] ? summaries[index].stats[type].credit_sum : 0
+            sets[type].data.push(summaries[index].stats[type] ? parseInt(summaries[index].stats[type].credit_sum) : 0)
           }
           for( var type of debitTypes ) {
-            summaries[index].stats[type] ? summaries[index].stats[type].debit_sum : 0
+            sets[type].data.push(summaries[index].stats[type] ? parseInt(summaries[index].stats[type].debit_sum) : 0)
           }
         }
       }
@@ -173,9 +175,13 @@ export default {
         },
         scales: {
             y: {
-              min: 0,
+              type: 'linear',
+              beginAtZero: true,
               suggestedMax: 100,
+              stacked: 'single',
+              title: 'Amount',
               ticks: {
+                  // major: { enabled: true },
                   // Nice Currency on Y axis
                   callback: function(value, index, values) {
                       return Vue.options.filters.niceCurrencyRounded(value)
@@ -203,7 +209,11 @@ export default {
             },
           },
           responsive: true,
-          maintainAspectRatio: true,
+          maintainAspectRatio: false, // WARNING: Only set to false if the canvas is wrapped in a set height value
+          onResize: (chart, newSize) => {
+            this.$log.debug('Chart onResize', { newSize })
+          },
+          resizeDelay: 200, // Eases resize update by denouncing call
       }
     },
   },
@@ -211,7 +221,11 @@ export default {
   data: () => ({
     shownTypes: [
       'earnings',
-      'expenses',
+      'sale',
+      'tip',
+      'subscription',
+
+      // 'expenses',
     ],
     chart: null,
   }),
@@ -254,7 +268,11 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.wrapper {
+  max-height: 30rem;
+}
+</style>
 
 <i18n lang="json5" scoped>
 {
@@ -263,9 +281,9 @@ export default {
       "earnings": "#28a745",
       "expenses": "#dc3545",
       "net": "#28a745",
-      "sale": "#28a745",
-      "tip": "#28a745",
-      "subscription": "#28a745",
+      "sale": "#0ebae6",
+      "tip": "#2a5ebe",
+      "subscription": "#961ece",
       "fee": "#dc3545",
       "chargeback": "#dc3545",
       "refund": "#dc3545",

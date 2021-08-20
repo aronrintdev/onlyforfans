@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Financial;
 
 use Illuminate\Bus\Batch;
 use Illuminate\Console\Command;
@@ -17,7 +17,7 @@ class CreateTransactionSummaries extends Command
      *
      * @var string
      */
-    protected $signature = 'financial:summary_start {type?} {back?}';
+    protected $signature = 'financial:summary-start {type?} {back?} {recalculate?}';
 
     /**
      * The console command description.
@@ -57,6 +57,10 @@ class CreateTransactionSummaries extends Command
         $back = $this->argument('back');
         if (!isset($back)) {
             $back = $this->ask('How many units back are you creating?');
+        }
+        $recalculate = $this->argument('recalculate');
+        if (!isset($recalculate)) {
+            $recalculate = $this->choice('Do you wish to recalculate these summaries if they already exist?', [ false, true ]);
         }
 
         $typeString = SummaryType::stringify($type);

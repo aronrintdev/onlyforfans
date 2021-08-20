@@ -70,7 +70,7 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     //protected $appends = [ ];
     protected $keyType = 'string';
     protected $guarded = ['id', 'created_at', 'updated_at'];
-    protected $hidden = ['user', 'posts', 'followers']; // %FIXME: why is this ness? timelines.show (route-model binding) loads these by default but should be lazy loading (?) %PSG
+    protected $hidden = ['posts', 'followers']; // %FIXME: why is this ness? timelines.show (route-model binding) loads these by default but should be lazy loading (?) %PSG
 
     protected $casts = [
         'name' => 'string',
@@ -108,6 +108,7 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         $array = parent::toArray();
         // Localize Price
         $array['price_display'] = static::formatMoney($this->price);
+        $array['userstats'] = $this->getUserstats();
         return $array;
     }
 
@@ -322,6 +323,11 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         return ($stories->count()>0) ? $stories[0] : null;
     }
 
+    public function getUserstats()
+    {
+        return $this->user->getStats();
+    }
+
     // Has the viewer seen all 'active' slides in this timeline's story (?)
     public function isEntireStoryViewedByUser($viewerId) : bool
     {
@@ -334,7 +340,7 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         return ( $notViewedCount === 0 );
     }
 
-    // No viewable stories within last time period 'window'
+    // No viewable stories within last time period 'window' for *this* timeline
     public function isStoryqueueEmpty() : bool
     {
         $daysWindow = Config::get('stories.window_days');

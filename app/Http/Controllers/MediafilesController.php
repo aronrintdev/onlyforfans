@@ -165,6 +165,7 @@ class MediafilesController extends AppBaseController
 
     public function show(Request $request, Mediafile $mediafile)
     {
+        $owner = $request->user();
         $this->authorize('view', $mediafile);
         /*
         if ( $request->user()->cannot('view', $mediafile) ) {
@@ -176,12 +177,11 @@ class MediafilesController extends AppBaseController
         //   ~ https://laravel.com/docs/5.5/filesystem#retrieving-files
         if (Config::get('app.env') === 'testing') {
             // %NOTE: workaround for S3 in testing env
-            return $mediafile->filename;
+            return $mediafile->mfname;
         } else {
-            $url = Storage::disk('s3')->temporaryUrl(
-                $mediafile->filename,
-                now()->addMinutes(5) // %FIXME: hardcoded
-            );
+            $url = $mediafile->diskmediafile->filepath;
+            $s3_file = Storage::disk('s3')->get($url);
+            return $s3_file;
         }
         return new MediafileResource($mediafile);
     }

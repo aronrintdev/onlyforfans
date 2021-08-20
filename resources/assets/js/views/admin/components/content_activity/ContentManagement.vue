@@ -8,7 +8,10 @@
       </b-tab>
       <b-tab title="Favorites" active>
       </b-tab>
-      <b-tab active title="Reported" active>
+      <b-tab active title="Tags" active>
+        <ListContenttag />
+      </b-tab>
+      <b-tab active title="Reported" >
         <ListContentflag />
       </b-tab>
     </b-tabs>
@@ -20,6 +23,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 import ListContentflag from './ListContentflag'
+import ListContenttag from './ListContenttag'
 
 export default {
 
@@ -37,6 +41,7 @@ export default {
 
   components: {
     ListContentflag,
+    ListContenttag,
   },
 
   name: 'ContentManagement',

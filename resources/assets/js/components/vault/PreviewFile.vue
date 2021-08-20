@@ -1,19 +1,24 @@
 <template>
   <div>
     <div class="img-box position-relative">
-      <b-img-lazy
-        @click="$emit('render-lightbox', mediafile)"
+      <div
         v-if="mediafile.is_image"
-        :class="mediafile.selected ? 'tag-selected' : ''"
-        :src="mediafile.filepath"
-      />
+        :class="mediafile.selected ? 'tag-selected image' : 'image'"
+        @click="$emit('render-lightbox', mediafile)"
+      >
+        <b-img-lazy
+          :src="mediafile.filepath"
+        />
+      </div>
       <div
         @click="$emit('render-lightbox', mediafile)"
         :class="mediafile.selected ? 'tag-selected video' : 'video'"
         v-if="mediafile.is_video"
       >
         <video>
-          <source :src="`${mediafile.filepath}#t=2`" :type="mediafile.mimetype" />
+          <source :src="`${mediafile.filepath}#t=2`" type="video/mp4" />
+          <source :src="`${mediafile.filepath}#t=2`" type="video/webm" />
+          <source :src="`${mediafile.filepath}#t=2`" type="video/quicktime" />
         </video>
         <div class="icon-video">
           <fa-icon :icon="['fas', 'play']" class="text-white icon-play" />
@@ -92,7 +97,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.video {
+.image, .video {
   position: absolute;
   top: 0;
   left: 0;

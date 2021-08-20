@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\InvalidCastException;
 use App\Models\Financial\Exceptions\AlreadyPurchasedException;
 use App\Models\Financial\Exceptions\AlreadySubscribedException;
+use App\Models\Financial\Exceptions\Account\FundsPendingException;
 use App\Models\Financial\Exceptions\InvalidPaymentAmountException;
 use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
 use App\Models\Financial\Exceptions\InvalidTransactionAmountException;
@@ -65,6 +66,18 @@ use App\Models\Financial\Exceptions\Account\TransactionNotAllowedException;
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon $deleted_at
+ *
+ * @method static static|Builder isEarnings()
+ * @method static static|Builder isWallet()
+ * @method static static|Builder financialSystem(string $system, string $currency)
+ * @method static static|Builder currency(string $currency)
+ * @method static static|Builder system(string $system)
+ * @method static static|Builder type(string $type)
+ * @method static static|Builder isIn()
+ * @method static static|Builder isInternal()
+ * @method static static|Builder isOut()
+ * @method static static|Builder hasPending()
+ * @method static static|Builder hasPendingTransactions()
  *
  * @package App\Models\Financial
  */
@@ -213,8 +226,67 @@ class Account extends Model implements Ownable
         return $query->type(AccountTypeEnum::OUT);
     }
 
+    /**
+     * Accounts that have a pending amount
+     * `$account->hasPending();`
+     */
+    public function scopeHasPending($query)
+    {
+        return $query->where('pending', '!=', 0);
+    }
+
+    /**
+     * Account has transactions that are pending settling
+     * `$account->hasPendingTransactions()`
+     */
+    public function scopeHasPendingTransactions($query)
+    {
+        return $query->whereHas('transactions', function ($query) {
+            return $query->pending();
+        });
+    }
+
     #endregion Scopes
     /* ---------------------------------------------------------------------- */
+
+    /* -------------------------------------------------------------------------- */
+    /*                                   Checks                                   */
+    /* -------------------------------------------------------------------------- */
+    #region Checks
+
+    /**
+     * If this account is required to check for pending funds
+     * @return bool
+     */
+    public function pendingRequired() {
+        return $this->type === AccountTypeEnum::INTERNAL;
+    }
+
+    /**
+     * Returns hold time start
+     * @return Carbon
+     */
+    public function pendingHoldSince()
+    {
+        $holdMinutes = Config::get("transactions.systems.{$this->system}.defaults.holdPeriod");
+
+        // TODO: Get Custom Hold Periods from DB | Jira Issue: AF-236
+
+        return Carbon::now()->subMinutes($holdMinutes);
+    }
+
+    /**
+     * Returns the transaction types to calculate pending hold on
+     * @return mixed
+     */
+    public function holdOnTypes()
+    {
+        return Config::get("transactions.systems.{$this->system}.holdOn");
+    }
+
+    #endregion Checks
+    /* -------------------------------------------------------------------------- */
+
 
     /* ------------------------------ Functions ----------------------------- */
     #region Functions
@@ -292,6 +364,17 @@ class Account extends Model implements Ownable
             ) {
                 throw new InsufficientFundsException($fromAccount, $amount->getAmount(), $newBalance->getAmount());
             }
+
+            // Verify from account has valid balance when pending is taken into account
+            $newBalance = $fromAccount->balance->subtract($fromAccount->pending->subtract($amount));
+            if (
+                $fromAccount->type === AccountTypeEnum::INTERNAL
+                && $newBalance->isNegative()
+                && !$ignoreBalance
+            ) {
+                throw new FundsPendingException($fromAccount, $amount->getAmount(), $newBalance->getAmount());
+            }
+
             $fromAccount->balance = $newBalance;
             $fromAccount->balance_last_updated_at = Carbon::now();
             $fromAccount->save();
@@ -312,6 +395,7 @@ class Account extends Model implements Ownable
                         ? $options['resource']->getMorphString()
                         : null
                     ),
+                'fee_for' => $options['fee_for'] ?? null,
                 'metadata' => $options['metadata'] ?? null,
             ];
 
@@ -369,74 +453,7 @@ class Account extends Model implements Ownable
                 });
 
             // Calculate up to date balance from current settled transactions
-            $query = Transaction::select(DB::raw('sum(credit_amount) - sum(debit_amount) as amount'))
-                ->where('account_id', $this->getKey())
-                ->whereNotNull('settled_at');
-
-            $lastSummary = TransactionSummary::lastFinalized($this)->with('to_transaction')->first();
-            if (isset($lastSummary)) {
-                $query = $query->where('settled_at', '>', $lastSummary->to_transaction->settled_at);
-            }
-            $balance = $this->asMoney($query->value('amount'));
-            if (isset($lastSummary)) {
-                $balance = $lastSummary->balance->add($balance);
-            }
-
-            // Check for any failed transaction that debit account and subtract that sum from balance
-            //   Usually this will be zero with no failed transactions
-            $failedAmount = Transaction::select(DB::raw('sum(debit_amount) as amount'))
-                ->where('account_id', $this->getKey())
-                ->whereNotNull('failed_at')
-                ->value('amount');
-            if (isset($failedAmount)) {
-                $balance = $balance->subtract($this->asMoney($failedAmount));
-            }
-
-            $pending = $this->asMoney(0);
-            $feesFromPending = $this->asMoney(0);
-
-            if ($this->type === AccountTypeEnum::INTERNAL) {
-                // Calculate new Pending
-
-                // Get Default Hold Period
-                $holdMinutes = Config::get("transactions.systems.{$this->system}.defaults.holdPeriod");
-
-                // TODO: Get Custom Hold Periods from DB | Jira Issue: AF-236
-
-                if ($holdMinutes > 0) { // Don't bother executing this query if hold is 0
-
-                    $holdSince = Carbon::now()->subMinutes($holdMinutes);
-
-                    $holdOnTypes = Config::get("transactions.systems.{$this->system}.holdOn");
-                    $pending = $this->asMoney(
-                        Transaction::select(DB::raw("sum(credit_amount) as amount"))
-                            ->where("account_id", $this->getKey())
-                            ->where("settled_at", '>=', $holdSince->toDateString())
-                            ->whereIn('type', $holdOnTypes)
-                            ->whereNotNull("settled_at")
-                            ->value('amount')
-                    );
-                    if ($pending->isPositive()) {
-                        // The amount deducted by fees during pending period
-                        $feesFromPending = $this->asMoney(
-                            Transaction::select(DB::raw("sum(debit_amount) as amount"))
-                                ->where("type", TransactionTypeEnum::FEE)
-                                ->where("account_id", $this->getKey())
-                                ->where("settled_at", '>=', $holdSince->toDateString())
-                                ->whereNotNull("settled_at")
-                                ->value('amount')
-                        );
-                    }
-                }
-            }
-
-            // Save new balance and pending
-            $this->balance = $balance->subtract($pending)->add($feesFromPending);
-            $this->balance_last_updated_at = Carbon::now();
-            $this->pending = $pending;
-            $this->pending_last_updated_at = Carbon::now();
-
-            $this->save();
+            $this->updateBalance();
 
             // Check if summary needs to be made
             $query = Transaction::where('account_id', $this->getKey())->whereNotNull('settled_at');
@@ -453,6 +470,69 @@ class Account extends Model implements Ownable
             }
         });
     }
+
+    /**
+     * Updates the balance and pending balance of the account
+     * @return void
+     */
+    public function updateBalance()
+    {
+        // Only settled transactions
+        $query = $this->transactions()->settled();
+        // Get Last Transaction Summary
+        $lastSummary = TransactionSummary::lastFinalized($this);
+        if (isset($lastSummary)) {
+            // If last transaction summary, get only transactions from it's last transaction settled time
+            $query->where('created_at', '>', $lastSummary->to);
+        }
+
+        // Calculate balance of transactions
+        // credit - debit
+        $creditSum = $this->asMoney( $query->sum('credit_amount') );
+        $debitSum  = $this->asMoney( $query->sum('debit_amount') );
+
+        $balance = $creditSum->subtract($debitSum);
+
+        // Add in the last summaries balance if necessary
+        if (isset($lastSummary)) {
+            $balance = $balance->add($lastSummary->balance);
+        }
+
+        $pending = $this->asMoney(0);
+        $feesFromPending = $this->asMoney(0);
+
+        if ($this->pendingRequired()) {
+            $table = Transaction::getTableName();
+            $query = $this->transactions()
+                ->where("$table.created_at", '>=', $this->pendingHoldSince()->toDateString())
+                ->whereIn("$table.type", $this->holdOnTypes())
+                ->whereNotNull("$table.settled_at");
+
+            // Total pending amount
+            $pending = $this->asMoney($query->sum('credit_amount'));
+
+            if ($pending->isPositive()) {
+                // The amount deducted by fees during pending period
+                $feesFromPending = $this->asMoney(
+                    // Query done this way so that it only calls the DB once
+                    $query->join("$table as fees", "fees.fee_for", '=', "$table.id")
+                        ->selectRaw('sum(fees.debit_amount) as sum')
+                        ->value('sum')
+                );
+            }
+        }
+
+        // Balance of account now
+        $this->balance = $balance;
+        $this->balance_last_updated_at = Carbon::now();
+
+        // Pending release balance
+        $this->pending = $pending->subtract($feesFromPending);
+        $this->pending_last_updated_at = Carbon::now();
+
+        $this->save();
+    }
+
 
     /**
      * Handle a chargeback on an in account, rolls back transactions made with this transaction

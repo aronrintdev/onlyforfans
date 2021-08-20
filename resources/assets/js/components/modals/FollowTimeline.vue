@@ -3,7 +3,8 @@
 
     <b-card-header>
       <section class="user-avatar">
-        <router-link :to="timelineUrl"><b-img-lazy :src="timeline.avatar.filepath" :alt="timeline.name" :title="timeline.name"></b-img-lazy></router-link>
+        <router-link :to="timelineUrl"><b-img-lazy :src="timeline.user.avatar.filepath" :alt="timeline.name" :title="timeline.name"></b-img-lazy></router-link>
+        <OnlineStatus :user="timeline.user" size="lg" :textInvisible="false" />
       </section>
       <section class="user-details">
         <div>
@@ -17,47 +18,35 @@
         </div>
       </section>
     </b-card-header>
-    <transition name="quick-fade" mode="out-in">
-      <b-card-body v-if="step === 'initial'" key="initial">
-        <div v-if="timeline.is_following"> <!-- un-follow or un-subscribe -->
-          <p>If you're sure you want to unfollow this user, please confirm below.</p>
-          <div class="text-right">
-            <b-button class="mr-2 px-4" variant="secondary" @click="$bvModal.hide('modal-follow')">Cancel</b-button>
-            <b-button v-if="timeline.is_subscribed" @click="doSubscribe" variant="danger">Click to Cancel Subscription</b-button>
-            <b-button v-else @click="doFollow" variant="danger" class="px-4">Unfollow</b-button>
-          </div>
-        </div>
-        <div v-else> <!-- follow or subscribe -->
-          <div v-if="!userCampaign">
-            <p>Get Full Access for {{ timeline.price_display || (timeline.price | niceCurrency) }} monthly premium subscription!</p>
-          </div>
-          <b-row v-if="userCampaign">
-            <b-col class="mt-3">
-              <h5 v-if="userCampaign.type === 'trial'">Limited offer - Free trial for {{ userCampaign.trial_days }} days!</h5>
-              <h5 v-if="userCampaign.type === 'discount'">Limited offer - {{ userCampaign.discount_percent }} % off for 31 days!</h5>
-              <p><small class="text-muted">For {{ campaignAudience }} • ends {{ campaignExpDate }} • left {{ userCampaign.subscriber_count }}</small></p>
-              <p v-if="userCampaign.message">Message from {{ timeline.name }}: <i>{{ userCampaign.message }}</i></p>
+    <transition v-if="!paymentsDisabled" name="quick-fade" mode="out-in">
+      <b-card-body>
+        <div>
+          <b-row>
+            <b-col class="mb-2">
+              <p v-if="!subscribe_only"><fa-icon :icon="['fas', 'check']" /> Get access to purchase content</p>
+              <p v-else><fa-icon :icon="['fas', 'check']" /> Get access to premium content</p>
+              <p v-if="!subscribe_only"><fa-icon :icon="['fas', 'check']" /> Upgrade to full access anytime</p>
+              <p v-if="subscribe_only"><fa-icon :icon="['fas', 'check']" /> Full access for {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} monthly</p>
+              <p><fa-icon :icon="['fas', 'check']" /> Quick and easy cancellation</p>
+              <p><fa-icon :icon="['fas', 'check']" /> Safe and secure transaction</p>
+              <p><fa-icon :icon="['fas', 'check']" /> Ability to Message with {{ timeline.name }}</p>
+              <!-- <h5 v-if="userCampaign.type === 'trial'">Limited offer - Free trial for {{ userCampaign.trial_days }} days!</h5>
+              <h5 v-if="userCampaign.type === 'discount'">Limited offer - {{ userCampaign.discount_percent }} % off for 31 days!</h5> -->
+              <!-- <p><small class="text-muted">For {{ campaignAudience }} • ends {{ campaignExpDate }} • left {{ userCampaign.subscriber_count }}</small></p> -->
             </b-col>
           </b-row>
-          <b-button @click="doSubscribe" variant="primary" class="w-100 mb-3">Subscribe for Full Access</b-button>
-          <template v-if="!subscribe_only">
-            <p>...or follow this creator for free to see limited content</p>
-            <b-button @click="doFollow" variant="primary" class="w-100 mb-3">Follow for Free</b-button>
-          </template>
+          <b-button v-if="subscribe_only" @click="doSubscribe" :disabled="isInProcess" variant="primary" class="w-100 mb-3">
+            <b-spinner small v-if="isInProcess" class="mr-2"></b-spinner>
+            Subscribe for {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} per month now
+          </b-button>
+          <b-button v-if="!subscribe_only" @click="doFollow" :disabled="isInProcess" variant="primary" class="w-100 mb-3">
+            <b-spinner small v-if="isInProcess" class="mr-2"></b-spinner>
+            Follow Now
+          </b-button>
         </div>
       </b-card-body>
-      <b-card-body v-if="step === 'payment'" key="payment">
-        <PurchaseForm
-          :value="timeline"
-          item-type="timeline"
-          :price="timeline.price"
-          :currency="'USD'"
-          type="subscription"
-          :display-price="timeline.price_display || (timeline.price | niceCurrency)"
-          class="mt-3"
-        />
-      </b-card-body>
     </transition>
+    <PaymentsDisabled class="mx-4 mt-4 mb-2" v-if="paymentsDisabled" />
   </b-card>
 </template>
 
@@ -65,11 +54,15 @@
 import moment from 'moment'
 import { eventBus } from '@/eventBus'
 import PurchaseForm from '@components/payments/PurchaseForm'
+import OnlineStatus from '@components/common/OnlineStatus'
+import PaymentsDisabled from '@components/payments/PaymentsDisabled'
 
 export default {
 
   components: {
     PurchaseForm,
+    OnlineStatus,
+    PaymentsDisabled,
   },
 
   props: {
@@ -127,11 +120,14 @@ export default {
     /** 'initial' | 'payment' */
     step: 'initial',
     userCampaign: null,
+    isInProcess: false,
+    paymentsDisabled: false,
   }),
 
   methods: {
 
     async doFollow(e) {
+      this.isInProcess = true
       e.preventDefault()
       const response = await this.axios.put( route('timelines.follow', this.timeline.id), {
         sharee_id: this.session_user.id,
@@ -146,6 +142,7 @@ export default {
         title: 'Success!',
         variant: 'success',
       })
+      this.isInProcess = false
       // %FIXME: this emit should be more general, as this modal may be used elsewhere
        eventBus.$emit('update-timelines', this.timeline.id)
     },
@@ -153,6 +150,7 @@ export default {
     async doSubscribe(e) {
       e.preventDefault()
       this.step = 'payment'
+      this.paymentsDisabled = true;
 
       // const response = await this.axios.put( route('timelines.subscribe', this.timeline.id), {
       //   sharee_id: this.session_user.id,
@@ -197,17 +195,26 @@ footer.card-footer {
 
 /* %TODO DRY */
 body .user-avatar {
-  width: 40px;
-  height: 40px;
+  width: 80px;
+  height: 80px;
   float: left;
   margin-right: 10px;
+  position: relative;
 }
 body .user-avatar img {
   width: 100%;
   height: 100%;
   border-radius: 50%;
+  border: 2px solid #fff;
 }
-
+.user-avatar .onlineStatus {
+  position: absolute;
+  bottom: 5px;
+  right: -5px;
+}
+body .user-details {
+  margin-top: 4px;
+}
 body .user-details .tag-username {
   color: #859AB5;
 }

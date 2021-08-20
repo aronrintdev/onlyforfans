@@ -118,7 +118,7 @@ return [
     */
 
     'beta' => [
-        'active' => env('AUTH_BETA_ACTIVE', true),
+        'active' => env('AUTH_BETA_ACTIVE', false),
         'tokenName' => env('AUTH_BETA_TOKEN_NAME', 'beta'),
         'tokenLength' => env('AUTH_BETA_TOKEN_LENGTH', 10),
         'sendGridTemplateId' => env('AUTH_BETA_SEND_GRID_TEMPLATE_ID', 'd-f70c0e1dfa9d48b5b6c1841f4dfe9514')

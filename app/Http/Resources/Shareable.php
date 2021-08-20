@@ -28,7 +28,7 @@ class Shareable extends JsonResource
             'sharee' => $this->whenLoaded('sharee'),
             'sharee_timeline_id' => $this->whenLoaded('sharee')->timeline->id,
             'sharee_timeline_slug' => $this->whenLoaded('sharee')->timeline->slug,
-            'shareable' => $this->whenLoaded('shareable'),
+            'shareable' => $this->whenLoaded('shareable')->load('avatar', 'cover', 'user')->makeVisible(['user']),
             'is_favorited' => $is_favorited,
             'notes' => $this->notes,
             'created_at' => $this->created_at,
