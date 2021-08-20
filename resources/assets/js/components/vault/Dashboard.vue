@@ -86,15 +86,16 @@
           <b-col>
             <section class="d-md-flex OFF-justify-content-between align-items-center">
 
-              <b-breadcrumb class="pl-0 my-0 mr-auto">
-                <b-breadcrumb-item v-for="(bc, index) in breadcrumbNav" :key="bc.pkid" @click="doNav(bc.pkid)" :active="bc.active">{{ bc.text }}</b-breadcrumb-item>
-              </b-breadcrumb>
+              <div class="mr-auto d-flex align-items-center">
+                <b-breadcrumb class="pl-0 my-0">
+                  <b-breadcrumb-item v-for="(bc, index) in breadcrumbNav" :key="bc.pkid" @click="doNav(bc.pkid)" :active="bc.active">{{ bc.text }}</b-breadcrumb-item>
+                </b-breadcrumb>
+                <div v-if="this.selectedMediafiles.length" class="mr-2"><em>{{ this.selectedMediafiles.length }} selected</em></div>
+              </div>
         
               <div class="d-flex align-items-center">
-                <div v-if="this.selectedMediafiles.length" class="mr-3">{{ this.selectedMediafiles.length }} selected</div>
-                <div class="mr-5" v-if="isAllSelected"><b-button @click="clearSelected()" variant="light">Clear Selection</b-button></div>
-                <div class="mr-5" v-else><b-button @click="selectAll()" variant="secondary">Select All</b-button></div>
-                <div class="">
+
+                <div class="mr-3">
                   <b-button @click="renderSendForm()" variant="primary" class="mr-1" :disabled="!this.selectedMediafiles.length">Send To</b-button>
                   <b-button @click="renderShareForm()" variant="primary" class="mr-1"  :disabled="!this.selectedMediafiles.length">Share</b-button>
                   <b-button @click="renderDownloadForm()" variant="primary" class="mr-1" :disabled="isDownloading || !this.selectedMediafiles.length" >
@@ -102,9 +103,12 @@
                   </b-button>
                   <b-button @click="renderDeleteForm()" variant="danger" class="mr-1" :disabled="!this.selectedMediafiles.length">Delete</b-button>
                 </div>
+
+                <div class="mr-5" v-if="isAllSelected"><b-button @click="clearSelected()" variant="light">Clear Selection</b-button></div>
+                <div class="mr-5" v-else><b-button @click="selectAll()" variant="secondary">Select All</b-button></div>
               </div>
 
-              <div class="ml-5">
+              <div class="ml-3">
                 <b-button variant="link" class="" @click="recordVideo">
                   <fa-icon :icon="['fas', 'video']" size="lg" />
                 </b-button>
@@ -119,10 +123,10 @@
 
         <!-- +++ List/Grid Display of Files & Folders +++ -->
         <b-overlay :show="fileUploading" spinner-variant="primary" rounded="sm">
-          <b-row :no-gutters="false">
+          <b-row :no-gutters="true">
 
             <!-- Files -->
-            <b-col cols="12" md="4" v-for="(mf) in mediafiles" :key="mf.id" role="button" class="mb-3">
+            <b-col cols="4" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button" class="OFF-mb-3">
               <PreviewFile 
                 :data-mf_id="mf.id" 
                 :mediafile="mf" 
@@ -134,7 +138,7 @@
             </b-col>
 
             <!-- Vaultfolders -->
-            <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="4" class="mb-2">
+            <b-col v-for="(vf) in children" :key="vf.id" cols="4" md="3" class="OFF-mb-2">
               <div v-if="vf.is_pending_approval" class="tag-folder img-box tag-shared tag-pending-approval">
                 <b-img-lazy fluid @click="renderApproveSharedModal(vf)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img-lazy>
                 <div class="icon-pending-approval" style="font-size: 3rem;">
@@ -144,13 +148,13 @@
               <div v-else class="tag-folder img-box">
                 <b-img fluid @click="doNav(vf.id)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
                 <div class="file-count">
-                  <b-badge variant="warning" class="p-2">{{ vf.mediafiles.length + vf.vfchildren.length }}</b-badge>
+                  <b-badge variant="warning" class="p-1" :class="{ 'tag-mobile': mobile }">{{ vf.mediafiles.length + vf.vfchildren.length }}</b-badge>
                 </div>
                 <div @click="renderDeleteFolderForm(vf)" class="clickme_to-delete" role="button">
-                  <fa-icon :icon="['fas', 'trash']" size="lg" class="text-danger" />
+                  <fa-icon :icon="['fas', 'trash']" class="text-danger" />
                 </div>
               </div>
-              <p class="text-center truncate m-0 tag-folder-title">{{ vf.name }}</p>
+              <p class="text-center truncate m-0 tag-folder-title" :class="{ 'tag-mobile' : mobile} ">{{ vf.name }}</p>
             </b-col>
           </b-row>
         </b-overlay>
@@ -193,7 +197,7 @@
           <div class="share-list mt-3" v-if="shareForm.sharees.length">
             <div>
               <span v-for="(se, idx) in shareForm.sharees" :key="idx" class="tag-sharee mr-2">
-                <b-badge variant="info" class="p-2">{{ se.label }} 
+                <b-badge variant="info" class="p-1">{{ se.label }} 
                   <span @click="removeSharee(se)" role="button"><fa-icon :icon="['far', 'times']" /></span>
                 </b-badge>
               </span>
@@ -365,6 +369,7 @@ export default {
 
   computed: {
     //...Vuex.mapState(['vault']),
+    ...Vuex.mapState([ 'mobile' ]),
     ...Vuex.mapState(['vaultfolder']),
     ...Vuex.mapState(['breadcrumb']),
     ...Vuex.mapState(['shares']),
@@ -1023,20 +1028,25 @@ body {
     }
     .tag-folder .file-count {
       position: absolute;
-      top: 0.7rem;
-      left: 1.5rem;
+      //top: 0.7rem;
+      //left: 1.5rem;
+      top: 5px;
+      left: 5px;
 
       .badge {
         color: #fff;
         background: #535353;
         opacity: 0.7;
-        font-size: 11px;
+        //font-size: 11px;
+      }
+      .badge.tag-mobile {
+        font-size: 0.65rem;
       }
     }
     .tag-folder .clickme_to-delete {
       position: absolute;
-      top: 0.7rem;
-      right: 1.5rem;
+      top: 5px;
+      right: 5px;
     }
     .tag-folder .icon-pending-approval {
       position: absolute;
@@ -1054,6 +1064,10 @@ body {
       padding: 2px 12px;
       border-radius: 5px;
       background: rgba(83, 83, 83, 0.7);
+    }
+    .tag-folder-title.tag-mobile {
+      font-size: 0.65rem;
+      width: 75%;
     }
   }
 

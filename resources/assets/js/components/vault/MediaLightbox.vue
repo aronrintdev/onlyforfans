@@ -30,16 +30,21 @@
 
       <template footer>
         <section class="panel-footer">
+
           <div class="p-3">
             <b-form-tags v-model="contenttags" separator=" ," no-outer-focus class="mb-2">
+
               <template v-slot="{ tags, inputAttrs, inputHandlers, tagVariant, addTag, removeTag }">
-                <b-input-group class="mb-2">
+                <b-input-group class="mb-2 d-flex align-items-center">
                   <b-form-input
                     v-bind="inputAttrs"
                     v-on="inputHandlers"
                     placeholder="New tag - Press enter to add"
                     class="OFF-form-control"
                   ></b-form-input>
+                  <div class="ml-2" v-b-tooltip.hover.html="{title: 'Add tags - use hash at start for <em>#publictag</em> or hash and exclamation at end for <em>#privatetag!</em>', variant: 'info'}">
+                    <fa-icon :icon="['far', 'info-circle']" class="text-secondary" />
+                  </div>
                 </b-input-group>
                 <div class="d-inline-block">
                   <b-form-tag v-for="tag in tags"
@@ -51,6 +56,7 @@
                   >{{ tag }}</b-form-tag>
                 </div>
               </template>
+
             </b-form-tags>
 
             <div class="d-flex justify-content-end">
@@ -58,6 +64,7 @@
             </div>
 
           </div>
+
         </section>
       </template>
 
@@ -118,6 +125,18 @@ export default {
   created() {
     this.axios.get(this.$apiRoute('mediafiles.diskStats', this.mediafile.id)).then(response => {
       this.stats = response.data.stats
+    })
+  },
+
+  mounted() {
+    console.log(this.mediafile, this.mediafile.contenttags)
+    this.contenttags = this.mediafile.contenttags.map( ct => {
+      switch ( ct.pivot.access_level ) {
+        case 'management-group':
+          return `#${ct.ctag}!`
+        case 'open':
+          return `#${ct.ctag}`
+      }
     })
   },
 
