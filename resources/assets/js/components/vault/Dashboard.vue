@@ -1019,7 +1019,6 @@ body {
   .vault-container {
     background: #fff;
     .tag-folder {
-      //border: solid #b5b5bf 3px;
       background: #f5f5f5;
       border-radius: 5px;
     }
@@ -1028,8 +1027,6 @@ body {
     }
     .tag-folder .file-count {
       position: absolute;
-      //top: 0.7rem;
-      //left: 1.5rem;
       top: 5px;
       left: 5px;
 
@@ -1037,7 +1034,6 @@ body {
         color: #fff;
         background: #535353;
         opacity: 0.7;
-        //font-size: 11px;
       }
       .badge.tag-mobile {
         font-size: 0.65rem;
