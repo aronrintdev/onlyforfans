@@ -9,7 +9,7 @@ use App\Models\Traits\UsesUuid;
 use App\Traits\OwnableFunctions;
 use Illuminate\Support\Collection;
 
-class Note extends Model implements UuidId, Ownable
+class Notes extends Model implements UuidId, Ownable
 {
     use UsesUuid, OwnableFunctions;
 

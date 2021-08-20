@@ -42,7 +42,7 @@ class Chatthread extends JsonResource
             'originator' => $this->originator,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'notes' => $this->note,
+            'notes' => $this->notes,
         ];
 
         // %NOTE: in the current usage scenario, there are only 2 participants in a chat, 

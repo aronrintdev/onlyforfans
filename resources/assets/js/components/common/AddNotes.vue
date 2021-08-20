@@ -95,7 +95,7 @@ export default {
           notes: this.notesInput,
         })
       } else {
-        res = await this.axios.patch(`/notes/${this.notes.id}`, {
+        res = await this.axios.put(`/notes/${this.notes.id}`, {
           notes: this.notesInput,
         })
       }

@@ -148,8 +148,10 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
 
     // -- notes: --
+    Route::put('/notes/{notes}', ['as' => 'notes.update', 'uses' => 'NotesController@update']);
+    Route::delete('/notes/{notes}', ['as' => 'notes.destroy', 'uses' => 'NotesController@destroy']);
     Route::resource('notes', 'NotesController', [
-        'only' => ['store', 'update', 'destroy'],
+        'only' => ['store' ],
     ]);
 
     // -- mediafiles: likeable | shareable | commentable (?) | tippable | purchaseable --
