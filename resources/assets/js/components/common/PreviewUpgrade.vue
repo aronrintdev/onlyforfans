@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="preview_upgrade-crate tag-crate my-3">
+  <div v-if="!isLoading" class="preview_upgrade-crate tag-crate my-3 d-none d-md-block">
     <b-card tag="article">
       <b-card-text>
         <b-row class="mx-0">
