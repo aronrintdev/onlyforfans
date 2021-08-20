@@ -408,7 +408,7 @@ export default {
 }
 
 #modal-post {
-  
+
   .modal-header {
     height: 0;
     padding: 0;
@@ -421,7 +421,12 @@ export default {
       top: 25px;
       color: #343a40;
       opacity: 1;
+      padding: 15px 15px;
     }
+  }
+
+  .post-header-tooltip {
+    margin-right: 1.2em !important;
   }
 
   .superbox-post {
@@ -566,8 +571,8 @@ export default {
   @media (max-width: 600px) {
     .modal-header {
       .close {
-        padding-left: 8px;
-        padding-right: 10px;
+        padding-left: 15px;
+        padding-right: 15px;
       }
     }
     .superbox-post {
