@@ -123,7 +123,7 @@
           <b-row :no-gutters="false">
 
             <!-- Files -->
-            <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button" class="mb-3">
+            <b-col cols="12" md="4" v-for="(mf) in mediafiles" :key="mf.id" role="button" class="mb-3">
               <PreviewFile 
                 :data-mf_id="mf.id" 
                 :mediafile="mf" 
@@ -135,7 +135,7 @@
             </b-col>
 
             <!-- Vaultfolders -->
-            <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3" class="mb-2">
+            <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="4" class="mb-2">
               <div v-if="vf.is_pending_approval" class="tag-folder img-box tag-shared tag-pending-approval">
                 <b-img-lazy fluid @click="renderApproveSharedModal(vf)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img-lazy>
                 <div class="icon-pending-approval" style="font-size: 3rem;">
