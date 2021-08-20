@@ -81,31 +81,34 @@
         </b-row>
 
         <!-- +++ Minor Nav +++ -->
-        <b-row class="py-3">
+        <b-row class="minor-nav py-3">
 
           <b-col>
-            <section class="d-md-flex justify-content-between align-items-center">
+            <section class="d-md-flex OFF-justify-content-between align-items-center">
 
-              <b-breadcrumb class="pl-0 my-0">
-                <b-breadcrumb-item v-for="(bc, index) in breadcrumbNav" :key="bc.pkid" @click="doNav(bc.pkid)" :active="bc.active">{{ bc.text }}</b-breadcrumb-item>
-              </b-breadcrumb>
+              <div class="mr-auto d-flex align-items-center">
+                <b-breadcrumb class="pl-0 my-0">
+                  <b-breadcrumb-item v-for="(bc, index) in breadcrumbNav" :key="bc.pkid" @click="doNav(bc.pkid)" :active="bc.active">{{ bc.text }}</b-breadcrumb-item>
+                </b-breadcrumb>
+                <div v-if="this.selectedMediafiles.length" class="mr-2"><em>{{ this.selectedMediafiles.length }} selected</em></div>
+              </div>
         
-              <div v-if="this.selectedMediafiles.length" class="d-flex align-items-center">
-                <div class="mr-3">{{ this.selectedMediafiles.length }} selected</div>
+              <div class="d-flex align-items-center">
+
+                <div class="mr-3">
+                  <b-button @click="renderSendForm()" variant="primary" class="mr-1" :disabled="!this.selectedMediafiles.length">Send To</b-button>
+                  <b-button @click="renderShareForm()" variant="primary" class="mr-1"  :disabled="!this.selectedMediafiles.length">Share</b-button>
+                  <b-button @click="renderDownloadForm()" variant="primary" class="mr-1" :disabled="isDownloading || !this.selectedMediafiles.length" >
+                    <b-spinner small v-if="isDownloading"></b-spinner> Download
+                  </b-button>
+                  <b-button @click="renderDeleteForm()" variant="danger" class="mr-1" :disabled="!this.selectedMediafiles.length">Delete</b-button>
+                </div>
+
                 <div class="mr-5" v-if="isAllSelected"><b-button @click="clearSelected()" variant="light">Clear Selection</b-button></div>
                 <div class="mr-5" v-else><b-button @click="selectAll()" variant="secondary">Select All</b-button></div>
-                <div class="">
-                  <b-button @click="renderSendForm()" variant="primary" class="mr-1">Send To</b-button>
-                  <b-button @click="renderShareForm()" variant="primary" class="mr-1">Share</b-button>
-                  <b-button @click="renderDownloadForm()" variant="primary" class="mr-1" :disabled="isDownloading" >
-                    <b-spinner small v-if="isDownloading"></b-spinner>
-                    Download
-                  </b-button>
-                  <b-button @click="renderDeleteForm()" variant="danger" class="mr-1">Delete</b-button>
-                </div>
               </div>
 
-              <div v-else>
+              <div class="ml-3">
                 <b-button variant="link" class="" @click="recordVideo">
                   <fa-icon :icon="['fas', 'video']" size="lg" />
                 </b-button>
@@ -120,10 +123,10 @@
 
         <!-- +++ List/Grid Display of Files & Folders +++ -->
         <b-overlay :show="fileUploading" spinner-variant="primary" rounded="sm">
-          <b-row :no-gutters="false">
+          <b-row :no-gutters="true">
 
             <!-- Files -->
-            <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button" class="mb-3">
+            <b-col cols="4" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button" class="OFF-mb-3">
               <PreviewFile 
                 :data-mf_id="mf.id" 
                 :mediafile="mf" 
@@ -135,7 +138,7 @@
             </b-col>
 
             <!-- Vaultfolders -->
-            <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3" class="mb-2">
+            <b-col v-for="(vf) in children" :key="vf.id" cols="4" md="3" class="OFF-mb-2">
               <div v-if="vf.is_pending_approval" class="tag-folder img-box tag-shared tag-pending-approval">
                 <b-img-lazy fluid @click="renderApproveSharedModal(vf)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img-lazy>
                 <div class="icon-pending-approval" style="font-size: 3rem;">
@@ -145,13 +148,13 @@
               <div v-else class="tag-folder img-box">
                 <b-img fluid @click="doNav(vf.id)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
                 <div class="file-count">
-                  <b-badge variant="warning" class="p-2">{{ vf.mediafiles.length + vf.vfchildren.length }}</b-badge>
+                  <b-badge variant="warning" class="p-1" :class="{ 'tag-mobile': mobile }">{{ vf.mediafiles.length + vf.vfchildren.length }}</b-badge>
                 </div>
                 <div @click="renderDeleteFolderForm(vf)" class="clickme_to-delete" role="button">
-                  <fa-icon :icon="['fas', 'trash']" size="lg" class="text-danger" />
+                  <fa-icon :icon="['fas', 'trash']" class="text-danger" />
                 </div>
               </div>
-              <p class="text-center truncate m-0 tag-folder-title">{{ vf.name }}</p>
+              <p class="text-center truncate m-0 tag-folder-title" :class="{ 'tag-mobile' : mobile} ">{{ vf.name }}</p>
             </b-col>
           </b-row>
         </b-overlay>
@@ -194,7 +197,7 @@
           <div class="share-list mt-3" v-if="shareForm.sharees.length">
             <div>
               <span v-for="(se, idx) in shareForm.sharees" :key="idx" class="tag-sharee mr-2">
-                <b-badge variant="info" class="p-2">{{ se.label }} 
+                <b-badge variant="info" class="p-1">{{ se.label }} 
                   <span @click="removeSharee(se)" role="button"><fa-icon :icon="['far', 'times']" /></span>
                 </b-badge>
               </span>
@@ -284,7 +287,12 @@
 
     <!-- 'Lightbox' modal for image preview when clicking on a file in the vault grid/list -->
     <b-modal v-model="isMediaLightboxModalVisible" id="modal-media-lightbox" centered title="" hide-footer body-class="p-0" size="lg">
-      <MediaLightbox :session_user="session_user" :mediafile="lightboxSelection" />
+      <MediaLightbox 
+        @close="isMediaLightboxModalVisible=false" 
+        @reload="doReload" 
+        context="vault-dashboard" 
+        :session_user="session_user" 
+        :mediafile="lightboxSelection" />
     </b-modal>
 
     <!-- Form modal for image preview before saving to story (%FIXME DRY: see StoryBar.vue) -->
@@ -366,6 +374,7 @@ export default {
 
   computed: {
     //...Vuex.mapState(['vault']),
+    ...Vuex.mapState([ 'mobile' ]),
     ...Vuex.mapState(['vaultfolder']),
     ...Vuex.mapState(['breadcrumb']),
     ...Vuex.mapState(['shares']),
@@ -781,12 +790,6 @@ export default {
       this.$root.$bvToast.toast( `Deleted folder ( Total of ${deleteResponse.data.number_of_items_deleted} items deleted)`, {toaster: 'b-toaster-top-center', variant: 'success'} )
     },
 
-    //getLink(e, mediafileId) {
-    //  axios.get(`/mediafiles/${mediafileId}`).then( (response) => {
-    //    console.log('response', { response })
-    //  })
-    //},
-
     // for dropzone
     sendingEvent(file, xhr, formData) {
       this.fileUploading = true
@@ -907,6 +910,11 @@ export default {
       this.$store.dispatch('getVaultfolder', this.currentFolderId);
       this.fileUploading = false;
     },
+
+    doReload() {
+      this.$store.dispatch('getVaultfolder', this.currentFolderId)
+    },
+
   },
 
   created() {
@@ -917,18 +925,6 @@ export default {
       this.foldertree = response.data.foldertree || null
       this.$store.dispatch('getVaultfolder', this.vaultfolder_pkid)
     })
-
-      /*
-    // %HERE %FIXME act on any special context params passed from Vue router
-    if ( this.$route.params.context ) {
-      switch( this.$route.params.context ) {
-        case 'storybar': // we got here from the storybar, so instead of sending the story directly, return to story bar (!)
-          this.sendChannels = ['story']
-          this.sendAction = 'storybar'
-          break
-      }
-    }
-    */
   },
 
   watch: {
@@ -949,74 +945,6 @@ export default {
     CreatePost,
   },
 }
-/*
-      <b-row>
-        <b-col v-for="(mf) in mediafiles" :key="mf.guid" 
-          role="button" 
-          v-bind:class="{ 'tag-shared': isShareMode && isSelectedToShare({shareable_type: 'mediafiles', shareable_id: mf.id}) }"
-        >
-          <div class="position-relative">
-            <img class="OFF-img-fluid" height="64" :src="mf.filepath" />
-            <b-form-checkbox ref="checkbox" size="lg" :checked="contact.selected" :value="true" @change="onSelect" />
-          </div>
-          <span>{{ mf.orig_filename }}</span>
-          <span v-if="isShared('mediafiles', mf.id)"><b-icon icon="share"></b-icon></span>
-          <span v-if="isShareMode"><button @click="toggleSelectedToShare($event, 'mediafiles', mf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
-        </b-col>
-      </b-row>
-      <b-list-group-item v-for="(vf, index) in children" :key="vf.guid" 
-        @click="doNav($event, vf.id)"
-        role="button" 
-        v-bind:class="{ 'tag-shared': isShareMode && isSelectedToShare({shareable_type: 'vaultfolders', shareable_id: vf.id}) }"
-      >
-        {{ vf.name }} 
-        <span v-if="isShared('vaultfolders', vf.id)"><b-icon icon="share"></b-icon></span>
-        <span v-if="isShareMode"><button @click="toggleSelectedToShare($event, 'vaultfolders', vf.id)" type="button" class="btn btn-link ml-3">Share</button></span>
-      </b-list-group-item>
- */
-/*
-      if ( this.contactsSelectedLength < this.contactsLength ) {
-      this.selectIndeterminate = true
-      }
-      if ( this.contactsSelectedLength === this.contactsLength ) {
-      this.selectIndeterminate = false
-      this.selectAll = true
-      }
-      if (this.contactsSelectedLength === 0) {
-      this.selectIndeterminate = false
-      this.selectAll = false
-      }
- */
-/*
-      async getContacts() {
-      let params = {
-      page: this.currentPage,
-      take: this.perPage,
-        //participant_id: this.session_user.id,
-      }
-      params = { ...params, ...this.filters }
-      this.$log.debug('getContacts', {
-      filters: this.filters,
-      params: params,
-      })
-      if ( this.sortBy ) {
-      params.sortBy = this.sortBy
-      }
-      const response = await axios.get( this.$apiRoute('mycontacts.index'), { params } )
-
-      const selected = _.keys(this.filters).length > 0 ? true : false
-
-      this.mycontacts = _.keyBy(response.data.data.map(o => ({ ...o, selected })), 'id')
-
-      if (selected) {
-      this.selectAll = true
-      this.selectIndeterminate = false
-      } else {
-      this.selectAll = false
-      }
-      this.meta = response.meta
-      },
- */
 </script>
 
 <style lang="scss" >
@@ -1083,7 +1011,6 @@ body {
   .vault-container {
     background: #fff;
     .tag-folder {
-      //border: solid #b5b5bf 3px;
       background: #f5f5f5;
       border-radius: 5px;
     }
@@ -1092,20 +1019,22 @@ body {
     }
     .tag-folder .file-count {
       position: absolute;
-      top: 0.7rem;
-      left: 1.5rem;
+      top: 5px;
+      left: 5px;
 
       .badge {
         color: #fff;
         background: #535353;
         opacity: 0.7;
-        font-size: 11px;
+      }
+      .badge.tag-mobile {
+        font-size: 0.65rem;
       }
     }
     .tag-folder .clickme_to-delete {
       position: absolute;
-      top: 0.7rem;
-      right: 1.5rem;
+      top: 5px;
+      right: 5px;
     }
     .tag-folder .icon-pending-approval {
       position: absolute;
@@ -1123,6 +1052,10 @@ body {
       padding: 2px 12px;
       border-radius: 5px;
       background: rgba(83, 83, 83, 0.7);
+    }
+    .tag-folder-title.tag-mobile {
+      font-size: 0.65rem;
+      width: 75%;
     }
   }
 

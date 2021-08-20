@@ -152,6 +152,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/mediafiles/match', ['as'=>'mediafiles.match', 'uses' => 'MediafilesController@match']);
     Route::get('/mediafiles/disk-stats/{mediafile}', ['as'=>'mediafiles.diskStats', 'uses' => 'MediafilesController@diskStats']);
     Route::post('/mediafiles/batch-destroy', ['as'=>'mediafiles.batchDestroy', 'uses' => 'MediafilesController@batchDestroy']);
+    Route::patch('/mediafiles/{mediafile}/update-tags', ['as'=>'mediafiles.updateTags', 'uses' => 'MediafilesController@updateTags']);
     Route::resource('mediafiles', 'MediafilesController', [ 'except' => [ 'create', 'edit', ] ]);
 
     Route::resource('diskmediafiles', 'DiskmediafilesController', [ 'only' => [ 'index', 'show', 'destroy'] ])->middleware(['role:admin|super-admin']);
