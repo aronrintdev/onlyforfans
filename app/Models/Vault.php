@@ -33,7 +33,7 @@ class Vault extends BaseModel implements Guidable, Ownable
         static::created(function ($model) {
             // rootFolder
             Vaultfolder::create([
-                'vfname' => 'Root',
+                'vfname' => 'Home',
                 'vault_id' => $model->id,
                 'parent_id' => null,
                 'user_id' => $model->user_id,
