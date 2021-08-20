@@ -84,9 +84,9 @@
         <b-row class="minor-nav py-3">
 
           <b-col>
-            <section class="d-md-flex justify-content-between align-items-center">
+            <section class="d-md-flex OFF-justify-content-between align-items-center">
 
-              <b-breadcrumb class="pl-0 my-0">
+              <b-breadcrumb class="pl-0 my-0 mr-auto">
                 <b-breadcrumb-item v-for="(bc, index) in breadcrumbNav" :key="bc.pkid" @click="doNav(bc.pkid)" :active="bc.active">{{ bc.text }}</b-breadcrumb-item>
               </b-breadcrumb>
         
@@ -104,7 +104,7 @@
                 </div>
               </div>
 
-              <div v-else>
+              <div class="ml-5">
                 <b-button variant="link" class="" @click="recordVideo">
                   <fa-icon :icon="['fas', 'video']" size="lg" />
                 </b-button>
