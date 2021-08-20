@@ -10,11 +10,12 @@
     >
 
       <template v-if="mediafile.access">
-        <b-img-lazy v-if="mediafile.is_image" 
-          @click="renderFull"
-          class="d-block"
-          :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
-          :alt="mediafile.mfname" />
+        <div class="image-preview" @click="renderFull" v-if="mediafile.is_image" >
+          <b-img-lazy 
+            class="d-block"
+            :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
+            :alt="mediafile.mfname" />
+        </div>
         <MediaSlider v-else-if="mediafile.is_video" 
           @click="renderFull"
           :mediafiles="[mediafile]" 
@@ -108,8 +109,9 @@ export default {
     async renderFull() {
       const response = await axios.get( route('posts.show', this.mediafile.resource_id) );
       const post = response.data.data
+      const imageIndex = post.mediafiles.filter(file => !file.is_audio).findIndex(file => file.id === this.mediafile.id)
       if (post.access) {
-        eventBus.$emit('open-modal', { key: 'show-post', data: { post } })
+        eventBus.$emit('open-modal', { key: 'show-post', data: { post, imageIndex } })
       } else {
         if ( this.$options.filters.isSubscriberOnly(post) ) {
           eventBus.$emit('open-modal', { key: 'render-subscribe', data: { timeline: this.timeline } })
@@ -183,5 +185,21 @@ ul {
 }
 .user-details ul > li:last-child {
   font-size: 14px;
+}
+.image-preview {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-top: 100%;
+  background: transparent;
+}
+
+.image-preview img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 </style>

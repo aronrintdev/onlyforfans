@@ -13,8 +13,8 @@
         <section v-if="!is_schedulefeed" class="mt-3 px-2 py-2 d-flex flex-column flex-md-row justify-content-center justify-content-md-between" :class="{ 'feed-ctrl': !is_homefeed }">
           <b-nav v-if="!is_homefeed" pills>
             <b-nav-item @click="setFeedType('default')" :active="feedType==='default'">All</b-nav-item>
-            <b-nav-item @click="setFeedType('photos')" :active="feedType==='photos'">Photos({{ totalPhotosCount }})</b-nav-item>
-            <b-nav-item @click="setFeedType('videos')" :active="feedType==='videos'">Videos({{ totalVideosCount }})</b-nav-item>
+            <b-nav-item @click="setFeedType('photos')" :active="feedType==='photos'">Photos ({{ totalPhotosCount }})</b-nav-item>
+            <b-nav-item @click="setFeedType('videos')" :active="feedType==='videos'">Videos ({{ totalVideosCount }})</b-nav-item>
           </b-nav>
           <article v-else>
             <!-- empty placeholder to preserve justify arrangment in flex area -->
@@ -61,7 +61,7 @@
     <section class="row">
       <article
         v-for="(feedItem, index) in listItems"
-        :key="feedItem.id"
+        :key="feedItem.id + index"
         :class="feedClass"
         v-observe-visibility="index === listItems.length - 1 ? endPostVisible : false"
       >
@@ -125,7 +125,7 @@ export default {
       return {
         'col-sm-12': !this.isGridLayout,
         'col-sm-4': this.isGridLayout,
-        'mt-3': true,
+        'mt-4': true,
       }
     },
 

@@ -98,6 +98,7 @@
           :key="selectedResource && selectedResource.id"
           :is_feed="false"
           :is_public_post="true"
+          :imageIndex="imageIndex"
         />
       </div>
       <div
@@ -253,6 +254,7 @@ export default {
     is_for_edit: null,
     showPostArrows: false,
     followTimelineTitle: '',
+    imageIndex: 0,
   }),
 
   methods: {
@@ -299,6 +301,7 @@ export default {
           case 'show-post':
             this.selectedResource = data.post
             this.showPostArrows = data.showArrows
+            this.imageIndex = data.imageIndex
             this.$bvModal.show('modal-post')
             break
           case 'show-photo':
