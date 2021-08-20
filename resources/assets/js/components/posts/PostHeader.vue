@@ -172,4 +172,8 @@ body .user-details ul > li {
   /*
    */
 }
+
+.post-author {
+  margin-left: -0.4em;
+}
 </style>

@@ -10,7 +10,7 @@
     >
       <template #header>
         <PostHeader :post="post" :session_user="session_user"/>
-        <section class="d-flex align-items-center mr-0 mr-md-3">
+        <section class="d-flex align-items-center m-0 post-header-tooltip">
           <div class="expire_at" v-if="post.expire_at">
             <span class="text-secondary">{{ expireFromNow }}</span>
             <fa-icon :icon="['far', 'hourglass-half']" class="text-secondary ml-1 mr-2" />
@@ -427,6 +427,11 @@ ul {
     transform: scale(0);
   }
 }
+
+.post-header-tooltip {
+  margin-right: -0.8em !important;
+}
+
 </style>
 
 <i18n lang="json5">
