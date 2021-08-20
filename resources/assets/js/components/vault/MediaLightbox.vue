@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="mediafile-crate" v-bind:data-mediafile_guid="mediafile.id">
+  <div v-if="!isLoading" class="tag-media-lightbox" v-bind:data-mediafile_guid="mediafile.id">
     <b-card
       no-body
       header-tag="header"
@@ -29,8 +29,36 @@
       </template>
 
       <template footer>
-        <div class="panel-footer">
-        </div>
+        <section class="panel-footer">
+          <div class="p-3">
+            <b-form-tags v-model="contenttags" separator=" ," no-outer-focus class="mb-2">
+              <template v-slot="{ tags, inputAttrs, inputHandlers, tagVariant, addTag, removeTag }">
+                <b-input-group class="mb-2">
+                  <b-form-input
+                    v-bind="inputAttrs"
+                    v-on="inputHandlers"
+                    placeholder="New tag - Press enter to add"
+                    class="OFF-form-control"
+                  ></b-form-input>
+                </b-input-group>
+                <div class="d-inline-block">
+                  <b-form-tag v-for="tag in tags"
+                    @remove="removeTag(tag)"
+                    :key="tag"
+                    :title="tag"
+                    :variant="isHashtagPrivate(tag) ? 'danger' : 'secondary'" 
+                    class="mr-1"
+                  >{{ tag }}</b-form-tag>
+                </div>
+              </template>
+            </b-form-tags>
+
+            <div class="d-flex justify-content-end">
+              <b-button @click="updateTags" style="width: 10rem;" variant="primary">Save</b-button>
+            </div>
+
+          </div>
+        </section>
       </template>
 
     </b-card>
@@ -57,9 +85,34 @@ export default {
 
   data: () => ({
     stats: null,
+    contenttags: [],
   }),
 
   methods: {
+    handleTagInput(tags) {
+      console.log('handleTagInput', { value })
+    },
+
+    isHashtagPrivate(s) {
+      return s.endsWith('!')
+    },
+
+    async updateTags() {
+      const payload = {
+        contenttags: this.contenttags,
+      }
+      let response = null
+      try { 
+        console.log('updateTags', { payload })
+        response = await axios.patch( this.$apiRoute('mediafiles.updateTags', this.mediafile.id), payload )
+      } catch (e) {
+        console.log('err', { e, })
+        return
+      }
+      this.$emit('close')
+      this.contenttags = []
+    },
+
   },
 
   created() {
@@ -75,7 +128,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 ul {
   margin: 0;
 }
