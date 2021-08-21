@@ -13,6 +13,7 @@
           :participant="participant"
           :favorited="isFavorite"
           :muted="!!isMuted"
+          :hasNotes="!!notes"
           @tip="tip"
           @addNotes="addNotes"
           @toggleMute="toggleMute"

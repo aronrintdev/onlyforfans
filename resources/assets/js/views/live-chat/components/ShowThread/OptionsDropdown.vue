@@ -11,7 +11,7 @@
 
     <b-dropdown-item @click="$emit('addNotes')">
       <fa-icon icon="pencil" fixed-width />
-      {{ $t('addNotes') }}
+      {{ addNotesTitle }}
     </b-dropdown-item>
 
     <b-dropdown-item @click="$emit('rename')">
@@ -65,10 +65,19 @@ export default {
   props: {
     favorited: { type: Boolean, default: false },
     muted: { type: Boolean, default: false },
+    hasNotes: { type: Boolean, default: false },
     participant: { type: Object, default: () => ({}) },
   },
 
-  computed: {},
+  computed: {
+    addNotesTitle() {
+      if (this.hasNotes) {
+        return 'Edit Notes'
+      } else {
+        return 'Add Notes'
+      }
+    }
+  },
 
   data: () => ({}),
 
