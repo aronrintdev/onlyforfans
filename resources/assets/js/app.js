@@ -42,6 +42,9 @@ Vue.use(VueI18n);
 import VueObserveVisibility from 'vue-observe-visibility';
 Vue.use(VueObserveVisibility);
 
+import IsEmpty from './plugins/isEmpty';
+Vue.use(IsEmpty);
+
 import ForceCompute from './plugins/forceCompute';
 Vue.use(ForceCompute);
 

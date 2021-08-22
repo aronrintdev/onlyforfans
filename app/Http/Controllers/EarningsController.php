@@ -82,7 +82,26 @@ class EarningsController extends Controller
         $chargeback['total'] += $chargebackPartial['total'];
         $chargeback['count'] += $chargebackPartial['count'];
 
-        $summaries = TransactionSummary::getBatchAgo($account, $ago_unit, $ago);
+        // if ($request->has('ago')) {
+            $summaries = TransactionSummary::getBatchAgo($account, $ago_unit, $ago);
+            // Summarize the last days items
+            $today = Carbon::today();
+            $todaySummary = $account->transactions()
+                ->select('type', DB::raw('SUM(credit_amount) as total, COUNT(*) as count, created_at '))
+                ->isCredit()->settled()
+                ->whereIn('type', [
+                    TransactionTypeEnum::SALE,
+                    TransactionTypeEnum::TIP,
+                    TransactionTypeEnum::SUBSCRIPTION,
+                ])
+                ->whereBetween('created_at', [$from, Carbon::now()])
+                ->groupBy('type')
+                ->groupByRaw('UNIX_TIMESTAMP(created_at) DIV 3600') // Group by every hour
+                ->get();
+        // } else {
+        //     $summaries = TransactionSummary::type('day')->whereBetween('from', [ $from, $to ]);
+        // }
+
 
         return [
             'credits' => [
@@ -103,8 +122,21 @@ class EarningsController extends Controller
             'ago' => $ago,
             'ago_unit' => $ago_unit,
             'summaries' => $summaries,
+            'todaySummary' => $todaySummary,
         ];
     }
+
+
+    /**
+     * Earnings stats for today
+     * @param Request $request
+     * @return void
+     */
+    public function today(Request $request)
+    {
+        $request->validate([]);
+    }
+
 
     /**
      * Retrieves the balances for the current logged in user.
