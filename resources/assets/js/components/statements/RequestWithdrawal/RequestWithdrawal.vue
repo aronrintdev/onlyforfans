@@ -101,7 +101,7 @@ export default {
     processing: false,
     requestAmount: 0,
 
-    animationLength: 1000,
+    animationLength: 2000,
     showCompleted: false,
   }),
 

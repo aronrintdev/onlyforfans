@@ -283,9 +283,9 @@ export default {
       this.$echo.private(this.purchasesChannel).listen('ItemPurchased', e => {
         if (e.item_id === this.value.id) {
           this.processing = false
-          this.$nextTick(() => {
-            this.$bvModal.hide('modal-purchase-post')
-          })
+          // this.$nextTick(() => {
+          //   this.$bvModal.hide('modal-purchase-post')
+          // })
         }
       })
     },

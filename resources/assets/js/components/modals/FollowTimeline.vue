@@ -110,6 +110,11 @@ export default {
 
   created() {
     this.getUserCampaign()
+    try {
+      if ( window.paymentsDisabled || paymentsDisabled ) {
+        this.paymentsDisabled = true
+      }
+    } catch (e) {}
   },
 
   mounted() {
@@ -150,7 +155,6 @@ export default {
     async doSubscribe(e) {
       e.preventDefault()
       this.step = 'payment'
-      this.paymentsDisabled = true;
 
       // const response = await this.axios.put( route('timelines.subscribe', this.timeline.id), {
       //   sharee_id: this.session_user.id,

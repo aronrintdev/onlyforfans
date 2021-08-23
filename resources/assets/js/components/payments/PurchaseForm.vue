@@ -36,6 +36,9 @@
       </transition>
     </b-skeleton-wrapper>
 
+    <transition name="quick-fade">
+      <ConfirmationCheckAnime v-if="showCompleted" />
+    </transition>
     <!-- <PayWithForm class="mt-3" /> -->
   </div>
 </template>
@@ -56,10 +59,12 @@ import SubscriptionIFrame from './forms/SegpaySubscriptionIFrame'
 import LongRunningTransactionToast from './LongRunningTransactionToast'
 
 import PaymentsDisabled from './PaymentsDisabled'
+import ConfirmationCheckAnime from '@components/common/flair/ConfirmationCheckAnime'
 
 export default {
   name: 'PurchaseForm',
   components: {
+    ConfirmationCheckAnime,
     FormNew,
     LongRunningTransactionToast,
     PaymentConfirmation,
@@ -104,6 +109,9 @@ export default {
     maxProcessingWaitTime: 20 * 1000, // 20s
     waiting: null,
     paymentsDisabled: false,
+
+    animationLength: 2000,
+    showCompleted: false,
   }),
 
   methods: {
@@ -173,6 +181,25 @@ export default {
       clearTimeout(this.waiting)
     },
 
+    completeAnimate(type) {
+      this.showCompleted = true
+      setTimeout(() => {
+        switch(type) {
+          case 'purchase':
+            this.$bvModal.hide('modal-purchase-post')
+            break
+          case 'tip':
+            this.$bvModal.hide('modal-tip')
+            break
+          case 'subscribed':
+            this.$bvModal.hide('modal-follow')
+            break
+        }
+        this.showCompleted = false
+        this.$emit('completed')
+      }, this.animationLength)
+    },
+
     init() {
       /* Purchase */
       if (this.type === 'purchase') {
@@ -186,9 +213,7 @@ export default {
           if (e.item_id === this.value.id) {
             this.processing = false
             clearTimeout(this.waiting)
-            this.$nextTick(() => {
-              this.$bvModal.hide('modal-purchase-post')
-            })
+            this.completeAnimate('purchase')
           }
         })
 
@@ -204,9 +229,7 @@ export default {
           if (e.item_id === this.value.id) {
             this.processing = false
             clearTimeout(this.waiting)
-            this.$nextTick(() => {
-              this.$bvModal.hide('modal-tip')
-            })
+            this.completeAnimate('tip')
           }
         })
 
@@ -223,9 +246,7 @@ export default {
           if (e.item_id === this.value.id) {
             this.processing = false
             clearTimeout(this.waiting)
-            this.$nextTick(() => {
-              this.$bvModal.hide('modal-follow')
-            })
+            this.completeAnimate('subscribed')
           }
         }).listen('SubscriptionFailed', e => {
           this.$log.debug('SubscriptionFailed received', { e, this_item_id: this.value.id })
@@ -245,9 +266,11 @@ export default {
   mounted() {
     this.init()
     this.loadPaymentMethods()
-    if ( paymentsDisabled || window.paymentsDisabled ) {
-      this.paymentsDisabled = true
-    }
+    try {
+      if ( window.paymentsDisabled || paymentsDisabled ) {
+        this.paymentsDisabled = true
+      }
+    } catch (e) {}
   },
 
 }
