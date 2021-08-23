@@ -247,7 +247,6 @@ Route::group(['middleware' => ['auth']], function () {
 
     /* ------------------------------ Users ------------------------------ */
     // -- users: messageable --
-    //Route::get('/users-suggested', ['as'=>'users.suggested', 'uses' => 'UsersController@suggested']);
     Route::get('/users/me', ['as' => 'users.me', 'uses' => 'UsersController@me']);
     Route::get('/users/match', ['as'=>'users.match', 'uses' => 'UsersController@match']);
     Route::post('/users/request-verify', ['as'=>'users.requestVerify', 'uses' => 'UsersController@requestVerify']);
@@ -257,6 +256,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::patch('/users/{user}/settings/disable/{group}', ['as'=>'users.disableSetting', 'uses' => 'UsersController@disableSetting']); // turn off a single update within a group
     Route::patch('/users/{user}/settings', ['as'=>'users.updateSettingsBatch', 'uses' => 'UsersController@updateSettingsBatch']); // batch update one (or multiple) groups at a time
     Route::patch('/users/{user}/updatePassword', ['as'=>'users.updatePassword', 'uses' => 'UsersController@updatePassword']);
+    Route::post('/users/{user}/login-as-user', ['as'=>'users.loginAsUser', 'uses' => 'UsersController@loginAsUser'])->middleware(['role:admin|super-admin']);
     Route::get('/users/{user}/settings', [
         'middleware' => 'spaMixedRoute',
         'as'=>'users.showSettings',

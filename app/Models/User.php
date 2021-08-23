@@ -551,16 +551,18 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
     /* ---------------------------------------------------------------------- */
 
 
-    public function isAdmin() : bool
-    {
+    public function isSuperAdmin() : bool {
         return $this->roles()->pluck('name')->contains('super-admin');
     }
 
+    public function isAdmin() : bool {
+        return $this->roles()->pluck('name')->contains('super-admin')
+            || $this->roles()->pluck('name')->contains('admin'); // %FIXME - all code refs
+    }
 
     // total sales in cents
     public function getSales() : int
-    {
-        // TODO: Hook up to earnings controller
+    { // %TODO: Hook up to earnings controller
         return 0;
     }
 
