@@ -2,27 +2,28 @@
 
 namespace App\Models\Financial;
 
-use App\Events\FinancialFlagRaised;
-use App\Models\Traits\UsesUuid;
 use App\Models\User;
+use Illuminate\Support\Carbon;
+use App\Models\Traits\UsesUuid;
+use App\Events\FinancialFlagRaised;
 use Illuminate\Support\Facades\Auth;
 
 /**
  * Admin flag for financial items
  *
- * @property string $id
- * @property string $model_type
- * @property string $model_id
- * @property string $column
- * @property string $delta_before
- * @property string $delta_after
- * @property string $description
- * @property string $notes
- * @property bool   $handled
- * @property string $handled_by
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- * @property \Carbon\Carbon $deleted_at
+ * @property  string  $id
+ * @property  string  $model_type
+ * @property  string  $model_id
+ * @property  string  $column
+ * @property  string  $delta_before
+ * @property  string  $delta_after
+ * @property  string  $description
+ * @property  string  $notes
+ * @property  Carbon  $handled_at
+ * @property  string  $handled_by
+ * @property  Carbon  $created_at
+ * @property  Carbon  $updated_at
+ * @property  Carbon  $deleted_at
  *
  * @package App\Models\Financial
  */
@@ -33,10 +34,14 @@ class Flag extends Model
     protected $connection = 'financial';
     protected $table = 'flags';
 
-    protected $guarded = [ 'handled', 'handled_by' ];
+    protected $guarded = [ 'handled_at', 'handled_by' ];
 
     protected $casts = [
         'notes' => 'collection',
+    ];
+
+    protected $dates = [
+        'handled_at',
     ];
 
     /* ---------------------------- Relationships --------------------------- */

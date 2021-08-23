@@ -1,13 +1,16 @@
 // Animation classes
 
+$speed-default: 0.3s;
+$speed-quick: 0.15s;
+
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity .3s ease;
+  transition: opacity $speed-default ease;
 }
 
 .quick-fade-enter-active,
 .quick-fade-leave-active {
-  transition: opacity .15s ease;
+  transition: opacity $speed-quick ease;
 }
 
 .fade-enter,
@@ -17,18 +20,75 @@
   opacity: 0;
 }
 
+// Icon flip
+.icon-flip {
+  // $perspective: 400px;
+  $perspective: 5rem;
+
+  &-right, &-left, &-up, &-down {
+    &-leave-active {
+      position: absolute;
+    }
+    &-enter-active,
+    &-leave-active {
+      transition: transform $speed-quick ease;
+    }
+    &-enter-active {
+      transition-delay: $speed-quick;
+    }
+    &-enter-to, &-leave {
+      transform: perspective($perspective) rotate3d(0, 0, 0, 0deg);
+    }
+  }
+
+  &-right {
+    &-enter {
+      transform: perspective($perspective) rotate3d(0, 1, 0, -90deg);
+    }
+    &-leave-to {
+      transform: perspective($perspective) rotate3d(0, 1, 0, 90deg);
+    }
+  }
+
+  &-left {
+    &-enter {
+      transform: perspective($perspective) rotate3d(0, 1, 0, 90deg);
+    }
+    &-leave-to {
+      transform: perspective($perspective) rotate3d(0, 1, 0, -90deg);
+    }
+  }
+
+  &-up {
+    &-enter {
+      transform: perspective($perspective) rotate3d(1, 0, 0, -90deg);
+    }
+    &-leave-to {
+      transform: perspective($perspective) rotate3d(1, 0, 0, 90deg);
+    }
+  }
+
+  &-down {
+    &-enter {
+      transform: perspective($perspective) rotate3d(1, 0, 0, 90deg);
+    }
+    &-leave-to {
+      transform: perspective($perspective) rotate3d(1, 0, 0, -90deg);
+    }
+  }
+}
 
 // Mobile sliding classes
 .screen-slide {
   &-right, &-left, &-up, &-down {
     &-leave-active {
-      position: absolute
+      position: absolute;
     }
   }
   &-right, &-left, &-up, &-down {
     &-enter-active,
     &-leave-active {
-      transition: transform 0.3s cubic-bezier(0.215,0.61,0.355,1);
+      transition: transform $speed-default cubic-bezier(0.215,0.61,0.355,1);
     }
   }
 
