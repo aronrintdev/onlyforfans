@@ -29,7 +29,7 @@ export default {
   left: 0;
   right: 0;
   color: var(--dark, #000000);
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.9);
   z-index: 100;
   cursor: wait;
 }
