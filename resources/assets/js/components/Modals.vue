@@ -382,7 +382,7 @@ export default {
     height: 100%;
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 576px) {
     & {
       background: rgba(0, 0, 0, 0.6);
       border-radius: 2px;
@@ -510,7 +510,7 @@ export default {
               .swiper-wrapper {
                 align-items: center;
 
-                @media (max-width: 600px) {
+                @media (max-width: 576px) {
                   pointer-events: none;
                 }
 
@@ -568,7 +568,7 @@ export default {
     }
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 576px) {
     .modal-header {
       .close {
         padding-left: 15px;

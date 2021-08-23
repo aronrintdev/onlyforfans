@@ -176,4 +176,12 @@ export default {
 .status-indicator.no-border {
   border: none;
 }
+
+@media (max-width: 576px) {
+  .status-indicator {
+    border-width: 2px;
+    width: 16px !important;
+    height: 16px !important;
+  }
+}
 </style>

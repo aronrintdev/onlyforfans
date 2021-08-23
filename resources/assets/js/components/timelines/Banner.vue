@@ -55,7 +55,7 @@
 
     <b-container fluid>
       <b-row class="avatar-profile py-3">
-        <b-col cols="12" md="4" offset-md="1" class="pl-5 avatar-details text-right text-md-left">
+        <b-col cols="12" md="4" offset-md="1" class="pl-5 avatar-details text-md-left">
           <h2 class="avatar-name my-0">
             {{ timeline.name }}
             <span v-if="timeline.verified" class="verified-badge">
@@ -222,9 +222,6 @@ export default {
 
 header.masthead {
   position: relative;
-  padding-top: 12rem;
-  padding-bottom: 12rem;
-  position: relative;
   background-color: #343a40;
   background-position: center;
   background-size: cover;
@@ -243,12 +240,6 @@ header.masthead .profile-ctrl.dropdown button {
   color: red !important;
   border: none;
   background: transparent;
-}
-
-.banner-online-status {
-  @media (max-width: 576px) {
-    float: right;
-  }
 }
 
 .avatar-img {
@@ -310,5 +301,40 @@ header.masthead .profile-ctrl.dropdown button {
 .tag-stats {
   margin-top: -0.5em;
   cursor: default;
+}
+
+@media (max-width: 576px) {
+  header.masthead {
+    padding-top: 5em;
+    padding-bottom: 5em;
+  }
+
+  .avatar-img {
+    width: 80px;
+    height: 80px;
+    left: 25px;
+    top: 120px;
+
+    .img-thumbnail {
+      padding: 0.1rem;
+    }
+
+    .onlineStatus {
+      bottom: 8px;
+      right: -3px;
+    }
+  }
+  
+  .tag-stats {
+    margin-top: 0.8em;
+
+    ul {
+      margin-bottom: 0;
+    }
+  }
+
+  .avatar-details {
+    margin-left: 56px;
+  }
 }
 </style>
