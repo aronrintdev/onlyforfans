@@ -149,7 +149,7 @@ export default {
         })
       // }
 
-      if (this.user_settings.is_manager) {
+      if (this.user_settings?.is_manager || false) {
         routes.push({
           name: 'Staff Members',
           to: { name: 'settings.staffmembers', params: {} },
@@ -162,7 +162,7 @@ export default {
       }))
 
       return routes
-    },
+    }, // routes
 
     currentRoute() {
       if (!this.$route) {
