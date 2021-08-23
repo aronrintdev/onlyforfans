@@ -503,6 +503,7 @@ class Account extends Model implements Ownable
 
         if ($this->pendingRequired()) {
             $table = Transaction::getTableName();
+            $prefix = Config::get('database.connections.financial.prefix'); // For seeding on the test database
             $query = $this->transactions()
                 ->where("$table.created_at", '>=', $this->pendingHoldSince()->toDateString())
                 ->whereIn("$table.type", $this->holdOnTypes())
@@ -516,7 +517,7 @@ class Account extends Model implements Ownable
                 $feesFromPending = $this->asMoney(
                     // Query done this way so that it only calls the DB once
                     $query->join("$table as fees", "fees.fee_for", '=', "$table.id")
-                        ->selectRaw('sum(fees.debit_amount) as sum')
+                        ->selectRaw("sum(" . $prefix . "fees.debit_amount) as sum")
                         ->value('sum')
                 );
             }

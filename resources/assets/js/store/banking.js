@@ -86,8 +86,10 @@ export const banking = {
       })
     },
 
-    updateAccounts({ commit }, { page = 1, take = 20 }) {
+    updateAccounts({ commit }, options = {}) {
       return new Promise((resolve, reject) => {
+        let page = options.page || 1
+        let take = options.take || 20
         axios.get(route('bank-accounts.index'), { params: { page, take } })
           .then(response => {
             commit('UPDATE_ACCOUNTS', response.data)

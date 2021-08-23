@@ -33,6 +33,9 @@ require('./bootstrap/filters')
 import VueI18n from 'vue-i18n';
 Vue.use(VueI18n);
 
+import IsEmpty from './plugins/isEmpty';
+Vue.use(IsEmpty);
+
 import ForceCompute from './plugins/forceCompute';
 Vue.use(ForceCompute);
 

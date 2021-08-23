@@ -3,7 +3,7 @@
     <div class="h2 text-center text-md-left" v-text="$t('title')" />
     <b-row>
       <b-col md="6">
-        <div class="d-lg-flex align-items-center mb-5">
+        <div class="d-lg-flex align-items-center">
           <!-- Name -->
           <b-form-group
             class="flex-fill"
@@ -17,12 +17,13 @@
             />
           </b-form-group>
 
-          <div class="mx-3 text-nowrap flex-shrink-1 text-center">
+          <div v-if="false" class="mx-3 text-nowrap flex-shrink-1 text-center">
             -- or --
           </div>
 
           <!-- Company Name -->
           <b-form-group
+            v-if="false"
             class="flex-fill"
             :label="$t('form.company_name.label')"
           >
@@ -169,6 +170,7 @@ export default {
     ...Vuex.mapActions('banking', [ 'bankFromRoutingNumber' ]),
 
     submit() {
+      this.$emit('processing')
       this.processing = true
       const data = {
         ...this.form,
@@ -178,6 +180,7 @@ export default {
       this.$axios.put(this.$apiRoute('ach_accounts.store'), { data })
       .then(response => {
         this.processing = false
+        this.$emit('finished')
       })
       .catch(error => {
         eventBus.$emit('error', { error, message: this.$t('formError') })

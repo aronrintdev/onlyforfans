@@ -43,6 +43,9 @@ Vue.use(VueI18n);
 import { VueReCaptcha } from 'vue-recaptcha-v3';
 Vue.use(VueReCaptcha, { siteKey: process.env.MIX_RECAPTCHAV3_SITEKEY });
 
+import IsEmpty from './plugins/isEmpty';
+Vue.use(IsEmpty);
+
 import ForceCompute from './plugins/forceCompute';
 Vue.use(ForceCompute);
 

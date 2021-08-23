@@ -1,36 +1,22 @@
 <template>
   <b-list-group-item class="bank-account-list-item">
-    <b-media vertical-align="center">
-      <template #aside>
-        <div class="position-relative" v-b-tooltip.hover="value.default ? ($t('primary')) : false">
-          <span v-if="value.default" class="text-primary primary-dot">
-            <fa-icon icon="circle" />
-          </span>
-          <fa-icon icon="university" fixed-width size="3x" />
-        </div>
+    <Display :value="value">
+      <template #append>
+        <b-dropdown no-caret right variant="outline-secondary">
+          <template #button-content>
+            <fa-icon icon="ellipsis-h" />
+          </template>
+          <b-dropdown-item link-class="pl-3" @click="setDefault(value.id)">
+            <fa-icon icon="dot-circle" fixed-width class="mr-2" />
+            {{ $t('options.setDefault') }}
+          </b-dropdown-item>
+          <b-dropdown-item link-class="pl-3" variant="danger" @click="deleteConfirmationOpen = true">
+            <fa-icon icon="trash-alt" fixed-width class="mr-2" />
+            {{ $t('options.delete') }}
+          </b-dropdown-item>
+        </b-dropdown>
       </template>
-      <div class="d-flex">
-        <div>
-          <div class="h4" v-text="value.bank_name" />
-          <div v-text="$t(`account_type.${value.account_type}`, { last_4: value.account_number_last_4 })" />
-        </div>
-        <div class="ml-auto align-self-center">
-          <b-dropdown no-caret right variant="outline-secondary">
-            <template #button-content>
-              <fa-icon icon="ellipsis-h" />
-            </template>
-            <b-dropdown-item link-class="pl-3" @click="setDefault(value.id)">
-              <fa-icon icon="dot-circle" fixed-width class="mr-2" />
-              {{ $t('options.setDefault') }}
-            </b-dropdown-item>
-            <b-dropdown-item link-class="pl-3" variant="danger" @click="deleteConfirmationOpen = true">
-              <fa-icon icon="trash-alt" fixed-width class="mr-2" />
-              {{ $t('options.delete') }}
-            </b-dropdown-item>
-          </b-dropdown>
-        </div>
-      </div>
-    </b-media>
+    </Display>
     <b-modal
       v-model="deleteConfirmationOpen"
       :title="$t('confirmation.title')"
@@ -48,9 +34,14 @@
 
 <script>
 import Vuex from 'vuex'
+import Display from './Display'
 
 export default {
   name: 'BankingAccountListItem',
+
+  components: {
+    Display,
+  },
 
   props: {
     value: { type: Object, default: () => ({}) },
