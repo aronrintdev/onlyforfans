@@ -4,13 +4,13 @@
     <!-- Mobile view -->
     <section v-if="mobile" class="mobile h-100" :class="{ 'focus-main': focusMain }">
       <!-- <transition :name="focusMain ? 'slide-right' : 'slide-left'"> -->
-        <div class="sidebar" key="sidebar">
+        <div class="sidebar p-3" key="sidebar">
           <div class="header">
             <slot name="mobileTitle"></slot>
           </div>
           <slot name="sidebar"></slot>
         </div>
-        <div class="main" key="main">
+        <div class="main p-3" key="main">
           <div v-if="!removeMobileMainNavTop" class="header pt-2">
             <slot name="mobileMainNavTop">
               <b-btn variant="link" size="lg" @click="$emit('back')">
@@ -27,10 +27,10 @@
 
     <!-- Non mobile view -->
     <section v-else class="d-flex flex-nowrap h-100 w-100">
-      <aside class="sidebar mr-3">
+      <aside class="sidebar p-3">
         <slot name="sidebar"></slot>
       </aside>
-      <main class="main flex-fill h-100">
+      <main class="main flex-fill h-100 pt-3">
         <slot></slot>
       </main>
     </section>
