@@ -196,12 +196,10 @@ export default {
     // %TODO: move to common library
     isFileVideo(file) { // for form input File type
       const is = file.type && file.type.startsWith('video/')
-      console.log('isFileVideo', { file, is })
       return is
     },
     isFileImage(file) { // for form input File type
       const is = file.type && file.type.startsWith('image/')
-      console.log('isFileImage', { file, is })
       return is
     },
 
