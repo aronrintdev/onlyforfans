@@ -54,6 +54,8 @@ class PayoutGateway implements PayoutGatewayContract
             'resource' => $batch,
         ]);
 
+        $from->settleBalance();
+
         return [
             'success' => true,
             'message' => 'Payout Request was processed'

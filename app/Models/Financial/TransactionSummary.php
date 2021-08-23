@@ -131,12 +131,7 @@ class TransactionSummary extends Model
      */
     public static function lastFinalized(Account $account)
     {
-        // return TransactionSummary::select(TransactionSummary::getTableName() . '.*')
-        //     ->join(Transaction::getTableName(), Transaction::getTableName() . '.id', '=', TransactionSummary::getTableName() . '.to_transaction_id' )
-        //     ->where('finalized', true)
-        //     ->orderByDesc(Transaction::getTableName() . '.settled_at')
-        //     ->limit(1);
-        return TransactionSummary::where('account_id', $account->id)->finalized()->orderBy('to', 'desc')->first();
+        return TransactionSummary::where('account_id', $account->id)->finalized()->latest('to')->with('to_transaction')->first();
     }
 
     public static function getBatch(Account $account, string $unit, Carbon $from, Carbon $to)
