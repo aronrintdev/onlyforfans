@@ -184,7 +184,7 @@
             <b-col>
               <div class="w-100 d-flex justify-content-end">
                 <b-button :disabled="isSubmitting.formProfile" class="w-25 ml-3" type="submit" variant="primary">
-                  <b-spinner v-if="isSubmitting.formProfile" small />&nbsp;
+                  <b-spinner v-if="isSubmitting.formProfile" small class="mr-3" />
                   Save
                 </b-button>
               </div>
