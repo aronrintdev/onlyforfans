@@ -17,6 +17,8 @@ class NotificationsController extends AppBaseController
 {
     public function index(Request $request)
     {
+        $sessionUser = $request->user();
+
         $request->validate([
             'type' => 'string|in:ResourcePurchased,TipReceived,ResourceLiked,TimelineFollowed,TimelineSubscribed,CommentReceived,MessageReceived',
         ]);
@@ -50,8 +52,28 @@ class NotificationsController extends AppBaseController
             $query->where('type', 'App\\Notifications\\'.$request->type);
         }
 
+        // Mark all my notifications as 'read' if I access this route as sesson user
+        $sessionUser->unreadNotifications()->update(['read_at' => now()]);
+
+        $unreadCount = NotificationModel::whereNull('read_at')
+            ->where('notifiable_type', 'users')
+            ->where('notifiable_id', $sessionUser->id)
+            ->count();
+
         $data = $query->latest()->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
         return new NotificationCollection($data);
+    }
+
+    public function getTotalUnreadCount(Request $request)
+    {
+        $sessionUser = $request->user();
+        $unreadCount = NotificationModel::whereNull('read_at')
+            ->where('notifiable_type', 'users')
+            ->where('notifiable_id', $sessionUser->id)
+            ->count();
+        return response()->json(
+            ['total_unread_count' => $unreadCount]
+        );
     }
 
 }
