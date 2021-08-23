@@ -37,17 +37,17 @@ class NotesController extends AppBaseController
     public function store(Request $request)
     {
         $request->validate([
-            'noticed_id' => 'uuid|exists:timelines,id',
+            'notes_id' => 'uuid|exists:timelines,id',
             'notes'      => 'string',
         ]);
         $session_user = $request->user();
         $notes = Notes::create([
             'user_id'     => $session_user->id,
-            'noticed_id'  => $request->noticed_id,
+            'notes_id'  => $request->notes_id,
             'notes'       => $request->notes,
         ]);
 
-        return response()->json(['note' => $notes], 201);
+        return response()->json(['notes' => $notes], 201);
     }
 
     /**
@@ -65,7 +65,7 @@ class NotesController extends AppBaseController
         $update['notes'] = $request->notes;
         $notes->update($update);
 
-        return response()->json(['note' => $notes], 201);
+        return response()->json(['notes' => $notes], 201);
     }
 
     /**

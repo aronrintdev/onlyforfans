@@ -91,7 +91,7 @@ export default {
       let res = null
       if (!this.notes) {
         res = await this.axios.post(route('notes.store'), {
-          noticed_id: this.timeline.id,
+          notes_id: this.timeline.id,
           notes: this.notesInput,
         })
       } else {
@@ -100,7 +100,7 @@ export default {
         })
       }
       if (this.onUpdate) {
-        this.onUpdate(res.data.note)
+        this.onUpdate(res.data.notes)
       }
 
       this.onClose()

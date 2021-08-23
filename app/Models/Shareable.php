@@ -106,7 +106,7 @@ class Shareable extends Model
 
     public function getNotesAttribute($value) {
         return Notes::where('user_id', $this->shareable->user_id)
-            ->where('noticed_id', $this->sharee->timeline->id)
+            ->where('notes_id', $this->sharee->timeline->id)
             ->first();
     }
 

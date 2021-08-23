@@ -66,7 +66,7 @@ class Chatthread extends Model implements UuidId
         })->first();
 
         return Notes::where('user_id', $sessionUser->id)
-            ->where('noticed_id', $otherUser->timeline->id)
+            ->where('notes_id', $otherUser->timeline->id)
             ->first();
     }
 
