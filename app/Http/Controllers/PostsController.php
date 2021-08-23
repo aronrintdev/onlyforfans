@@ -186,7 +186,8 @@ class PostsController extends AppBaseController
         $this->authorize('update', $post);
 
         if ($post->price->isPositive() && $post->sharees()->count() > 0) {
-            abort(403, 'Post has sharees');
+            //abort(403, 'Post has sharees'); // removed as per AF-540 20210823
+            // %PSG: this was too broad in any case, as it restricted user from adding tags, etc
         }
 
         $request->validate([
