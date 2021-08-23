@@ -8,6 +8,8 @@ use Illuminate\Http\Response;
 use App\Payouts\PayoutGateway;
 use App\Models\Financial\Account;
 use App\Models\Financial\AchAccount;
+use App\Models\Financial\Transaction;
+use Illuminate\Support\Facades\Config;
 
 /**
  *
@@ -15,6 +17,40 @@ use App\Models\Financial\AchAccount;
  */
 class PayoutController extends Controller
 {
+
+
+    /**
+     * Paginated list of payout transactions
+     * @param Request $request
+     * @return void
+     */
+    public function transactions(Request $request)
+    {
+        $request->validate([
+            'account_id' => 'uuid',
+            'system' => 'string',
+            'currency' => 'size:3'
+        ]);
+
+        $system = $request->system ?? Config::get('transactions.default');
+        $currency = $request->system ?? Config::get('transactions.defaultCurrency');
+
+        if ($request->has('account_id') && $request->user()->isAdmin()) {
+            $account = Account::find($request->account_id);
+        } else {
+            $account = $request->user()->getEarningsAccount($system, $currency);
+        }
+
+        $data = $account->transactions()
+            ->isPayout()
+            // ->with('reference.account.resource')
+            ->latest()
+            ->paginate($request->input('take', Config::get('collections.max.default')));
+
+        return $data;
+    }
+
+
     /**
      * Request a payout from the system.
      *
