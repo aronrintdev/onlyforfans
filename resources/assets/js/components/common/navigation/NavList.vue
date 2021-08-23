@@ -3,9 +3,9 @@
     <b-list-group-item
       v-for="(item, index) in items"
       :key="item.key"
-      :active="selected === item.key || selected === index"
+      :active="isActive(item, index)"
       class="cursor-pointer d-flex align-items-center"
-      @click="$emit('select', item)"
+      @click="onClick(item)"
     >
       <fa-icon v-if="item.icon" :icon="item.icon" fixed-width class="mr-2" />
       {{ item.label }}
@@ -31,6 +31,21 @@ export default {
   props: {
     items: { type: Array, default: () => ([]) },
     selected: { type: [ String, Number ], default: '' },
+  },
+
+  methods: {
+    isActive(item, index) {
+      if(item.to && this.$route.name === item.to.name) {
+        return true
+      }
+      return this.selected === item.key || this.selected === index
+    },
+    onClick(item) {
+      if(item.to) {
+        this.$router.push(item.to)
+      }
+      this.$emit('select', item)
+    },
   },
 }
 </script>

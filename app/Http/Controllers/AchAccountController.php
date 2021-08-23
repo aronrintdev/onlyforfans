@@ -59,25 +59,37 @@ class AchAccountController extends Controller
             'residence_country' => 'required|size:2',
             'beneficiary_name'  => 'required|max:255',
             'bank_name'         => 'required|max:255',
-            'routing_number'    => 'required|numeric|size:9',
+            'routing_number'    => 'required|digits:9',
             'account_number'    => 'required|numeric',
             'account_type'      => ['required', new InEnum(new AchAccountBankTypeEnum())],
             'bank_country'      => 'required|size:2',
             'currency'          => 'required|size:3',
         ]);
 
+        $user = $request->user();
+
+        $achAccount = new AchAccount($request->all());
+        $achAccount->user_id = $user->id;
+        $achAccount->save();
+
         // New Out Account
-        $account = $request->user()->financialAccounts()->create([
+        $account = $user->financialAccounts()->create([
             'system' => Config::get('transactions.default'),
             'currency' => $request->currency,
             'name' => $request->user()->username . ' Ach Account',
             'type' => AccountTypeEnum::OUT,
+            'resource_id' => $achAccount->id,
+            'resource_type' => $achAccount->getMorphString(),
         ]);
         $account->verified = true;
         $account->can_make_transactions = true;
         $account->save();
 
-        $achAccount = $account->resource()->create($request->all());
+        if ($request->has('default') && $request->default) {
+            $settings = Auth::user()->settings;
+            $settings->cattrs = array_merge($settings->cattrs, ['default_payout_method' => $achAccount->id]);
+            $settings->save();
+        }
 
         return new AchAccountResource($achAccount);
     }

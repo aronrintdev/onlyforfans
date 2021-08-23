@@ -2,23 +2,26 @@
 
 namespace App\Jobs\Financial;
 
-use App\Models\Financial\Account;
-
+use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 
 class UpdateAccountBalance implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Batchable,
+        Dispatchable,
+        InteractsWithQueue,
+        Queueable,
+        SerializesModels;
 
     public $uniqueUntilStart = true;
-    public $tries = 4;
-    public $backoff = [ 5, 15, 60 ];
+    public $tries = 1;
+    public $backoff = [5];
 
     /**
      * Account instance
@@ -32,7 +35,7 @@ class UpdateAccountBalance implements ShouldQueue, ShouldBeUnique
      * @param  \App\Models\Financial\Account  $account
      * @return void
      */
-    public function __construct(Account $account)
+    public function __construct($account)
     {
         $this->account = $account->withoutRelations();
         $this->onQueue('financial-transactions');
@@ -43,7 +46,7 @@ class UpdateAccountBalance implements ShouldQueue, ShouldBeUnique
      */
     public function uniqueId()
     {
-        return $this->account->id;
+        return "update-account-balance-{$this->account->id}";
     }
 
     /**
@@ -64,8 +67,6 @@ class UpdateAccountBalance implements ShouldQueue, ShouldBeUnique
     public function handle()
     {
         $this->account->settleBalance();
+        return;
     }
-
-
-
 }

@@ -3,13 +3,13 @@
     <template #aside>
       <slot name="prepend">
         <div class="position-relative" v-b-tooltip.hover="value.default ? ($t('primary')) : false">
-          <span v-if="value.default" class="text-primary primary-dot">
-            <fa-icon icon="circle" />
-          </span>
           <transition-group :name="selected ? 'icon-flip-right' : 'icon-flip-left'" mode="out-in">
             <fa-icon v-if="selected" key="selected" icon="check" fixed-width size="3x" class="text-success" />
             <fa-icon v-else key="not-selected" icon="university" fixed-width size="3x" class="text-muted" />
           </transition-group>
+          <span v-if="value.default" class="text-primary primary-dot">
+            <fa-icon icon="circle" />
+          </span>
         </div>
       </slot>
     </template>
@@ -58,7 +58,13 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.primary-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+</style>
 
 <i18n lang="json5" scoped>
 {

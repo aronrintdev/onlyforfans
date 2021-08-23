@@ -111,8 +111,8 @@ export default {
       }
       const value = this.price !== ''
         ? typeof this.price === 'string'
-          ? this.$parseNumber(this.price) * this.currencyModifier
-          : this.price * this.currencyModifier
+          ? Math.round(this.$parseNumber(this.price) * this.currencyModifier)
+          : Math.round(this.price * this.currencyModifier)
         : 0
       if ( value < this.min ) {
         this.valid = false
@@ -130,7 +130,7 @@ export default {
     onInput(value) {
       this.validate(true)
       if (value !== '') {
-        this.$emit('input', this.$parseNumber(value) * this.currencyModifier)
+        this.$emit('input', Math.round(this.$parseNumber(value) * this.currencyModifier))
       } else {
         this.$emit('input', 0)
       }
@@ -138,7 +138,7 @@ export default {
     onSliderChange(value) {
       this.price = this.numberFormatter.format(value / this.currencyModifier)
       this.validate()
-      this.$emit('input', value)
+      this.$emit('input', Math.round(value))
     },
     onFocus(e) {
       this.focus = true
@@ -150,7 +150,7 @@ export default {
       this.focus = false
       this.price = this.numberFormatter.format(this.price)
       this.validate()
-      this.$emit('input', this.$parseNumber(this.price) * this.currencyModifier)
+      this.$emit('input', Math.round(this.$parseNumber(this.price) * this.currencyModifier))
     },
 
     onMousewheel(e) {
