@@ -9,6 +9,7 @@
       <b-nav-item :to="{ name: 'media-management', params: {} }" ><h6>Media</h6></b-nav-item>
       <b-nav-item :to="{ name: 'feed-management', params: {} }" ><h6>Feeds</h6></b-nav-item>
       <b-nav-item :to="{ name: 'content-management', params: {} }"><h6>Content</h6></b-nav-item>
+      <b-nav-item to="/n0g1cg9sbx/beta-program"><h6>Beta Program</h6></b-nav-item>
     </b-nav>
 
     <hr />
