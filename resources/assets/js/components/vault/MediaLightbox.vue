@@ -42,7 +42,7 @@
                     placeholder="New tag - Press enter to add"
                     class="OFF-form-control"
                   ></b-form-input>
-                  <div class="ml-2" v-b-tooltip.hover.html="{title: 'Add tags - use hash at start for <em>#publictag</em> or hash and exclamation at end for <em>#privatetag!</em>', variant: 'info'}">
+                  <div class="ml-2" v-b-tooltip.hover.html="{title: 'Add tags - use hash at start for <em>#publictag</em> or hash and exclamation at end for <em>#privatetag!</em>' }">
                     <fa-icon :icon="['far', 'info-circle']" class="text-secondary" />
                   </div>
                 </b-input-group>
