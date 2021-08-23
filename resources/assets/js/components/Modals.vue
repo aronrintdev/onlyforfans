@@ -99,6 +99,7 @@
           :is_feed="false"
           :is_public_post="true"
           :imageIndex="imageIndex"
+          @delete-post="deletePost"
         />
       </div>
       <div
@@ -255,6 +256,7 @@ export default {
     showPostArrows: false,
     followTimelineTitle: '',
     imageIndex: 0,
+    feedType: 'default',
   }),
 
   methods: {
@@ -302,6 +304,7 @@ export default {
             this.selectedResource = data.post
             this.showPostArrows = data.showArrows
             this.imageIndex = data.imageIndex
+            this.feedType = data.feedType
             this.$bvModal.show('modal-post')
             break
           case 'show-photo':
@@ -345,6 +348,29 @@ export default {
     closeModal(modalId) {
       this.$bvModal.hide(modalId)
       eventBus.$emit('close-modal');
+    },
+    deletePost(postId) {
+      const url = `/posts/${postId}`
+      axios.delete(url)
+        .then(() => {
+          this.$bvToast.toast('Post was successfully removed.', {
+            title: 'Success!',
+            variant: 'success',
+            solid: true,
+            toaster: 'b-toaster-top-center',
+          });
+          eventBus.$emit('update-timelines', this.selectedResource.timeline.id)
+          this.closeModal('modal-post')
+        })
+        .catch((err) => {
+          this.$bvToast.toast(err.message, {
+            variant: 'danger',
+            title: 'Warning',
+            solid: true,
+            toaster: 'b-toaster-top-center',
+          });
+          this.closeModal('modal-post')
+        })
     },
   },
 

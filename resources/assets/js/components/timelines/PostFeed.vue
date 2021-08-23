@@ -189,11 +189,7 @@ export default {
     this.feedType = this.is_schedulefeed ? 'schedule' : this.feedType;
 
     // Get photos & videos feed total count
-    axios.get(route('timelines.getPhotosVideosCount', this.timelineId))
-      .then((response) => {
-        this.totalPhotosCount = response.data.photos || 0;
-        this.totalVideosCount = response.data.videos || 0;
-      })
+    this.getMediaCount()
 
     this.$store.dispatch('getFeeddata', { 
       feedType: this.feedType,
@@ -362,6 +358,7 @@ export default {
         hidePromotions: this.hidePromotions,
       })
       this.$store.dispatch('getQueueMetadata')
+      this.getMediaCount()
     },
 
     doReset() {
@@ -371,6 +368,13 @@ export default {
       this.moreLoading = true
     },
 
+    getMediaCount() {
+      axios.get(route('timelines.getPhotosVideosCount', this.timelineId))
+        .then((response) => {
+          this.totalPhotosCount = response.data.photos || 0;
+          this.totalVideosCount = response.data.videos || 0;
+        })
+    }
   },
 
   watch: {

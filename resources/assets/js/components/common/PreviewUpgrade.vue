@@ -97,17 +97,18 @@ export default {
     },
 
     backgroundImg(post) {
+      const mediafiles = post.mediafiles.filter(mf => mf.is_image);
       if ( post.access ) {
-        if ( post.mediafiles && post.mediafiles[0] && post.mediafiles[0].has_thumb ) {
-          return { '--background-image': `url(${post.mediafiles[0].thumbFilepath})` }
+        if ( mediafiles && mediafiles[0] && mediafiles[0].has_thumb ) {
+          return { '--background-image': `url(${mediafiles[0].thumbFilepath})` }
         }
-        if ( post.mediafiles && post.mediafiles[0] && post.mediafiles[0].has_mid ) {
-          return { '--background-image': `url(${post.mediafiles[0].midFilepath})` }
+        if ( mediafiles && mediafiles[0] && mediafiles[0].has_mid ) {
+          return { '--background-image': `url(${mediafiles[0].midFilepath})` }
         }
-        return { '--background-image': `url(${post.mediafiles[0].filepath})` }
+        return { '--background-image': `url(${mediafiles[0].filepath})` }
       } else { // locked content 
-        if ( post.mediafiles && post.mediafiles[0] && post.mediafiles[0].has_blur ) {
-          return { '--background-image': `url(${post.mediafiles[0].blurFilepath})` }
+        if ( mediafiles && mediafiles[0] && mediafiles[0].has_blur ) {
+          return { '--background-image': `url(${mediafiles[0].blurFilepath})` }
         } 
         return { '--background-image': `url(/images/locked_post.png)` }
       }

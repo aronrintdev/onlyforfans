@@ -98,6 +98,9 @@ export default {
       try {
         const response = await this.axios.get(this.$apiRoute('timelines.show', { timeline: this.slug }))
         this.timeline = response.data.data
+        if (this.timeline && this.timeline.id) {
+          this.$store.dispatch('getPreviewposts', { timelineId: this.timeline.id, limit: 6 })
+        }
       } catch (error) {
         this.$log.error(error)
       }
