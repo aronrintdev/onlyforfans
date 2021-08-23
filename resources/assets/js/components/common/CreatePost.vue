@@ -260,9 +260,6 @@ export default {
     },
 
     isSaveButtonDisabled() {
-      // .trim
-      // .replace(/data-/g,'')
-      // "foo #admin! #public bar".replace(/\B#\w\w+!/g,'')
       const descriptionWithoutAdminTags = this.description.replace(/\B#\w\w+!/g,'').trim()
       return this.isBusy || (!descriptionWithoutAdminTags && ( this.selectedMediafiles && this.selectedMediafiles.length===0 ))
     },
