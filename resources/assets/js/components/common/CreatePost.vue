@@ -155,7 +155,7 @@
                     </button>
                   </li>
                   <li class="w-100 mx-0">
-                    <button :disabled="isBusy || (!description && ( selectedMediafiles && selectedMediafiles.length === 0 ))" @click="savePost()" class="btn btn-submit btn-primary w-100">
+                    <button :disabled="isSaveButtonDisabled" @click="savePost()" class="btn btn-submit btn-primary w-100">
                       <span v-if="isBusy" class="text-white spinner-border spinner-border-sm pr-2" role="status" aria-hidden="true"></span>
                       Post
                     </button>
@@ -258,6 +258,15 @@ export default {
         },
       }
     },
+
+    isSaveButtonDisabled() {
+      // .trim
+      // .replace(/data-/g,'')
+      // "foo #admin! #public bar".replace(/\B#\w\w+!/g,'')
+      const descriptionWithoutAdminTags = this.description.replace(/\B#\w\w+!/g,'').trim()
+      return this.isBusy || (!descriptionWithoutAdminTags && ( this.selectedMediafiles && this.selectedMediafiles.length===0 ))
+    },
+
 
   }, // computed
 
