@@ -62,7 +62,7 @@ class PayoutController extends Controller
         $request->validate([
             'account_id' => 'required_without:ach_id|uuid',
             'ach_id'     => 'required_without:account_id',
-            'amount'     => 'required|numeric',
+            'amount'     => 'required|numeric|min:2000',
             'currency'   => 'required|size:3',
         ]);
 

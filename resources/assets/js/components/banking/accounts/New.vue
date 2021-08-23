@@ -36,6 +36,15 @@
         </div>
 
         <b-form-group
+          :label="$t('form.type.label')"
+        >
+          <b-form-select
+            v-model="form.type"
+            :options="typeOptions"
+          />
+        </b-form-group>
+
+        <b-form-group
           :label="$t('form.beneficiary_name.label')"
         >
           <b-form-input v-model="form.beneficiary_name" :placeholder="$t('form.beneficiary_name.placeholder')" />
@@ -89,6 +98,15 @@
         </b-form-group>
 
         <b-form-group
+          :label="$t('form.account_type.label')"
+        >
+          <b-form-select
+            v-model="form.account_type"
+            :options="accountTypeOptions"
+          />
+        </b-form-group>
+
+        <b-form-group
           :label="$t('form.bank_name.label')"
         >
           <div class="position-relative">
@@ -103,12 +121,20 @@
         </b-form-group>
 
         <CountrySelectInput v-model="form.bank_country" :label="$t('form.bank_country.label')" />
+
+        <b-form-group>
+          <b-form-checkbox
+            v-model="form.default"
+          >
+            {{ $t('form.default.label') }}
+          </b-form-checkbox>
+        </b-form-group>
       </b-col>
     </b-row>
 
     <b-row class="mt-5">
       <b-col>
-        <b-btn variant="success" block :disabled="processing">
+        <b-btn variant="primary" block :disabled="processing" @click="submit">
           <span v-if="processing">
             <fa-icon icon="spinner" spin />
           </span>
@@ -132,11 +158,13 @@ import _ from 'lodash'
 import Vuex from 'vuex'
 import CountrySelectInput from '@components/forms/elements/CountrySelectInput'
 import { numericMask } from '@helpers/masks'
+import ConfirmationCheckAnime from '@components/common/flair/ConfirmationCheckAnime'
 
 export default {
   name: "NewAch",
 
   components: {
+    ConfirmationCheckAnime,
     CountrySelectInput,
   },
 
@@ -144,43 +172,70 @@ export default {
     ...Vuex.mapState([ 'mobile' ]),
     numericMask() {
       return numericMask
-    }
+    },
+
+    typeOptions() {
+      return [
+        { value: 'individual', text: this.$t('type.individual') },
+        { value: 'company', text: this.$t('type.company') },
+      ]
+    },
+
+    accountTypeOptions() {
+      return [
+        { value: 'CHK', text: this.$t('accountType.chk') },
+        { value: 'SAV', text: this.$t('accountType.sav') },
+      ]
+    },
   },
 
   data: () => ({
     form: {
       name: '',
       company_name: '',
-      type: '', // Individual | Business
+      type: 'individual', // Individual | Business
       residence_country: 'US',
       beneficiary_name: '',
       bank_name: '',
       routing_number: '',
       account_number: '',
+      account_type: 'CHK',
       bank_country: 'US',
       currency: 'USD',
+      default: true,
     },
     routingNumberWarning: false,
 
     processing: false,
     bankGuessProcessing: false,
+
+    showCompleted: false,
+    completedLength: 2000,
   }),
 
   methods: {
     ...Vuex.mapActions('banking', [ 'bankFromRoutingNumber' ]),
+
+    completeAnimate() {
+      this.showCompleted = true
+      setTimeout(() => {
+        this.showCompleted = false
+        this.$emit('finished')
+      }, this.completedLength)
+    },
 
     submit() {
       this.$emit('processing')
       this.processing = true
       const data = {
         ...this.form,
-        name: this.form.name || this.form.company_name,
-        type: this.form.name ? 'individual' : 'business',
+        // name: this.form.name || this.form.company_name,
+        // type: this.form.name ? 'individual' : 'business',
       }
-      this.$axios.put(this.$apiRoute('ach_accounts.store'), { data })
+      this.axios.post(this.$apiRoute('bank-accounts.store'), data)
       .then(response => {
         this.processing = false
-        this.$emit('finished')
+        this.completeAnimate()
       })
       .catch(error => {
         eventBus.$emit('error', { error, message: this.$t('formError') })
@@ -248,6 +303,9 @@ export default {
         "label": "Company Name",
         "placeholder": "Company Name",
       },
+      "type": {
+        "label": "Account Type"
+      },
       "residence_country": {
         "label": "Country of Residence",
       },
@@ -264,6 +322,9 @@ export default {
         "placeholder": " ",
         "warningTooltip": "We were unable to look up this routing number. Please double check that it is correct before adding this account."
       },
+      "account_type": {
+        "label": "Bank Account Type"
+      },
       "account_number": {
         "label": "Account Number",
         "placeholder": " ",
@@ -271,8 +332,19 @@ export default {
       "bank_country": {
         "label": "Bank Country of Origin"
       },
-      "submit": "Add Account"
-    }
+      "default": {
+        "label": "Make this my Default Bank Account"
+      },
+      "submit": "Add Account",
+    },
+    "accountType": {
+        "chk": "Checking",
+        "sav": "Savings",
+      },
+      "type": {
+        "individual": "Individual",
+        "company": "Company"
+      }
   }
 }
 </i18n>

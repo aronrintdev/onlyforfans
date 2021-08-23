@@ -11,6 +11,9 @@
 </template>
 
 <script>
+/**
+ * resources/assets/js/components/common/LoadingOverlay.vue
+ */
 export default {
   name: 'LoadingOverlay',
 
