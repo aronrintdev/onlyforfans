@@ -1,5 +1,5 @@
 <template>
-  <div class="toolbar d-flex">
+  <div class="toolbar" :class="{'d-flex': !mobile}">
     <div class="tool-items d-flex flex-shrink-1 py-2 mr-3">
       <b-btn
         v-for="item in buttons"
@@ -19,17 +19,14 @@
         />
       </b-btn>
     </div>
-    <div class="py-2 ml-auto d-flex align-items-end">
+    <div class="py-2 ml-auto d-flex align-items-end" :class="{'float-right': mobile}">
       <b-btn
         variant="success"
         class="mr-3 text-nowrap"
         v-b-tooltip.hover="mobile ? null :$t('tooltips.sendWithTip')"
       >
         <fa-icon icon="dollar-sign" class="mr-2" />
-        <span v-if="!mobile">{{ $t('sendWithTip') }}</span>
-        <span v-else>
-          <fa-icon icon="arrow-right" class="ml-2" />
-        </span>
+        <span>{{ $t('sendWithTip') }}</span>
       </b-btn>
       <div class="d-flex flex-column">
         <div
@@ -43,7 +40,7 @@
           :disabled="false"
           @click="$emit('submit')"
         >
-          <span v-if="!mobile">{{ $t('send') }}</span>
+          <span>{{ $t('send') }}</span>
           <fa-icon icon="arrow-right" class="ml-2" />
         </b-btn>
       </div>
