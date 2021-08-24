@@ -75,7 +75,7 @@
 </template>
 
 <script>
-//import Vuex from 'vuex'
+import Vuex from 'vuex'
 //import { DateTime } from 'luxon'
 import moment from 'moment'
 
@@ -90,6 +90,8 @@ export default {
     isLoading() {
       return !this.session_user || !this.notifications || !this.meta || !this.filter
     },
+
+    ...Vuex.mapActions(['getUnreadNotificationsCount']),
 
     totalRows() {
       return this.meta ? this.meta.total : 1
@@ -175,7 +177,9 @@ export default {
     this.getPagedData()
   },
 
-  mounted() { },
+  mounted() { 
+    this.$store.dispatch('getUnreadNotificationsCount')
+  },
 
   components: { },
 }

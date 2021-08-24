@@ -33,6 +33,7 @@ export default {
   props: {
     mobileStyle: { type: Boolean, default: false },
     unreadMessagesCount: { type: Number, default: 0 },
+    unreadNotificationsCount: { type: Number, default: 0 },
   },
   computed: {
     ...Vuex.mapGetters([
@@ -68,6 +69,7 @@ export default {
             name: 'Notifications',
             icon: 'bell',
             to: { name: 'notifications.dashboard' },
+            alerts: this.unreadNotificationsCount,
             // alerts: 4,
           },
           {
@@ -84,6 +86,9 @@ export default {
 
   watch: {
     unread_messages_count() {
+      this.$forceCompute('buttons')
+    },
+    unread_notifications_count() {
       this.$forceCompute('buttons')
     },
   },
