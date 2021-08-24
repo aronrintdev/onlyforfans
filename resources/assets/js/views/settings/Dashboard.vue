@@ -6,11 +6,11 @@
     >
 
       <template #mobileTitle>
-        <div class="h2 px-3 py-2 d-flex align-items-center">
-          <b-btn variant="link" :to="{ name: 'index' }" class="d-flex align-items-center">
+        <div class="h4 px-3 py-3 mb-0 d-flex align-items-center">
+          <!-- <b-btn variant="link" :to="{ name: 'index' }" class="d-flex align-items-center">
             <fa-icon icon="arrow-left" size="lg" fixed-width />
-          </b-btn>
-          <fa-icon icon="cogs" fixed-width class="ml-3 mr-2" />
+          </b-btn> -->
+          <fa-icon icon="cogs" class="mr-2" />
           {{ $t('title.sidebar') }}
         </div>
       </template>
