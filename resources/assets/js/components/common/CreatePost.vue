@@ -78,7 +78,7 @@
               @complete="audioRecordFinished"
             />
 
-            <b-progress v-if="isBusy" :value="uploadProgress" max="100" animated />
+            <b-progress class="progress-widget" v-if="isBusy" :value="uploadProgress" max="100" animated />
           </div>
 
           <template #footer>
@@ -290,7 +290,8 @@ export default {
     formErr: null, // null if no error, otherwise string (error message)
 
     uploadProgress: 0,
-
+    uploadFailedFilesCount: 0,
+    uploadingFilesCount: 0,
   }), // data
 
   methods: {
@@ -375,6 +376,7 @@ export default {
         // %NOTE: files added manually don't seem to be put into the queue, thus onDropzoneSending won't be called for them (?)
 
         if (queued.length) {
+          this.uploadingFilesCount = queued.length
           console.log('CreatePost::savePost() - process queue', { queued, })
           this.$refs.myVueDropzone.processQueue() // this will call createCompleted() via callback
         }  else {
@@ -454,6 +456,7 @@ export default {
     onDropzoneError(file, message, xhr) {
       this.$log.error('Dropzone Error Event', { file, message, xhr })
       if (file) {
+        this.uploadFailedFilesCount += 1;
         this.$refs.myVueDropzone.removeFile(file)
         this.removeFileFromSelected(file)
       }
@@ -516,6 +519,16 @@ export default {
     // ---
 
     async createCompleted() {
+      if (this.uploadFailedFilesCount > 0 && this.uploadingFilesCount === this.uploadFailedFilesCount) {
+        this.$root.$bvToast.toast('Uploading files failed.', {
+          title: 'Warning!',
+          variant: 'danger',
+          solid: true,
+        })
+        await axios.delete(`/posts/${this.newPostId}`)
+        this.resetForm()
+        this.isBusy = false
+      }
       // Take care of any files attached from vault (disk files have already been removed from selectedMediafiles)...
       this.selectedMediafiles.forEach( async mf => {
         await axios.post(this.$apiRoute('mediafiles.store'), {
@@ -788,6 +801,10 @@ li.selectable[disabled] {
 
 .price-select-container {
   border-bottom: 1px solid rgba(0,0,0,.125)
+}
+
+.progress-widget {
+  margin: 0.5rem 1rem !important;
 }
 </style>
 
