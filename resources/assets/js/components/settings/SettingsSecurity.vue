@@ -31,7 +31,7 @@
     </b-card>
 
     <b-card title="Login Sessions" class="mt-5">
-      <b-card-text>
+      <b-card-text class="login-table-wrapper">
         <b-table hover 
           id="loginSessions-table"
           :items="login_sessions.data"
@@ -172,6 +172,9 @@ export default {
   #loginSessions-table thead th:first-child,
   #loginSessions-table thead th:last-child {
     white-space: nowrap;
+  }
+  .login-table-wrapper {
+    overflow-x: auto;
   }
 </style>
 
