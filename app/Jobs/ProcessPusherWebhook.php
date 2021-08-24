@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Webhook;
+use App\Models\Webhook;
 use App\Enums\WebhookStatusEnum as Status;
 use DB;
 use Illuminate\Bus\Queueable;
@@ -13,7 +13,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 
 class ProcessPusherWebhook implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, HandlesSlot;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $webhook;
     /**

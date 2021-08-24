@@ -1,0 +1,28 @@
+---
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /var/www/allfans.com/
+    #overwrite: true
+hooks:
+  # ApplicationStop:
+  #   - location: .aws/ApplicationStop.sh
+  #     timeout:
+  #     runas: root
+  # BeforeInstall:
+  #   - location: .aws/BeforeInstall.sh
+  #     timeout:
+  #     runas: root
+  AfterInstall:
+    - location: .aws/AfterInstall.sh
+      timeout:
+      runas: root
+  ApplicationStart:
+    - location: .aws/ApplicationStart.sh
+      timeout:
+      runas: root
+# ValidateService:
+#   - location: .aws/ValidateService.sh
+#     timeout:
+#     runas: root
