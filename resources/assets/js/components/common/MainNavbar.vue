@@ -6,14 +6,6 @@
     <div class="ml-auto mr-3" @click="showSearchBar">
       <fa-icon v-if="mobile" icon="search" class="text-secondary" />
     </div>
-    <b-navbar-toggle target="nav-collapse" class="mb-1 pr-0" :class="{'ml-auto': !mobile}">
-      <ProfileButton />
-    </b-navbar-toggle>
-    <b-collapse v-if="mobile" id="nav-collapse" is-nav>
-      <b-navbar-nav>
-        <ProfileMenu v-if="session_user" />
-      </b-navbar-nav>
-    </b-collapse>
 
     <ScrollCollapse v-if="mobile && enableSearch" ref="scrollCollapse" class="w-100" :full-open="searchOpen" :full-open-height="openHeight">
       <div class="d-flex flex-column justify-content-between h-100 pb-3">
