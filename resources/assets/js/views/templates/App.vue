@@ -4,7 +4,7 @@
       <SiteLoading v-if="loading" key="loading" />
     </transition>
     <!-- Header -->
-    <MainNavBar v-if="!mobile" class="header" />
+    <MainNavBar class="header" />
 
     <div class="content flex-grow-1 d-flex" :class="{ 'p-3': !mobile, 'mobile': mobile }">
       <MobileSidebarMenu v-if="mobile" :show="mobileMenuOpen" fromRight @change="onMobileMenuChange" />
@@ -162,6 +162,7 @@ export default {
 
 <style lang="scss" scoped>
 .content.mobile {
+  padding-top: 15px;
   padding-bottom: 68px;
 }
 </style>
