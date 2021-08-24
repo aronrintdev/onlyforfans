@@ -93,22 +93,22 @@
                 <div v-if="this.selectedMediafiles.length" class="mr-2"><em>{{ this.selectedMediafiles.length }} selected</em></div>
               </div>
         
-              <div class="d-flex align-items-center">
+              <div class="d-flex flex-wrap align-items-center">
 
-                <div class="mr-3">
-                  <b-button @click="renderSendForm()" variant="primary" class="mr-1" :disabled="!this.selectedMediafiles.length">Send To</b-button>
-                  <b-button @click="renderShareForm()" variant="primary" class="mr-1"  :disabled="!this.selectedMediafiles.length">Share</b-button>
-                  <b-button @click="renderDownloadForm()" variant="primary" class="mr-1" :disabled="isDownloading || !this.selectedMediafiles.length" >
+                <div class="mr-3 mb-2 mb-md-0">
+                  <b-button @click="renderSendForm()" variant="primary" class="mr-1 vault-btn" :disabled="!this.selectedMediafiles.length">Send To</b-button>
+                  <b-button @click="renderShareForm()" variant="primary" class="mr-1 vault-btn"  :disabled="!this.selectedMediafiles.length">Share</b-button>
+                  <b-button @click="renderDownloadForm()" variant="primary" class="mr-1 vault-btn" :disabled="isDownloading || !this.selectedMediafiles.length" >
                     <b-spinner small v-if="isDownloading"></b-spinner> Download
                   </b-button>
-                  <b-button @click="renderDeleteForm()" variant="danger" class="mr-1" :disabled="!this.selectedMediafiles.length">Delete</b-button>
+                  <b-button @click="renderDeleteForm()" variant="danger" class="mr-1 vault-btn" :disabled="!this.selectedMediafiles.length">Delete</b-button>
                 </div>
 
-                <div class="mr-5" v-if="isAllSelected"><b-button @click="clearSelected()" variant="light">Clear Selection</b-button></div>
-                <div class="mr-5" v-else><b-button @click="selectAll()" variant="secondary">Select All</b-button></div>
+                <div class="mr-5 mb-2 mb-md-0" v-if="isAllSelected"><b-button @click="clearSelected()" variant="light" class="vault-btn">Clear Selection</b-button></div>
+                <div class="mr-5 mb-2 mb-md-0" v-else><b-button @click="selectAll()" variant="secondary" class="vault-btn">Select All</b-button></div>
               </div>
 
-              <div class="ml-3">
+              <div class="ml-3 text-right record-btns">
                 <b-button variant="link" class="" @click="recordVideo">
                   <fa-icon :icon="['fas', 'video']" size="lg" />
                 </b-button>
@@ -1089,6 +1089,17 @@ body {
   right: 15px;
   padding: 4px 6px;
 }
+
+@media (max-width: 576px) {
+  .vault-btn {
+    font-size: 12px;
+  }
+
+  .record-btns {
+    margin-top: -2.5rem !important;
+  }
+}
+
 </style>
 
 <style>
