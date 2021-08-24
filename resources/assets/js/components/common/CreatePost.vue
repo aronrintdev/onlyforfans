@@ -405,13 +405,22 @@ export default {
       if (!file.filepath) {
         if (file.type == 'image/heic' || file.type == 'image/heif') {
           const url = await heic2any({ blob: file })
-            .then((conversionResult) => URL.createObjectURL(conversionResult))
+            .then((conversionResult) => {
+              let newFile = new File([conversionResult], file.name.replace(/.hei[c,f]/i, '.jpg'), {type:"image/jpeg", lastModified:new Date().getTime()});
+              this.$refs.myVueDropzone.addFile(newFile)
+              return URL.createObjectURL(conversionResult)
+            })
           payload.filepath = url
+          payload.type = "image/jpeg"
         } else {
           payload.filepath = URL.createObjectURL(file)
         }
       }
       this.ADD_SELECTED_MEDIAFILES(payload)
+      if (file.type == 'image/heic' || file.type == 'image/heif') {
+        this.$refs.myVueDropzone.removeFile(file)
+        this.removeFileFromSelected(file)
+      }
       this.$nextTick(() => this.$forceUpdate())
     },
 
