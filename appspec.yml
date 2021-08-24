@@ -4,7 +4,7 @@ os: linux
 files:
   - source: /
     destination: /var/www/allfans.com/
-    #overwrite: true
+    overwrite: true
 hooks:
   # ApplicationStop:
   #   - location: .aws/ApplicationStop.sh
