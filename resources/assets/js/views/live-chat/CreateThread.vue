@@ -10,7 +10,7 @@
           <fa-icon icon="arrow-left" fixed-width size="lg" />
           <span v-text="$t('nav.return')" />
         </b-btn>
-        <b-btn v-if="mobile" :disabled="!nextStep" :variant="nextStep ? 'primary' : 'secondary'" class="mb-1 px-3 ml-auto mr-0" @click="createMessage">
+        <b-btn v-if="mobile" :disabled="!isNextEnabled" :variant="isNextEnabled ? 'primary' : 'secondary'" class="mb-1 px-3 ml-auto mr-0" @click="createMessage">
           <span v-text="$t('nav.next')" />
         </b-btn>
       </article>
@@ -219,9 +219,11 @@ export default {
       'selectedContactsCount',
     ]),
 
-    nextStep() {
-      if (this.selectedContactsCount > 0) return true
-      else return false
+    isNextEnabled() {
+      if (this.selectedContactsCount > 0) {
+        return true
+      }
+      return false
     },
 
     isLoading() {
