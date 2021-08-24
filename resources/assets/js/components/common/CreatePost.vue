@@ -111,16 +111,16 @@
 
               <b-col cols="12" md="8" class="post-create-footer-ctrl d-flex">
                 <ul class="list-inline d-flex mb-0 OFF-border-right pt-1">
-                  <li title="Select from device" id="clickme_to-select" class="selectable select-pic">
+                  <li v-b-tooltip.hover title="Select from device" id="clickme_to-select" class="selectable select-pic">
                     <fa-icon :icon="selectedMedia==='pic' ? ['fas', 'image'] : ['far', 'image']" size="lg" :class="selectedMedia==='pic' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li title="Record live video" v-if="!isIOS9PlusAndAndroid" @click="recordVideo()" class="selectable select-video">
+                  <li v-b-tooltip.hover title="Record live video" v-if="!isIOS9PlusAndAndroid" @click="recordVideo()" class="selectable select-video">
                     <fa-icon :icon="selectedMedia==='video' ? ['fas', 'video'] : ['far', 'video']" size="lg" :class="selectedMedia==='video' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li title="Record live audio" @click="recordAudio()" class="selectable select-audio">
+                  <li v-b-tooltip.hover title="Record live audio" @click="recordAudio()" class="selectable select-audio">
                     <fa-icon :icon="selectedMedia==='audio' ? ['fas', 'microphone'] : ['far', 'microphone']" size="lg" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li title="Select from vault" @click="renderVaultSelector()" class="selectable">
+                  <li v-b-tooltip.hover title="Select from vault" @click="renderVaultSelector()" class="selectable">
                     <fa-icon :icon="selectedMedia==='vault' ? ['fas', 'archive'] : ['far', 'archive']" size="lg" :class="selectedMedia==='vault' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
@@ -131,18 +131,18 @@
                   <li class="selectable select-timer"><span><TimerIcon /></span></li>
                   <li class="selectable select-calendar" @click="showSchedulePicker()"><span><CalendarIcon /></span></li>
                   -->
-                  <li title="Set expiration date" class="selectable select-expire-date" :disabled="expirationPeriod" @click="showExpirationPicker()">
+                  <li v-b-tooltip.hover title="Set expiration date" class="selectable select-expire-date" :disabled="expirationPeriod" @click="showExpirationPicker()">
                     <fa-icon :icon="showedModal === 'expiration' ? ['fas', 'hourglass-half'] : ['far', 'hourglass-half']" size="lg" :class="showedModal === 'expiration' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li title="Schedule publish date" class="selectable select-calendar" :disabled="scheduled_at" @click="showSchedulePicker()">
+                  <li v-b-tooltip.hover title="Schedule publish date" class="selectable select-calendar" :disabled="scheduled_at" @click="showSchedulePicker()">
                     <fa-icon :icon="showedModal === 'schedule' ? ['fas', 'calendar-alt'] : ['far', 'calendar-alt']" size="lg" :class="showedModal === 'schedule' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
                 <ul class="list-inline d-flex mb-0 pt-1">
-                  <li @click="showTagForm()" class="selectable show-tagform" title="Add Tags">
+                  <li @click="showTagForm()" class="selectable show-tagform" v-b-tooltip.hover title="Add Tags">
                     <fa-icon :icon="isTagFormVisible ? ['fas', 'hashtag'] : ['far', 'hashtag']" class="text-secondary" size="lg" />
                   </li>
-                  <li @click="togglePostPrice()" class="selectable select-pic" title="Set Price">
+                  <li @click="togglePostPrice()" class="selectable select-pic" v-b-tooltip.hover title="Set Price">
                     <fa-icon :icon="postType === 'price' ? ['fas', 'tag'] : ['far', 'tag']" size="lg" :class="postType === 'price' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
