@@ -22,7 +22,10 @@ phases:
     commands:
       - npm run prod2
 artifacts:
-  files::
+  # base-directory: /var/www/allfans.com/
+  # name: build-artifact-name
+  # discard-paths: no
+  files:
     - '**/*'
   exclude-paths:
     - ./**/node_modules
