@@ -3,7 +3,7 @@
   <div v-if="!isLoading" class="mini_my_stats_widget-crate tag-crate">
     <section>
       <b-card
-        :img-src="session_user.cover.filepath"
+        :img-src="coverImage"
         :img-alt="timeline.name"
         img-top
         tag="article"
@@ -75,6 +75,7 @@
 
 <script>
 import Vuex from 'vuex'
+import heic2any from 'heic2any'
 import OnlineStatus from '@components/common/OnlineStatus'
 
 export default {
@@ -93,11 +94,29 @@ export default {
     },
   },
 
-  data: () => ({}),
+  data: () => ({
+    coverImage: null,
+  }),
 
-  created() {},
+  created() {
+    this.getCoverImage(this.session_user.cover);
+  },
 
-  methods: {},
+  methods: {
+    async getCoverImage(cover) {
+      if (cover.mimetype == 'image/heif' || cover.mimetype == 'image/heic') {
+        const url = await fetch(cover.filepath)
+          .then((res) => res.blob())
+          .then((blob) => heic2any({
+            blob
+          }))
+          .then((conversionResult) => URL.createObjectURL(conversionResult))
+        this.coverImage = url ? url : '/images/locked_post.png'
+      } else {
+        this.coverImage = cover ? cover.filepath : '/images/locked_post.png'
+      }
+    },
+  },
 
   components: {
     OnlineStatus,
