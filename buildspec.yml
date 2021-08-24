@@ -28,9 +28,9 @@ artifacts:
   files:
     - '**/*'
   exclude-paths:
-    - ./node_modules/*
-    - ./resources/assets/*
-    - ./rsyncconfig/*
-    - ./.vscode/*
-    - ./data.ms/*
+    - ./node_modules/**/*
+    - ./resources/assets/**/*
+    - ./rsyncconfig/**/*
+    - ./.vscode/**/*
+    - ./data.ms/**/*
 
