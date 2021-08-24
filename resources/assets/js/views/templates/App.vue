@@ -160,6 +160,6 @@ export default {
 
 <style lang="scss" scoped>
 .content.mobile {
-  padding-bottom: 64px;
+  padding-bottom: 68px;
 }
 </style>

@@ -594,19 +594,18 @@ body .feed-crate.tag-grid-layout .superbox-post .media-slider {
 
 // Settings Mobile Style
 
-@media (max-width: 576px) {
-  #view-settings {
-    .sidebar {
-      .list-group {
-        height: calc(100% - 64px);
-        overflow: auto;
-      }
-    }
-    .main {
-      & > .settings-page {
-        height: calc(100% - 56px);
-        overflow: auto;
-      }
-    }
-  }
-}
+// @media (max-width: 576px) {
+//   #view-settings {
+//     .sidebar {
+//       .list-group {
+//         overflow: auto;
+//       }
+//     }
+//     .main {
+//       & > .settings-page {
+//         height: calc(100% - 56px);
+//         overflow: auto;
+//       }
+//     }
+//   }
+// }
