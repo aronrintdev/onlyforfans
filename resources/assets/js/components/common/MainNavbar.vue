@@ -1,5 +1,5 @@
 <template>
-  <b-navbar :toggleable="mobile" variant="light" class="bg-white" :class="{ 'pb-0': mobile }" >
+  <b-navbar :toggleable="mobile" variant="light" class="bg-white" :class="{ 'pb-0': enableSearch }" >
     <b-navbar-brand :to="{ name: 'index' }" class="navbar-brand" :class="mobile ? 'mr-2' : 'mr-5'">
       <Branding :type="mobile ? 'text' : 'text'" :size="mobile ? 'lg' : 'lg'" :variant="mobile ? 'brand' : 'brand'" />
     </b-navbar-brand>
