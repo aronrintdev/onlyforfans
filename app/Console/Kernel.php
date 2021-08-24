@@ -42,6 +42,7 @@ class Kernel extends ConsoleKernel
 
         // Financial Commands
         \App\Console\Commands\Financial\CreateTransactionSummaries::class,
+        \App\Console\Commands\Financial\DispatchAccountBalanceUpdates::class,
         \App\Console\Commands\Financial\SettleFinancialAccounts::class,
         \App\Console\Commands\Financial\UpdateAccountNames::class,
         \App\Console\Commands\Financial\UpdatePendingBalances::class,

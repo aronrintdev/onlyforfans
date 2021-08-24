@@ -68,12 +68,12 @@ export default {
 
   methods: {
     init() {
-      this.$echo.private(this.purchasesChannel)
-        .listen('ItemPurchased', e => {
-          if (e.item_id === this.post.id) {
-            this.$bvModal.hide('modal-purchase-post')
-          }
-        })
+      // this.$echo.private(this.purchasesChannel)
+      //   .listen('ItemPurchased', e => {
+      //     if (e.item_id === this.post.id) {
+      //       this.$bvModal.hide('modal-purchase-post')
+      //     }
+      //   })
     },
   },
 

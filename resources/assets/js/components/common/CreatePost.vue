@@ -100,7 +100,7 @@
                     </div>
                   </template>
                 </b-form-tags>
-                <div class="ml-2" v-b-tooltip.hover.html="{title: 'Enter tags in post body, use hash at start for <em>#publictag</em> or hash and exclamation at end for <em>#privatetag!</em>', variant: 'info'}">
+                <div class="ml-2" v-b-tooltip.hover.html="{title: 'Enter tags in post body, use hash at start for <em>#publictag</em> or hash and exclamation at end for <em>#privatetag!</em>' }">
                   <fa-icon :icon="['far', 'info-circle']" class="text-secondary" />
                 </div>
                 <!-- <small>Enter tags in post body, use hash at start for <i>#publictag</i> or hash and exclamation at end for <i>#privatetag!</i></small> -->
@@ -182,6 +182,7 @@
 import Vuex from 'vuex'
 import moment from 'moment'
 import { isAndroid, isIOS, osVersion } from 'mobile-device-detect'
+import heic2any from 'heic2any'
 
 import { eventBus } from '@/eventBus'
 import vue2Dropzone from 'vue2-dropzone'
@@ -398,11 +399,17 @@ export default {
       this.$refs.myVueDropzone.dropzone.hiddenFileInput.click()
     },
 
-    onDropzoneAdded(file) {
+    async onDropzoneAdded(file) {
       this.$log.debug('onDropzoneAdded', {file})
       let payload = { ...file, type: file.type }
       if (!file.filepath) {
-        payload.filepath = URL.createObjectURL(file)
+        if (file.type == 'image/heic' || file.type == 'image/heif') {
+          const url = await heic2any({ blob: file })
+            .then((conversionResult) => URL.createObjectURL(conversionResult))
+          payload.filepath = url
+        } else {
+          payload.filepath = URL.createObjectURL(file)
+        }
       }
       this.ADD_SELECTED_MEDIAFILES(payload)
       this.$nextTick(() => this.$forceUpdate())

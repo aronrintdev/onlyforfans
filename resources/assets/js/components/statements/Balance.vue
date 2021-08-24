@@ -4,7 +4,7 @@
       <b-list-group-item>
         <div class="d-flex">
           <span v-text="$t('available')" />
-          <span class="ml-auto">{{ available | niceCurrency }}</span>
+          <span class="ml-auto font-weight-bold">{{ available | niceCurrency }}</span>
         </div>
       </b-list-group-item>
       <b-list-group-item>
@@ -14,11 +14,17 @@
         </div>
       </b-list-group-item>
     </b-list-group>
+    <div class="d-flex pt-3 px-3">
+      <div class="text-muted ml-auto font-size-small">
+        {{ $t('minMessage', { amount: minimumDisplay }) }}
+      </div>
+    </div>
     <div class="d-flex p-3">
       <RequestWithdrawal
         class="ml-auto"
-        :disabled="!balances.balance || balances.balance.amount <= 0"
+        :disabled="!balances.balance || balances.balance.amount <= minimum"
         :balance="balances.balance"
+        :minimum="minimum"
         @completed="refresh"
       />
     </div>
@@ -46,11 +52,17 @@ export default {
 
   computed: {
     ...Vuex.mapState('statements', [ 'balances' ]),
+
+    minimumDisplay() {
+      return this.$options.filters.niceCurrency(this.minimum, this.available.currency)
+    },
   },
 
   data: () => ({
     available: { amount: 0, currency: 'USD' },
     pending: { amount: 0, currency: 'USD' },
+
+    minimum: 2000, // $20
 
     availableAnime: null,
     pendingAnime: null,
@@ -99,7 +111,8 @@ export default {
   "en": {
     "title": "Balances",
     "available": "Available Balance",
-    "pending": "Pending Balance"
+    "pending": "Pending Balance",
+    "minMessage": "Minimum withdrawal amount: {amount}"
   }
 }
 </i18n>

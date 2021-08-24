@@ -7,7 +7,7 @@
       :to="button.to"
       :title="$t(button.name)"
     >
-      <fa-layers fixed-width class="fa-lg">
+      <fa-layers fixed-width class="fa-lg" @click="scrollToTop">
         <fa-icon :icon="button.selected ? [ 'fas', button.icon ] : [ 'far', button.icon ]" class="mx-auto" />
         <fa-layers-text
           v-if="button.alerts"
@@ -30,7 +30,7 @@
     >
       <AvatarWithStatus :user="session_user" centerAvatar noTooltip noLink imageOnly />
     </b-nav-item>
-
+    <div @click="scrollToTop" class="scroll-to-top-area"></div>
   </b-navbar-nav>
 </template>
 
@@ -113,6 +113,9 @@ export default {
     ...Vuex.mapMutations([ 'UPDATE_MOBILE_MENU_OPEN' ]),
     sidebarToggle() {
       this.UPDATE_MOBILE_MENU_OPEN(!this.mobileMenuOpen)
+    },
+    scrollToTop() {
+      $('.app').animate({ scrollTop: 0 }, 'slow')
     }
   },
 
@@ -200,6 +203,15 @@ export default {
     top: -0.5rem;
     background-color: var(--danger);
   }
+}
+
+.scroll-to-top-area {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  z-index: 9999;
 }
 </style>
 
