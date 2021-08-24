@@ -1,0 +1,28 @@
+
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - npm install
+  build:
+    commands:
+      - MIX_RECAPTCHAV3_SITEKEY=6LeWrDkbAAAAABaDZZfPrtP52uYTDOCxjpIsocWa
+      - MIX_PUSHER_APP_ID=1133958
+      - MIX_PUSHER_APP_KEY=c0277f01daca608700b8
+      - MIX_PUSHER_APP_HOST="allfans.com"
+      - MIX_PUSHER_FORCE_TLS=true
+      - MIX_PUSHER_ENCRYPTED=true
+      - MIX_WS_HOST="sockets.allfans.com"
+      - MIX_WS_PORT=443
+      - npm prod2
+artifacts:
+  files::
+    - '**/*'
+  exclude-paths:
+    - ./**/node_modules
+    - ./**/resources/assets
+    - ./**/rsyncconfig
+    - ./**/.vscode
+    - ./**/data.ms
+
