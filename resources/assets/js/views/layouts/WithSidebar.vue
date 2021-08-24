@@ -11,7 +11,7 @@
           <slot name="sidebar"></slot>
         </div>
         <div class="main" key="main">
-          <div v-if="!removeMobileMainNavTop" class="header pt-2">
+          <div v-if="!removeMobileMainNavTop" class="header pt-2 pb-2">
             <slot name="mobileMainNavTop">
               <b-btn variant="link" size="lg" @click="$emit('back')">
                 <fa-icon icon="arrow-left" fixed-width />
@@ -20,7 +20,9 @@
               <slot name="mobileMainNavTopTitle"></slot>
             </slot>
           </div>
-          <slot></slot>
+          <div class="settings-page">
+            <slot></slot>
+          </div>
         </div>
       <!-- </transition> -->
     </section>
@@ -84,8 +86,9 @@ export default {
     width: 100vw;
     max-width: 100vw;
     height: 100%;
-    min-height: calc(100vh - 64px);
-    max-height: calc(100vh - 64px);
+    max-height: 100%;
+    overflow-y: auto;
+
     .header {
       position: sticky;
       top: 0;
@@ -93,6 +96,8 @@ export default {
       right: 0;
       z-index: 100;
       background-color: white;
+      display: flex;
+      align-items: center;
     }
   }
 

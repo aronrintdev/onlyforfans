@@ -6,7 +6,7 @@
     <b-modal v-model="modalOpen" size="lg" :title="$t('modal.title')" hide-footer>
 
       <div v-if="$isEmpty(accounts)">
-        <NoAccounts />
+        <NoAccounts @accountAdded="refresh" />
       </div>
 
       <div v-if="!$isEmpty(accounts)">
@@ -16,7 +16,7 @@
           <div class="d-flex flex-column w-100 mt-3">
             <PriceSelector
               v-model="requestAmount"
-              :min="0"
+              :min="minimum"
               :max="parseInt(balance.amount)"
               :currency="balance.currency"
               :label="$t('selectorLabel')"
@@ -24,11 +24,12 @@
               class="flex-grow-1"
             >
               <template #append>
-                <b-btn variant="link" @click="setToBalance">
-                  <fa-layers full-width class="fa-lg">
+                <b-btn variant="link" @click="setToBalance" class="d-flex align-content-center">
+                  <fa-layers full-width class="fa-lg mr-2">
                     <fa-icon icon="long-arrow-alt-up" transform="left-5 shrink-2 up-1" />
                     <fa-icon icon="dollar-sign" transform="right-5" />
                   </fa-layers>
+                  {{ $t('setToMax') }}
                 </b-btn>
               </template>
             </PriceSelector>
@@ -55,6 +56,9 @@
         </b-collapse>
       </div>
       <transition name="quick-fade">
+        <LoadingOverlay v-if="loading" :loading="loading" />
+      </transition>
+      <transition name="quick-fade">
         <ConfirmationCheckAnime v-if="showCompleted" />
       </transition>
     </b-modal>
@@ -74,6 +78,7 @@ import AccountSelect from './AccountSelect'
 import NoAccounts from './NoAccounts'
 import PriceSelector from '@components/common/PriceSelector'
 import ConfirmationCheckAnime from '@components/common/flair/ConfirmationCheckAnime'
+import LoadingOverlay from '@components/common/LoadingOverlay'
 
 export default {
   name: 'RequestWithdrawal',
@@ -89,6 +94,7 @@ export default {
     balance: { type: Object, default: () => ({ amount: 0, currency: 'USD' }) },
     /** If the request withdrawal is disabled */
     disabled: { type: Boolean, default: false },
+    minimum: { type: Number, default: 2000 },
   },
 
   computed: {
@@ -101,12 +107,20 @@ export default {
     processing: false,
     requestAmount: 0,
 
-    animationLength: 1000,
+    loading: false,
+
+    animationLength: 2000,
     showCompleted: false,
   }),
 
   methods: {
     ...Vuex.mapActions('banking', [ 'updateAccounts' ]),
+
+    refresh() {
+      this.loading = true;
+      this.updateAccounts()
+        .finally(() => { this.loading = false })
+    },
 
     completeAnimate() {
       this.showCompleted = true
@@ -135,7 +149,7 @@ export default {
     },
 
     setToBalance() {
-      this.requestAmount = parseInt(this.balance.amount)
+      this.requestAmount = Math.round(parseInt(this.balance.amount))
     },
 
     submit() {
@@ -159,7 +173,7 @@ export default {
   watch: {},
 
   created() {
-    this.updateAccounts()
+    this.refresh()
   },
 }
 </script>
@@ -176,7 +190,8 @@ export default {
     },
     "selectorLabel": "Withdrawal Amount",
     "payoutButton": "Request Payout",
-    "processingError": "There was an issue requesting this payout. Please try again later"
+    "processingError": "There was an issue requesting this payout. Please try again later",
+    "setToMax": "Set to Maximum Value"
   }
 }
 </i18n>

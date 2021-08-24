@@ -1,7 +1,7 @@
 <template>
   <div class="component-vault-selector">
     <div class="d-flex">
-      <div class="h5" v-text="$t('header')" />
+      <div v-if="isTopCtrlVisible" class="h5" v-text="$t('header')" />
       <b-btn v-if="isTopCtrlVisible" variant="link" class="ml-auto" @click="onClose">
         <fa-icon icon="times" size="lg" />
       </b-btn>

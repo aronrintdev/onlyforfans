@@ -19,10 +19,10 @@ class AchAccount extends JsonResource
         $default = Auth::user()->settings->cattrs['default_payout_method'] ?? null;
 
         return [
-            'id'                    => $this->getKey(),
-            'account_id'            => $this->account->getKey(),
+            'id'                    => $this->id,
+            'account_id'            => $this->account ? $this->account->id : '',
             'type'                  => $this->type,
-            'default'               => $this->getKey() === $default ? true : false,
+            'default'               => $this->id === $default ? true : false,
             'name'                  => $this->name,
             'beneficiary_name'      => $this->beneficiary_name,
             'bank_name'             => $this->bank_name,

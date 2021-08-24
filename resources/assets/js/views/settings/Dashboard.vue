@@ -142,14 +142,14 @@ export default {
         to: { name: 'settings.subscriptions', params: {} },
       })
 
-      // if (this.user_settings.is_creator) {
+      if (this.session_user?.is_verified || false) {
         routes.push({
           name: 'Managers',
           to: { name: 'settings.managers', params: {} },
         })
-      // }
+      }
 
-      if (this.user_settings.is_manager) {
+      if (this.session_user?.is_verified || false) {
         routes.push({
           name: 'Staff Members',
           to: { name: 'settings.staffmembers', params: {} },
@@ -162,7 +162,7 @@ export default {
       }))
 
       return routes
-    },
+    }, // routes
 
     currentRoute() {
       if (!this.$route) {

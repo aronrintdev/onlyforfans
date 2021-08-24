@@ -119,7 +119,7 @@ export default {
     uploadAvatarVisible: false,
 
     isFavoritedByMe: false, // is timeline/feed a favorite
-    coverImage: '',
+    coverImage: null,
     isLoadingCover: false,
   }),
 

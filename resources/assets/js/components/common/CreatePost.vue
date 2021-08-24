@@ -78,7 +78,7 @@
               @complete="audioRecordFinished"
             />
 
-            <b-progress v-if="isBusy" :value="uploadProgress" max="100" animated />
+            <b-progress class="progress-widget" v-if="isBusy" :value="uploadProgress" max="100" animated />
           </div>
 
           <template #footer>
@@ -111,16 +111,16 @@
 
               <b-col cols="12" md="8" class="post-create-footer-ctrl d-flex">
                 <ul class="list-inline d-flex mb-0 OFF-border-right pt-1">
-                  <li id="clickme_to-select" class="selectable select-pic">
+                  <li v-b-tooltip.hover title="Select from device" id="clickme_to-select" class="selectable select-pic">
                     <fa-icon :icon="selectedMedia==='pic' ? ['fas', 'image'] : ['far', 'image']" size="lg" :class="selectedMedia==='pic' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li v-if="!isIOS9PlusAndAndroid" @click="recordVideo()" class="selectable select-video">
+                  <li v-b-tooltip.hover title="Record live video" v-if="!isIOS9PlusAndAndroid" @click="recordVideo()" class="selectable select-video">
                     <fa-icon :icon="selectedMedia==='video' ? ['fas', 'video'] : ['far', 'video']" size="lg" :class="selectedMedia==='video' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li @click="recordAudio()" class="selectable select-audio">
+                  <li v-b-tooltip.hover title="Record live audio" @click="recordAudio()" class="selectable select-audio">
                     <fa-icon :icon="selectedMedia==='audio' ? ['fas', 'microphone'] : ['far', 'microphone']" size="lg" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li @click="renderVaultSelector()" class="selectable">
+                  <li v-b-tooltip.hover title="Select from vault" @click="renderVaultSelector()" class="selectable">
                     <fa-icon :icon="selectedMedia==='vault' ? ['fas', 'archive'] : ['far', 'archive']" size="lg" :class="selectedMedia==='vault' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
@@ -131,19 +131,19 @@
                   <li class="selectable select-timer"><span><TimerIcon /></span></li>
                   <li class="selectable select-calendar" @click="showSchedulePicker()"><span><CalendarIcon /></span></li>
                   -->
-                  <li class="selectable select-expire-date" :disabled="expirationPeriod" @click="showExpirationPicker()">
+                  <li v-b-tooltip.hover title="Set expiration date" class="selectable select-expire-date" :disabled="expirationPeriod" @click="showExpirationPicker()">
                     <fa-icon :icon="showedModal === 'expiration' ? ['fas', 'hourglass-half'] : ['far', 'hourglass-half']" size="lg" :class="showedModal === 'expiration' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li class="selectable select-calendar" :disabled="scheduled_at" @click="showSchedulePicker()">
+                  <li v-b-tooltip.hover title="Schedule publish date" class="selectable select-calendar" :disabled="scheduled_at" @click="showSchedulePicker()">
                     <fa-icon :icon="showedModal === 'schedule' ? ['fas', 'calendar-alt'] : ['far', 'calendar-alt']" size="lg" :class="showedModal === 'schedule' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
                 <ul class="list-inline d-flex mb-0 pt-1">
-                  <li @click="togglePostPrice()" class="selectable select-pic" title="Set Price">
-                    <fa-icon :icon="postType === 'price' ? ['fas', 'tag'] : ['far', 'tag']" size="lg" :class="postType === 'price' ? 'text-primary' : 'text-secondary'" />
-                  </li>
-                  <li @click="showTagForm()" class="selectable show-tagform" title="Add Tags">
+                  <li @click="showTagForm()" class="selectable show-tagform" v-b-tooltip.hover title="Add Tags">
                     <fa-icon :icon="isTagFormVisible ? ['fas', 'hashtag'] : ['far', 'hashtag']" class="text-secondary" size="lg" />
+                  </li>
+                  <li @click="togglePostPrice()" class="selectable select-pic" v-b-tooltip.hover title="Set Price">
+                    <fa-icon :icon="postType === 'price' ? ['fas', 'tag'] : ['far', 'tag']" size="lg" :class="postType === 'price' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
               </b-col>
@@ -155,7 +155,7 @@
                     </button>
                   </li>
                   <li class="w-100 mx-0">
-                    <button :disabled="isBusy || (!description && ( selectedMediafiles && selectedMediafiles.length === 0 ))" @click="savePost()" class="btn btn-submit btn-primary w-100">
+                    <button :disabled="isSaveButtonDisabled" @click="savePost()" class="btn btn-submit btn-primary w-100">
                       <span v-if="isBusy" class="text-white spinner-border spinner-border-sm pr-2" role="status" aria-hidden="true"></span>
                       Post
                     </button>
@@ -259,6 +259,12 @@ export default {
       }
     },
 
+    isSaveButtonDisabled() {
+      const descriptionWithoutAdminTags = this.description.replace(/\B#\w\w+!/g,'').trim()
+      return this.isBusy || (!descriptionWithoutAdminTags && ( this.selectedMediafiles && this.selectedMediafiles.length===0 ))
+    },
+
+
   }, // computed
 
   data: () => ({
@@ -290,7 +296,8 @@ export default {
     formErr: null, // null if no error, otherwise string (error message)
 
     uploadProgress: 0,
-
+    uploadFailedFilesCount: 0,
+    uploadingFilesCount: 0,
   }), // data
 
   methods: {
@@ -375,6 +382,7 @@ export default {
         // %NOTE: files added manually don't seem to be put into the queue, thus onDropzoneSending won't be called for them (?)
 
         if (queued.length) {
+          this.uploadingFilesCount = queued.length
           console.log('CreatePost::savePost() - process queue', { queued, })
           this.$refs.myVueDropzone.processQueue() // this will call createCompleted() via callback
         }  else {
@@ -405,13 +413,22 @@ export default {
       if (!file.filepath) {
         if (file.type == 'image/heic' || file.type == 'image/heif') {
           const url = await heic2any({ blob: file })
-            .then((conversionResult) => URL.createObjectURL(conversionResult))
+            .then((conversionResult) => {
+              let newFile = new File([conversionResult], file.name.replace(/.hei[c,f]/i, '.jpg'), {type:"image/jpeg", lastModified:new Date().getTime()});
+              this.$refs.myVueDropzone.addFile(newFile)
+              return URL.createObjectURL(conversionResult)
+            })
           payload.filepath = url
+          payload.type = "image/jpeg"
         } else {
           payload.filepath = URL.createObjectURL(file)
         }
       }
       this.ADD_SELECTED_MEDIAFILES(payload)
+      if (file.type == 'image/heic' || file.type == 'image/heif') {
+        this.$refs.myVueDropzone.removeFile(file)
+        this.removeFileFromSelected(file)
+      }
       this.$nextTick(() => this.$forceUpdate())
     },
 
@@ -445,6 +462,7 @@ export default {
     onDropzoneError(file, message, xhr) {
       this.$log.error('Dropzone Error Event', { file, message, xhr })
       if (file) {
+        this.uploadFailedFilesCount += 1;
         this.$refs.myVueDropzone.removeFile(file)
         this.removeFileFromSelected(file)
       }
@@ -507,6 +525,16 @@ export default {
     // ---
 
     async createCompleted() {
+      if (this.uploadFailedFilesCount > 0 && this.uploadingFilesCount === this.uploadFailedFilesCount) {
+        this.$root.$bvToast.toast('Uploading files failed.', {
+          title: 'Warning!',
+          variant: 'danger',
+          solid: true,
+        })
+        await axios.delete(`/posts/${this.newPostId}`)
+        this.resetForm()
+        this.isBusy = false
+      }
       // Take care of any files attached from vault (disk files have already been removed from selectedMediafiles)...
       this.selectedMediafiles.forEach( async mf => {
         await axios.post(this.$apiRoute('mediafiles.store'), {
@@ -779,6 +807,10 @@ li.selectable[disabled] {
 
 .price-select-container {
   border-bottom: 1px solid rgba(0,0,0,.125)
+}
+
+.progress-widget {
+  margin: 0.5rem 1rem !important;
 }
 </style>
 
