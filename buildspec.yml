@@ -20,7 +20,7 @@ phases:
       - npm install
   build:
     commands:
-      - npm run prod
+      - npm run prod2
 artifacts:
   files::
     - '**/*'
