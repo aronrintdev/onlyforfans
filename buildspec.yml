@@ -14,7 +14,9 @@ env:
     FONTAWESOME_NPM_AUTH_TOKEN: "/build/deep-link/master/GetUri/fontawesomeNpmAuthToken"
 phases:
   install:
+    # run-as: root
     commands:
+      - npm -v
       - npm install
   build:
     commands:
