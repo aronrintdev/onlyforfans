@@ -24,6 +24,13 @@ class UpdateAccountBalance implements ShouldQueue, ShouldBeUnique
     public $backoff = [5];
 
     /**
+     * Delete the job if its models no longer exist.
+     *
+     * @var bool
+     */
+    public $deleteWhenMissingModels = true;
+
+    /**
      * Account instance
      * @var \App\Models\Financial\Account
      */
