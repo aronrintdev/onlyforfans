@@ -180,11 +180,11 @@
             </template>
           </fieldset>
 
-          <b-row class="mt-5">
+          <b-row class="mt-4 mb-3">
             <b-col>
               <div class="w-100 d-flex justify-content-end">
                 <b-button :disabled="isSubmitting.formProfile" class="w-25 ml-3" type="submit" variant="primary">
-                  <b-spinner v-if="isSubmitting.formProfile" small class="mr-3" />
+                  <b-spinner v-if="isSubmitting.formProfile" small class="mr-1" />
                   Save
                 </b-button>
               </div>

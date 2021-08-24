@@ -1,17 +1,25 @@
 <template>
   <div class="w-100">
     <div v-if="mobile">
-      <transition-group name="quick-fade" mode="out-in">
-        <TransactionCard
-          v-for="item in transactions"
-          :key="item.id"
-          :value="item"
-          :fields="fieldsObj"
-          class="mt-3"
-          @preview="preview"
-        />
-      </transition-group>
-
+      <TransactionCard
+        v-for="(item, index) in transactions"
+        :key="item.id"
+        :value="item"
+        :fields="fieldsObj"
+        class="mt-3"
+        @preview="preview"
+        v-observe-visibility="index === transactions.length - 1 ? lastVisible : false"
+      />
+      <b-card v-if="transactionsLoading" class="mt-3" >
+        <div class="d-flex justify-content-center align-content-center my-4">
+          <fa-icon icon="spinner" size="2x" fixed-width spin />
+        </div>
+      </b-card>
+      <b-card v-else-if="isLastPage" class="mt-3" >
+        <div class="d-flex justify-content-center align-content-center my-4">
+          {{ $t('endMessage') }}
+        </div>
+      </b-card>
     </div>
     <b-table
       v-else
@@ -38,6 +46,7 @@
 
     </b-table>
     <b-pagination
+      v-if="!mobile"
       v-model="page"
       :total-rows="totalTransactions"
       :per-page="take"
@@ -161,7 +170,11 @@ export default {
 
     fieldsObj() {
       return _.keyBy(this.fields, 'key')
-    }
+    },
+
+    isLastPage() {
+      return this.page === this.totalPages
+    },
   },
 
   data: () => ({
@@ -182,6 +195,8 @@ export default {
     // Options
     spliceId: true,
     encodeBase: 'base58',
+
+    lastTransactionVisible: false,
   }),
 
   methods: {
@@ -201,6 +216,30 @@ export default {
           this.transactionsLoading = false
         })
     },
+
+    lastVisible(isVisible) {
+      this.lastTransactionVisible = isVisible
+      if (isVisible && !this.transactionsLoading && !this.isLastPage) {
+        this.loadNextPage()
+      }
+    },
+
+    loadNextPage() {
+      this.transactionsLoading = true
+      this.axios.get(this.$apiRoute('earnings.transactions'), { params: { take: this.take, page: this.page + 1 } })
+        .then(response => {
+          this.transactions = [ ...this.transactions, ...response.data.data ]
+          this.totalPages = response.data.meta.last_page
+          this.totalTransactions = response.data.meta.total
+          this.transactionsLoading = false
+          this.page += 1
+        })
+        .catch(error => {
+          eventBus.$emit('error', { error, message: this.$t('error.load') })
+          this.transactionsLoading = false
+        })
+    },
+
     preview(item) {
       if (item.resource_type === 'posts') {
         this.previewOpen = true
@@ -217,11 +256,17 @@ export default {
 
   watch: {
     page(value) {
+      if (this.mobile) {
+        return
+      }
       this.load()
     }
   },
 
   mounted() {
+    if (this.mobile) {
+      this.load()
+    }
     this.load()
   },
 }
@@ -230,6 +275,7 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
+    "endMessage": "Beginning of transaction history",
     "error": {
       "load": "Unable to load transactions",
       "preview": "Failed to Load Preview"

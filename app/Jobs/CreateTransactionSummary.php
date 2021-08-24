@@ -57,7 +57,7 @@ class CreateTransactionSummary implements ShouldQueue, ShouldBeUnique
      */
     public function uniqueId()
     {
-        return "{$this->account->id}-{$this->type}-{$this->range['from']}-{$this->range['to']}";
+        return "create-transaction-summary-{$this->account->id}-{$this->type}-{$this->range['from']}-{$this->range['to']}";
     }
 
     public function middleware()

@@ -1,6 +1,6 @@
 <template>
   <b-card>
-    <div>{{ fields.id.label }}: {{ fields.id.formatter(value.id, 'id', value) }}</div>
+    <!-- <div>{{ fields.id.label }}: {{ fields.id.formatter(value.id, 'id', value) }}</div> -->
     <div>{{ fields.created_at.formatter(value.created_at, 'created_at', value) }}</div>
     <div class="my-3">
       <div class="d-flex justify-content-between">

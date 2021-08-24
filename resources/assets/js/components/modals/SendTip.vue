@@ -137,9 +137,11 @@ export default {
   }),
 
   created() {
-    if ( paymentsDisabled || window.paymentsDisabled ) {
-      this.paymentsDisabled = true
-    }
+    try {
+      if ( window.paymentsDisabled || paymentsDisabled ) {
+        this.paymentsDisabled = true
+      }
+    } catch (e) {}
   },
 
   methods: {

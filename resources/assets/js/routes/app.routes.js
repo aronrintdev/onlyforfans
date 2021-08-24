@@ -26,6 +26,7 @@ import livechatRoutes from './livechat.routes'
 import settingsRoutes from './settings.routes'
 import listRoutes from './list.routes'
 //import notificationsRoutes from './notifications.routes'
+import statementsRoutes from './statements.routes'
 
 export const routes = [
   {
@@ -93,6 +94,7 @@ export const routes = [
     name: 'statements.dashboard',
     path: '/statements',
     component: statements.Dashboard,
+    children: statementsRoutes,
   },
 
   {

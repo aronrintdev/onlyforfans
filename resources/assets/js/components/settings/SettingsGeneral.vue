@@ -19,11 +19,11 @@
             </b-row>
           </fieldset>
 
-          <b-row class="mt-3">
+          <b-row class="mt-3 mb-3 mb-md-0">
             <b-col>
               <div class="w-100 d-flex justify-content-end">
                 <b-button :disabled="isSubmitting.formGeneral" class="w-25 ml-3" type="submit" variant="primary">
-                  <b-spinner v-if="isSubmitting.formGeneral" small />&nbsp;
+                  <b-spinner v-if="isSubmitting.formGeneral" class="mr-1" small />
                   Save
                 </b-button>
               </div>
@@ -39,7 +39,7 @@
         <b-form @submit.prevent="submitLocalization($event)" @reset="onReset">
           <fieldset :disabled="isSubmitting.formLocalization">
             <b-row>
-              <b-col >
+              <b-col sm="12" md="6">
                 <FormSelectInput
                   ikey="localization.language"
                   v-model="formData.language"
@@ -48,7 +48,7 @@
                   :options="options.languages"
                 />
               </b-col>
-              <b-col>
+              <b-col sm="12" md="6">
                 <FormSelectInput
                   ikey="localization.timezone"
                   v-model="formData.timezone"
@@ -60,7 +60,7 @@
             </b-row>
 
             <b-row>
-              <b-col>
+              <b-col sm="12" md="6">
                 <FormSelectInput 
                   ikey="localization.country"  
                   v-model="formData.country" 
@@ -69,7 +69,7 @@
                   :options="options.countries" 
                 />
               </b-col>
-              <b-col>
+              <b-col sm="12" md="6">
                 <FormSelectInput 
                   ikey="localization.currency"  
                   v-model="formData.currency" 
@@ -81,7 +81,7 @@
             </b-row>
           </fieldset>
 
-          <b-row class="mt-3">
+          <b-row class="mt-3 mb-3 mb-md-0">
             <b-col>
               <div class="w-100 d-flex justify-content-end">
                 <b-button class="w-25 ml-3" type="submit" variant="primary">Save</b-button>

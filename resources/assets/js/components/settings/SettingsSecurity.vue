@@ -5,21 +5,21 @@
         <b-form @submit.prevent="submitPassword($event)" @reset="onReset">
           <fieldset :disabled="isSubmitting.formPassword">
             <b-row>
-              <b-col>
+              <b-col class="mt-2 mt-md-0" sm="12" md="6">
                 <FormTextInput ikey="oldPassword" itype="password" label="Current Password" placeholder="Enter current password..." v-model="formPassword.oldPassword" :verrors="verrors" />
               </b-col>
-              <b-col>
+              <b-col sm="12" md="6">
                 <FormTextInput ikey="newPassword" itype="password" label="New Password" placeholder="Enter new password..." v-model="formPassword.newPassword" :verrors="verrors" />
               </b-col>
             </b-row>
 
           </fieldset>
 
-          <b-row class="mt-3">
+          <b-row class="mt-3 mb-2 mb-md-0">
             <b-col>
               <div class="w-100 d-flex justify-content-end">
                 <b-button :disabled="isSubmitting.formPassword" class="w-25 ml-3" type="submit" variant="primary">
-                  <b-spinner v-if="isSubmitting.formPassword" small />&nbsp;
+                  <b-spinner v-if="isSubmitting.formPassword" small class="mr-1" />
                   Save
                 </b-button>
               </div>

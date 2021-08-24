@@ -2,12 +2,12 @@
   <div>
     <transition name="quick-fade" mode="out-in">
       <div v-if="showNew" key="new-form">
-        <NewBankAccount />
+        <NewBankAccount @finished="accountAdded" />
       </div>
 
       <div v-else key="warning">
         <WarningAlert :header="$t('header')" :message="$t('message')" />
-        <b-btn variant="success" block @click="showNew = true">
+        <b-btn variant="primary" block @click="showNew = true">
           <fa-icon icon="plus" fixed-width class="mr-2" />
           {{ $t('button') }}
         </b-btn>
@@ -40,7 +40,11 @@ export default {
     showNew: false,
   }),
 
-  methods: {},
+  methods: {
+    accountAdded() {
+      this.$emit('accountAdded')
+    },
+  },
 
   watch: {},
 

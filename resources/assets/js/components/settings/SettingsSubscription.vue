@@ -5,13 +5,13 @@
         <b-form @submit.prevent="submitSubscriptions($event)" @reset="onReset">
           <fieldset :disabled="isSubmitting.formSubscriptions">
             <b-row>
-              <b-col>
+              <b-col sm="12" md="6">
                 <FormTextInput itype="currency" ikey="subscriptions.price_per_1_months"  v-model="subscriptions.price_per_1_months"  label="Price per Month" :verrors="verrors" />
                 <FormTextInput itype="currency" ikey="subscriptions.price_per_3_months"  v-model="subscriptions.price_per_3_months"  label="Price per 3 Months" :verrors="verrors" disabled />
                 <FormTextInput itype="currency" ikey="subscriptions.price_per_6_months"  v-model="subscriptions.price_per_6_months"  label="Price per 6 Months" :verrors="verrors" disabled />
                 <FormTextInput itype="currency" ikey="subscriptions.price_per_12_months" v-model="subscriptions.price_per_12_months" label="Price per Year" :verrors="verrors" disabled />
               </b-col>
-              <b-col>
+              <b-col sm="12" md="6">
                 <b-form-group id="group-is_follow_for_free" label="Allow Follow for Free" label-for="is_follow_for_free">
                   <b-form-checkbox
                     id="is_follow_for_free"
@@ -28,7 +28,10 @@
           <b-row class="mt-3">
             <b-col>
               <div class="w-100 d-flex justify-content-end">
-                <b-button class="w-25 ml-3" type="submit" variant="primary">Save</b-button>
+                <b-button class="w-25 ml-3" type="submit" variant="primary">
+                  <b-spinner class="mr-1" v-if="isSubmitting.formSubscriptions" small />
+                  Save
+                </b-button>
               </div>
             </b-col>
           </b-row>
@@ -41,8 +44,8 @@
       <b-row class="mt-3">
         <b-col>
           <p><small class="text-muted">Offer a free trial or a discounted subscription on your profile for a limited number of new or already expired subscribers.</small></p>
-          <div class="w-100 d-flex justify-content-start">
-            <b-button @click="startCampaign" class="w-25 ml-3" variant="primary">Start Promotion Campaign</b-button>
+          <div class="w-100 d-flex justify-content-end">
+            <b-button @click="startCampaign" class="px-4" variant="primary">Start Promotion Campaign</b-button>
           </div>
         </b-col>
       </b-row>

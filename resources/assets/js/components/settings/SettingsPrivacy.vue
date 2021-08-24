@@ -31,11 +31,11 @@
               </tr>
             </table>
           </fieldset>
-          <b-row class="mt-3">
+          <b-row class="mt-2 mb-2 mb-md-0">
             <b-col>
               <div class="w-100 d-flex justify-content-end">
                 <b-button class="w-25 ml-3" type="submit" variant="primary">
-                  <b-spinner v-if="isSubmitting.formPrivacy" small />&nbsp;
+                  <b-spinner v-if="isSubmitting.formPrivacy" small class="mr-1" />
                   Save
                 </b-button>
               </div>
@@ -95,11 +95,11 @@
             </b-row>
           </fieldset>
 
-          <b-row class="mt-3">
+          <b-row class="mt-3 mb-2 mb-md-0">
             <b-col>
               <div class="w-100 d-flex justify-content-end">
                 <b-button class="w-25 ml-3" type="submit" variant="primary">
-                  <b-spinner v-if="isSubmitting.formBlocked" small />&nbsp;
+                  <b-spinner v-if="isSubmitting.formBlocked" small />
                   Save
                 </b-button>
               </div>
@@ -129,11 +129,11 @@
             </b-row>
           </fieldset>
 
-          <b-row class="mt-3">
+          <b-row class="mt-3 mb-2 mb-md-0">
             <b-col>
               <div class="w-100 d-flex justify-content-end">
                 <b-button class="w-25 ml-3" type="submit" variant="primary">
-                  <b-spinner v-if="isSubmitting.formWatermark" small />&nbsp;
+                  <b-spinner class="mr-1" v-if="isSubmitting.formWatermark" small />
                   Save
                 </b-button>
               </div>
@@ -291,13 +291,34 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 label {
   margin-bottom: 0;
 }
 
 .list-blocked .unblock {
   cursor: pointer; 
+}
+
+@media (max-width: 576px) {
+  .table {
+    display: flex;
+    flex-direction: column;
+
+    tr {
+      display: block;
+
+      td {
+        display: block;
+        border-top: none;
+
+        &:first-child {
+          border-top: 1px solid #dee2e6;
+          padding-bottom: 0;
+        }
+      }
+    }
+  }
 }
 
 </style>

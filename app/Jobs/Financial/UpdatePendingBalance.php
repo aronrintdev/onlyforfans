@@ -45,7 +45,7 @@ class UpdatePendingBalance implements ShouldQueue, ShouldBeUnique
      */
     public function uniqueId()
     {
-        return "{$this->account->id}";
+        return "update-pending-balance-{$this->account->id}";
     }
 
     public function middleware()
