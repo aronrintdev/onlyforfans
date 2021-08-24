@@ -27,7 +27,7 @@
       <SearchBar />
     </b-navbar-nav>
     <b-navbar-nav v-if="!mobile" class="ml-auto">
-      <NavButtons class="mx-3" :unread-messages-count="unread_messages_count" />
+      <NavButtons class="mx-3" :unread-notifications-count="unread_notifications_count" :unread-messages-count="unread_messages_count" />
       <b-nav-item-dropdown
         id="profile-dropdown"
         toggle-class="nav-link-custom"
@@ -38,7 +38,7 @@
         <template #button-content>
           <ProfileButton />
         </template>
-        <ProfileMenu v-if="session_user" dropdown />
+        <ProfileMenu v-if="session_user" dropdown class="meta-username" :data-username="session_user.username"/>
       </b-nav-item-dropdown>
     </b-navbar-nav>
   </b-navbar>
@@ -69,11 +69,12 @@ export default {
   props: {
     toggleMobileAt: { type: [String, Number], default: 'md', },
     unreadMessagesCount: { type: Number, default: 0 },
+    //unreadNotificationsCount: { type: Number, default: 0 },
   },
 
   computed: {
     ...Vuex.mapState([ 'mobile' ]),
-    ...Vuex.mapGetters(['session_user', 'unread_messages_count']),
+    ...Vuex.mapGetters(['session_user', 'unread_messages_count', 'unread_notifications_count']),
     openHeight() {
       var height = this.$vssHeight
       if (this.$el) {

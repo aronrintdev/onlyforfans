@@ -165,6 +165,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('diskmediafiles', 'DiskmediafilesController', [ 'only' => [ 'index', 'show', 'destroy'] ])->middleware(['role:admin|super-admin']);
     //Route::resource('diskmediafiles', 'DiskmediafilesController', [ 'only' => [ 'index', 'show', 'destroy'] ]);
 
+    Route::get('/notifications/totalUnreadCount', ['as'=>'notifications.totalUnreadCount', 'uses' => 'NotificationsController@getTotalUnreadCount']);
     Route::resource('notifications', 'NotificationsController', [ 'only' => [ 'index', ] ]);
 
     /* -------------------------------- Posts ------------------------------- */
