@@ -154,6 +154,7 @@ body .card.background .cover-image {
   background-color: #343a40;
   background-repeat: no-repeat;
   background-size: cover;
+  background-position: center;
 }
 body .card .avatar-details h2.avatar-name {
   font-size: 16px;
