@@ -143,7 +143,7 @@ export default {
     "error": {
       "loading": "An error has occurred while loading your vault, please try again later."
     },
-    "header": "Select from your Vault",
+    "header": "Select from My Media",
     "selectButton": "Select"
   }
 }

@@ -17,7 +17,7 @@ class MediafileTypeEnum extends SmartEnum implements Selectable {
         self::COVER => 'Cover',
         self::POST => 'Post',
         self::STORY => 'Story',
-        self::VAULT => 'Vault',
+        self::VAULT => 'My Media',
         self::GALLERY => 'Gallery',
     ];
 
