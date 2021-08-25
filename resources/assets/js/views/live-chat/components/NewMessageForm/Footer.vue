@@ -1,13 +1,13 @@
 <template>
-  <div class="toolbar" :class="{'d-flex': !mobile}">
-    <div class="tool-items d-flex flex-shrink-1 py-2 mr-3">
+  <div class="toolbar align-items-center pb-sm-5" :class="{'d-flex': !mobile}">
+    <div class="tool-items d-flex OFF-flex-shrink-1 OFF-py-5 mr-3">
       <b-btn
         v-for="item in buttons"
         :key="item.key"
         variant="link"
         :disabled="item.disabled"
         :class="item.class"
-        v-b-tooltip.hover="item.tooltip"
+        v-b-tooltip.hover.bottom="{boundary: 'viewport', title: item.tooltip}"
         @click="item.onClick"
       >
         <fa-icon
@@ -18,7 +18,7 @@
         />
       </b-btn>
     </div>
-    <div class="py-2 ml-auto d-flex align-items-end" :class="{'float-right': mobile}">
+    <div class="OFF-py-5 ml-auto d-flex align-items-end" :class="{'float-right': mobile}">
       <b-btn
         variant="success"
         class="mr-3 text-nowrap"
@@ -28,11 +28,6 @@
         <span>{{ $t('sendWithTip') }}</span>
       </b-btn>
       <div class="d-flex flex-column">
-        <div
-          v-if="!mobile"
-          class="font-size-smaller text-muted text-right mr-2"
-          v-text="$t('sendHint')"
-        />
         <b-btn
           variant="primary"
           class="submit text-nowrap"
@@ -156,7 +151,6 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
-    "sendHint": "Ctrl + Enter",
     "send": "Send",
     "tooltips": {
       "uploadFiles": "Add Photo",
