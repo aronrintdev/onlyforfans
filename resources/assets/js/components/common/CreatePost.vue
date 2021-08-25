@@ -120,7 +120,7 @@
                   <li v-b-tooltip.hover title="Record live audio" @click="recordAudio()" class="selectable select-audio">
                     <fa-icon :icon="selectedIcon==='audio' ? ['fas', 'microphone'] : ['far', 'microphone']" size="lg" :class="selectedIcon==='audio' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li v-b-tooltip.hover title="Select from vault" @click="renderVaultSelector()" class="selectable">
+                  <li v-b-tooltip.hover title="Select from My Media" @click="renderVaultSelector()" class="selectable">
                     <fa-icon :icon="selectedIcon==='vault' ? ['fas', 'archive'] : ['far', 'archive']" size="lg" :class="selectedIcon==='vault' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
