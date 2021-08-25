@@ -138,24 +138,10 @@ export default {
       this.scrollToTop()
     }, 
 
-    /*
-    mobile(value) {
-      if (value) {
-        this.$root.$emit('bv::disable::tooltip')  // disable if mobile
-      } else {
-      }
-    },
-     */
   },
 
   mounted() {
     this.updateScreenSize(this.$vssWidth)
-      /*
-    if ( this.mobile ) {
-      // disable tooltips on mobile screens (on page load!)
-      this.$root.$emit('bv::disable::tooltip') 
-    }
-       */
   },
 
   created() {
