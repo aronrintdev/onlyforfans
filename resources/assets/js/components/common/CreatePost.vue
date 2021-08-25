@@ -74,7 +74,7 @@
             </vue-dropzone>
             <AudioRecorder
               v-if="showAudioRec"
-              @close="showAudioRec=false;selectedMedia=null"
+              @close="showAudioRec=false; selectedIcon=null"
               @complete="audioRecordFinished"
             />
 
@@ -112,16 +112,16 @@
               <b-col cols="12" md="8" class="post-create-footer-ctrl d-flex">
                 <ul class="list-inline d-flex mb-0 OFF-border-right pt-1">
                   <li v-b-tooltip.hover title="Select from device" id="clickme_to-select" class="selectable select-pic">
-                    <fa-icon :icon="selectedMedia==='pic' ? ['fas', 'image'] : ['far', 'image']" size="lg" :class="selectedMedia==='pic' ? 'text-primary' : 'text-secondary'" />
+                    <fa-icon :icon="selectedIcon==='pic' ? ['fas', 'image'] : ['far', 'image']" size="lg" :class="selectedIcon==='pic' ? 'text-primary' : 'text-secondary'" />
                   </li>
                   <li v-b-tooltip.hover title="Record live video" v-if="!isIOS9PlusAndAndroid" @click="recordVideo()" class="selectable select-video">
-                    <fa-icon :icon="selectedMedia==='video' ? ['fas', 'video'] : ['far', 'video']" size="lg" :class="selectedMedia==='video' ? 'text-primary' : 'text-secondary'" />
+                    <fa-icon :icon="selectedIcon==='video' ? ['fas', 'video'] : ['far', 'video']" size="lg" :class="selectedIcon==='video' ? 'text-primary' : 'text-secondary'" />
                   </li>
                   <li v-b-tooltip.hover title="Record live audio" @click="recordAudio()" class="selectable select-audio">
-                    <fa-icon :icon="selectedMedia==='audio' ? ['fas', 'microphone'] : ['far', 'microphone']" size="lg" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
+                    <fa-icon :icon="selectedIcon==='audio' ? ['fas', 'microphone'] : ['far', 'microphone']" size="lg" :class="selectedIcon==='audio' ? 'text-primary' : 'text-secondary'" />
                   </li>
                   <li v-b-tooltip.hover title="Select from vault" @click="renderVaultSelector()" class="selectable">
-                    <fa-icon :icon="selectedMedia==='vault' ? ['fas', 'archive'] : ['far', 'archive']" size="lg" :class="selectedMedia==='vault' ? 'text-primary' : 'text-secondary'" />
+                    <fa-icon :icon="selectedIcon==='vault' ? ['fas', 'archive'] : ['far', 'archive']" size="lg" :class="selectedIcon==='vault' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
                 <ul class="list-inline d-flex mb-0 pt-1">
@@ -140,7 +140,7 @@
                 </ul>
                 <ul class="list-inline d-flex mb-0 pt-1">
                   <li @click="showTagForm()" class="selectable show-tagform" v-b-tooltip.hover title="Add Tags">
-                    <fa-icon :icon="isTagFormVisible ? ['fas', 'hashtag'] : ['far', 'hashtag']" class="text-secondary" size="lg" />
+                    <fa-icon :icon="isTagFormVisible ? ['fas', 'hashtag'] : ['far', 'hashtag']" :class="isHashtagIconSelected ? 'text-primary' : 'text-secondary'" size="lg" />
                   </li>
                   <li @click="togglePostPrice()" class="selectable select-pic" v-b-tooltip.hover title="Set Price">
                     <fa-icon :icon="postType === 'price' ? ['fas', 'tag'] : ['far', 'tag']" size="lg" :class="postType === 'price' ? 'text-primary' : 'text-secondary'" />
@@ -173,7 +173,7 @@
       </div>
     </section>
 
-    <VideoRecorder v-if="showVideoRec" @close="showVideoRec=false; selectedMedia=null" @complete="videoRecCompleted" />
+    <VideoRecorder v-if="showVideoRec" @close="showVideoRec=false; selectedIcon=null" @complete="videoRecCompleted" />
 
   </div>
 </template>
@@ -271,7 +271,8 @@ export default {
     moment,
     newPostId: null,
     description: '',
-    selectedMedia: null, // 'pic',
+    selectedIcon: null, // 'pic',
+    isHashtagIconSelected: false,
     showedModal: null,
     postType: 'free',
     ptypes: [
@@ -318,7 +319,8 @@ export default {
       this.$refs.myVueDropzone.removeAllFiles()
       this.description = ''
       this.newPostId = null
-      this.selectedMedia = 'pic'
+      this.selectedIcon = 'pic'
+      this.isHashtagIconSelected = false
       this.ptype = 'free'
       this.price = 0
       this.priceForPaidSubscribers = 0
@@ -561,14 +563,14 @@ export default {
     },
 
     takePicture() { // %TODO
-      this.selectedMedia = this.selectedMedia!=='pic' ? 'pic' : null
+      this.selectedIcon = this.selectedIcon!=='pic' ? 'pic' : null // toggle
     },
     recordVideo() { // %TODO
-      this.selectedMedia = this.selectedMedia!=='video' ? 'video' : null
+      this.selectedIcon = this.selectedIcon!=='video' ? 'video' : null // toggle
       this.showVideoRec = true
     },
     recordAudio() { // %TODO
-      this.selectedMedia = this.selectedMedia!=='audio' ? 'audio' : null
+      this.selectedIcon = this.selectedIcon!=='audio' ? 'audio' : null // toggle
       this.showAudioRec = true
     },
 
@@ -591,7 +593,14 @@ export default {
       })
     },
 
-    showTagForm() {
+    showTagForm() { // toggles visiblity
+      if ( this.isTagFormVisible && this.isHashtagIconSelected ) { 
+        // toggling to hidden, deselect icon if selected
+        this.isHashtagIconSelected = false
+      } else {
+        // toggling to viewable, always select icon
+        this.isHashtagIconSelected = true
+      }
       this.isTagFormVisible = !this.isTagFormVisible
     },
 
@@ -705,6 +714,7 @@ export default {
 
     hashtags(newVal, oldVal) {
       this.isTagFormVisible = this.hashtags.length > 0
+      this.isHashtagIconSelected = this.isTagFormVisible // highlight if we have tags
     },
 
     description(newVal, oldVal) {
