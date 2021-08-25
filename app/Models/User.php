@@ -142,7 +142,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
 
         static::created(function ($model) {
             $vault = Vault::create([
-                'vname' => 'My Home Vault',
+                'vname' => 'My Media',
                 'user_id' => $model->id,
             ]);
         });

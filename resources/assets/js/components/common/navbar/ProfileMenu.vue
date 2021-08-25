@@ -108,7 +108,7 @@ export default {
     "Lists": "Lists",
     "Logout": "Logout",
     "My Profile": "My Profile",
-    "My Vault": "My Vault",
+    "My Media": "My Media",
     "Payment Method": "Payment Method",
     "Settings": "Settings",
     "statements": "Statements",

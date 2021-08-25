@@ -163,7 +163,7 @@ export default {
       "uploadFiles": "Add Photo",
       "recordVideo": "Record Video",
       "recordAudio": "Record Audio",
-      "vaultSelect": "Add Photo From Your Vault",
+      "vaultSelect": "Add Photo From My Media",
       "openScheduleMessage": "Schedule Message To Be Sent At",
       "setPrice": "Set Message Unlock Price",
       "sendWithTip": "Include a tip with your message",
