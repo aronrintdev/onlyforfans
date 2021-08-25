@@ -142,7 +142,8 @@ export default {
   mounted() {
     this.updateScreenSize(this.$vssWidth)
     if ( mobile ) {
-      this.$root.$emit('bv::disable::tooltip')
+      // disable tooltips on mobile screens (on page load!)
+      this.$root.$emit('bv::disable::tooltip') 
     }
   },
 
