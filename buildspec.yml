@@ -33,4 +33,9 @@ artifacts:
     - ./rsyncconfig/**/*
     - ./.vscode/**/*
     - ./data.ms/**/*
+    - ./package-lock.json
+    - ./package.json
+    - ./run-dev-server.sh
+    - ./start-multible-queue-workers
+    - ./tinker.sh
 
