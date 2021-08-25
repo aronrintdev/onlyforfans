@@ -156,13 +156,16 @@ export const messaging = {
     /**
      * Gets a page of chatthreads from the server
      */
-    getThreads({ commit }, { page, take, filters, sortBy }) {
+    getThreads({ commit }, { page, take, filters, sortBy, asc }) {
       return new Promise((resolve, reject) => {
-        console.log('getThreads', { page, take, filters, sortBy })
+        console.log('getThreads', { page, take, filters, sortBy, asc })
         let params = { page, take }
         params = { ...params, ...filters }
-        if ( this.sortBy ) {
-          params.sortBy = this.sortBy
+        if ( sortBy ) {
+          params.sortBy = sortBy
+        }
+        if (asc) {
+          params.asc = 1
         }
         axios.get(route('chatthreads.index'), { params })
           .then(response => {

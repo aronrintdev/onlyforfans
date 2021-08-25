@@ -1,7 +1,7 @@
 <template>
   <b-dropdown class="filter-controls" variant="link" size="sm" right no-caret>
     <template #button-content>
-      <fa-icon :icon="['fas', 'sort-amount-down']" class="fa-lg" />
+      <fa-icon :icon="asc ? ['fas', 'sort-amount-up'] : ['fas', 'sort-amount-down']" class="fa-lg" />
     </template>
 
     <b-dropdown-header>
@@ -9,12 +9,28 @@
     </b-dropdown-header>
 
     <b-dropdown-item :active="value === 'recent'" @click="onSelect('recent')" >
-      <fa-icon icon="sort-up" fixed-width class="mx-2" size="lg" />
-      {{ $t('recent') }}
+      <span class="ml-3">{{ $t('date') }}</span>
     </b-dropdown-item>
-    <b-dropdown-item :active="value === 'oldest'" @click="onSelect('oldest')" >
+    <b-dropdown-item :active="value === 'unread'" @click="onSelect('unread')" >
+      <span class="ml-3">{{ $t('unread') }}</span>
+    </b-dropdown-item>
+    <b-dropdown-item :active="value === 'unreadWithTips'" @click="onSelect('unreadWithTips')" >
+      <span class="ml-3">{{ $t('unreadWithTips') }}</span>
+    </b-dropdown-item>
+    <b-dropdown-item :active="value === 'online'" @click="onSelect('online')" >
+      <span class="ml-3">{{ $t('online') }}</span>
+    </b-dropdown-item>
+    <b-dropdown-item :active="value === 'amountSpent'" @click="onSelect('amountSpent')" >
+      <span class="ml-3">{{ $t('amountSpent') }}</span>
+    </b-dropdown-item>
+    <b-dropdown-divider></b-dropdown-divider>
+    <b-dropdown-item :active="asc" @click="$emit('sortBy', true)" >
+      <fa-icon icon="sort-up" fixed-width class="mx-2" size="lg" />
+      {{ $t('ascending') }}
+    </b-dropdown-item>
+    <b-dropdown-item :active="!asc" @click="$emit('sortBy', false)" >
       <fa-icon icon="sort-down" fixed-width class="mx-2" size="lg" />
-      {{ $t('oldest') }}
+      {{ $t('descending') }}
     </b-dropdown-item>
   </b-dropdown>
 </template>
@@ -29,6 +45,7 @@ export default {
 
   props: {
     value: { type: String, default: '' },
+    asc: { type: Boolean, default: false },
   },
 
   methods: {
@@ -51,8 +68,13 @@ export default {
 {
   "en": {
     "header": "Sort By",
-    "recent": "Most Recent First",
-    "oldest": "Most Recent Last"
+    "unread": "Unread",
+    "unreadWithTips": "Unread with Tips",
+    "date": "Date",
+    "online": "Currently Online",
+    "amountSpent": "Total Amount Spent",
+    "ascending": "Ascending",
+    "descending": "Descending",
   }
 }
 </i18n>

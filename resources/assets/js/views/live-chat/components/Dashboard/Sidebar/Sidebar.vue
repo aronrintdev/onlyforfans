@@ -6,10 +6,12 @@
       :search="searchQuery"
       :selectFilter="selectedFilter"
       :sortBy="sortBy"
+      :asc="asc"
       @selected="filterSelected"
       @searchInput="value => searchQuery = value"
       @filterInput="value => selectedFilter = value"
       @sortByInput="value => sortBy = value"
+      @setAscending="value => asc = value"
     />
     <MarkAllRead @updateThreadsAllRead="getChatthreads" />
     <ThreadList
@@ -114,6 +116,7 @@ export default {
     selectedFilter: 'all',
     filters: {},
     sortBy: 'recent',
+    asc: false,
   }),
 
   methods: {
@@ -147,6 +150,7 @@ export default {
         take: this.take,
         filters: this.filters,
         sortBy: this.sortBy,
+        asc: this.asc,
       }).then(response => {
         this.renderItems = response.data.data.map(o => (o.id))
       }).catch(error => {
@@ -196,6 +200,12 @@ export default {
       if (index > -1 && typeof this.availableFilters[index].callback === 'function') {
         this.availableFilters[index].callback()
       }
+    },
+    sortBy() {
+      this.reloadFromFirstPage()
+    },
+    asc() {
+      this.reloadFromFirstPage()
     },
     state(value) {
       if (value === 'loaded') {

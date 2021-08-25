@@ -20,7 +20,7 @@
       :options="filters"
       @input="value => $emit('filterInput', value)"
     />
-    <SortControl :value="sortBy" @input="value => $emit('sortByInput', value)" />
+    <SortControl :value="sortBy" :asc="asc" @input="value => $emit('sortByInput', value)" @sortBy="value => $emit('setAscending', value)" />
   </div>
 </template>
 
@@ -43,6 +43,7 @@ export default {
     selectedFilter: { type: String, default: 'all' },
     filters: { type: Array, default: () => ([]) },
     sortBy: { type: String, default: 'recent' },
+    asc: { type: Boolean, default: false },
   },
 
   computed: {},

@@ -57,11 +57,22 @@ class ChatthreadsController extends AppBaseController
 
         if ( $request->has('sortBy') ) { // UI may imply these filters when sorting
             switch ($request->sortBy) {
-            case 'unread-first':
-            case 'oldest-unread-first':
+            case 'unread':
                 $filters['is_unread'] = 1;
                 break;
+            case 'unreadWithTips':
+                $filters['is_unread'] = 1;
+                $filters['with_tips'] = 1;
+                break;
+            case 'online':
+                $filters['current_online'] = 1;
+                break;
             }
+        }
+
+        $orderBy = 'desc';
+        if (isset($request->asc)){
+            $orderBy = 'asc';
         }
 
         $query = Chatthread::query(); // Init query
@@ -96,6 +107,11 @@ class ChatthreadsController extends AppBaseController
                     $q1->where('is_read', $v); // apply filter
                 });
                 break;
+            case 'with_tips':
+                $query->whereHas('chatmessages', function($q1) use($v) {
+                    $q1->where('purchase_only', 1); // apply filter
+                });
+                break;
             case 'is_subscriber': // %TODO
                 $query->whereHas('participants', function($q1) use(&$sessionUser) {
                     $q1->whereHas('subscribedtimelines', function($q2) use(&$sessionUser) {
@@ -111,6 +127,11 @@ class ChatthreadsController extends AppBaseController
                     });
                 });
                 break;
+            case 'current_online':
+                $query->whereHas('participants', function($q1) use(&$sessionUser) {
+                    $q1->where('users.id', '<>', $sessionUser->id)->where('is_online', 1);
+                });
+                break;
             default:
                 $query->where($key, $v);
             }
@@ -122,10 +143,18 @@ class ChatthreadsController extends AppBaseController
         case 'oldest-unread-first':
             $query->orderBy('updated_at', 'asc');
             break;
+        case 'amountSpent':
+            $query->addSelect(['totalSpent' => Chatmessage::selectRaw('sum(price) as total')
+                ->whereColumn('chatthread_id', 'chatthreads.id')
+                ->where('sender_id', $sessionUser->id)
+                ->groupBy('chatthread_id')
+            ])
+            ->orderBy('totalSpent', $orderBy);
+            break;
         case 'recent':
         case 'unread-first':
         default:
-            $query->orderBy('updated_at', 'desc');
+            $query->orderBy('updated_at', $orderBy);
             //$query->latest();
         }
 

@@ -49,7 +49,7 @@ class Chatthread extends Model implements UuidId
     // %%% Accessors/Mutators | Casts
     //------------------------------------------------------------------------//
 
-    protected $appends = ['isFavoritedByMe', 'notes'];
+    protected $appends = ['isFavoritedByMe', 'notes', 'totalSpent'];
 
     public function getIsFavoritedByMeAttribute($value)
     {
@@ -80,6 +80,13 @@ class Chatthread extends Model implements UuidId
         return Notes::where('user_id', $sessionUser->id)
             ->where('notes_id', $otherUser->timeline->id)
             ->first();
+    }
+
+    public function getTotalSpentAttribute($value) {
+        $sessionUser = Auth::user();
+        $sentMessages = $this->chatmessages()->where('sender_id', $sessionUser->id);
+
+        return intval($sentMessages->sum('price'));
     }
 
     //------------------------------------------------------------------------//
