@@ -613,7 +613,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
 
     // Takes a single string that could be a first name or 
     //   a full name and parses into distinct fields
-    public static function parseName(string $name) : string 
+    public static function parseName(string $name) : array
     {
         $name = trim($name);
         $last = (strpos($name, ' ') === false) ? '' : preg_replace('#.*\s([\w-]*)$#', '$1', $name);
