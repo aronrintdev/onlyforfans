@@ -16,11 +16,12 @@
             :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
             :alt="mediafile.mfname" />
         </div>
-        <MediaSlider v-else-if="mediafile.is_video" 
-          @click="renderFull"
-          :mediafiles="[mediafile]" 
-          :session_user="session_user" 
-          :use_mid="use_mid" />
+        <div class="image-preview" @click="renderFull" v-if="mediafile.is_video">
+          <video v-if="mediafile.is_video">
+          <source :src="`${mediafile.filepath}#t=2`" type="video/mp4" />
+          <source :src="`${mediafile.filepath}#t=2`" type="video/webm" />
+        </video>
+        </div> 
       </template>
       <template v-else-if="mediafile.resource_type==='posts'">
         <PostCta :post="mediafile.resource" :session_user="session_user" :primary_mediafile="mediafile" />
@@ -194,7 +195,8 @@ ul {
   background: transparent;
 }
 
-.image-preview img {
+.image-preview img,
+.image-preview video {
   position: absolute;
   top: 0;
   left: 0;
