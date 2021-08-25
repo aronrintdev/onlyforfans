@@ -58,7 +58,7 @@
             <b-form-textarea
               class="message"
               v-model="newMessageForm.mcontent"
-              placeholder="Type a message..."
+              placeholder="Type a message... (Ctrl + Enter to send)"
               :rows="mobile ? 2 : 3"
               max-rows="6"
               spellcheck="false"

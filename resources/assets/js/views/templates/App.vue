@@ -136,7 +136,8 @@ export default {
 
       // whenever the route changes, go to the top of the new page
       this.scrollToTop()
-    }
+    }, 
+
   },
 
   mounted() {
@@ -164,5 +165,6 @@ export default {
 .content.mobile {
   padding-top: 15px;
   padding-bottom: 68px;
+  height: calc(100% - 68px);
 }
 </style>

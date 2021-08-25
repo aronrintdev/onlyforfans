@@ -14,18 +14,28 @@ env:
     FONTAWESOME_NPM_AUTH_TOKEN: "/build/deep-link/master/GetUri/fontawesomeNpmAuthToken"
 phases:
   install:
+    # run-as: root
     commands:
+      - npm -v
       - npm install
   build:
     commands:
       - npm run prod2
 artifacts:
-  files::
+  # base-directory: /var/www/allfans.com/
+  # name: build-artifact-name
+  # discard-paths: no
+  files:
     - '**/*'
   exclude-paths:
-    - ./**/node_modules
-    - ./**/resources/assets
-    - ./**/rsyncconfig
-    - ./**/.vscode
-    - ./**/data.ms
+    - ./node_modules/**/*
+    - ./resources/assets/**/*
+    - ./rsyncconfig/**/*
+    - ./.vscode/**/*
+    - ./data.ms/**/*
+    - ./package-lock.json
+    - ./package.json
+    - ./run-dev-server.sh
+    - ./start-multible-queue-workers
+    - ./tinker.sh
 

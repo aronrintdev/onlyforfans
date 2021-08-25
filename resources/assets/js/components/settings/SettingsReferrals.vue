@@ -107,13 +107,21 @@ export default {
     },
 
     onCopySuccess() {
-      alert("Copy to Clipboard has been succeed");
       this.showCopyToClipboardModal = false;
+      this.$root.$bvToast.toast('Link copied to clipboard', {
+        title: 'Success!',
+        toaster: 'b-toaster-top-center',
+        variant: 'success',
+      })
     },
 
     onCopyError() {
       this.showCopyToClipboardModal = false;
-      alert("Copy to Clipboard has been failed. Please try again later.");
+      this.$root.$bvToast.toast('Copy to Clipboard failed', {
+        title: 'Warning!',
+        toaster: 'b-toaster-top-center',
+        variant: 'danger',
+      })
     },
 
     async checkReferralCode() {

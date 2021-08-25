@@ -5,7 +5,6 @@
       v-for="button in buttons"
       :key="button.name"
       :to="button.to"
-      :title="$t(button.name)"
     >
       <fa-layers fixed-width class="fa-lg" @click="scrollToTop">
         <fa-icon :icon="button.selected ? [ 'fas', button.icon ] : [ 'far', button.icon ]" class="mx-auto" />

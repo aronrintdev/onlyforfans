@@ -84,19 +84,19 @@
         </div>
 
         <div>
-          <b-button variant="primary" class="" @click="selectFromVault">Select from Vault</b-button>
+          <b-button variant="primary" class="" @click="selectFromVault">Select from My Media</b-button>
         </div>
 
         <b-modal
           id="modal-select-vaultfile"
           size="lg"
-          title="Vault Files"
+          title="My Media Files"
           hide-footer
           body-class="p-0"
         >
           <b-row>
             <b-col>
-              Vault files
+              My Media Files
             </b-col>
           </b-row>
 

@@ -3,7 +3,7 @@
 
     <b-row class="pt-2">
       <b-col>
-        <h2 class="my-1">My Vault</h2>
+        <h2 class="my-1">My Media</h2>
         <hr class="my-0"/>
       </b-col>
     </b-row>
@@ -315,7 +315,7 @@
     </b-modal>
 
     <!-- 'Lightbox' modal for image preview when clicking on a file in the vault grid/list -->
-    <b-modal v-model="isApproveSharedModalVisible" title="Approve Shared Vault Files" size="xl">
+    <b-modal v-model="isApproveSharedModalVisible" title="Approve Shared Media Files" size="xl">
       <p>The user {{ strSharerName }} has shared {{ strSharedMfCount }} files with you...</p>
       <template #modal-footer>
         <div class="w-100">
