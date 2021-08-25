@@ -21,6 +21,7 @@ import payments from '@views/payments'
 
 import LivechatDashboard from '@views/live-chat/Dashboard'
 import LivechatCreateThread from '@views/live-chat/CreateThread'
+import LivechatStats from '@views/live-chat/mass-stats/StatsDashboard'
 import livechatRoutes from './livechat.routes'
 
 import settingsRoutes from './settings.routes'
@@ -49,6 +50,11 @@ export const routes = [
   },
 
   // Live Chat
+  {
+    component: LivechatStats,
+    name: 'chatthreads.stats',
+    path: '/messages/stats',
+  },
   {
     component: LivechatCreateThread,
     name: 'chatthreads.create',
