@@ -7,8 +7,7 @@
         variant="link"
         :disabled="item.disabled"
         :class="item.class"
-        v-b-tooltip.hover
-        :title="item.tooltip"
+        v-b-tooltip.hover="item.tooltip"
         @click="item.onClick"
       >
         <fa-icon
