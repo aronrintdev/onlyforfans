@@ -1,6 +1,6 @@
 <template>
   <div class="toolbar align-items-center pb-sm-5" :class="{'d-flex': !mobile}">
-    <div class="tool-items d-flex OFF-flex-shrink-1 OFF-py-5 mr-3">
+    <div class="tool-items d-flex flex-shrink-1 mr-3">
       <b-btn
         v-for="item in buttons"
         :key="item.key"
@@ -18,7 +18,7 @@
         />
       </b-btn>
     </div>
-    <div class="OFF-py-5 ml-auto d-flex align-items-end" :class="{'float-right': mobile}">
+    <div class="ml-auto d-flex align-items-end" :class="{'float-right': mobile}">
       <b-btn
         variant="success"
         class="mr-3 text-nowrap"
