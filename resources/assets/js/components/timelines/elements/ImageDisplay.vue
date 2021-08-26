@@ -18,9 +18,12 @@
         </div>
         <div class="image-preview" @click="renderFull" v-if="mediafile.is_video">
           <video v-if="mediafile.is_video">
-          <source :src="`${mediafile.filepath}#t=2`" type="video/mp4" />
-          <source :src="`${mediafile.filepath}#t=2`" type="video/webm" />
-        </video>
+            <source :src="`${mediafile.filepath}#t=2`" type="video/mp4" />
+            <source :src="`${mediafile.filepath}#t=2`" type="video/webm" />
+          </video>
+          <div class="icon-video">
+            <fa-icon :icon="['fas', 'play']" class="text-white icon" />
+          </div>
         </div> 
       </template>
       <template v-else-if="mediafile.resource_type==='posts'">
@@ -133,7 +136,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 ul {
   margin: 0;
 }
@@ -193,6 +196,7 @@ ul {
   height: 0;
   padding-top: 100%;
   background: transparent;
+  cursor: pointer;
 }
 
 .image-preview img,
@@ -204,4 +208,28 @@ ul {
   height: 100%;
   object-fit: cover;
 }
+
+.icon-video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+
+  .icon {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@media (max-width: 767px) {
+  .icon-video {
+    width: 30px;
+    height: 30px;
+  }
+}
+
 </style>

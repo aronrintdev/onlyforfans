@@ -491,6 +491,7 @@ export default {
               position: relative;
               z-index: 1;
               max-width: 100vw;
+              height: 100%;
 
               .video-js.vjs-fluid {
                 width: 100%;
