@@ -136,7 +136,8 @@ export default {
 
       // whenever the route changes, go to the top of the new page
       this.scrollToTop()
-    }
+    }, 
+
   },
 
   mounted() {

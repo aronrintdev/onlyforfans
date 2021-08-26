@@ -39,7 +39,7 @@ class VaultsController extends AppBaseController
         if ( empty($myVault) ) {
             $myVault = DB::transaction(function () use(&$sessionUser) {
                 $v = Vault::create([
-                    'vname' => 'My Home Vault',
+                    'vname' => 'My Media',
                     'user_id' => $sessionUser->id,
                 ]);
                 $vf = Vaultfolder::create([

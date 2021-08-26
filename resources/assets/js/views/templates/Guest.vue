@@ -15,7 +15,7 @@
     <div v-if="isVisible" class="footer">
       <b-navbar variant="dark">
         <b-nav-text class="text-light mx-auto">
-          &copy; {{ $DateTime().year }} All Fans. All rights reserved.
+          &copy; {{ $DateTime().year }} AllFans. All rights reserved.
         </b-nav-text>
       </b-navbar>
     </div>
