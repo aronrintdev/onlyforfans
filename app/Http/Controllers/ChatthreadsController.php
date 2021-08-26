@@ -10,7 +10,6 @@ use App\Models\Mediafile;
 use App\Models\Mycontact;
 use App\Models\Chatthread;
 use App\Models\Chatmessagegroup;
-//use App\Http\Resources\ChatmessageCollection;
 use App\Models\Chatmessage;
 use Illuminate\Http\Request;
 use App\Events\MessageSentEvent;
@@ -295,7 +294,6 @@ class ChatthreadsController extends AppBaseController
             'attachments'    => 'required_with:price|array',   // optional first message attachments
         ]);
 
-
         $chatthreads = DB::transaction( function() use(&$request) { 
 
             $chatthreads = collect();
@@ -303,10 +301,21 @@ class ChatthreadsController extends AppBaseController
             $isMassMessage = count($request->participants) > 1;
 
             if ($isMassMessage) {
-                $cmGroup = Chatmessagegroup::create([
-                    'gmtype' => MessagegroupTypeEnum::MASSMSG,
-                    'sender_id' => $originator->id,
-                ]);
+                $cmgroupAttrs = [
+                    'gmtype'          => MessagegroupTypeEnum::MASSMSG,
+                    'sender_id'       => $originator->id,
+                    'cattrs' => [
+                        'originator_id'   => $request->originator_id,
+                        'sender_name'     => $originator->name,
+                        'participants'    => $request->participants ?? null,
+                        'mcontent'        => $request->mcontent ?? null,
+                        'deliver_at'      => $request->deliver_at ?? null,
+                        'price'           => $request->price ?? null,
+                        'currency'        => $request->currency ?? null,
+                        'attachments'     => $request->attachments ?? null,
+                    ],
+                ];
+                $cmGroup = Chatmessagegroup::create($cmgroupAttrs);
             }
     
             foreach ($request->participants as $pkid) {
@@ -329,7 +338,6 @@ class ChatthreadsController extends AppBaseController
                     $ct->addParticipant($pkid);
                 }
     
-                // ... %TODO: use DB transaction ?
                 if ( $request->has('mcontent') || $request->has('attachments') ) { // if included send the first message
                     if ( $request->has('deliver_at') ) {
                         $message = $ct->scheduleMessage($request->user(), $request->mcontent ?? '', $request->deliver_at);
