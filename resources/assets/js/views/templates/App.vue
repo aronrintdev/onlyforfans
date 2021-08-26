@@ -138,17 +138,17 @@ export default {
       this.scrollToTop()
     }, 
 
-    /*
     mobile(val) {
       if (val) {
         console.log('App::watch.mobile - disabling tooltips', { val })
-        this.$root.$emit('bv::disable::tooltip')
+        //alert('App::watch.mobile - disabling tooltips', { val })
+        //this.$root.$emit('bv::disable::tooltip')
       } else {
         console.log('App::watch.mobile - enabling tooltips', { val })
-        this.$root.$emit('bv::enable::tooltip')
+        //alert('App::watch.mobile - enabling tooltips', { val })
+        //this.$root.$emit('bv::enable::tooltip')
       }
     },
-     */
 
   },
 
