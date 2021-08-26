@@ -152,10 +152,12 @@ export default {
 
   mounted() {
     this.updateScreenSize(this.$vssWidth)
-    if (this.mobile) {
-      console.log('App::mounted() - disabling tooltips', { val: this.mobile })
-      this.$root.$emit('bv::disable::tooltip')
-    }
+    this.$nextTick( () => {
+      if (this.mobile) {
+        console.log('App::mounted() - disabling tooltips', { val: this.mobile })
+        this.$root.$emit('bv::disable::tooltip')
+      }
+    })
   },
 
   created() {
