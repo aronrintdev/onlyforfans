@@ -17,7 +17,7 @@
             <div v-if="verrors && verrors.token">
               <b-alert variant="danger" v-text="$t('betaFailedMessage')" show />
             </div>
-            <b-form-group :invalid-feedback="verrors.email ? verrors.email[0] : null" :state="verrors.email ? false : null">
+            <b-form-group :invalid-feedback="verrors.email ? 'Invalid email address.' : null" :state="verrors.email ? false : null">
               <b-form-input
                 id="input-email"
                 v-model="form.email"

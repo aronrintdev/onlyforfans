@@ -42,6 +42,12 @@ class UsersController extends AppBaseController
         return new UserCollection($data);
     }
 
+    public function show(Request $request, User $user)
+    {
+        $this->authorize('view', $user);
+        return new UserResource($user);
+    }
+
     public function update(Request $request, User $user)
     {
         $this->authorize('update', $user);
@@ -542,5 +548,15 @@ class UsersController extends AppBaseController
         }
 
         return response()->json( ['status' => 200] );
+    }
+
+    public function loginAsUser(Request $request, User $user)
+    {
+        $sessionUser = $request->user();
+        if ( !$sessionUser->isAdmin() ) {
+            abort(404);
+        }
+        Auth::loginUsingId($user->id);
+        return response()->json([]);
     }
 }

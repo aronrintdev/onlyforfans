@@ -147,16 +147,25 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => ['index'],
     ]);
 
+    // -- notes: --
+    Route::put('/notes/{notes}', ['as' => 'notes.update', 'uses' => 'NotesController@update']);
+    Route::delete('/notes/{notes}', ['as' => 'notes.destroy', 'uses' => 'NotesController@destroy']);
+    Route::resource('notes', 'NotesController', [
+        'only' => ['store' ],
+    ]);
+
     // -- mediafiles: likeable | shareable | commentable (?) | tippable | purchaseable --
     //Route::post('/mediafiles/{mediafile}/doClone', ['as'=>'mediafiles.doClone', 'uses' => 'MediafilesController@doClone']);
     Route::get('/mediafiles/match', ['as'=>'mediafiles.match', 'uses' => 'MediafilesController@match']);
     Route::get('/mediafiles/disk-stats/{mediafile}', ['as'=>'mediafiles.diskStats', 'uses' => 'MediafilesController@diskStats']);
     Route::post('/mediafiles/batch-destroy', ['as'=>'mediafiles.batchDestroy', 'uses' => 'MediafilesController@batchDestroy']);
+    Route::patch('/mediafiles/{mediafile}/update-tags', ['as'=>'mediafiles.updateTags', 'uses' => 'MediafilesController@updateTags']);
     Route::resource('mediafiles', 'MediafilesController', [ 'except' => [ 'create', 'edit', ] ]);
 
     Route::resource('diskmediafiles', 'DiskmediafilesController', [ 'only' => [ 'index', 'show', 'destroy'] ])->middleware(['role:admin|super-admin']);
     //Route::resource('diskmediafiles', 'DiskmediafilesController', [ 'only' => [ 'index', 'show', 'destroy'] ]);
 
+    Route::get('/notifications/totalUnreadCount', ['as'=>'notifications.totalUnreadCount', 'uses' => 'NotificationsController@getTotalUnreadCount']);
     Route::resource('notifications', 'NotificationsController', [ 'only' => [ 'index', ] ]);
 
     /* -------------------------------- Posts ------------------------------- */
@@ -239,7 +248,6 @@ Route::group(['middleware' => ['auth']], function () {
 
     /* ------------------------------ Users ------------------------------ */
     // -- users: messageable --
-    //Route::get('/users-suggested', ['as'=>'users.suggested', 'uses' => 'UsersController@suggested']);
     Route::get('/users/me', ['as' => 'users.me', 'uses' => 'UsersController@me']);
     Route::get('/users/match', ['as'=>'users.match', 'uses' => 'UsersController@match']);
     Route::post('/users/request-verify', ['as'=>'users.requestVerify', 'uses' => 'UsersController@requestVerify']);
@@ -249,6 +257,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::patch('/users/{user}/settings/disable/{group}', ['as'=>'users.disableSetting', 'uses' => 'UsersController@disableSetting']); // turn off a single update within a group
     Route::patch('/users/{user}/settings', ['as'=>'users.updateSettingsBatch', 'uses' => 'UsersController@updateSettingsBatch']); // batch update one (or multiple) groups at a time
     Route::patch('/users/{user}/updatePassword', ['as'=>'users.updatePassword', 'uses' => 'UsersController@updatePassword']);
+    Route::post('/users/{user}/login-as-user', ['as'=>'users.loginAsUser', 'uses' => 'UsersController@loginAsUser'])->middleware(['role:admin|super-admin']);
     Route::get('/users/{user}/settings', [
         'middleware' => 'spaMixedRoute',
         'as'=>'users.showSettings',

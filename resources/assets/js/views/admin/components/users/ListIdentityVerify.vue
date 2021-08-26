@@ -9,7 +9,7 @@
     />
 
     <!-- Ellipsis Modal -->
-    <b-modal v-model="isEllipsisModalVisible" id="modal-ellipsis" size="xl" title="Title TBD" body-class="">
+    <b-modal v-model="isEllipsisModalVisible" id="modal-ellipsis" size="xl" title="Identity Verification Details" body-class="">
       <section>
         <!-- <pre>{{ JSON.stringify(this.modalSelection, null, 2) }}</pre> -->
         <table v-if="this.modalSelection!==null" class="table">
@@ -146,10 +146,14 @@ export default {
     },
 
     async hideModal(modal) {
+      this.renderError = false
       this.modalSelection = null
       switch (modal) {
         case 'show':
           this.isShowModalVisible = false
+          break
+        case 'ellipsis':
+          this.isEllipsisModalVisible = false
           break
       }
     },

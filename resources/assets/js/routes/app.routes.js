@@ -126,7 +126,7 @@ export const routes = [
   // Vaults
   {
     name: 'vault.dashboard',
-    path: '/my-vault',
+    path: '/my-media',
     component: vaults.Dashboard,
   },
 
@@ -210,6 +210,15 @@ export const routes = [
 const router = new VueRouter({
   mode: 'history',
   routes: routes,
+  scrollBehavior (to, from, savedPosition) {
+    if (to.hash) {
+      return {
+        selector: to.hash,
+        offset: { x: 0, y: 10 }
+      }
+    }
+    return { x: 0, y: 0 }
+  }
 })
 
 export default router

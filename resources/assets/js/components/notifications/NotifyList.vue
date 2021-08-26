@@ -6,27 +6,16 @@
     <ul class="list-unstyled">
       <b-media v-for="n in notifications" :key="n.id" tag="li" class="mb-0">
         <template #aside>
-          <router-link v-if="n.data.actor" :to="{ name: 'timeline.show', params: { slug: n.data.actor.slug ? n.data.actor.slug : n.data.actor.username } }">
-            <b-img-lazy width="48" height="48" rounded="circle" :src="n.data.actor.avatar" :alt="n.data.actor.slug" :title="n.data.actor.name" />
-          </router-link>
-          <router-link v-if="n.data.sender" :to="{ name: 'timeline.show', params: { slug: n.data.sender.slug ? n.data.sender.slug : n.data.sender.username } }">
-            <b-img width="48" height="48" rounded="circle" :src="n.data.sender.avatar" :alt="n.data.sender.slug" :title="n.data.sender.name" />
+          <router-link :to="{ name: 'timeline.show', params: { slug: n.user.slug } }">
+            <b-img-lazy width="48" height="48" rounded="circle" :src="n.user.avatar.filepath" :alt="n.user.slug" :title="n.user.name" />
           </router-link>
         </template>
-        <h6 class="mt-0 mb-1" v-if="n.data.actor">
-          <router-link :to="{ name: 'timeline.show', params: { slug: n.data.actor.slug ? n.data.actor.slug : n.data.actor.username } }">
-            <span>{{n.data.actor.name}}</span>
+        <h6 class="mt-0 mb-1">
+          <router-link :to="{ name: 'timeline.show', params: { slug: n.user.slug } }">
+            <span>{{n.user.name}}</span>
           </router-link>&nbsp;
-          <router-link :to="{ name: 'timeline.show', params: { slug: n.data.actor.slug ? n.data.actor.slug : n.data.actor.username } }">
-            <small class="text-muted">@{{ n.data.actor.username}}</small>
-          </router-link>
-        </h6>
-        <h6 class="mt-0 mb-1" v-if="n.data.sender">
-          <router-link :to="{ name: 'timeline.show', params: { slug: n.data.sender.slug ? n.data.sender.slug : n.data.sender.username } }">
-            <span>{{n.data.sender.name}}</span>
-          </router-link>&nbsp;
-          <router-link :to="{ name: 'timeline.show', params: { slug: n.data.sender.slug ? n.data.sender.slug : n.data.sender.username } }">
-            <small class="text-muted">@{{ n.data.sender.username}}</small>
+          <router-link :to="{ name: 'timeline.show', params: { slug: n.user.slug } }">
+            <small class="text-muted">@{{ n.user.slug }}</small>
           </router-link>
         </h6>
         <p class="mb-0 notify-message">
@@ -86,7 +75,7 @@
 </template>
 
 <script>
-//import Vuex from 'vuex'
+import Vuex from 'vuex'
 //import { DateTime } from 'luxon'
 import moment from 'moment'
 
@@ -101,6 +90,8 @@ export default {
     isLoading() {
       return !this.session_user || !this.notifications || !this.meta || !this.filter
     },
+
+    ...Vuex.mapActions(['getUnreadNotificationsCount']),
 
     totalRows() {
       return this.meta ? this.meta.total : 1
@@ -186,7 +177,9 @@ export default {
     this.getPagedData()
   },
 
-  mounted() { },
+  mounted() { 
+    this.$store.dispatch('getUnreadNotificationsCount')
+  },
 
   components: { },
 }

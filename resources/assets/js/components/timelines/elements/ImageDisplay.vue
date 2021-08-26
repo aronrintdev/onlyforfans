@@ -111,7 +111,7 @@ export default {
       const post = response.data.data
       const imageIndex = post.mediafiles.filter(file => !file.is_audio).findIndex(file => file.id === this.mediafile.id)
       if (post.access) {
-        eventBus.$emit('open-modal', { key: 'show-post', data: { post, imageIndex } })
+        eventBus.$emit('open-modal', { key: 'show-post', data: { post, imageIndex, feedType: 'photos' } })
       } else {
         if ( this.$options.filters.isSubscriberOnly(post) ) {
           eventBus.$emit('open-modal', { key: 'render-subscribe', data: { timeline: this.timeline } })

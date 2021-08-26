@@ -7,10 +7,12 @@
       v-b-tooltip.hover
       :title="item.tooltip"
     >
-      <span>
-        {{ stats[item.stat] }}
-        <fa-icon :icon="item.icon" />
-      </span>
+      <router-link :to="item.link">
+        <span>
+          {{ stats[item.stat] }}
+          <fa-icon :icon="item.icon" />
+        </span>
+      </router-link>
     </li>
   </ul>
 </template>
@@ -34,21 +36,25 @@ export default {
   data: () => ({
     statsDisplay: [
       {
+        link: '',
         stat: 'post_count',
         tooltip: 'Posts',
-        icon: 'pen',
+        icon: 'photo-video',
       },
       {
+        link: '/fans/followers',
         stat: 'follower_count',
-        tooltip: 'Followers',
+        tooltip: 'Fans',
         icon: 'user-friends',
       },
       {
+        link: '/notifications/dashboard',
         stat: 'like_count',
         tooltip: 'Likes',
         icon: 'heart',
       },
       {
+        link: '/fans/following',
         stat: 'following_count',
         tooltip: 'Following',
         icon: 'user-check',
@@ -57,3 +63,10 @@ export default {
   }),
 }
 </script>
+
+<style lang="scss" scoped>
+  .list-inline-item a {
+    color: inherit;
+    text-decoration: none;
+  }
+</style>

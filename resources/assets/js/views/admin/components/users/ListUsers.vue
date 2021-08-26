@@ -1,5 +1,6 @@
 <template>
   <div>
+
     <AdminTable 
       :fields="fields" 
       :tblFilters="userFilters" 
@@ -7,6 +8,30 @@
       @table-event=handleTableEvent 
       :encodedQueryFilters="encodedQueryFilters"
     />
+
+    <!-- Ellipsis Modal -->
+    <b-modal v-model="isEllipsisModalVisible" id="modal-ellipsis" size="xl" title="User Details" body-class="">
+      <section>
+        <!-- <pre>{{ JSON.stringify(this.modalSelection, null, 2) }}</pre> -->
+        <table v-if="this.modalSelection!==null" class="table">
+          <tr>
+            <th>Username</th>
+            <td>{{this.modalSelection.username}}</td>
+          </tr>
+          <tr>
+            <th>GUID</th>
+            <td>{{this.modalSelection.id}}</td>
+          </tr>
+        </table>
+      </section>
+      <template #modal-footer>
+        <section class="d-flex align-items-center">
+          <p v-if="renderError" class="mb-0 text-danger">There was a problem with your request</p>
+          <b-button @click="isEllipsisModalVisible=false" class="ml-3" variant="secondary">Cancel</b-button>
+          <b-button @click="loginAsUser()" class="ml-3" variant="danger">Login As User</b-button>
+        </section>
+      </template>
+    </b-modal>
 
   </div>
 </template>
@@ -46,7 +71,10 @@ export default {
     ],
 
     isShowModalVisible: false,
+    isEllipsisModalVisible: false,
     modalSelection: null,
+    isProcessing: false,
+    renderError: false,
 
     userFilters: {
       booleans: [
@@ -60,6 +88,19 @@ export default {
   }),
 
   methods: {
+
+    async loginAsUser() {
+      this.renderError = false
+      try { 
+        await axios.post( this.$apiRoute('users.loginAsUser', this.modalSelection.id) )
+        this.hideModal()
+        window.location.href = '/'
+      } catch (err) {
+        this.$log.error(err)
+        this.renderError = true
+      }
+    },
+
     handleTableEvent(payload) {
       console.log('handleTableEvent()', {
         payload,
@@ -67,6 +108,9 @@ export default {
       switch (payload.action) {
         case 'render-show':
           this.renderModal('show', payload.data)
+          break
+        case 'render-ellipsis':
+          this.renderModal('ellipsis', payload.data)
           break
       }
     },
@@ -77,16 +121,19 @@ export default {
         case 'show':
           this.isShowModalVisible = true
           break
+        case 'ellipsis':
+          const response = await axios.get( this.$apiRoute('users.show', this.modalSelection.id) )
+          this.modalSelection = response.data.data
+          this.isEllipsisModalVisible = true
+          break
       }
     },
 
-    async hideModal(modal) {
+    async hideModal() {
+      this.renderError = false
       this.modalSelection = null
-      switch (modal) {
-        case 'show':
-          this.isShowModalVisible = false
-          break
-      }
+      this.isShowModalVisible = false
+      this.isEllipsisModalVisible = false
     },
 
     toggleFilter(filterGroup, fObj) {
@@ -119,8 +166,6 @@ export default {
       }
     },
   },
-
-  watchers: {},
 
   created() { },
 

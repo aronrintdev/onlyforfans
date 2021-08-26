@@ -4,7 +4,7 @@
       <SiteLoading v-if="loading" key="loading" />
     </transition>
     <!-- Header -->
-    <MainNavBar v-if="!mobile" class="header" />
+    <MainNavBar class="header" />
 
     <div class="content flex-grow-1 d-flex" :class="{ 'p-3': !mobile, 'mobile': mobile }">
       <MobileSidebarMenu v-if="mobile" :show="mobileMenuOpen" fromRight @change="onMobileMenuChange" />
@@ -59,7 +59,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState(['session_user', 'mobile', 'mobileMenuOpen', 'screenSize', 'unread_messages_count']),
+    ...Vuex.mapState(['session_user', 'mobile', 'mobileMenuOpen', 'screenSize', 'unread_messages_count', 'unread_notifications_count']),
 
     mobileWidth() {
       if (typeof this.toggleMobileAt === 'number') {
@@ -82,11 +82,12 @@ export default {
     loading: false,
     onlineMonitor: null,
     unreadMessagesCount: 0,
+    unreadNotificationsCount: 0,
     isFooterHidden: false,
   }),
 
   methods: {
-    ...Vuex.mapActions(['getMe', 'getUnreadMessagesCount']),
+    ...Vuex.mapActions(['getMe', 'getUnreadMessagesCount', 'getUnreadNotificationsCount']),
     ...Vuex.mapMutations([ 'UPDATE_MOBILE', 'UPDATE_SCREEN_SIZE', 'UPDATE_MOBILE_MENU_OPEN' ]),
     startOnlineMonitor() {
       if (this.session_user) {
@@ -135,7 +136,8 @@ export default {
 
       // whenever the route changes, go to the top of the new page
       this.scrollToTop()
-    }
+    }, 
+
   },
 
   mounted() {
@@ -150,6 +152,7 @@ export default {
       this.loading = true
       this.getMe();
       this.getUnreadMessagesCount();
+      this.getUnreadNotificationsCount();
     }
     if (this.$vssWidth < this.mobileWidth) {
       this.UPDATE_MOBILE(true)
@@ -160,6 +163,8 @@ export default {
 
 <style lang="scss" scoped>
 .content.mobile {
-  padding-bottom: 64px;
+  padding-top: 15px;
+  padding-bottom: 68px;
+  height: calc(100% - 68px);
 }
 </style>
