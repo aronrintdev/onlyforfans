@@ -270,8 +270,8 @@ export default {
     "continueWithFacebook": "Continue With Facebook",
     "continueWithGoogle": "Continue With Google",
     "continueWithTwitter": "Continue With Twitter",
-    "betaMessage": "Welcome to the Allfans.com closed beta. Please complete the form below to register your account",
-    "betaFailedMessage": "Allfans.com is currently in a closed beta, please use the link provided to you in your invitation email to register in the beta program"
+    "betaMessage": "Welcome to the Allfans.com. Please complete the form below to register your account",
+    "betaFailedMessage": "Allfans.com is currently only accepting invited priority users, please use the link provided to you in your invitation email to register currently"
   },
 }
 </i18n>
