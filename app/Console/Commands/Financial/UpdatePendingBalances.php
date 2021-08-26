@@ -54,8 +54,8 @@ class UpdatePendingBalances extends Command
         ])->then(function (Batch $batch) {
             Log::info("Manually starting update pending balances");
             $finished = true;
-        })->name("Update Pending Balances")->onQueue("$queue-low")
-        ->allowFailures()->dispatch();
+        })->name("Update Pending Balances")->onConnection($queue)
+            ->allowFailures()->dispatch();
 
         $bar = $this->output->createProgressBar($batch->totalJobs);
         while (!$batch->finished() && !$batch->cancelled()) {
