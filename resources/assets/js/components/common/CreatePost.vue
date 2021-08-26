@@ -111,9 +111,11 @@
 
               <b-col cols="12" md="8" class="post-create-footer-ctrl d-flex">
                 <ul class="list-inline d-flex mb-0 OFF-border-right pt-1">
+
                   <li v-b-tooltip.hover="'Add Photo'" id="clickme_to-select" class="selectable select-pic">
                     <fa-icon :icon="selectedIcon==='pic' ? ['fas', 'image'] : ['far', 'image']" size="lg" :class="selectedIcon==='pic' ? 'text-primary' : 'text-secondary'" />
                   </li>
+
                   <li v-b-tooltip.hover="'Record Video'" v-if="!isIOS9PlusAndAndroid" @click="recordVideo()" class="selectable select-video">
                     <fa-icon :icon="selectedIcon==='video' ? ['fas', 'video'] : ['far', 'video']" size="lg" :class="selectedIcon==='video' ? 'text-primary' : 'text-secondary'" />
                   </li>
@@ -139,9 +141,13 @@
                   </li>
                 </ul>
                 <ul class="list-inline d-flex mb-0 pt-1">
-                  <li @click="showTagForm()" class="selectable show-tagform" v-b-tooltip.hover="'Add Tags'">
+                  <li v-if="mobile" @click="showTagForm()" class="selectable show-tagform">
                     <fa-icon :icon="isTagFormVisible ? ['fas', 'hashtag'] : ['far', 'hashtag']" :class="isHashtagIconSelected ? 'text-primary' : 'text-secondary'" size="lg" />
                   </li>
+                  <li v-else @click="showTagForm()" class="selectable show-tagform" v-b-tooltip.hover="'Add Tags'">
+                    <fa-icon :icon="isTagFormVisible ? ['fas', 'hashtag'] : ['far', 'hashtag']" :class="isHashtagIconSelected ? 'text-primary' : 'text-secondary'" size="lg" />
+                  </li>
+
                   <li @click="togglePostPrice()" class="selectable select-pic" v-b-tooltip.hover="'Set Post Unlock Price'">
                     <fa-icon :icon="postType === 'price' ? ['fas', 'tag'] : ['far', 'tag']" size="lg" :class="postType === 'price' ? 'text-primary' : 'text-secondary'" />
                   </li>
@@ -210,6 +216,16 @@ export default {
 
   computed: {
 
+    ...Vuex.mapState('vault', [
+      'mobile',
+      'selectedMediafiles',
+      'uploadsVaultFolder',
+    ]),
+
+    isIOS9PlusAndAndroid() {
+      return (isIOS && parseInt(osVersion.split('.')[0]) >= 9) || isAndroid
+    },
+
     hashtags: {
       // tag representation in the create post footer (can be deleted here but not added)
       get: function () {
@@ -224,15 +240,6 @@ export default {
         })
       }
     },
-
-    isIOS9PlusAndAndroid() {
-      return (isIOS && parseInt(osVersion.split('.')[0]) >= 9) || isAndroid
-    },
-
-    ...Vuex.mapState('vault', [
-      'selectedMediafiles',
-      'uploadsVaultFolder',
-    ]),
 
     // ref:
     //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
