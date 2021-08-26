@@ -37,4 +37,8 @@ class Chatmessagegroup extends Model
         return $this->hasMany(Chatmessage::class);
     }
 
+    public function sender() { // aka 'originator'
+        return $this->belongsTo(User::class, 'sender_id');
+    }
+
 }
