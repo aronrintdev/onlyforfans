@@ -206,6 +206,7 @@ import ReportPost from '@components/modals/ReportPost.vue'
 import ExpirationPeriod from '@components/modals/ExpirationPeriod.vue'
 import PromotionCampaign from '@components/modals/PromotionCampaign.vue'
 import PurchaseMessage from '@components/modals/PurchaseMessage'
+import { beforeDestroy } from 'vue2-dropzone';
 
 export default {
   name: 'Modals',

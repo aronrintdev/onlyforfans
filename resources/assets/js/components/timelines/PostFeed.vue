@@ -183,6 +183,7 @@ export default {
   },
   beforeDestroy() {
     // window.removeEventListener('scroll', this.onScroll)
+    eventBus.$off('update-timelines');
   },
 
   created() {
@@ -405,7 +406,23 @@ export default {
           if (!this.isLastPage && this.renderedItems.length >= 5) {
             this.renderedItems.pop();
           }
-          this.renderedItems.unshift(newVal);
+          newVal.mediafiles.forEach(mf => {
+            if (this.feedType === 'photos' && mf.is_image) {
+              this.renderedItems.unshift(mf);
+              this.totalPhotosCount += 1;
+            } else if (this.feedType === 'videos' && mf.is_video) {
+              this.renderedItems.unshift(mf);
+              this.totalVideosCount += 1;
+            } else if (this.feedType === 'default') {
+              if (mf.is_image) {
+                this.totalPhotosCount += 1;
+              }
+              if (mf.is_video) {
+                this.totalVideosCount += 1;
+              }
+              this.renderedItems.unshift(newVal);
+            }
+          })
         }
       } else {
         if (newVal.schedule_datetime) {
