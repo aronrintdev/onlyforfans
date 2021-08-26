@@ -466,7 +466,7 @@ class Account extends Model implements Ownable
             if (isset($priority) && $count >= $priority['count']) {
                 $queue = Config::get('transactions.summarizeQueue');
                 CreateTransactionSummary::dispatch($this, TransactionSummaryTypeEnum::BUNDLE, [ 'from' => '', 'to' => '' ])
-                    ->onQueue("{$queue}-{$priority}");
+                    ->onConnection($queue)->onQueue($priority);
             }
         });
     }
