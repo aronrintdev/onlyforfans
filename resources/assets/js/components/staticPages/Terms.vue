@@ -19,26 +19,27 @@
         <p>Indemnity. Customer agrees to indemnify and hold AllFans, its officers, directors and employees harmless from any losses (including attorneys’ fees) that result from any third party claims related to Customer’s (or its Users) access, use or misuse of the Beta Product(s), or any act or omission by Customer or its Users in violation of this Agreement.</p>
         <p>Dispute Resolution, Governing Law and Venue. The parties will attempt to resolve any dispute related to this Agreement through good faith, informal negotiation. If initial negotiation does not resolve the dispute, the parties will select a mutually agreed mediator in a mutually agreed location to attempt to resolve the dispute. If mediation fails to resolve the dispute, either party may file an action in a federal court in the Northern District of California only and each party irrevocably submits to the jurisdiction and venue of the applicable courts. The laws of the State of California govern this Agreement. The prevailing party in any litigation may seek to recover its legal fees and costs. Any breach of confidentiality obligations in this Agreement, or any unauthorized use of the services or a party’s intellectual property by the other, may cause irreparable harm. In no event may this agreement be governed by the United Nations convention on contracts for the international sale of goods.</p>
         <p>Compliance with Laws and Legal Advice. Each party must comply with all laws, rule or regulations applicable to such party’s activities in relation to this Agreement, including export control laws of the United States which are applicable to the Application and which may prohibit use of the Application in certain sanctioned or embargoed countries. AllFans will not provide Customer with any legal advice regarding compliance with data privacy or other relevant laws, rules or regulations in the jurisdictions in which Customer uses the Beta Product(s) (“Laws”). The parties acknowledge and agree that not all features, functions and capabilities of the Beta Product(s)may be used in all jurisdictions and Customer recognizes that certain features, functions and capabilities may need to be configured differently or not used in certain jurisdictions in order to comply with applicable local Laws, and in certain jurisdictions consents may need to be obtained from individuals submitting data via the Beta Product(s) as to the intended purpose, storage, distribution, access and use of the data submitted (“Local Use Decisions”). Customer is responsible for Local Use Decisions and AllFans disclaims all liability for Local Use Decisions.</p>
-        <p>Miscellaneous. This Agreement does not create a partnership, agency relationship, or joint venture between the parties. Any assignment of this Agreement by Customer in whole or in part without AllFans’s prior written consent will be null and void, except an assignment to a successor that is not a competitor of AllFans’s made in connection with a merger or sale of all or substantially all of Customer’s assets or stock or to an Affiliate. If this Agreement is translated into a language other than English, the translation is for convenience only, and the English language version will govern. If any provision of this Agreement is unenforceable, that provision will be modified to render it enforceable to the extent possible to affect the parties’ intention and the remaining provisions will not be affected. Failure of AllFans to enforce a right under this Agreement shall not act as a waiver of that right or the ability to later assert that right relative to the particular situation involved. This Agreement includes any schedules and exhibits attached hereto. Such documents encompass the entire agreement between Customer and AllFans with respect to the subject matter hereof and supersede all prior representations, agreements and understandings, written or oral. This Agreement may only be altered, amended or modified by duly executed written instrument. All notices to be provided by AllFans to Customer under this Agreement may be delivered in writing (a) by nationally recognized overnight delivery service (“Courier”) or US mail to the contact mailing address provided by Customer on any form; or (b) electronic mail to the electronic mail address provided for Customer’s Existing Account owner. Customer must give notice to AllFans in writing by Courier or US Mail to the following address: AllFans, Inc., Attn: Legal Department, 2110 E. Flamingo Road, Suite 206, Las Vegas, NV, 89119, USA. All notices shall be deemed to have been given immediately upon delivery by electronic mail, or if otherwise delivered upon receipt or, if earlier, two (2) business days after being deposited in the mail or with a Courier as permitted above. You may not assign this Agreement without the prior written consent of AllFans. Subject to the foregoing, the Agreement shall be binding upon the parties and their respective administrators, successors and assigns.</p>
+        <p>Miscellaneous. This Agreement does not create a partnership, agency relationship, or joint venture between the parties. Any assignment of this Agreement by Customer in whole or in part without AllFans’s prior written consent will be null and void, except an assignment to a successor that is not a competitor of AllFans’s made in connection with a merger or sale of all or substantially all of Customer’s assets or stock or to an Affiliate. If this Agreement is translated into a language other than English, the translation is for convenience only, and the English language version will govern. If any provision of this Agreement is unenforceable, that provision will be modified to render it enforceable to the extent possible to affect the parties’ intention and the remaining provisions will not be affected. Failure of AllFans to enforce a right under this Agreement shall not act as a waiver of that right or the ability to later assert that right relative to the particular situation involved. This Agreement includes any schedules and exhibits attached hereto. Such documents encompass the entire agreement between Customer and AllFans with respect to the subject matter hereof and supersede all prior representations, agreements and understandings, written or oral. This Agreement may only be altered, amended or modified by duly executed written instrument. All notices to be provided by AllFans to Customer under this Agreement may be delivered in writing (a) by nationally recognized overnight delivery service (“Courier”) or US mail to the contact mailing address provided by Customer on any form; or (b) electronic mail to the electronic mail address provided for Customer’s Existing Account owner. Customer must give notice to AllFans in writing by Courier or US Mail to the following address: AllFans, Inc., Attn: Legal Department, 3651 Lindell Road, Suite D407, Las Vegas, NV 89103. All notices shall be deemed to have been given immediately upon delivery by electronic mail, or if otherwise delivered upon receipt or, if earlier, two (2) business days after being deposited in the mail or with a Courier as permitted above. You may not assign this Agreement without the prior written consent of AllFans. Subject to the foregoing, the Agreement shall be binding upon the parties and their respective administrators, successors and assigns.</p>
       </div>
       <hr/>
       <b-card-title class="mt-5">{{$t('header')}}</b-card-title>
       <div class="mt-5">
         <p>1. About</p>
 
-        <p style="margin-left:.5in;text-align:justify;">1.1 AllFans
-        accessed at&nbsp;<u>www.AllFans.com</u>&nbsp;(&quot;ENTITY NAME&quot; or
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">1.1 AllFans
+        accessed at&nbsp;<u>www.AllFans.com</u>&nbsp;(&quot;AllFans&quot; or
         the &quot;Website&quot;) is a&nbsp;social media website and application service
         that allows users to upload photos and videos to their profile, setting a
         monthly subscription price and therefore earning money from any paying
         subscribers (&quot;Subscriber&quot;). AllFans is operated by CMJMS IP
-        Holdings LLC., a Nevada Limited Liability Company, registered at 2110 East
-        Flamingo Road, Suite 206,<br>
-        Las Vegas, Nevada 89119.  Digital content is governed by the federal laws of
+        Holdings LLC., a Nevada Limited Liability Company, registered at 3651 Lindell Road, Suite D407,<br>
+        Las Vegas, NV 89103.  Digital content is governed by the federal laws of
         the United States.</p>
 
 
-        <p style="margin-left:.5in;text-align:justify;">1.2 These
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">1.2 These
         Terms of Service, together with&nbsp;our Privacy Policy (&quot;Terms&quot;),
         govern your use of AllFans,&nbsp;including any content, functionality,
         and services offered on or through the Website. By registering with and using AllFans,
@@ -48,14 +49,14 @@
 
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:.5in;text-align:justify;">1.3 This Website is
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">1.3 This Website is
         offered and available to users who are 18 years of age or older. By using this
         Website, you represent and warrant that you are of legal age to form a binding
         contract with us and meet all of the foregoing eligibility requirements. If you
         do not meet all of these requirements, you must not access or use the Website.</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:.5in;text-align:justify;">1.4 We reserve the
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">1.4 We reserve the
         right to make changes to these Terms at any time&nbsp;and at our sole
         discretion. All changes are effective immediately when we post them, and apply
         to all access to and use of the Website thereafter.&nbsp;By continuing to use AllFans
@@ -63,7 +64,8 @@
         to check this page from time to time so you are aware of any changes, as they
         are binding on you.</p>
 
-        <p style="margin-left:.5in;text-align:justify;">1.5 By
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">1.5 By
         using AllFans you consent to receiving communications from us
         electronically, including emails and messages posted to your AllFans account,&nbsp;all
         as more fully detailed in our Privacy Policy<u>.</u> You acknowledge and agree
@@ -75,61 +77,55 @@
 
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:.5in;text-align:justify;">1.6 We do not own
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">1.6 We do not own
         User Content on AllFans and views expressed by Users on AllFans do
         not represent the views of AllFans. All User Content transactions and
         interactions on AllFans are between Users and at no point does AllFans
         become a party to any transaction or interaction between Users.</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;
-        ">1.7
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">1.7
         We reserve the right at any time and without notice to:</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;
-        ">1.7.1
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">1.7.1
         modify, suspend or terminate AllFans or any portion
         thereof;</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;
-        ">1.7.2
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">1.7.2
         restrict, limit, suspend or terminate your access to AllFans
         or any portion thereof;</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;">1.7.3 delete
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">1.7.3 delete
         any content you post on AllFans if in our reasonable opinion it does not
         comply with these Terms and/or applicable law;</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;
-        ">1.7.4
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">1.7.4
         monitor your use of AllFans (including any content or
         message you post or broadcast&nbsp;on AllFans) to verify compliance with
         these Terms and/or any applicable law;</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;
-        ">1.7.5
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">1.7.5
         investigate any suspected or alleged misuse or unlawful use of AllFans
         and cooperate with law enforcement in such investigation;</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">1.7.6 disclose information about your use of AllFans in
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">1.7.6 disclose information about your use of AllFans in
         connection with any law enforcement investigation of any suspected or alleged
         illegal activity, or in response to a lawful court order; or</p>
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">1.7.7 change the payment or payout processor that enables
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">1.7.7 change the payment or payout processor that enables
         you to make or receive payments as a User.</p>
 
 
-        <p style="margin-left:1.0in;text-align:justify;
-        text-indent:-.5in;">1.7.6
-        From time to time, we may restrict access to some parts of the
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">1.8 From time to time, we may restrict access to some parts of the
         Website, or the entire Website, to Users.</p>
 
         <p style="margin-left:41.0pt;text-align:justify;
@@ -138,34 +134,32 @@
         <p>2. How It Works</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;
-        ">2.1.1
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">2.1
         AllFans</span> is a social media platform that lets you create a User profile,
         which in turn allows you to:</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;
-        ">2.1.2
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">2.2
         upload and post photos and videos for access by your subscribers;
         and/or;</p>
 
 
-        <p style="margin-left:1.0in;text-align:justify;
-        text-indent:-.5in;">2.1.3
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">2.3
         subscribe to another User’s profile to view their otherwise
         restricted photos and videos.</p>
 
         <p style="margin-left:1.0in;text-align:justify;"></p>
 
-        <p style="margin-left:1.0in;text-align:justify;
-        text-indent:-.5in;">2.1.4
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">2.4
         The term&nbsp;&quot;Subscriber&quot;&nbsp;refers to all users,
         whether using the Website to earn money or to subscribe to others.</p>
 
         <p style="margin-left:1.0in;text-align:justify;"></p>
 
-        <p style="margin-left:1.0in;text-align:justify;
-        text-indent:-.5in;">2.1.5
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">2.5
         The term&nbsp;&quot;User Content&quot;&nbsp;means any and
         all&nbsp;media uploaded by Users.
         </p>
@@ -179,8 +173,7 @@
         is a condition of your use of the Website that all the information you provide
         on the Website is correct, current, and complete.</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">3.2 You agree that all information you provide to
+        <p style="margin-top:0in;margin-right:0in;margin-left:1.0in;text-align:justify;text-indent:-.5in;">3.2 You agree that all information you provide to
         register with this Website or otherwise, including but not limited to through
         the use of any interactive features on the Website, is governed by our Privacy
         Policy at&nbsp;<u>https://allfans.com/privacy</u>, and you consent to
@@ -188,56 +181,38 @@
         Policy.</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;">3.3 If
-        you are looking to subscribe to other profiles you will need to&nbsp;add a
-        payment card.&nbsp;When adding a payment card, your card information is stored
-        by a payment processor, which is called PROCESSOR NAME;&nbsp;or if you
-        are subscribing to a profile containing sexually explicit content, your card
-        information is stored by a different payment processor, PROCESSOR NAME.
-        However, as far as legally possible, AllFans reserves the right to
-        change the payment processors it uses at any time and without notice to you. AllFans
-        does not store any payment card information.</p>
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">3.3 If you are looking to subscribe to other profiles, you will need to add a payment card. When adding a payment card, your card information is stored by a payment processor; or if you are subscribing to a profile containing sexually explicit content, your card information may be stored by a different payment processor. However, as far as legally possible, AllFans reserves the right to change the payment processors it uses at any time and without notice to you. AllFans does not store any payment card information.</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;">3.4 If
-        you are looking to earn money from other Users subscribing to your profile, you
-        will need to add&nbsp;a bank account and upload a valid form of ID. You
-        may&nbsp;also need to submit&nbsp;additional legal information, such as a W-9
-        if you are resident in the United States of America (the exact information
-        required will depend on your country). Your earnings will be paid into your
-        bank account, either via one of our payout processors (PROCESSOR NAME(S))
-        or via&nbsp;direct bank wire (only on request and written approval by AllFans).
-        With exception to those Users&nbsp;seeking payment via direct bank wire,&nbsp;AllFans
-        does not store any&nbsp;bank account information, which is stored by our third-party
-        payout processors.</p>
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">3.4 If you are looking to earn money from other Users subscribing to your profile, tipping you, or buying paid posts, you will need to add a bank account and upload a valid form of ID. You may also need to submit additional legal information, such as a W-9 if you are resident in the United States of America (the exact information required will depend on your country). Your earnings will be paid into your bank account, either via one of our payout processors or via direct bank wire (only on request and written approval by AllFans). With exception to those Users seeking payment via direct bank wire, AllFans does not store any bank account information, which is stored by our third-party payout processors.</p>
 
         <p style="margin-top:0in;margin-right:0in;margin-bottom:
-        7.5pt;margin-left:1.0in;text-align:justify;text-indent:-.5in;">3.5.1  By registering
+        7.5pt;margin-left:1.0in;text-align:justify;text-indent:-.5in;">3.5  By registering
         on AllFans, you confirm&nbsp;that:</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;">3.5.1 all
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">3.5.1 all
         account registration, profile information and content you provide is your own
         information and the content is truthful and accurate;</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;">3.5.2 if
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">3.5.2 if
         you previously had an account with AllFans, your old account was not
         terminated or suspended by AllFans for violation of these Terms;</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">3.5.3 you register on AllFans for your own personal
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">3.5.3 you register on AllFans for your own personal
         use and you will not sell, rent or transfer your account to any third party;
         and</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">3.5.4 AllFans reserves the right, at any time, to
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">3.5.4 AllFans reserves the right, at any time, to
         verify the information which you provide to us as well as your compliance with
         these Terms and to suspend your account if it is unable to do so to its reasonable
         satisfaction.</p>
 
-        <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;">3.6 You
+        <p style="margin-top:0in;margin-right:0in;margin-bottom:
+        7.5pt;margin-left:1.0in;text-align:justify;text-indent:-.5in;">3.6 You
         are fully responsible for any and all activities that occur on your account and
         you are responsible for keeping your login details confidential and
         secure.&nbsp;You agree not to disclose these details to any other person or entity&nbsp;and
@@ -249,8 +224,8 @@
         so that others are not able to access, view or record your password or other
         personal information.</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">3.7 We have the right to disable any user name,
+        <p style="margin-top:0in;margin-right:0in;margin-bottom:
+        7.5pt;margin-left:1.0in;text-align:justify;text-indent:-.5in;">3.7 We have the right to disable any user name,
         password, or other identifier, whether chosen by you or provided by us, at any
         time and at our sole discretion for any or no reason, including if, in our
         opinion, you have violated any provision of these Terms.&nbsp;
@@ -276,8 +251,8 @@
         entitled to cancel any subscription, for any reason and at any time, thereby
         ensuring that you will not be billed again for that subscription.</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">5.2&nbsp;    <span style="">Any&nbsp;purchase
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">5.2&nbsp;    <span style="">Any&nbsp;purchase
         made on </span>AllFans<span style=""> resulting in a
         chargeback will cause the User’s account to be immediately and permanently
         excluded from </span>AllFans<span style="">.&nbsp;
@@ -286,8 +261,8 @@
 
         <p>6. Twitter</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">6.1 AllFans allows Users to connect
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">6.1 AllFans allows Users to connect
         a&nbsp;Twitter account and to post auto-tweets. By using this feature, you must
         fully comply with and respect Twitter's Terms of Service, which can be read in
         full here:&nbsp;</span><span style="color:black"><a
@@ -295,16 +270,16 @@
 
         <p>7. Account Deactivation</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">7.1 Should you wish to deactivate your AllFans account,
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">7.1 Should you wish to deactivate your AllFans account,
         please contact AllFans customer support at support@allfans.com&nbsp;to
         submit your deactivation request. We will deactivate your account within 10
         working days after receiving your request.</p>
 
         <p>8. Intellectual Property Rights</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">8.1 Other than User Content, the Website and its entire
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">8.1 Other than User Content, the Website and its entire
         contents, features, and functionality (including but not limited to all
         information, software, text, displays, images, video, and audio, and the
         design, selection, and arrangement thereof), are owned by us, our licensors, or
@@ -312,42 +287,42 @@
         trademark, patent, trade secret, and other intellectual property or proprietary
         rights laws.</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">8.2 You must not reproduce, distribute, modify, create
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">8.2 You must not reproduce, distribute, modify, create
         derivative works of, publicly display, publicly perform, republish, download,
         store, or transmit any of the material on the Website, except as follows:</p>
 
         <p style="text-align:justify;text-indent:.5in;"></p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">8.2.1 your computer may temporarily store copies of such materials
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">8.2.1 your computer may temporarily store copies of such materials
         in RAM incidental to your accessing and viewing those materials;</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">8.2.2 you may store files that are automatically cached by
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">8.2.2 you may store files that are automatically cached by
         your Web browser for display enhancement purposes; and</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">8.2.3 you may print or download one copy of a reasonable
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">8.2.3 you may print or download one copy of a reasonable
         number of pages of the Website for your own personal, non-commercial use and
         not for further reproduction, publication, or distribution.</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">8.3 If you print, copy, modify, download, or otherwise
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">8.3 If you print, copy, modify, download, or otherwise
         use or provide any other person with access to any part of the Website in
         breach of the Terms, your right to use the&nbsp;Website will stop immediately
         and you must, at our option, return or destroy any copies of the materials you
         have made.</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">8.4 Other than User Content, no right, title, or
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">8.4 Other than User Content, no right, title, or
         interest in or to the Website or any content on the Website is transferred to
         you, and all rights not expressly granted are reserved by us. Any use of the
         Website not expressly permitted by these Terms is a breach of these Terms and
         may violate copyright, trademark, and other laws.</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">8.5 The AllFans name, logo and all related names,
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">8.5 The AllFans name, logo and all related names,
         logos, product and service names, designs, and slogans are trademarks of ours
         or our affiliates or licensors. You must not use such marks without our prior
         written permission. All other names, logos, product and service names, designs,
@@ -355,8 +330,8 @@
 
         <p>9. License</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">9.1 Subject to all of the terms, conditions, limitations
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">9.1 Subject to all of the terms, conditions, limitations
         and restrictions contained in these Terms, we grant to you&nbsp;a conditional,
         revocable, non-transferable, non-sublicensable, non-exclusive and limited license
         to user our website and to download and install a single copy of the AllFans
@@ -367,8 +342,8 @@
         than as expressly permitted by these Terms is strictly prohibited. All rights
         not expressly granted herein are reserved by us.</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">9.2 We do not warrant that AllFans is compatible
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">9.2 We do not warrant that AllFans is compatible
         with all devices and operating systems. It is your sole responsibility to
         determine whether or not AllFans is compatible with your device. From
         time to time we may make updates to AllFans and will make such updates
@@ -382,116 +357,117 @@
         require that all Users respect and comply with these Terms below,&nbsp;at all
         times, when using AllFans.</p>
 
-        <p style="text-align:justify;text-indent:
-        .5in;">10.2  You may&nbsp;not:</p>
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">10.2  You may&nbsp;not:</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">10.2.1 use AllFans other than for your own lawful and
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.2.1 use AllFans other than for your own lawful and
         personal use in accordance with these Terms;</p>
 
         <p style="text-align:justify;text-indent:.5in;"></p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">10.2.2 impersonate&nbsp;us, one of our employees, another User,
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.2.2 impersonate&nbsp;us, one of our employees, another User,
         or any other person or entity&nbsp;or falsely state, suggest or otherwise
         misrepresent affiliation, endorsement, sponsorship between you and any other
         person or entity;</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">10.2.3 falsify account registration information, or make
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.2.3 falsify account registration information, or make
         unauthorized use of another's information or content;</p>
 
         <p style="text-align:justify;text-indent:.5in;"></p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">10.2.4 use AllFans in any manner or for any purpose that
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.2.4 use AllFans in any manner or for any purpose that
         is illegal or unlawful, including engaging in any activity that violates any
         right of any person or entity;</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">10.2.5 copy, reproduce, distribute, modify, or create
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.2.5 copy, reproduce, distribute, modify, or create
         derivative works from, any portion of AllFans without our express
         written permission;</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">10.2.6 use AllFans for the purpose of exploiting,
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.2.6 use AllFans for the purpose of exploiting,
         harming, or attempting to exploit or harm minors in any way by exposing them to
         inappropriate content, asking for personally identifiable information, or
         otherwise;</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">10.2.7 transmit, or procure the sending of, any advertising or
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.2.7 transmit, or procure the sending of, any advertising or
         promotional material, including any “junk mail”, “chain letter”, “spam”, or any
         other similar solicitation;</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">10.2.8 engage in any other conduct that restricts or inhibits
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.2.8 engage in any other conduct that restricts or inhibits
         anyone’s use or enjoyment of the Website, or which, as determined by us, may
         harm us or Users of the Website or expose them to liability;</p>
 
-        <p style="text-align:justify;text-indent:.5in;">10.2.9 create,
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.2.9 create,
         upload, post, display, publish or distribute User Content that:</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;">(a) is
+        margin-left:2in;text-align:justify;text-indent:-.5in;">(a) is
         obscene, illegal, fraudulent, defamatory, libelous, hateful, discriminatory,
         threatening or harassing, or in any way incites violence or any of the aforementioned
         prohibitions;</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;">(b) violates
+        margin-left:2in;text-align:justify;text-indent:-.5in;">(b) violates
         another's copyright, trademark, right of privacy, right of publicity, or other
         property or personal right (for example, using the name, likeness, image or
         other identity of another without proper consent);</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:.5in;text-align:justify;">(c) promotes or
+        margin-left:2in;text-align:justify;text-indent:-.5in;">(c) promotes or
         advertises escort services;</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;">(d) promotes
+        margin-left:2in;text-align:justify;text-indent:-.5in;">(d) promotes
         or advertises firearms or other weapons, tobacco, drugs, or drug
         paraphernalia;</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:.5in;text-align:justify;">(e) promotes any
+        margin-left:2in;text-align:justify;text-indent:-.5in;">(e) promotes any
         illegal activity, or advocates, promotes, or assists any unlawful act;</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;">(f)  causes
+        margin-left:2in;text-align:justify;text-indent:-.5in;">(f)  causes
         annoyance, inconvenience, or needless anxiety or is likely to upset, embarrass,
         alarm, or annoy any other person;</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;">(g) involves
+        margin-left:2in;text-align:justify;text-indent:-.5in;">(g) involves
         commercial activities or sales, such as contests, sweepstakes and other sales
         promotions, barter, or advertising;</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;">(h) gives
+        margin-left:2in;text-align:justify;text-indent:-.5in;">(h) gives
         the impression that it emanates from or is endorsed by us or any other person
         or entity, if this is not the case;</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">10.2.10 remove, erase, modify or tamper with any copyright,
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.2.10 remove, erase, modify or tamper with any copyright,
         trademark or other proprietary rights notice that is contained in any User
         Content that you do not own;</p>
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">10.2.11 use the Website in any manner that could disable,
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.2.11 use the Website in any manner that could disable,
         overburden, damage, or impair the site or interfere with any other party’s use
         of the Website, including their ability to engage in real time activities
         through the Website;</p>
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">10.2.12 decompile, disassemble, reverse engineer, or otherwise
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.2.12 decompile, disassemble, reverse engineer, or otherwise
         attempt to discover or derive the source code of AllFans;</p>
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">10.2.13 interfere in any way with the operation of AllFans or
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.2.13 interfere in any way with the operation of AllFans or
         any server, network or system associated with AllFans, including,
         without limitation: hacking, mail-bombing, flooding, overloading, or making
         &quot;denial of service&quot; attacks; probing, scanning or testing the
@@ -502,23 +478,23 @@
         access;</p>
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">10.2.14 use AllFans for any unauthorized purpose,
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.2.14 use AllFans for any unauthorized purpose,
         including, without limitation, for purposes of building a competitive product
         or service, monitoring the app's availability, performance or functionality, or
         for any other competitive purposes;</p>
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">10.2.15 use any automated program, tool or process (including
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.2.15 use any automated program, tool or process (including
         without limitation, web crawlers, robots, bots spiders, and automated scripts)
         to access AllFans or any server, network or system associated with AllFans,
         or to extract, collect, harvest or gather content or information from AllFans;
         or</p>
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">10.2.16 make any other use of AllFans that violates these
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.2.16 make any other use of AllFans that violates these
         Terms or any applicable law.</p>
 
         <p style="margin-top:0in;margin-right:0in;
@@ -535,95 +511,147 @@
         or legal guardian and become aware that your minor-child has registered on AllFans,
         please immediately notify us at support@allfans.com</p>
 
-        <p style="margin-left:1.0in;text-align:justify;
-        text-indent:-.5in;">10.4.1&nbsp;&nbsp;&nbsp;
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">10.4&nbsp;&nbsp;&nbsp;
         By registering an account with&nbsp;AllFans, you represent
         and warrant that:</p>
 
         <p style="margin-left:57.0pt;text-align:justify;
         "></p>
 
-        <p style="margin-left:1.0in;text-align:justify;
-        text-indent:-.5in;">10.4.2&nbsp;&nbsp;&nbsp;
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.4.1&nbsp;&nbsp;&nbsp;
         you are&nbsp;at least 18 years of age;</p>
 
 
-        <p style="margin-left:1.0in;text-align:justify;
-        text-indent:-.5in;">10.4.3&nbsp;&nbsp;&nbsp;
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.4.2&nbsp;&nbsp;&nbsp;
         you will fully comply with these Terms;</p>
 
         <p style="margin-left:1.0in;text-align:justify;"></p>
 
-        <p style="margin-left:1.0in;text-align:justify;
-        text-indent:-.5in;">10.4.4&nbsp;&nbsp;&nbsp;
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.4.3&nbsp;&nbsp;&nbsp;
         you accept full responsibility for the use of AllFans on
         any device, whether or not it is owned by you;</p>
 
         <p style="margin-left:1.0in"></p>
 
-        <p style="margin-left:1.0in;text-align:justify;
-        text-indent:-.5in;">10.4.5&nbsp;&nbsp;&nbsp;
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.4.4&nbsp;&nbsp;&nbsp;
         you accept full responsibility for any User Content created or
         provided by you; and</p>
 
         <p style="margin-left:1.0in"></p>
 
-        <p style="margin-left:1.0in;text-align:justify;
-        text-indent:-.5in;">10.4.6&nbsp;&nbsp;&nbsp;
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">10.4.5&nbsp;&nbsp;&nbsp;
         your use of AllFans will not violate these Terms or any
         applicable law.</p>
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">10.5  If you are using AllFans on behalf of a
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">10.5  If you are using AllFans on behalf of a
         business or other entity, you warrant that you are authorized to grant all the licenses
         stipulated in these Terms and that you are authorized to bind the business or
         other entity to these Terms.
         </p>
 
-        <p>11. User
-        Content</p>
+        <p>11. User Content</p>
+        
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">11.1  There may be no content, which suggests any illegal activity. Content in violation of Segpay policies, or the policies of the credit card associations can result in significant assessments and/or the termination of your account. The merchant is responsible for establishing controls to prevent prohibited content from being published to their website(s).
+        </p>
+        <p style="margin-left:1.0in;text-align:justify;text-indent:
+        -.5in;">Prohibited content includes, but is not limited:</p>
+        
+        <p style="margin-left:1.0in;text-align:justify;text-indent:
+        -.5in;">(a) Child Pornography (anyone under the age of 18)</P>
+        
+        <p style="margin-left:1.5in;text-align:justify;text-indent:
+        -.5in;">This includes depicting or describing persons under the age of 18, or appearing to be under the age of 18.</P>
+        <p style="margin-left:1.5in;text-align:justify;text-indent:
+        -.5in;">If your website uses the word "teen," it must be stated, in a clear and conspicuous manner, that the models are 18 or 19.</P>
+
+        <p style="margin-left:1.0in;text-align:justify;text-indent:
+        -.5in;">(b) Forced / Non-Consensual Sexual Activity</P>
+
+        <p style="margin-left:1.5in;text-align:justify;text-indent:
+        -.5in;">Oral, anal or vaginal penetration by sex organs, object (dildo, strap-on,etc.) or fingers and includes wording or actions indicating lack of consent: rape, force, asleep, drugged, passed/blacked out, chloroformed, unconscious, hypnotized, drunk, intoxicated, inebriated, drugged, stoned sex, etc.</P>
+        <p style="margin-left:1.5in;text-align:justify;text-indent:
+        -.5in;">Someone who is drunk, sleeping, hypnotized, etc. cannot give consent, and is therefore classified as a violation.</P>
+
+        <p style="margin-left:1.0in;text-align:justify;text-indent:
+        -.5in;">(c) Bestiality</P>
+
+        <p style="margin-left:1.5in;text-align:justify;text-indent:
+        -.5in;">This includes content depicting or describing sex with animals, and acts with non-human creatures (aliens, mythological creatures, etc.).</P>
+
+        <p style="margin-left:1.0in;text-align:justify;text-indent:
+        -.5in;">(d) Hate Crimes</P>
+        <p style="margin-left:1.0in;text-align:justify;text-indent:
+        -.5in;">(e) Violence, or extreme sexual violence and/or Pain</P>
+        <p style="margin-left:1.0in;text-align:justify;text-indent:
+        -.5in;">(f) Non-consensual mutilation of a person or body part</P>
+        <p style="margin-left:1.0in;text-align:justify;text-indent:
+        -.5in;">(g) Blood</P>
+        <p style="margin-left:1.0in;text-align:justify;text-indent:
+        -.5in;">(h) Scat, depicting or displaying human feces</P>
+        <p style="margin-left:1.0in;text-align:justify;text-indent:
+        -.5in;">(i) Counterfeit or Copyright Infringing Merchandise</P>
+
+        <p style="margin-left:1.0in;text-align:justify;text-indent:
+        -.5in;">The above prohibitions apply to:</p>
+        
+        <p style="margin-left:1.5in;text-align:justify;text-indent:
+        -.5in;">actual and suggested content;</P>
+        <p style="margin-left:1.5in;text-align:justify;text-indent:
+        -.5in;">cartoons and animations; and</P>
+        <p style="margin-left:1.5in;text-align:justify;text-indent:
+        -.5in;">links in to a registered website.  <em>* This means that a merchant is directly responsible for the advertising practices of their affiliates from all traffic sources.</em></P>
+
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;">11.1  By
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">11.2  By
         creating and publishing User Content on AllFans, you authorize your Fans
         to access and view (without downloading or copying) your User Content on AllFans
         for their own lawful and personal use. You also represent, warrant and
         undertake that:</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">11.1.1 you own, have a valid license to, or otherwise control
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">11.2.1 you own, have a valid license to, or otherwise control
         all rights in and to your User Content;</p>
 
         <p style="margin-left:.25in;text-align:justify;"></p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">11.1.2 to the extent your User Content includes or utilizes any
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">11.2.2 to the extent your User Content includes or utilizes any
         third-party property, you have secured all rights, licenses, consents and
         releases that are necessary for the use of such third-party property in your
         User Content; and</p>
 
         <p style="margin-left:.25in;text-align:justify;"></p>
 
-        <p style="margin-left:.5in;text-align:justify;">11.1.3    your
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">11.2.3 your
         User Content is non-confidential and will be&nbsp;made available to your Users
         on allfans.com</p>
 
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;">11.2  You
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">11.3  You
         grant us and our licensees, successors, and assigns the right to use,
         reproduce, modify, perform, display, distribute, and otherwise disclose to
         third parties any such material.</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;">11.3  You
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">11.4  You
         understand and acknowledge that you are responsible for any User Content you
         submit or contribute, and you have full responsibility for such content,
         including its legality, reliability, accuracy, and appropriateness.</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;">11.4  You
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">11.5  You
         shall indemnify us, our licensees, successors, and assigns against all
         liabilities, costs, expenses, damages and losses (including any direct,
         indirect or consequential losses, loss of profit, loss of reputation and all
@@ -632,17 +660,17 @@
         arising out of or in connection with your User Content.</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;">11.5  We
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">11.6  We
         are not responsible or liable to any third party for the content or accuracy of
         any User Content posted by you or any other user of the Website.</p>
 
         <p style="margin-top:0in;margin-right:0in;
-        margin-left:1.0in;text-align:justify;text-indent:-.5in;">11.6  Upon
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">11.7  Upon
         signing up to allfans.com, you also agree to act as custodian of records
         for the content that you&nbsp;upload to allfans.com.</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">11.7  Any questions regarding User Content can&nbsp;be
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">11.8  Any questions regarding User Content can&nbsp;be
         addressed by emailing&nbsp;support@allfans.com
         </p>
 
@@ -657,8 +685,8 @@
         appropriate by AllFans, terminating the account of the User who
         published the content.</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">12.2  To notify us of claimed copyright infringement, please
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">12.2  To notify us of claimed copyright infringement, please
         contact our customer support team by email at support@allfans.com</p>
 
 
@@ -667,40 +695,40 @@
         the DMCA, a notification of claimed copyright infringement must include all of
         the following:</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">12.3.1    a physical or electronic signature of a person
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">12.3.1    a physical or electronic signature of a person
         authorized to act on behalf of the owner of an exclusive right that is
         allegedly infringed;</p>
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">12.3.2 identification of the copyrighted work claimed to have
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">12.3.2 identification of the copyrighted work claimed to have
         been infringed, or if multiple copyrighted works are covered by a single
         notification, a representative list of such works;</p>
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">12.3.3 identification of the material that is claimed to be
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">12.3.3 identification of the material that is claimed to be
         infringing or to be the subject of infringing activity and that is to be
         removed or access to which is to be disabled, and information reasonably
         sufficient to permit the service provider to locate the material;</p>
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">12.3.4 information reasonably sufficient to permit the service
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">12.3.4 information reasonably sufficient to permit the service
         provider to contact the complaining party, such as an address, telephone
         number, and if available, an electronic mail address at which the complaining
         party may be contacted;</p>
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">12.3.5 a statement that the complaining party has a good faith
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">12.3.5 a statement that the complaining party has a good faith
         belief that use of the material in the manner complained of is not authorized
         by the copyright owner, its agent, or the law; and</p>
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">12.3.6 a statement that the information in the notification is
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">12.3.6 a statement that the information in the notification is
         accurate, and under penalty of perjury, that the complaining party is
         authorized to act on behalf of the owner of an exclusive right that is
         allegedly infringed.</p>
@@ -717,20 +745,21 @@
         margin-left:.5in;text-align:justify;">12.5  A DMCA
         counter-notification must include all of the following:</p>
 
-        <p style="margin-left:.5in;text-align:justify;">12.5.1    your
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">12.5.1    your
         physical or electronic signature;</p>
 
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">12.5.2    identification of the material that has been removed or
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">12.5.2    identification of the material that has been removed or
         to which access has been disabled and the location at which the material
         appeared before it was removed or access to it was disabled;</p>
 
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">12.5.3    a statement by you under penalty of perjury that you
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">12.5.3    a statement by you under penalty of perjury that you
         have a good faith belief that the material was removed or disabled as a result
         of mistake or misidentification; and&nbsp;your name, address, and telephone
         number, and a statement that you consent to the jurisdiction of&nbsp;which you
@@ -746,48 +775,49 @@
         counter-notification, unless the party alleging copyright infringement notifies
         us first that it/he/she has filed a court action against you.</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">12.7  Please note that, under the DMCA, any person who
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">12.7  Please note that, under the DMCA, any person who
         knowingly makes material misrepresentations in a notification of claimed
         infringement or in a counter-notification may be liable for damages.</p>
 
 
 
-        <p style="text-align:justify;text-indent:.5in;">13. Linking&nbsp;to&nbsp;the&nbsp;Website&nbsp;and&nbsp;Social
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:0.5in;text-align:justify;text-indent:-.5in;">13. Linking&nbsp;to&nbsp;the&nbsp;Website&nbsp;and&nbsp;Social
         Media Features</p>
 
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">13.1  You may link to our homepage, provided you do so in a
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1in;text-align:justify;text-indent:-.5in;">13.1  You may link to our homepage, provided you do so in a
         way that is fair and legal and does not damage our reputation or take advantage
         of it, but you must not establish a link in such a way as to suggest any form
         of association, approval, or endorsement on our part.</p>
 
 
-        <p style="margin-left:.75in;text-align:justify;
-        text-indent:-.25in;">13.2 &nbsp;
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1in;text-align:justify;text-indent:-.5in;">13.2 &nbsp;
         The Website may provide certain social media features that enable
         you to:</p>
 
         <p style="margin-left:.75in;text-align:justify;"></p>
 
-        <p style="margin-left:.75in;text-align:justify;
-        text-indent:-.25in;">13.2.1&nbsp;&nbsp;&nbsp;
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">13.2.1&nbsp;&nbsp;&nbsp;
         link from your own or certain third-party websites to certain
         content on the Website;</p>
 
         <p style="margin-left:.75in;text-align:justify;
         "></p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">13.2.2    send emails or other communications with certain
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">13.2.2    send emails or other communications with certain
         content, or links to certain content, on the Website;</p>
 
         <p style="margin-left:.75in;text-align:justify;"></p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">13.2.3    cause limited portions of content on this Website to be
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">13.2.3    cause limited portions of content on this Website to be
         displayed or&nbsp;appear to be displayed on your own or certain third-party
         websites.</p>
 
@@ -797,48 +827,45 @@
         may use these features solely as they are provided by us, solely with respect
         to the content they are displayed with. However, you must not:</p>
 
-        <p style="margin-left:1.0in;text-align:justify;
-        text-indent:-.5in;">13.3.1&nbsp;&nbsp;&nbsp;
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">13.3.1&nbsp;&nbsp;&nbsp;
         establish a link from any website that is not owned by you;</p>
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">13.3.2 cause the Website or portions of it to be displayed on,
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">13.3.2 cause the Website or portions of it to be displayed on,
         or appear to be displayed by, any other site, for example, framing, deep
         linking, or in-line linking;</p>
 
         <p style="margin-left:1.0in;text-align:justify;"></p>
 
-        <p style="margin-left:1.0in;text-align:justify;
-        text-indent:-.5in;">13.3.2&nbsp;&nbsp;&nbsp;
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">13.3.3&nbsp;&nbsp;&nbsp;
         link to any part of the Website other than the homepage; or</p>
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">13.3.3 otherwise take any action with respect to the materials
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">13.3.4 otherwise take any action with respect to the materials
         on this Website that is inconsistent with any other provision of these Terms.</p>
 
         <p style="margin-left:1.0in;text-align:justify;"></p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">13.4  You agree to cooperate with us in causing any unauthorized
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">13.4  You agree to cooperate with us in causing any unauthorized
         framing or linking immediately to stop. We reserve the right to withdraw
         linking permission without notice.&nbsp;
         </p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">13.5  We may disable all or any social media features and
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">13.5  We may disable all or any social media features and
         any links at any time without notice in our discretion.</p>
 
-        <p>14. Links from
-        the Website</p>
+        <p>14. Links from the Website</p>
 
-        <p style="margin-left:.5in;text-align:justify;">14.1 If the
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">14.1 If the
         Website contains links to other sites and resources provided by third parties,
-        these</p>
-
-        <p style="margin-left:1.0in;text-align:justify;">links are
-        provided for your convenience only. This includes links contained in advertisements,
+        these links are provided for your convenience only. This includes links contained in advertisements,
         including, without limitation, banner advertisements and sponsored links. We
         have no control over the contents of those sites or resources, and accept no
         responsibility for them or for any loss or damage that may arise from your use
@@ -846,27 +873,26 @@
         Website, you do so entirely at your own risk and subject to the terms and
         conditions of use for such websites. </p>
 
-        <p>15. Referral
-        Program</p>
+        <p>15. Referral Program</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">15.1  Every user with an AllFans account has a unique
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">15.1  Every user with an AllFans account has a unique
         referral URL that allows users to earn income from any other user who signs up
         via their referral link.&nbsp;In order to ensure the referral is successful,
         the new user must register with AllFans using the same browser that they
         used to click the referral link.&nbsp;More information on how the Referral
         Program works can be found at:&nbsp;<u>https://allfans.com/partners/</u></p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">15.2&nbsp; AllFans pays Users&nbsp;5% of all total
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">15.2&nbsp; AllFans pays Users&nbsp;5% of all total
         income earned by the referred User and the payment of this referred income is
         processed&nbsp;on the first calendar business day of each month. This
         referral&nbsp;income is deducted from the AllFans’ fee and not from the
         income of the referred User, who continues to earn 80% to 90% commission on all
         income.</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">15.3  For a User to be successfully added to another User's
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">15.3  For a User to be successfully added to another User's
         referral program, that user must sign up to AllFans via a unique
         referral URL. In no event will AllFans be liable to add a user to a
         referral account if that user has not signed up via the correct referral link.</p>
@@ -877,11 +903,11 @@
         <p>16. Disclaimer
         of Warranties; Limitations of Liability</p>
 
-        <p style="text-align:justify;text-indent:
-        .5in;">By using AllFans, you acknowledge and agree as follows:</p>
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">16.1 By using AllFans, you acknowledge and agree as follows:</p>
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">16.1.1    AllFans and all of its services and features are provided
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">16.1.1    AllFans and all of its services and features are provided
         without warranties of any kind, express or implied. To the fullest extent
         permitted by law, we disclaim any and all warranties, express or implied, with
         respect to AllFans and all of its services and features, including, and
@@ -911,8 +937,8 @@
 
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">16.1.2    AllFans does not warrant or guarantee that use of
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">16.1.2    AllFans does not warrant or guarantee that use of
         the Website will be uninterrupted or error free twenty-four hours a day, seven
         days a week, since AllFans may need to carry our maintenance of the
         Website from time to time. However, AllFans will use its reasonable endeavors
@@ -922,8 +948,8 @@
 
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">16.1.3    in no event shall AllFans be liable under
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">16.1.3    in no event shall AllFans be liable under
         contract, tort, negligence, strict liability or any other legal or equitable
         theory, for any indirect, incidental, exemplary, special, punitive or
         consequential damages (including, and without limitation, loss of use, profits,
@@ -937,8 +963,8 @@
 
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">16.1.4    in no event shall our total and aggregate liability to
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">16.1.4    in no event shall our total and aggregate liability to
         you and/or others for any and all claims arising out of or related to your use
         of (or your inability to use) AllFans or any of its services or
         features, exceed one hundred dollars ($100.00).&nbsp;This does not affect any
@@ -946,8 +972,8 @@
 
 
 
-        <p style="margin-left:1.0in;text-align:justify;text-indent:
-        -.5in;">16.2  Because some jurisdictions do not allow the exclusion
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">16.2  Because some jurisdictions do not allow the exclusion
         or limitation of liability for consequential or incidental damages or total
         liability, the above limitation may not apply to you. In such case, our total
         and aggregate liability to you arising out of or related to your use of (or
@@ -972,33 +998,38 @@
         without limitation, reasonable attorneys' fees and legal costs) arising out of
         or related to any of the following:</p>
 
-        <p style="margin-left:1.0in;text-align:justify;
-        text-indent:-.5in;">17.1.1&nbsp;&nbsp;&nbsp;
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">17.1.1&nbsp;&nbsp;&nbsp;
         Your use of AllFans or any of its services or features;</p>
 
 
 
-        <p>17.1.2 any
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">17.1.2 any
         User Content created, published, or otherwise made available on AllFans by
         you;</p>
 
-        <p>any transaction or interaction between you and any other User of AllFans;
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">17.1.3 any transaction or interaction between you and any other User of AllFans;
         and/or</p>
 
-        <p>your violation of these terms or any applicable law.</p>
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.5in;text-align:justify;text-indent:-.5in;">17.1.4 your violation of these terms or any applicable law.</p>
 
         <p>18. Governing
         Law and Dispute Resolution</p>
 
-        <p style="text-align:justify;text-indent:.5in;">18.1  You&nbsp;and
-        we agree that these Terms shall be governed by and construed in accordance</p>
-
-        <p style="margin-left:.5in;text-align:justify;">with the laws
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">18.1  You&nbsp;and
+        we agree that these Terms shall be governed by and construed in accordance with the laws
         of the United States&nbsp;(without regard to the conflict of law’s provisions
         thereof) and that any dispute between you and us concerning AllFans or
         arising out of or related to these Terms shall be resolved exclusively in the
         courts of&nbsp;England and Wales.
-        18.2 Except where prohibited by applicable law, any claim or cause of action by
+        </p>
+
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">18.2 Except where prohibited by applicable law, any claim or cause of action by
         you concerning AllFans or arising out of or related to these Terms must
         be filed&nbsp;within one year&nbsp;after such claim or cause of action arose,
         or be forever barred.
@@ -1006,13 +1037,15 @@
 
         <p>19. Waiver and Severability</p>
 
-        <p style="text-align:justify;">19.1
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">19.1
         No waiver of any term or condition set out in these Terms shall be deemed a
         further or continuing waiver of such term or condition or a waiver of any other
         term or condition, and any failure to assert a right or provision under these
         Terms shall not constitute a waiver of such right or provision.</p>
 
-        <p>19.2 If any provision of these Terms is held by a court or other tribunal of competent
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">19.2 If any provision of these Terms is held by a court or other tribunal of competent
         jurisdiction to be invalid, illegal or unenforceable for any reason, such
         provision shall be eliminated or limited to the minimum extent such that the
         remaining provisions of the Terms will continue in full force and effect.
@@ -1020,14 +1053,16 @@
 
         <p>20. Entire Agreement</p>
 
-        <p>20.1 The Terms
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">20.1 The Terms
         constitute the sole and entire agreement between you and us regarding the
         Website and supersede all prior and contemporaneous understandings, agreements,
         representations, and warranties, both written and oral, regarding the Website.</p>
 
         <p>21. Contact</p>
 
-        <p>If you have any questions, comments, complaints or concerns about AllFans, please
+        <p style="margin-top:0in;margin-right:0in;
+        margin-left:1.0in;text-align:justify;text-indent:-.5in;">If you have any questions, comments, complaints or concerns about AllFans, please
         contact our support team at&nbsp;<u>support@allfans.com</u></p>
       </div>
     </b-card>
