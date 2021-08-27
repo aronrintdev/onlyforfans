@@ -2,7 +2,7 @@
   <div v-if="!isLoading && timelines.length > 0" class="suggested_feed-crate tag-crate px-3 mt-3">
 
     <section class="ctrl-top d-flex justify-content-between align-items-center">
-      <h5 class="my-0 flex-grow-1">COMPANIES</h5>
+      <h5 class="my-0 flex-grow-1">My Managed Profiles</h5>
     </section>
 
     <ul class="list-suggested list-group">
