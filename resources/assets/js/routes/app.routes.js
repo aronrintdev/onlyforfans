@@ -132,7 +132,7 @@ export const routes = [
   // Vaults
   {
     name: 'vault.dashboard',
-    path: '/my-vault',
+    path: '/my-media',
     component: vaults.Dashboard,
   },
 

@@ -119,6 +119,7 @@ return [
 
     /**
      * Name of the queue running summarizations
+     *      Note this is now the connection name
      */
     'summarizeQueue' => 'financial-summaries',
 
@@ -127,17 +128,14 @@ return [
      */
     'summarizeAt' => [
         [
-            'priority' => 'low',
-            'count'    => 1000, // 1k
+            'priority' => env('QUEUE_PREFIX', '') . 'financial-summaries',
+            'count'    => env('TRANSACTIONS_SUMMARIZE_AT', 1000), // 1k
         ], [
-            'priority' => 'mid',
-            'count'    => 10000, // 10k
+            'priority' => env('QUEUE_PREFIX', '') . 'financial-summaries-high',
+            'count'    => env('TRANSACTIONS_SUMMARIZE_AT_HIGH', 10000), // 10k
         ], [
-            'priority' => 'high',
-            'count'    => 100000, // 100k
-        ], [
-            'priority' => 'urgent',
-            'count'    => 1000000 // 1M
+            'priority' => env('QUEUE_PREFIX', '') . 'financial-summaries-urgent',
+            'count'    => env('TRANSACTIONS_SUMMARIZE_AT_URGENT', 100000) // 100k
         ],
     ],
 

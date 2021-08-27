@@ -72,7 +72,7 @@ class Kernel extends ConsoleKernel
                 new StartTransactionSummaryCreation(TransactionSummaryTypeEnum::DAILY)
             ])->then(function (Batch $batch) {
                 Log::info('Summarize Daily Transactions Finished');
-            })->name('Summarize Daily Transactions')->onQueue("$queue-low");
+            })->name('Summarize Daily Transactions')->onConnection($queue);
         })->dailyAt('0:01');
 
         /* --------------------------------- WEEKLY --------------------------------- */
@@ -82,7 +82,7 @@ class Kernel extends ConsoleKernel
                 new StartTransactionSummaryCreation(TransactionSummaryTypeEnum::WEEKLY)
             ])->then(function (Batch $batch) {
                 Log::info('Summarize Weekly Transactions Finished');
-            })->name('Summarize Weekly Transactions')->onQueue("$queue-low");
+            })->name('Summarize Weekly Transactions')->onConnection($queue);
         })->weeklyOn(0, '0:01');
 
         /* --------------------------------- MONTHLY -------------------------------- */
@@ -92,7 +92,7 @@ class Kernel extends ConsoleKernel
                 new StartTransactionSummaryCreation(TransactionSummaryTypeEnum::MONTHLY)
             ])->then(function (Batch $batch) {
                 Log::info('Summarize Monthly Transactions Finished');
-            })->name('Summarize Monthly Transactions')->onQueue("$queue-low");
+            })->name('Summarize Monthly Transactions')->onConnection($queue);
         })->monthlyOn(1, '0:01');
 
         /* --------------------------------- YEARLY --------------------------------- */
@@ -102,7 +102,7 @@ class Kernel extends ConsoleKernel
                 new StartTransactionSummaryCreation(TransactionSummaryTypeEnum::YEARLY)
             ])->then(function (Batch $batch) {
                 Log::info('Summarize Yearly Transactions Finished');
-            })->name('Summarize Yearly Transactions')->onQueue("$queue-low");
+            })->name('Summarize Yearly Transactions')->onConnection($queue);
         })->yearlyOn(1, 1, '0:01');
 
         #endregion Transaction Summaries
@@ -118,7 +118,7 @@ class Kernel extends ConsoleKernel
                 new StartUpdatePendingBalances()
             ])->then(function (Batch $batch) {
                 Log::info('Update Pending Balances Finished');
-            })->name('Update Pending Balances')->onQueue("$queue-low");
+            })->name('Update Pending Balances')->onConnection($queue);
 
         // TODO: Determine reasonable interval
         })->everyFifteenMinutes();

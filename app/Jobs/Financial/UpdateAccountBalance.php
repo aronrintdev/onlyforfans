@@ -45,7 +45,7 @@ class UpdateAccountBalance implements ShouldQueue, ShouldBeUnique
     public function __construct($account)
     {
         $this->account = $account->withoutRelations();
-        $this->onQueue('financial-transactions');
+        $this->onConnection('financial-transactions');
     }
 
     /**
