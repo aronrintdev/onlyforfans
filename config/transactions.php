@@ -18,6 +18,7 @@ return [
     'defaultCurrency' => env('TRANSACTIONS_DEFAULT_CURRENCY', 'USD'),
 
     'disableAll' => env('TRANSACTIONS_DISABLE_ALL', 0),
+    'disableUserAbilityAtRegister' => env('TRANSACTIONS_USER_DISABLE_AT_START', 0),
 
     /**
      * All transactions live within a system, all background money in a system must live in same location, e.i. bank
