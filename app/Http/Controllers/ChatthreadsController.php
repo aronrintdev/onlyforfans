@@ -59,21 +59,6 @@ class ChatthreadsController extends AppBaseController
             'is_favorite',
         ]) ?? [];
 
-        if ( $request->has('sortBy') ) { // UI may imply these filters when sorting
-            switch ($request->sortBy) {
-            case 'unread':
-                $filters['is_unread'] = 1;
-                break;
-            case 'unreadWithTips':
-                $filters['is_unread'] = 1;
-                $filters['with_tips'] = 1;
-                break;
-            case 'online':
-                $filters['current_online'] = 1;
-                break;
-            }
-        }
-
         $orderBy = 'desc';
         if (isset($request->asc)){
             $orderBy = 'asc';
@@ -109,11 +94,6 @@ class ChatthreadsController extends AppBaseController
                 $v = $v ? 0 : 1; // invert: is_unread -> is_read
                 $query->whereHas('chatmessages', function($q1) use($v) {
                     $q1->where('is_read', $v); // apply filter
-                });
-                break;
-            case 'with_tips':
-                $query->whereHas('chatmessages', function($q1) use($v) {
-                    $q1->where('purchase_only', 1); // apply filter
                 });
                 break;
             case 'is_subscriber': // %TODO
@@ -168,6 +148,25 @@ class ChatthreadsController extends AppBaseController
                 ->groupBy('chatthread_id')
             ])
             ->orderBy('totalSpent', $orderBy);
+            break;
+        case 'unread':
+            $query->addSelect(['unread_count' => Chatmessage::selectRaw('COUNT(*)')
+                ->whereColumn('chatthread_id', 'chatthreads.id')
+                ->where('sender_id', '<>', $sessionUser->id)
+                ->where('is_read', 0)
+            ])
+            ->orderBy('unread_count', $orderBy);
+            break;
+        case 'unreadWithTips':
+            $query->addSelect(['unread_tips_count' => Chatmessage::selectRaw('COUNT(*)')
+                ->whereColumn('chatthread_id', 'chatthreads.id')
+                ->where('sender_id', '<>', $sessionUser->id)
+                ->where('purchase_only', 1)
+                ->where('is_read', 0)
+            ])
+            ->orderBy('unread_tips_count', $orderBy);
+            break;
+        case 'online':
             break;
         case 'recent':
         case 'unread-first':
