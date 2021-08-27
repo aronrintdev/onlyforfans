@@ -341,6 +341,7 @@ export default {
         take: this.perPage,
         chatthread_id: chatthreadID,
       }
+      console.log('components/ShowThread::getChatmessages', { params })
       const response = await axios.get( this.$apiRoute('chatmessages.index'), { params } )
 
       // Filter out any messages that we already have
