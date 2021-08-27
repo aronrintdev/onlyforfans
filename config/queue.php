@@ -75,7 +75,7 @@ return [
          * High Priority Queue
          */
         'high' => [
-            env('QUEUE_HIGH_DRIVER', 'database'),
+            'driver' => env('QUEUE_HIGH_DRIVER', 'database'),
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
             'prefix' => env('QUEUE_SQS_PATH'),
             'queue' => env('QUEUE_PREFIX', '') . 'high',
@@ -89,7 +89,7 @@ return [
          * Low Priority Queue
          */
         'low' => [
-            env('QUEUE_LOW_DRIVER', 'database'),
+            'driver' => env('QUEUE_LOW_DRIVER', 'database'),
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
             'prefix' => env('QUEUE_SQS_PATH'),
             'queue' => env('QUEUE_PREFIX', '') . 'high',
