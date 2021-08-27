@@ -142,6 +142,7 @@ export const messaging = {
   actions: {
     getThread({ commit }, threadId) {
       return new Promise((resolve, reject) => {
+        console.log('store/messaging/index.js::getThread() - chatthreads.show', {threadId})
         axios.get(route('chatthreads.show', { chatthread: threadId }))
           .then(response => {
             commit('UPDATE_THREAD', response.data)
@@ -185,7 +186,7 @@ export const messaging = {
     },
 
     getGallery({ commit }, { chatthread, page, take }) {
-      console.log('getMessages', {chatthread, page, take})
+      console.log('getGallery', {chatthread, page, take})
       return new Promise((resolve, reject) => {
         axios.get(route('chatthreads.gallery', chatthread), {
           params: { take, page }
@@ -196,7 +197,7 @@ export const messaging = {
       })
     },
     getMessages({ commit }, {threadId, page, take }) {
-      console.log('getMessages', {threadId, page, take})
+      console.log('store/messaging/index.js::getMessages() - chatmessages.index ', {threadId, page, take})
       return new Promise((resolve, reject) => {
         axios.get(route('chatmessages.index'), { params: {} })
           .then(response => {
