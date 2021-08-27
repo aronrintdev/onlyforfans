@@ -34,7 +34,6 @@ class RestChatmessagegroupsTest extends TestCase
      *  @group chatmessagegroups
      *  @group regression
      *  @group regression-base
-     *  @group here0826
      */
     public function test_can_send_mass_message()
     {
@@ -82,7 +81,6 @@ class RestChatmessagegroupsTest extends TestCase
      *  @group chatmessagegroups
      *  @group regression
      *  @group regression-base
-     *  @group here0826
      */
     public function test_can_list_chatmessagegroups()
     {
