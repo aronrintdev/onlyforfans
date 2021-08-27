@@ -142,6 +142,13 @@ export default {
 
   mounted() {
     this.updateScreenSize(this.$vssWidth)
+
+    // intercept so tooltips don't display on mobile
+    this.$root.$on('bv::tooltip::show', bvEvent => {
+      if (this.mobile) {
+        bvEvent.preventDefault() 
+      }
+    })
   },
 
   created() {

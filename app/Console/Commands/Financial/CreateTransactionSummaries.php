@@ -75,7 +75,7 @@ class CreateTransactionSummaries extends Command
         ])->then(function (Batch $batch) use ($typeString) {
             Log::info("Summarize $typeString Transactions Finished");
             $finished = true;
-        })->name("Summarize $typeString Transactions")->onQueue("$queue-low")
+        })->name("Summarize $typeString Transactions")->onConnection($queue)
             ->allowFailures()->dispatch();
 
         $bar = $this->output->createProgressBar($batch->totalJobs);
