@@ -292,8 +292,8 @@ class SegPayController extends Controller
             return PurchasableHelpers::getPurchasableItem($request->item);
         }
         if ($request->type === PaymentTypeEnum::TIP) {
-            return Tip::find($request->item);
-            // return TippableHelpers::getTippableItem($request->item);
+            // return Tip::find($request->item);
+            return TippableHelpers::getTippableItem($request->item);
         }
         if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
             return SubscribableHelpers::getSubscribableItem($request->item);
