@@ -111,16 +111,18 @@
 
               <b-col cols="12" md="8" class="post-create-footer-ctrl d-flex">
                 <ul class="list-inline d-flex mb-0 OFF-border-right pt-1">
-                  <li v-b-tooltip.hover="'Select from device 2'" id="clickme_to-select" class="selectable select-pic">
+
+                  <li v-b-tooltip.hover="'Add Photo'" id="clickme_to-select" class="selectable select-pic">
                     <fa-icon :icon="selectedIcon==='pic' ? ['fas', 'image'] : ['far', 'image']" size="lg" :class="selectedIcon==='pic' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li v-b-tooltip.hover="'Record live video'" v-if="!isIOS9PlusAndAndroid" @click="recordVideo()" class="selectable select-video">
+
+                  <li v-b-tooltip.hover="'Record Video'" v-if="!isIOS9PlusAndAndroid" @click="recordVideo()" class="selectable select-video">
                     <fa-icon :icon="selectedIcon==='video' ? ['fas', 'video'] : ['far', 'video']" size="lg" :class="selectedIcon==='video' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li v-b-tooltip.hover="'Record live audio'" @click="recordAudio()" class="selectable select-audio">
+                  <li v-b-tooltip.hover="'Record Audio'" @click="recordAudio()" class="selectable select-audio">
                     <fa-icon :icon="selectedIcon==='audio' ? ['fas', 'microphone'] : ['far', 'microphone']" size="lg" :class="selectedIcon==='audio' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li v-b-tooltip.hover="'Select from My Media'" @click="renderVaultSelector()" class="selectable">
+                  <li v-b-tooltip.hover="'Add Photo From My Media'" @click="renderVaultSelector()" class="selectable">
                     <fa-icon :icon="selectedIcon==='vault' ? ['fas', 'archive'] : ['far', 'archive']" size="lg" :class="selectedIcon==='vault' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
@@ -131,10 +133,10 @@
                   <li class="selectable select-timer"><span><TimerIcon /></span></li>
                   <li class="selectable select-calendar" @click="showSchedulePicker()"><span><CalendarIcon /></span></li>
                   -->
-                  <li v-b-tooltip.hover="'Set expiration date'" class="selectable select-expire-date" :disabled="expirationPeriod" @click="showExpirationPicker()">
+                  <li v-b-tooltip.hover="'Set Expiration Date'" class="selectable select-expire-date" :disabled="expirationPeriod" @click="showExpirationPicker()">
                     <fa-icon :icon="showedModal === 'expiration' ? ['fas', 'hourglass-half'] : ['far', 'hourglass-half']" size="lg" :class="showedModal === 'expiration' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li v-b-tooltip.hover="'Schedule publish date'" class="selectable select-calendar" :disabled="scheduled_at" @click="showSchedulePicker()">
+                  <li v-b-tooltip.hover="'Schedule Publish Date'" class="selectable select-calendar" :disabled="scheduled_at" @click="showSchedulePicker()">
                     <fa-icon :icon="showedModal === 'schedule' ? ['fas', 'calendar-alt'] : ['far', 'calendar-alt']" size="lg" :class="showedModal === 'schedule' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
@@ -142,7 +144,8 @@
                   <li @click="showTagForm()" class="selectable show-tagform" v-b-tooltip.hover="'Add Tags'">
                     <fa-icon :icon="isTagFormVisible ? ['fas', 'hashtag'] : ['far', 'hashtag']" :class="isHashtagIconSelected ? 'text-primary' : 'text-secondary'" size="lg" />
                   </li>
-                  <li @click="togglePostPrice()" class="selectable select-pic" v-b-tooltip.hover="'Set Price'">
+
+                  <li @click="togglePostPrice()" class="selectable select-pic" v-b-tooltip.hover="'Set Post Unlock Price'">
                     <fa-icon :icon="postType === 'price' ? ['fas', 'tag'] : ['far', 'tag']" size="lg" :class="postType === 'price' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
@@ -210,6 +213,16 @@ export default {
 
   computed: {
 
+    ...Vuex.mapState('vault', [
+      'mobile',
+      'selectedMediafiles',
+      'uploadsVaultFolder',
+    ]),
+
+    isIOS9PlusAndAndroid() {
+      return (isIOS && parseInt(osVersion.split('.')[0]) >= 9) || isAndroid
+    },
+
     hashtags: {
       // tag representation in the create post footer (can be deleted here but not added)
       get: function () {
@@ -224,15 +237,6 @@ export default {
         })
       }
     },
-
-    isIOS9PlusAndAndroid() {
-      return (isIOS && parseInt(osVersion.split('.')[0]) >= 9) || isAndroid
-    },
-
-    ...Vuex.mapState('vault', [
-      'selectedMediafiles',
-      'uploadsVaultFolder',
-    ]),
 
     // ref:
     //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
