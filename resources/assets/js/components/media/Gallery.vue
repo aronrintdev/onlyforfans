@@ -1,6 +1,6 @@
 <template>
-  <b-card-group :columns="existMedia" class="gallery p-3" :style="{ columnCount: columnCount }">
-    <div v-if="!existMedia" class="h-100 w-100 d-flex align-items-center">
+  <b-card-group :columns="mediaExists" class="gallery p-3" :style="{ columnCount: columnCount }">
+    <div v-if="!mediaExists" class="h-100 w-100 d-flex align-items-center">
       <div v-text="noItems" />
     </div>
 
@@ -46,6 +46,7 @@ export default {
       if (this.items.length === 0) {
         return 'none'
       }
+
       switch(this.screenSize) {
         case 'xs': return 2
         case 'sm': return 2
@@ -56,11 +57,8 @@ export default {
       }
     },
 
-    existMedia() {
-      if (this.items.length === 0) {
-        return false
-      }
-      return true
+    mediaExists() {
+      return this.items.length > 0
     },
 
     noItems() {
