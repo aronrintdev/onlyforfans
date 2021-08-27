@@ -34,7 +34,6 @@ class RestChatmessagegroupsTest extends TestCase
      *  @group chatmessagegroups
      *  @group regression
      *  @group regression-base
-     *  @group here0826
      */
     public function test_can_send_mass_message()
     {
@@ -50,55 +49,62 @@ class RestChatmessagegroupsTest extends TestCase
         ];
         $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
         $content = json_decode($response->content());
+        //dd($content);
         $response->assertStatus(201);
+
         $response->assertJsonStructure([
             'chatthreads' => [
                 0 => [ 'id', 'originator_id', 'is_tip_required', 'created_at' ],
             ],
+            'chatmessagegroup' => [ 'id', 'mgtype', 'sender_id' ],
         ]);
+
+        $this->assertEquals($fans->count(), count($content->chatthreads));
+
+        $ctR = Chatthread::find($content->chatthreads[0]->id);
+        //dd($ctR->chatmessages);
+        $this->assertNotNull($ctR);
+        $this->assertNotNull($ctR->id);
+        $this->assertEquals(2, $ctR->participants->count());
+
+        // This will *not* necessarily be true, because we made threads 'singletons', it's 
+        // possible the originator may not be the one pushing the mass message (ie it may be sent
+        // as a response to a fan who originated the 1-to-1 chat
+        //$this->assertEquals($originator->id, $ctR->originator->id);
+
+        // Because chatthreads.store returns an array of threads (not the created messages), in addition
+        // to the above, it doesn't seem like we can locate the exact message created by the 
+        // chatthreads.store call above (?)
     }
 
     /**
      *  @group chatmessagegroups
      *  @group regression
      *  @group regression-base
+     *  @group here0826
      */
     public function test_can_list_chatmessagegroups()
     {
-        //$originator = User::doesntHave('chatthreads')->firstOrFail();
-        //$receiver = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->firstOrFail();
-        $sessionUser = User::has('chatthreads')->firstOrFail();
-        $this->assertFalse($sessionUser->isAdmin());
+        $timeline = Timeline::has('followers', '>=', 2)->firstOrFail();
+        $originator = $timeline->user;
+        $fans = $timeline->followers;
 
-        $payload = [ 
-            'take' => 100,
+        $this->assertGreaterThan(0, $fans->count());
+
+        $payload = [
+            'originator_id' => $originator->id,
+            'participants' => $fans->pluck('id')->toArray(),
         ];
-        $response = $this->actingAs($sessionUser)->ajaxJSON( 'GET', route('chatthreads.index', $payload) );
-        $response->assertStatus(200);
+        $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
         $content = json_decode($response->content());
-        //dd($content);
+        $response->assertStatus(201);
 
-        $response->assertJsonStructure([
-            'data' => [
-                0 => [
-                    'originator_id', 
-                    'created_at', 
-                ],
-            ],
-            'links',
-            'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
-        ]);
-        //dd($content);
-        //dd($content->messages);
+        $ctR = Chatthread::find($content->chatthreads[0]->id);
+        $this->assertNotNull($ctR->id);
 
-        // Check no threads in which I am not a participant
-        $chatthreads = collect($content->data);
-        $num = $chatthreads->reduce( function($acc, $cm) use(&$sessionUser) {
-            $chatthread = Chatthread::find($cm->id);
-            $this->assertNotNull($chatthread);
-            return ($chatthread->participants->contains($sessionUser->id)) ? $acc : ($acc+1);
-        }, 0);
-        $this->assertEquals(0, $num, 'Found thread in which session user is not a participant (of '.$content->meta->total.' total threads)');
+        $payload = [];
+        $response = $this->actingAs($originator)->ajaxJSON( 'GET', route('chatmessagegroups.index', $payload) );
+        $response->assertStatus(200);
     }
 
     // ------------------------------

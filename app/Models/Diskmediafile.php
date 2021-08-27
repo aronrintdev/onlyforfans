@@ -200,7 +200,7 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
     // %%% --- Other ---
 
     public function flagCount() {
-        return !empty($this->filepath) ? Storage::disk('s3')->url($this->filepath) : null;
+        return !empty($this->filepath) ? Storage::disk('s3')->url($this->filepath) : null; // %FIXME?: this doesn't look right
     }
 
     public function renderUrl() {

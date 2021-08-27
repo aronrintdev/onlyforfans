@@ -294,7 +294,9 @@ class ChatthreadsController extends AppBaseController
             'attachments'    => 'required_with:price|array',   // optional first message attachments
         ]);
 
-        $chatthreads = DB::transaction( function() use(&$request) { 
+        $cmGroup = null;
+
+        $chatthreads = DB::transaction( function() use(&$request, &$cmGroup) { 
 
             $chatthreads = collect();
             $originator = User::find($request->originator_id);
@@ -305,7 +307,7 @@ class ChatthreadsController extends AppBaseController
                     'gmtype'          => MessagegroupTypeEnum::MASSMSG,
                     'sender_id'       => $originator->id,
                     'cattrs' => [
-                        'originator_id'   => $request->originator_id,
+                        //'originator_id'   => $request->originator_id,
                         'sender_name'     => $originator->name,
                         'participants'    => $request->participants ?? null,
                         'mcontent'        => $request->mcontent ?? null,
@@ -362,6 +364,7 @@ class ChatthreadsController extends AppBaseController
 
         return response()->json([
             'chatthreads' => $chatthreads,
+            'chatmessagegroup' => $cmGroup,
         ], 201);
     }
 

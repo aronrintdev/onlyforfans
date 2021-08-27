@@ -30,6 +30,8 @@ class ChatmessagesTableSeeder extends Seeder
             dd('truncate done');
         }
 
+        // ----
+
         //$senderCount = $this->faker->numberBetween(2, 4); // number of senders
         $originatorCount = 3;
 
@@ -101,7 +103,9 @@ class ChatmessagesTableSeeder extends Seeder
             });
         });
 
-        // 'touch' the 'updated_at' column for all theads based on latest messeage
+        // ----
+
+        // 'touch' the 'updated_at' column for all theads based on latest message
         $chatthreads = Chatthread::get();
         $chatthreads->each( function($ct) {
             //$latestMsg = $ct->chatmessages->where('is_delivered', true)->orderBy('created_at', 'desc')->first();
