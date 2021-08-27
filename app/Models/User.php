@@ -341,6 +341,11 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
         return $this->hasMany(Staff::class, 'owner_id');
     }
 
+    public function staff()
+    {
+        return $this->hasOne(Staff::class, 'user_id');
+    }
+
 
 
 //    public function lists()
@@ -620,6 +625,25 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
         }));
     }
 
+
+    // $permission_name: Post.create, Post.edit, Post.delete
+    public function canChangePostForTimeline(Timeline $timeline, $permission_name) {
+        $models = Staff::with('permissions')->where('user_id', $this->id)->where('role', 'staff')->get();
+        $result = false;
+        foreach( $models as $model) {
+            $timeline = Timeline::where('user_id', $model->creator_id)->where('id', $timeline->id)->first();
+            
+            if ($timeline) {
+                foreach($model->permissions as $permission) {
+                    if ($permission->name == $permission_name) {
+                        $result = true;
+                    }
+                }
+            }
+        }
+        return $result;
+    }
+    
     // Takes a single string that could be a first name or 
     //   a full name and parses into distinct fields
     public static function parseName(string $name) : array

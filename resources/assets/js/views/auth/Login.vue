@@ -6,7 +6,7 @@
           <!-- Login Form -->
           <div class="login-form">
             <Branding type="text" size="3x" class="mb-3 signin-logo" />
-            <div class="h1 mb-3" v-text="$t('signInHeader')"></div>
+            <div class="h1 mb-3 text-center text-md-left" v-text="$t('signInHeader')"></div>
             <div v-if="verrors && verrors.message">
               <b-alert variant="danger" v-text="verrors.message" show />
             </div>
@@ -30,7 +30,7 @@
                 @focus="clearVerrors"
               />
             </b-form-group>
-            <div class="text-right">
+            <div class="text-center text-md-right">
               <!-- TODO: Link to forgot password page -->
               <router-link :to="{ name: 'forgot-password' }" v-text="$t('forgotPasswordLink')" />
             </div>
@@ -66,7 +66,7 @@
         </div>
 
         <div class="d-flex text-center auth-bottom">
-          <p class="text-secondary mt-0 mr-3">Don't have an account?</p>
+          <p class="text-secondary mt-0 mr-0 mr-md-3">Don't have an account?</p>
           <router-link :to="{ name: 'register' }" v-text="$t('signUpLink')" />
         </div>
       </div>
@@ -189,6 +189,12 @@ export default {
     display: block;
     width: 154px;
     margin: 0 auto 25px;
+  }
+}
+
+@media (max-width: 576px) {
+  .h1 {
+    font-size: 2rem;
   }
 }
 </style>

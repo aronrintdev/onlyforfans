@@ -5,7 +5,7 @@
         <!-- SignUp Form -->
         <b-form @submit.prevent="signup">
           <Branding type="text" size="3x" class="mb-3 register-logo" />
-          <div class="h1 mb-3" v-text="$t('signUpLink')" />
+          <div class="h1 mb-3 text-center text-md-left" v-text="$t('signUpLink')" />
           <div class="signup-form">
             <div v-if="$route.query.beta">
               <b-alert variant="primary" v-text="$t('betaMessage')" show />
@@ -114,7 +114,7 @@
         </div>
 
         <div class="d-flex text-center auth-bottom">
-          <p class="text-secondary mt-0 mr-3">Do you already have an account?</p>
+          <p class="text-secondary mt-0 mr-0 mr-md-3">Do you already have an account?</p>
           <router-link :to="{ name: 'login' }" v-text="$t('signInHeader')" />
         </div>
       </div>
@@ -254,6 +254,12 @@ export default {
     margin: 0 auto 25px;
   }
 }
+
+  @media (max-width: 576px) {
+    .h1 {
+      font-size: 2rem;
+    }
+  }
 </style>
 
 <i18n lang="json5">

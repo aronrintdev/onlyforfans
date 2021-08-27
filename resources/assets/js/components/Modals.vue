@@ -604,7 +604,11 @@ export default {
       }
     }
     .superbox-post {
-      height: calc(100vh - 100px);
+      border: none;
+      border-radius: 0;
+    }
+    .modal-dialog {
+      margin: 0;
     }
   }
 }
