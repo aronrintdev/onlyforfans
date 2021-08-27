@@ -501,6 +501,11 @@ class RegisterController extends Controller
      * @return void
      */
     private function betaCheck($request, $user) {
+        if (Config::get('transactions.disableUserAbilityAtRegister', false)) {
+            $user->settings->cattrs = array_merge($user->settings->cattrs, ['disable_payments' => true]);
+            $user->settings->save();
+        }
+
         if (Config::get('auth.beta.active')) {
             if (Token::useToken($request->token, $user, Config::get('auth.beta.tokenName'))) {
                 $user->timeline->cattrs = ['beta_program' => true];

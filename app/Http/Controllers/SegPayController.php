@@ -214,6 +214,11 @@ class SegPayController extends Controller
             'currency' => 'required',
         ]);
 
+        // Validate Payment allowed
+        if (!$request->user()->canMakePayments()) {
+            abort(403, 'Payments Forbidden');
+        }
+
         // Get payment item
         if ($request->type === PaymentTypeEnum::PURCHASE) {
             $description = Config::get('segpay.description.purchase', 'All Fans Purchase');
