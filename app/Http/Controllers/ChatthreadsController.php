@@ -395,6 +395,7 @@ class ChatthreadsController extends AppBaseController
         return new ChatthreadResource($chatthread);
     }
 
+    // %DRY %FIXME: use version in app/Models/Chatthread
     private function addAttachments(Request $request, Chatmessage $chatmessage)
     {
         if ($request->has('attachments')) {
