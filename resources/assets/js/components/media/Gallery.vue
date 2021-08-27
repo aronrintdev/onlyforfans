@@ -1,6 +1,6 @@
 <template>
-  <b-card-group columns class="gallery p-3" :style="{ columnCount: columnCount, }">
-    <div v-if="items.length === 0" class="h-100 w-100 d-flex align-items-center justify-content-around">
+  <b-card-group :columns="existMedia" class="gallery p-3" :style="{ columnCount: columnCount }">
+    <div v-if="!existMedia" class="h-100 w-100 d-flex align-items-center">
       <div v-text="noItems" />
     </div>
 
@@ -43,6 +43,9 @@ export default {
     ...Vuex.mapState(['screenSize']),
 
     columnCount() {
+      if (this.items.length === 0) {
+        return 'none'
+      }
       switch(this.screenSize) {
         case 'xs': return 2
         case 'sm': return 2
@@ -51,6 +54,13 @@ export default {
         case 'xl': return 6
         default: return 3
       }
+    },
+
+    existMedia() {
+      if (this.items.length === 0) {
+        return false
+      }
+      return true
     },
 
     noItems() {
