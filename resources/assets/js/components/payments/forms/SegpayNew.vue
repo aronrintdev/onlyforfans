@@ -207,7 +207,7 @@ export default {
             // Create tip model first to send to Segpay
             this.axios.post(this.$apiRoute('tips.store'), {
               tippable_id: this.value.id,
-              amount: this.amount,
+              amount: this.price,
               currency: this.currency,
               message: this.extra ? this.extra.message : null,
             }).then(response => {
