@@ -13,7 +13,6 @@
           v-mask="currencyMask"
           :state="valid"
           inputmode="numeric"
-          pattern="[0-9]*"
           @focus="onFocus"
           @blur="onBlur"
           @wheel.prevent="onMousewheel"
