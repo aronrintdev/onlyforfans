@@ -197,11 +197,7 @@ export const messaging = {
       })
     },
     getMessages({ commit }, {threadId, page, take }) {
-<<<<<<< HEAD
-      console.log('store/messaging/index/getMessages', {threadId, page, take})
-=======
       console.log('store/messaging/index.js::getMessages() - chatmessages.index ', {threadId, page, take})
->>>>>>> c52e689b125559cc8b5707d34d04966bad815542
       return new Promise((resolve, reject) => {
         axios.get(route('chatmessages.index'), { params: {} })
           .then(response => {
