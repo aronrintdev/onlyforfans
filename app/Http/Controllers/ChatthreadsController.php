@@ -294,73 +294,9 @@ class ChatthreadsController extends AppBaseController
             'attachments'    => 'required_with:price|array',   // optional first message attachments
         ]);
 
-        $cmGroup = null;
+        $attrs = (object)$request->all();
 
-        $chatthreads = DB::transaction( function() use(&$request, &$cmGroup) { 
-
-            $chatthreads = collect();
-            $originator = User::find($request->originator_id);
-            $isMassMessage = count($request->participants) > 1;
-
-            if ($isMassMessage) {
-                $cmgroupAttrs = [
-                    'gmtype'          => MessagegroupTypeEnum::MASSMSG,
-                    'sender_id'       => $originator->id,
-                    'cattrs' => [
-                        //'originator_id'   => $request->originator_id,
-                        'sender_name'     => $originator->name,
-                        'participants'    => $request->participants ?? null,
-                        'mcontent'        => $request->mcontent ?? null,
-                        'deliver_at'      => $request->deliver_at ?? null,
-                        'price'           => $request->price ?? null,
-                        'currency'        => $request->currency ?? null,
-                        'attachments'     => $request->attachments ?? null,
-                    ],
-                ];
-                $cmGroup = Chatmessagegroup::create($cmgroupAttrs);
-            }
-    
-            foreach ($request->participants as $pkid) {
-                // Check if chat with participant already exits
-                $ct = $originator->chatthreads()->whereHas('participants', function ($query) use($pkid) {
-                    $query->where('user_id', $pkid);
-                })->first();
-    
-                // Add participant to originator mycontacts if they are not already there
-                if ($originator->mycontacts()->where('contact_id', $pkid)->doesntExist()) {
-                    Mycontact::create([
-                        'owner_id' => $originator->id,
-                        'contact_id' => $pkid,
-                    ]);
-                }
-    
-                // Start new chat thread if one is not found
-                if (!isset($ct)) {
-                    $ct = Chatthread::startChat($originator);
-                    $ct->addParticipant($pkid);
-                }
-    
-                if ( $request->has('mcontent') || $request->has('attachments') ) { // if included send the first message
-                    if ( $request->has('deliver_at') ) {
-                        $message = $ct->scheduleMessage($request->user(), $request->mcontent ?? '', $request->deliver_at);
-                    } else {
-                        $message = $ct->sendMessage($request->user(), $request->mcontent ?? '', new Collection());
-                    }
-                    $this->addAttachments($request, $message);
-                    if ($isMassMessage) {
-                        $message->chatmessagegroup_id = $cmGroup->id;
-                        $message->save();
-                    }
-                } else { 
-                    // ... %FIXME...what is the else case? Is this an error or does logic just fall through to below?
-                }
-                $ct->refresh();
-                $chatthreads->push($ct);
-
-            } // foreach
-
-            return $chatthreads;
-        });
+        ['chatthreads' => $chatthreads, 'chatmessagegroup' => $cmGroup] = Chatthread::findOrCreateChat($request->user(), $attrs);
 
         return response()->json([
             'chatthreads' => $chatthreads,

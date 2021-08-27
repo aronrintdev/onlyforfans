@@ -1,15 +1,20 @@
 <?php
 namespace App\Models;
 
+use DB;
 use Exception;
 use Carbon\Carbon;
-use App\Interfaces\UuidId;
-use Laravel\Scout\Searchable;
 
-use App\Models\Traits\UsesUuid;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
+
+use Laravel\Scout\Searchable;
+
+use App\Interfaces\UuidId;
+
+use App\Models\Traits\UsesUuid;
+use App\Enums\MessagegroupTypeEnum;
 //use App\Models\Traits\UsesShortUuid;
 
 class Chatthread extends Model implements UuidId
@@ -181,6 +186,79 @@ class Chatthread extends Model implements UuidId
             $ct->addParticipant($participant->id);
         }
         return $ct;
+    }
+
+    // 'thin-controlller-fat-model' refacator of code from chatthreads.store
+    public static function findOrCreateChat($sender, $rattrs)
+    {
+        $cmGroup = null;
+
+        $chatthreads = DB::transaction( function() use(&$rattrs, &$cmGroup, &$sender) { 
+
+            $chatthreads = collect();
+            $originator = User::find($rattrs->originator_id);
+            $isMassMessage = count($rattrs->participants) > 1;
+
+            if ($isMassMessage) {
+                $cmgroupAttrs = [
+                    'gmtype'          => MessagegroupTypeEnum::MASSMSG,
+                    'sender_id'       => $sender->id,
+                    'cattrs' => [
+                        'sender_name'     => $sender->name,
+                        'participants'    => $rattrs->participants ?? null,
+                        'mcontent'        => $rattrs->mcontent ?? null,
+                        'deliver_at'      => $rattrs->deliver_at ?? null,
+                        'price'           => $rattrs->price ?? null,
+                        'currency'        => $rattrs->currency ?? null,
+                        'attachments'     => $rattrs->attachments ?? null,
+                    ],
+                ];
+                $cmGroup = Chatmessagegroup::create($cmgroupAttrs);
+            }
+    
+            foreach ($rattrs->participants as $pkid) {
+                // Check if chat with participant already exits
+                $ct = $originator->chatthreads()->whereHas('participants', function ($query) use($pkid) {
+                    $query->where('user_id', $pkid);
+                })->first();
+    
+                // Add participant to originator mycontacts if they are not already there
+                if ($originator->mycontacts()->where('contact_id', $pkid)->doesntExist()) {
+                    Mycontact::create([
+                        'owner_id' => $originator->id,
+                        'contact_id' => $pkid,
+                    ]);
+                }
+    
+                // Start new chat thread if one is not found
+                if (!isset($ct)) {
+                    $ct = Chatthread::startChat($originator);
+                    $ct->addParticipant($pkid);
+                }
+    
+                if ( ($rattrs->mcontent??null) || ($rattrs->attachments??null) ) { // if included send the first message
+                    if ( isset($rattrs->deliver_at) ) {
+                        $message = $ct->scheduleMessage($sender, $rattrs->mcontent ?? '', $rattrs->deliver_at);
+                    } else {
+                        $message = $ct->sendMessage($sender, $rattrs->mcontent ?? '', new Collection());
+                    }
+                    $this->addAttachments($rattrs, $message);
+                    if ($isMassMessage) {
+                        $message->chatmessagegroup_id = $cmGroup->id;
+                        $message->save();
+                    }
+                } else { 
+                    // ... %FIXME...what is the else case? Is this an error or does logic just fall through to below?
+                }
+                $ct->refresh();
+                $chatthreads->push($ct);
+
+            } // foreach
+
+            return $chatthreads;
+        });
+
+        return ['chatthreads' => $chatthreads, 'chatmessagegroup' => $cmGroup];
     }
 
     public function addParticipant($participantID)

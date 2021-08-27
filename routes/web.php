@@ -87,6 +87,10 @@ Route::group(['middleware' => ['auth']], function () {
         'only' => [ 'index', ],
     ]);
 
+    Route::apiResource('chatmessagegroups', 'ChatmessagegroupsController', [
+        'only' => [ 'index', ],
+    ]);
+
     Route::get('/chatthreads/{chatthread}/gallery', 'ChatmessagesController@gallery')->name('chatthreads.gallery');
 
     // -- chatthreads --

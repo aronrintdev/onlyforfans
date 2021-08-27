@@ -34,6 +34,7 @@ class RestChatmessagegroupsTest extends TestCase
      *  @group chatmessagegroups
      *  @group regression
      *  @group regression-base
+     *  @group here0826
      */
     public function test_can_send_mass_message()
     {
@@ -105,6 +106,8 @@ class RestChatmessagegroupsTest extends TestCase
         $payload = [];
         $response = $this->actingAs($originator)->ajaxJSON( 'GET', route('chatmessagegroups.index', $payload) );
         $response->assertStatus(200);
+        $content = json_decode($response->content());
+        //dd($content);
     }
 
     // ------------------------------
