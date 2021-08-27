@@ -72,14 +72,22 @@ export default {
             this.clearFilters()
           }
         }, {
-          key: 'unread',
-          label: this.$t('filters.labels.unread'),
-          callback: () => this.toggleFilter('is_unread'),
+          key: 'favorites',
+          label: this.$t('filters.labels.favorites'),
+          callback: () => this.toggleFilter('is_favorite'),
+        }, {
+          key: 'freeFollowers',
+          label: this.$t('filters.labels.freeFollowers'),
+          callback: () => this.toggleFilter('is_free_follower'),
         }, {
           key: 'subscribers',
           label: this.$t('filters.labels.subscribers'),
           callback: () => this.toggleFilter('is_subscriber'),
-        }
+        }, {
+          key: 'following',
+          label: this.$t('filters.labels.following'),
+          callback: () => this.toggleFilter('is_following'),
+        }, 
       ]
     },
 
@@ -128,11 +136,8 @@ export default {
     },
 
     toggleFilter(key) {
-      if ( Object.keys(this.filters).includes(key) ) {
-        delete this.filters[key]
-      } else {
-        this.filters[key] = 1
-      }
+      this.filters = {}
+      this.filters[key] = 1
       this.reloadFromFirstPage()
     },
 
@@ -231,7 +236,10 @@ export default {
     "filters": {
       "labels": {
         "all": "All",
-        "subscribers": "Subscribers",
+        "favorites": "Favorites",
+        "freeFollowers": "Free Followers",
+        "subscribers": "Paid Subscribers",
+        "following": "Who I Follow",
         "unread": "Unread"
       },
     },

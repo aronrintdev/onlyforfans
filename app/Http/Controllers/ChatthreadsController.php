@@ -41,6 +41,8 @@ class ChatthreadsController extends AppBaseController
             'is_unread'       => 'boolean',
             'is_subscriber'   => 'boolean',
             'is_following'    => 'boolean',
+            'is_free_follower'=> 'boolean',
+            'is_favorite'     => 'boolean',
         ]);
 
         // Filters
@@ -53,6 +55,8 @@ class ChatthreadsController extends AppBaseController
             'is_unread',
             'is_subscriber',
             'is_following',
+            'is_free_follower',
+            'is_favorite',
         ]) ?? [];
 
         if ( $request->has('sortBy') ) { // UI may imply these filters when sorting
@@ -119,11 +123,25 @@ class ChatthreadsController extends AppBaseController
                     });
                 });
                 break;
-            case 'is_following':
+            case 'is_free_follower':
                 $query->whereHas('participants', function($q1) use(&$sessionUser) {
                     $q1->whereHas('followedtimelines', function($q2) use(&$sessionUser) {
                         $q2->where('timelines.id', $sessionUser->timeline->id)
                             ->where('access_level', ShareableAccessLevelEnum::DEFAULT);
+                    });
+                });
+                break;
+            case 'is_following':
+                $query->whereHas('participants', function($q1) use(&$sessionUser) {
+                    $q1->whereHas('timeline', function($q2) use(&$sessionUser) {
+                        $q2->whereIn('timelines.id', $sessionUser->followedtimelines->pluck('id'));
+                    });
+                });
+                break;
+            case 'is_favorite':
+                $query->whereHas('participants', function($q1) use(&$sessionUser) {
+                    $q1->whereHas('timeline', function($q2) use(&$sessionUser) {
+                        $q2->whereIn('timelines.id', $sessionUser->favorites->pluck('favoritable_id'));
                     });
                 });
                 break;
