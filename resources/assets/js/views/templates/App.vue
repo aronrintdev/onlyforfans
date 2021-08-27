@@ -138,30 +138,17 @@ export default {
       this.scrollToTop()
     }, 
 
-    /*
-    mobile(val) {
-      if (val) {
-        console.log('App::watch.mobile - disabling tooltips', { val })
-        this.$root.$emit('bv::disable::tooltip')
-      } else {
-        console.log('App::watch.mobile - enabling tooltips', { val })
-        this.$root.$emit('bv::enable::tooltip')
-      }
-    },
-     */
-
   },
 
   mounted() {
     this.updateScreenSize(this.$vssWidth)
-      /*
-    this.$nextTick( () => {
+
+    // intercept so tooltips don't display on mobile
+    this.$root.$on('bv::tooltip::show', bvEvent => {
       if (this.mobile) {
-        console.log('App::mounted() - disabling tooltips', { val: this.mobile })
-        this.$root.$emit('bv::disable::tooltip')
+        bvEvent.preventDefault() 
       }
     })
-       */
   },
 
   created() {
@@ -175,7 +162,6 @@ export default {
       this.getUnreadNotificationsCount();
     }
     if (this.$vssWidth < this.mobileWidth) {
-      this.$root.$emit('bv::disable::tooltip')
       this.UPDATE_MOBILE(true)
     }
   },
