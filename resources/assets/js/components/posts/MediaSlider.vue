@@ -197,3 +197,55 @@ $media-height: calc(100vh - 300px);
   margin-top: 10px;
 }
 </style>
+
+<style lang="scss">
+.media-slider {
+  .single {
+    position: relative;
+
+    .wrap {
+      height: calc(100vh - 300px);
+      position: relative;
+      z-index: 1;
+      max-width: 100vw;
+
+      .video-js.vjs-fluid {
+        width: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        height: 100%;
+        padding-top: 0;
+        background: transparent;
+      }
+    }
+
+    img {
+      position: relative;
+      z-index: 1;
+    }
+
+    .background-preview {
+      display: none;
+    }
+
+    .wrap + .background-preview {
+      background-color: rgba(0, 0, 0, 0.8);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      display: block;
+      overflow: hidden;
+
+      video, img {
+        object-fit: cover;
+        opacity: 0.4;
+        transform: scale(1.1);
+        height: 100%;
+      }
+    }
+  }
+}
+</style>
