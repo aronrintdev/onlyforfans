@@ -22,6 +22,7 @@ class RestAccountsTest extends TestCase
         $admin = $this->getAdmin();
 
         $response = $this->actingAs($admin)->ajaxJSON('GET', route('financial.accounts.index'));
+        $admin->removeRole('admin'); // Must remove or following tests may fail (!)
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'data' => [
