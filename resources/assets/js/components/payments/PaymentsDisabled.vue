@@ -1,9 +1,12 @@
 <template>
   <div>
     <b-alert varian="warning" show>
-      <b-media>
+      <b-media vertical-align="center">
         <template #aside>
-          <fa-icon icon="exclamation-triangle" size="2x" fixed-width />
+          <fa-layers class="fa-3x">
+            <fa-icon icon="ban" fixed-width  />
+            <fa-icon icon="dollar-sign" transform="shrink-6" fixed-width />
+          </fa-layers>
         </template>
         <p>
           {{ $t('message') }}
@@ -43,7 +46,7 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
-    "message": "Payments are temporarily disable for this phase of the beta program."
+    "message": "Payments are temporarily disabled at the moment. Please check back later."
   }
 }
 </i18n>

@@ -1,5 +1,5 @@
 <template>
-  <b-nav-form class="search-bar" :class="{'mobile': mobile}" form-class="w-100 position-relative" v-click-outside="close">
+  <b-nav-form class="search-bar" :class="{'mobile': mobile}" form-class="w-100 position-relative" v-custom-click-outside="close">
     <b-input-group class="w-100">
       <template #prepend>
         <b-input-group-text>

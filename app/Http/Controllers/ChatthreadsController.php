@@ -69,7 +69,7 @@ class ChatthreadsController extends AppBaseController
 
         // If user is admin and originator or participant ids are not specified then can perform query where user is
         // not a part of the participants
-        if (
+        if ( true || 
             !(
                 $request->user()->isAdmin() &&
                 ($request->has('originator_id') || $request->has('participant_id'))

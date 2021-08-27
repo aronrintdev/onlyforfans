@@ -240,6 +240,7 @@ export default {
   },
 
   mounted() {
+    console.log(`live-chat/components/ShowThread::mounted() - calling getChatmessages with id ${this.id}`)
     this.getMuteStatus(this.id)
     this.getChatmessages(this.id)
 
@@ -250,14 +251,14 @@ export default {
     }).catch(error => eventBus.$emit('error', { error, message: this.$t('error')}))
 
     this.markRead(this.id)
-    this.$log.debug('ShowThread Mounted', { channelName: this.channelName })
+    //this.$log.debug('ShowThread Mounted', { channelName: this.channelName })
     this.$echo.join(this.channelName)
       .listen('.chatmessage.sent', e => {
-        this.$log.debug('Event Received: .chatmessage.sent', { e })
+        //this.$log.debug('Event Received: .chatmessage.sent', { e })
         this.addMessage(e.chatmessage)
       })
       .listenForWhisper('sendMessage', e => {
-        this.$log.debug('Whisper Received: sendMessage', { e })
+        //this.$log.debug('Whisper Received: sendMessage', { e })
         this.addTempMessage(e.message)
       })
   },
@@ -278,7 +279,7 @@ export default {
      * Add official message from db, overwrite temp message if necessary
      */
     addMessage(message) {
-      this.$log.debug('ShowThread addMessage', { message })
+      //this.$log.debug('ShowThread addMessage', { message })
       var replaced = false
       for (var i in this.chatmessages) {
         if (
@@ -286,13 +287,13 @@ export default {
           this.chatmessages[i].sender_id === message.sender_id &&
           this.chatmessages[i].mcontent === message.mcontent
         ) {
-          this.$log.debug('ShowThread addMessage replaced message', { i, message: this.chatmessages[i] })
+          //this.$log.debug('ShowThread addMessage replaced message', { i, message: this.chatmessages[i] })
           Vue.set(this.chatmessages, i, message)
           replaced = true
           break;
         }
       }
-      this.$log.debug('ShowThread addMessage', { replaced })
+      //this.$log.debug('ShowThread addMessage', { replaced })
       if (!replaced) {
         this.chatmessages = [
           message,
@@ -305,7 +306,7 @@ export default {
      * Quickly add a temp message to data set while official one is processed in db
      */
     addTempMessage(message) {
-      this.$log.debug('ShowThread addTempMessage', { message })
+      //this.$log.debug('ShowThread addTempMessage', { message })
       this.chatmessages = [
         { id: moment().valueOf(), temp: true, ...message },
         ...this.chatmessages,
@@ -313,7 +314,8 @@ export default {
     },
 
     endVisible(isVisible) {
-      this.$log.debug('endVisible', { isVisible })
+      //this.$log.debug('endVisible', { isVisible })
+      console.log(`live-chat/components/ShowThread::endVisible()`)
       this.isEndVisible = isVisible
       if (isVisible && !this.moreLoading && !this.isLastPage) {
         this.loadNextPage()
@@ -321,9 +323,10 @@ export default {
     },
 
     loadNextPage() {
+      console.log(`live-chat/components/ShowThread::loadNextPage() - calling getChatmessages with no id `)
       this.currentPage += 1
       this.moreLoading = true
-      this.getChatmessages()
+      this.getChatmessages(this.id)
     },
 
     isDateBreak(cm, idx) {
@@ -341,7 +344,7 @@ export default {
         take: this.perPage,
         chatthread_id: chatthreadID,
       }
-      console.log('components/ShowThread::getChatmessages', { params })
+      console.log('live-chat/components/ShowThread::getChatmessages() - chatmessages.index', { params })
       const response = await axios.get( this.$apiRoute('chatmessages.index'), { params } )
 
       // Filter out any messages that we already have
@@ -349,7 +352,7 @@ export default {
         _.findIndex(this.chatmessages, message => message.id === incoming.id) === -1
       ))
 
-      this.$log.debug('getChatmessages', { newMessages })
+      //this.$log.debug('getChatmessages', { newMessages })
 
       this.chatmessages = [
         ...this.chatmessages,
@@ -489,6 +492,7 @@ export default {
 
     id (newValue, oldValue) {
       if ( newValue && (newValue !== oldValue) ) {
+        console.log(`live-chat/components/ShowThread::watch(id) - calling getChatmessages with id ${newValue}`)
         this.getChatmessages(newValue)
         this.markRead(newValue)
         this.getMuteStatus(newValue)

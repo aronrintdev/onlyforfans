@@ -72,6 +72,34 @@ return [
         ],
 
         /**
+         * High Priority Queue
+         */
+        'high' => [
+            'driver' => env('QUEUE_HIGH_DRIVER', 'database'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'prefix' => env('QUEUE_SQS_PATH'),
+            'queue' => env('QUEUE_PREFIX', '') . 'high',
+            'region' => env('QUEUE_SQS_REGION', env('AWS_DEFAULT_REGION', 'us-east-1')),
+
+            'table' => 'jobs',
+            'after_commit' => true,
+        ],
+
+        /**
+         * Low Priority Queue
+         */
+        'low' => [
+            'driver' => env('QUEUE_LOW_DRIVER', 'database'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'prefix' => env('QUEUE_SQS_PATH'),
+            'queue' => env('QUEUE_PREFIX', '') . 'high',
+            'region' => env('QUEUE_SQS_REGION', env('AWS_DEFAULT_REGION', 'us-east-1')),
+
+            'table' => 'jobs',
+            'after_commit' => true,
+        ],
+
+        /**
          * Queue jobs related to financial transactions, such as balance updates
          */
         'financial-transactions' => [

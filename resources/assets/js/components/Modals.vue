@@ -206,6 +206,7 @@ import ReportPost from '@components/modals/ReportPost.vue'
 import ExpirationPeriod from '@components/modals/ExpirationPeriod.vue'
 import PromotionCampaign from '@components/modals/PromotionCampaign.vue'
 import PurchaseMessage from '@components/modals/PurchaseMessage'
+import { beforeDestroy } from 'vue2-dropzone';
 
 export default {
   name: 'Modals',
@@ -491,6 +492,7 @@ export default {
               position: relative;
               z-index: 1;
               max-width: 100vw;
+              height: 100%;
 
               .video-js.vjs-fluid {
                 width: 100%;
@@ -602,7 +604,11 @@ export default {
       }
     }
     .superbox-post {
-      height: calc(100vh - 100px);
+      border: none;
+      border-radius: 0;
+    }
+    .modal-dialog {
+      margin: 0;
     }
   }
 }
