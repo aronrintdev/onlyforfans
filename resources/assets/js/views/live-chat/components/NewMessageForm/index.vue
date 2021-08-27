@@ -34,6 +34,7 @@
         @vdropzone-success="onDropzoneSuccess"
         @vdropzone-error="onDropzoneError"
         @vdropzone-queue-complete="onDropzoneQueueComplete"
+        @vdropzone-total-upload-progress="onDropzoneTotalUploadProgress"
         class="dropzone"
       >
         <!-- Photo Store display -->
@@ -57,7 +58,7 @@
             <b-form-textarea
               class="message"
               v-model="newMessageForm.mcontent"
-              placeholder="Type a message..."
+              placeholder="Type a message... (Ctrl + Enter to send)"
               :rows="mobile ? 2 : 3"
               max-rows="6"
               spellcheck="false"
@@ -84,6 +85,8 @@
       @close="showVideoRec = false"
       @complete="videoRecCompleted"
     />
+
+    <b-progress v-if="sending" :value="uploadProgress" max="100" animated />
 
     <b-modal v-model="scheduleMessageOpen" body-class="p-0" hide-header centered hide-footer>
       <ScheduleDateTime
@@ -171,6 +174,10 @@ export default {
         thumbnailWidth: 100,
         clickable: '.upload-files', // button in the footer, see: https://www.dropzonejs.com/#configuration-options
         maxFilesize: 5000, // 5 GB
+
+        // https://stackoverflow.com/questions/46379917/dropzone-js-upload-with-php-failed-after-30-seconds-upload
+        timeout: 0, // disables timeout
+
         addRemoveLinks: true,
         headers: {
           'X-Requested-With': 'XMLHttpRequest',
@@ -221,6 +228,7 @@ export default {
 
     // If client is sending message
     sending: false,
+    uploadProgress: 0,
 
   }), // data
 
@@ -270,6 +278,10 @@ export default {
       formData.append('resource_id', this.uploadsVaultFolder.id)
       formData.append('resource_type', 'vaultfolders')
       formData.append('mftype', 'vault')
+    },
+
+    onDropzoneTotalUploadProgress(totalUploadProgress, totalBytes, totalBytesSent) {
+      this.uploadProgress = totalUploadProgress
     },
 
     // Called each time the queue successfully uploads a file

@@ -177,6 +177,14 @@ export default {
     display: none;
   @media (min-width: 576px) {
     display: block;
+    float: none;  
+    margin-top: 120px;
+    margin-right: auto;
+    width: 350px;
+    margin-left: auto;
+  }
+  @media (min-width: 992px) {
+    display: block;
     float: right;
     margin-top: 120px;
     margin-right: 150px;

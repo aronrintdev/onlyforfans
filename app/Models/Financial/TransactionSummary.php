@@ -10,6 +10,16 @@ use App\Models\Financial\Traits\HasSystemByAccount;
 use App\Enums\Financial\TransactionSummaryTypeEnum as Type;
 use Illuminate\Support\Collection;
 
+/**
+ *
+ *
+ *
+ * @method static Builder type(string $type)
+ * @method static Builder account(Account $account)
+ * @method static Builder finalized()
+ *
+ * @package App\Models\Financial
+ */
 class TransactionSummary extends Model
 {
     use UsesUuid,
@@ -70,15 +80,25 @@ class TransactionSummary extends Model
     /* ------------------------------- Scopes ------------------------------- */
     #region Scopes
 
-    public function scopeType($query, $type) {
+    public function scopeType($query, $type)
+    {
         return $query->where('type', $type);
     }
 
-    public function scopeIsAccount($query, $account) {
+    public function scopeIsAccount($query, $account)
+    {
         if ($account instanceof Account) {
             return $query->where('account_id', $account->id);
         }
         return $query->where('account_id', $account);
+    }
+
+    /**
+     * only finalized summaries
+     */
+    public function scopeFinalized($query)
+    {
+        return $query->where('finalized', true);
     }
 
     #endregion Scopes
@@ -111,11 +131,7 @@ class TransactionSummary extends Model
      */
     public static function lastFinalized(Account $account)
     {
-        return TransactionSummary::select(TransactionSummary::getTableName() . '.*')
-            ->join(Transaction::getTableName(), Transaction::getTableName() . '.id', '=', TransactionSummary::getTableName() . '.to_transaction_id' )
-            ->where('finalized', true)
-            ->orderByDesc(Transaction::getTableName() . '.settled_at')
-            ->limit(1);
+        return TransactionSummary::where('account_id', $account->id)->finalized()->latest('to')->with('to_transaction')->first();
     }
 
     public static function getBatch(Account $account, string $unit, Carbon $from, Carbon $to)

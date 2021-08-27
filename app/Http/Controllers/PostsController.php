@@ -177,13 +177,6 @@ class PostsController extends AppBaseController
 
         $post->addTag($publicTags, ContenttagAccessLevelEnum::OPEN); // batch add
         $post->addTag($privateTags, ContenttagAccessLevelEnum::MGMTGROUP); // batch add
-        /*
-        $allTags->each( function($str) use(&$post) {
-            $accessLevel = (substr($str,-1)==='!') ? ContenttagAccessLevelEnum::MGMTGROUP : ContenttagAccessLevelEnum::OPEN;
-            $str = trim($str, '#!'); // remove hashtag and possible '!' at end indicating private/mgmt tag
-            $post->addTag($str, $accessLevel); // add 1-by-1
-        });
-         */
 
         $post->refresh();
 
@@ -201,7 +194,8 @@ class PostsController extends AppBaseController
         }
 
         if ($post->price->isPositive() && $post->sharees()->count() > 0) {
-            abort(403, 'Post has sharees');
+            //abort(403, 'Post has sharees'); // removed as per AF-540 20210823
+            // %PSG: this was too broad in any case, as it restricted user from adding tags, etc
         }
 
         $request->validate([

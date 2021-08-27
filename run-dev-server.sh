@@ -5,10 +5,11 @@ trap quitjobs INT
 quitjobs() {
   echo ""
   pkill -P $$
-  echo "Killed all running jobs".
+  echo " => Killed all running jobs".
   scriptCancelled="true"
   trap - INT
-  exit
+  ## Update: exit was exiting open terminal
+  # exit
 }
 
 ### Wait for cancceled trap loop ###
@@ -16,7 +17,7 @@ scriptCancelled="false"
 waitforcancel() {
   while :
   do
-    if [ "$scriptCanceled" == "true"]; then
+    if [ "$scriptCanceled" == "true" ]; then
       return
     fi
     sleep 1
@@ -28,7 +29,8 @@ php artisan serve & \
 
 ### Starting Laravel Queue Workers ###
 php artisan queue:listen --tries=3 --backoff=3 & \
-php artisan queue:listen --queue=financial-summaries-urgent,financial-summaries-high,financial-summaries-mid,financial-summaries-low --tries=3 --backoff=3 & \
+php artisan queue:listen financial-transactions --tries=3 --backoff=3 & \
+php artisan queue:listen financial-summaries --tries=3 --backoff=3 & \
 
 ### Starting Websockets Server ###
 php artisan websockets:serve & \

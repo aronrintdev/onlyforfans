@@ -31,23 +31,32 @@ class CreateTransactionSummary implements ShouldQueue, ShouldBeUnique
     public $backoff = [5, 15, 60];
 
     /**
+     * Delete the job if its models no longer exist.
+     *
+     * @var bool
+     */
+    public $deleteWhenMissingModels = true;
+
+    /**
      * Account instance
      * @var \App\Models\Financial\Account
      */
     protected $account;
     protected $type;
     protected $range;
+    protected $recalculate;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(Account $account, $type, $range = [ "from" => '', 'to' => '' ])
+    public function __construct(Account $account, $type, $range = [ 'from' => '', 'to' => '' ], $recalculate = false)
     {
         $this->account = $account->withoutRelations();
         $this->type = $type;
         $this->range = $range;
+        $this->recalculate = $recalculate;
     }
 
     /**
@@ -55,7 +64,7 @@ class CreateTransactionSummary implements ShouldQueue, ShouldBeUnique
      */
     public function uniqueId()
     {
-        return "{$this->account->id}-{$this->type}-{$this->range['from']}-{$this->range['to']}";
+        return "create-transaction-summary-{$this->account->id}-{$this->type}-{$this->range['from']}-{$this->range['to']}";
     }
 
     public function middleware()
@@ -81,14 +90,16 @@ class CreateTransactionSummary implements ShouldQueue, ShouldBeUnique
             $this->account->settleBalance();
         }
 
-        // Check if this summary has already been created
-        if (
-            $this->type !== TransactionSummaryTypeEnum::BUNDLE &&
-            TransactionSummary::where('account_id', $this->account->getKey())
-                ->where('type', $this->type)->where('from', $this->range['from'])
-                ->where('to', $this->range['to'])->exists()
-        ) {
-            return;
+        if (!$this->recalculate) {
+            // Check if this summary has already been created
+            if (
+                $this->type !== TransactionSummaryTypeEnum::BUNDLE &&
+                TransactionSummary::where('account_id', $this->account->getKey())
+                    ->where('type', $this->type)->where('from', $this->range['from'])
+                    ->where('to', $this->range['to'])->exists()
+            ) {
+                return;
+            }
         }
 
         if ($this->type === TransactionSummaryTypeEnum::BUNDLE) {
@@ -102,12 +113,15 @@ class CreateTransactionSummary implements ShouldQueue, ShouldBeUnique
             $this->range['to'] = Carbon::now();
         }
 
-        $summary = TransactionSummary::create([
+        $summary = TransactionSummary::firstOrCreate([
             'account_id' => $this->account->getKey(),
             'from'       => $this->range['from'],
             'to'         => $this->range['to'],
             'type'       => $this->type,
         ]);
+
+        $summary->finalized = false;
+        $summary->save();
 
         $query = $this->account->transactions()->inRange($this->range)->settled();
 

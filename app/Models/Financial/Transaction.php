@@ -3,7 +3,8 @@
 namespace App\Models\Financial;
 
 use Exception;
-use App\Models\Casts\Money;
+use App\Models\Casts\Money as CastsMoney;
+use Money\Money;
 use Illuminate\Support\Carbon;
 use App\Models\Traits\UsesUuid;
 
@@ -17,32 +18,44 @@ use App\Models\Financial\Traits\HasSystemByAccount;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Financial\Exceptions\FeesTooHighException;
 use App\Models\Financial\Exceptions\TransactionAlreadySettled;
+use App\Models\Financial\Traits\TransactionScopes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Financial Transaction Model
  *
- * @property string       $id
- * @property string       $account_id
- * @property \Money\Money $credit_amount
- * @property \Money\Money $debit_amount
- * @property \Money\Money $balance
- * @property string       $currency
- * @property string       $type
- * @property string       $description
- * @property string       $reference_id
- * @property string       $resource_type
- * @property string       $resource_id
- * @property array        $metadata
- * @property Carbon       $settled_at
- * @property Carbon       $failed_at
- * @property Carbon       $created_at
- * @property Carbon       $updated_at
+ * @property  string  $id
+ * @property  string  $account_id
+ * @property  Money   $credit_amount
+ * @property  Money   $debit_amount
+ * @property  Money   $balance
+ * @property  string  $currency
+ * @property  string  $type
+ * @property  string  $description
+ * @property  string  $reference_id
+ * @property  string  $resource_type
+ * @property  string  $resource_id
+ * @property  array   $metadata
+ * @property  Carbon  $settled_at
+ * @property  Carbon  $failed_at
+ * @property  Carbon  $created_at
+ * @property  Carbon  $updated_at
+ *
+ * @property  Account      $account
+ * @property  mixed        $resource
+ * @property  Transaction  $reference
+ * @property  Transaction  $fee_for
+ * @property  Collection   $feeTransactions
  *
  * @package App\Models\Financial
  */
 class Transaction extends Model
 {
     use UsesUuid,
+        TransactionScopes, // Model Scopes
         HasSystemByAccount,
         HasCurrency,
         HasFactory;
@@ -80,12 +93,15 @@ class Transaction extends Model
         });
     }
 
+    /* -------------------------------------------------------------------------- */
+    /*                                    Casts                                   */
+    /* -------------------------------------------------------------------------- */
     #region Casts
     protected $casts = [
         'metadata' => 'array',
-        'credit_amount' => Money::class,
-        'debit_amount' => Money::class,
-        'balance' => Money::class,
+        'credit_amount' => CastsMoney::class,
+        'debit_amount' => CastsMoney::class,
+        'balance' => CastsMoney::class,
     ];
 
     public function getSystemAttribute()
@@ -101,100 +117,56 @@ class Transaction extends Model
 
     #endregion
 
-    /* ---------------------------- Relationships --------------------------- */
+    /* -------------------------------------------------------------------------- */
+    /*                                Relationships                               */
+    /* -------------------------------------------------------------------------- */
     #region Relationships
+
+    /**
+     * Account this transaction belongs to
+     */
     public function account()
     {
         return $this->belongsTo(Account::class);
     }
 
+    /**
+     * App Model associated with this transaction
+     */
     public function resource()
     {
         return $this->morphTo();
     }
 
+    /**
+     * The associated inverse transaction
+     */
     public function reference()
     {
         return $this->hasOne(Transaction::class, 'reference_id');
     }
 
+    /**
+     * Transaction this fee is for
+     */
+    public function fee_for()
+    {
+        return $this->belongsTo(Transaction::class, 'fee_for');
+    }
+
+    /**
+     * Fee transactions for this transaction
+     */
+    public function feeTransactions()
+    {
+        return $this->hasMany(Transaction::class, 'fee_for');
+    }
+
     #endregion Relationships
 
-    /* ------------------------------- Scopes ------------------------------- */
-    #region Scopes
-
-    /**
-     * Only transactions within a range
-     * ```
-     * $transactions->inRange([ 'from' => '', 'to' => '' ])->get();
-     * ```
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param array $range [ 'from' => Carbon, 'to' => Carbon ]
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeInRange($query, $range)
-    {
-        return $query->where('created_at', '>=', $range['from'])
-            ->where('created_at', '<', $range['to']);
-    }
-
-    /**
-     * Transactions that have been settled.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeSettled($query)
-    {
-        return $query->whereNotNull('settled_at');
-    }
-
-    /**
-     * Transactions that have failed.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeFailed($query)
-    {
-        return $query->whereNotNull('failed_at');
-    }
-
-    /**
-     * Transactions that are pending settling.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopePending($query)
-    {
-        return $query->whereNull('settled_at')->whereNull('failed_at');
-    }
-
-    public function scopeIsDebit($query)
-    {
-        return $query->where('debit_amount', '>', 0);
-    }
-
-    public function scopeIsCredit($query)
-    {
-        return $query->where('credit_amount', '>', 0);
-    }
-
-    public function scopeType($query, $type)
-    {
-        return $query->where('type', $type);
-    }
-
-    public function scopeIsTip($query)
-    {
-        return $query->type(TransactionTypeEnum::TIP);
-    }
-
-    #endregion Scopes
-
-    /* ------------------------------ Functions ----------------------------- */
+    /* -------------------------------------------------------------------------- */
+    /*                                  Functions                                 */
+    /* -------------------------------------------------------------------------- */
     #region Functions
 
     /**
@@ -211,81 +183,86 @@ class Transaction extends Model
                 if (isset($this->settled_at)) {
                     throw new TransactionAlreadySettled($this);
                 }
-                if (isset($this->metadata) && isset($this->metadata['feeTransactions'])) {
-                    throw new TransactionAlreadySettled($this);
+                $skipFees = false;
+                if (isset($this->fee_for)) {
+                    // Skip Fees transactions
+                    $skipFees = true;
+                    // throw new TransactionAlreadySettled($this);
                 }
 
-                // Get Defaults
-                $fees = Config::get('transactions.systems.' . $this->system . '.fees');
+                $transactions = new Collection([]);
+                if(!$skipFees) {
+                    // Get Defaults
+                    $fees = Config::get('transactions.systems.' . $this->system . '.fees');
 
-                // Check for fee default overwrites for this account
-                // TODO: Create DB Table and get this check
+                    // Check for fee default overwrites for this account
+                    // TODO: Create DB Table and get this check
 
-                // Allocate Funds
-                $takes = [];
-                foreach($fees as $key => $fee) {
-                    $takes[$key] = $fee['take'];
-                }
-                if ( array_sum($takes) >= 100 ) {
-                    throw new FeesTooHighException($this->system, $fees, $this, array_sum($takes) . '%' );
-                }
-                // User remaining ratio
-                $takes = array_merge($takes, [ 'remainder' => 100 - array_sum($takes)]);
-                $result = $this->credit_amount->allocate($takes);
+                    // Allocate Funds
+                    $takes = [];
+                    foreach($fees as $key => $fee) {
+                        $takes[$key] = $fee['take'];
+                    }
+                    if ( array_sum($takes) >= 100 ) {
+                        throw new FeesTooHighException($this->system, $fees, $this, array_sum($takes) . '%' );
+                    }
+                    // User remaining ratio
+                    $takes = array_merge($takes, [ 'remainder' => 100 - array_sum($takes)]);
+                    $result = $this->credit_amount->allocate($takes);
 
-                // Check minimums and adjust
-                foreach ($fees as $key => $fee) {
-                    if ( $result[$key]->lessThan($this->asMoney($fee['min'] ?? 0)) ) {
-                        $diff = $this->asMoney($fee['min'])->subtract($result[$key]);
-                        $result[$key] = $result[$key]->add($diff);
-                        $result['remainder'] = $result['remainder']->subtract($diff);
-                        if ($result['remainder']->isNegative()) {
-                            // Add back to make remainder zero
-                            $diff = $this->asMoney(0)->subtract($result['remainder']);
-                            $result[$key] = $result[$key]->subtract($diff);
-                            $result['remainder'] = $result['remainder']->add($diff);
+                    // Check minimums and adjust
+                    foreach ($fees as $key => $fee) {
+                        if ( $result[$key]->lessThan($this->asMoney($fee['min'] ?? 0)) ) {
+                            $diff = $this->asMoney($fee['min'])->subtract($result[$key]);
+                            $result[$key] = $result[$key]->add($diff);
+                            $result['remainder'] = $result['remainder']->subtract($diff);
+                            if ($result['remainder']->isNegative()) {
+                                // Add back to make remainder zero
+                                $diff = $this->asMoney(0)->subtract($result['remainder']);
+                                $result[$key] = $result[$key]->subtract($diff);
+                                $result['remainder'] = $result['remainder']->add($diff);
+                            }
                         }
                     }
-                }
-                // Make sure user still has amount left, if this is not a chargeback partial amount
-                if (!$result['remainder']->isPositive() && $this->type !== TransactionTypeEnum::CHARGEBACK_PARTIAL ) {
-                    $feeTotal = 0;
+                    // Make sure user still has amount left, if this is not a chargeback partial amount
+                    if (!$result['remainder']->isPositive() && $this->type !== TransactionTypeEnum::CHARGEBACK_PARTIAL ) {
+                        $feeTotal = 0;
+                        foreach ($fees as $key => $fee) {
+                            $feeTotal += $result[$key]->getAmount();
+                        }
+                        throw new FeesTooHighException($this->system, $fees, $this, $feeTotal);
+                    }
+
+                    // Move to System Accounts
                     foreach ($fees as $key => $fee) {
-                        $feeTotal += $result[$key]->getAmount();
+                        if ($result[$key]->isPositive()) {
+                            $transactions[$key] = $this->account->moveTo(
+                                Account::getFeeAccount($key, $this->system, $this->currency),
+                                $result[$key],
+                                [
+                                    'ignoreBalance' => true,
+                                    'description' => $fee->description ?? "Transaction {$key}",
+                                    'type' => TransactionTypeEnum::FEE,
+                                    'resource_type' => $this->resource_type,
+                                    'resource_id' => $this->resource_id,
+                                    'fee_for' => $this->getKey(),
+                                ]
+                            );
+                        }
                     }
-                    throw new FeesTooHighException($this->system, $fees, $this, $feeTotal);
-                }
-
-                // Move to System Accounts
-                $transactions = new Collection([]);
-                foreach ($fees as $key => $fee) {
-                    if ($result[$key]->isPositive()) {
-                        $transactions[$key] = $this->account->moveTo(
-                            Account::getFeeAccount($key, $this->system, $this->currency),
-                            $result[$key],
-                            [
-                                'ignoreBalance' => true,
-                                'description' => $fee->description ?? "Transaction {$key}",
-                                'type' => TransactionTypeEnum::FEE,
-                                'shareable_id' => $this->shareable_id,
-                                'metadata' => [ 'fee' => true, 'feeFor' => $this->getKey() ],
-                            ]
-                        );
-                    }
-                }
-                // Save fees as metadata
-                $this->metadata = array_merge(
-                    $this->metadata ?? [],
-                    [
-                        'feeTransactions' => $transactions->map(function($item) {
-                            return $item->map(function($item) {
-                                return $item->getKey();
-                            })->all();
-                        })->all(),
-                    ]
-                );
-
-                $this->save();
+                    // Save fees as metadata
+                    $this->metadata = array_merge(
+                        $this->metadata ?? [],
+                        [
+                            'feeTransactions' => $transactions->map(function($item) {
+                                return $item->map(function($item) {
+                                    return $item->getKey();
+                                })->all();
+                            })->all(),
+                        ]
+                    );
+                    $this->save();
+                } // End Fees creation
                 $this->settleBalance();
                 $this->save();
                 // Settle balance on all debit side fee transactions
@@ -304,12 +281,16 @@ class Transaction extends Model
                     'message' => $e->getMessage(),
                 ]
             ]);
+            Log::error('Transaction Settle Balance Error', ['error' => $e]);
             $this->save();
+
+            Flag::raise($this, [ 'description' => 'Transaction Settle Balance Error' ]);
         }
     }
 
     /**
      * Settles the balance amount for this transaction
+     * @return void
      */
     public function settleBalance()
     {
@@ -332,6 +313,7 @@ class Transaction extends Model
                     'message' => $e->getMessage(),
                 ]
             ]);
+            Log::error('Transaction Settle Balance Error', [ 'error' => $e ]);
             $this->save();
         }
 
@@ -339,23 +321,34 @@ class Transaction extends Model
 
     /**
      * Calculates balance from past settled transactions
+     *
+     * @param  bool  $bySummary - Calculate using sum of settled transactions sense last finalized transaction summary.
+     *    This is more DB intensive, but has less potential to have lock issues. Default `false`
+     * @return Money
      */
-    public function calculateBalance()
+    public function calculateBalance($bySummary = false)
     {
-        $query = Transaction::select(DB::raw('sum(credit_amount) - sum(debit_amount) as amount'))
-            ->where('account_id', $this->account->getKey())
-            ->whereNotNull('settled_at');
+        if ($bySummary) {
+            $query = Transaction::select(DB::raw('sum(credit_amount) - sum(debit_amount) as amount'))
+                ->where('account_id', $this->account->getKey())
+                ->settled();
 
-        // Find last finalized transaction summary balance
-        $lastSummary = TransactionSummary::lastFinalized($this->account)->with('to:settled_at')->first();
-        // Calculate from last summary if there is one
-        if (isset($lastSummary)) {
-            $query = $query->where('settled_at', '>', $lastSummary->to->settled_at);
-        }
-        $balance = $query->pluck('amount');
-        $balance = $this->asMoney($query->value('amount'));
-        if (isset($lastSummary)) {
-            $balance = $lastSummary->balance->add($balance);
+            // Find last finalized transaction summary balance
+            $lastSummary = TransactionSummary::lastFinalized($this->account);
+
+            // Calculate from latest summary's to transaction balance if there is one
+            if (isset($lastSummary)) {
+                $query = $query->where('created_at', '>', $lastSummary->to);
+            }
+            $balance = $this->asMoney($query->value('amount'));
+
+            if (isset($lastSummary)) {
+                // Add amount to balance from latest summary to transaction
+                $balance = $lastSummary->to_transaction->balance->add($balance);
+            }
+        } else {
+            // Get balance of last settled transaction
+            $balance = Transaction::sameAccountAs($this)->latestSettled()->first()->balance;
         }
 
         return $balance;

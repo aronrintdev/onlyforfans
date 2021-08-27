@@ -13,8 +13,8 @@
         <section v-if="!is_schedulefeed" class="mt-3 px-2 py-2 d-flex flex-column flex-md-row justify-content-center justify-content-md-between" :class="{ 'feed-ctrl': !is_homefeed }">
           <b-nav v-if="!is_homefeed" pills>
             <b-nav-item @click="setFeedType('default')" :active="feedType==='default'">All</b-nav-item>
-            <b-nav-item @click="setFeedType('photos')" :active="feedType==='photos'">Photos({{ totalPhotosCount }})</b-nav-item>
-            <b-nav-item @click="setFeedType('videos')" :active="feedType==='videos'">Videos({{ totalVideosCount }})</b-nav-item>
+            <b-nav-item @click="setFeedType('photos')" :active="feedType==='photos'">Photos ({{ totalPhotosCount }})</b-nav-item>
+            <b-nav-item @click="setFeedType('videos')" :active="feedType==='videos'">Videos ({{ totalVideosCount }})</b-nav-item>
           </b-nav>
           <article v-else>
             <!-- empty placeholder to preserve justify arrangment in flex area -->
@@ -61,7 +61,7 @@
     <section class="row">
       <article
         v-for="(feedItem, index) in listItems"
-        :key="feedItem.id"
+        :key="feedItem.id + index"
         :class="feedClass"
         v-observe-visibility="index === listItems.length - 1 ? endPostVisible : false"
       >
@@ -125,7 +125,7 @@ export default {
       return {
         'col-sm-12': !this.isGridLayout,
         'col-sm-4': this.isGridLayout,
-        'mt-3': true,
+        'mt-4': true,
       }
     },
 
@@ -183,17 +183,14 @@ export default {
   },
   beforeDestroy() {
     // window.removeEventListener('scroll', this.onScroll)
+    eventBus.$off('update-timelines');
   },
 
   created() {
     this.feedType = this.is_schedulefeed ? 'schedule' : this.feedType;
 
     // Get photos & videos feed total count
-    axios.get(route('timelines.getPhotosVideosCount', this.timelineId))
-      .then((response) => {
-        this.totalPhotosCount = response.data.photos || 0;
-        this.totalVideosCount = response.data.videos || 0;
-      })
+    this.getMediaCount()
 
     this.$store.dispatch('getFeeddata', { 
       feedType: this.feedType,
@@ -362,6 +359,7 @@ export default {
         hidePromotions: this.hidePromotions,
       })
       this.$store.dispatch('getQueueMetadata')
+      this.getMediaCount()
     },
 
     doReset() {
@@ -371,6 +369,13 @@ export default {
       this.moreLoading = true
     },
 
+    getMediaCount() {
+      axios.get(route('timelines.getPhotosVideosCount', this.timelineId))
+        .then((response) => {
+          this.totalPhotosCount = response.data.photos || 0;
+          this.totalVideosCount = response.data.videos || 0;
+        })
+    }
   },
 
   watch: {
@@ -401,7 +406,23 @@ export default {
           if (!this.isLastPage && this.renderedItems.length >= 5) {
             this.renderedItems.pop();
           }
-          this.renderedItems.unshift(newVal);
+          newVal.mediafiles.forEach(mf => {
+            if (this.feedType === 'photos' && mf.is_image) {
+              this.renderedItems.unshift(mf);
+              this.totalPhotosCount += 1;
+            } else if (this.feedType === 'videos' && mf.is_video) {
+              this.renderedItems.unshift(mf);
+              this.totalVideosCount += 1;
+            } else if (this.feedType === 'default') {
+              if (mf.is_image) {
+                this.totalPhotosCount += 1;
+              }
+              if (mf.is_video) {
+                this.totalVideosCount += 1;
+              }
+              this.renderedItems.unshift(newVal);
+            }
+          })
         }
       } else {
         if (newVal.schedule_datetime) {

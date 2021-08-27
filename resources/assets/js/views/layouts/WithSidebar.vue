@@ -4,33 +4,34 @@
     <!-- Mobile view -->
     <section v-if="mobile" class="mobile h-100" :class="{ 'focus-main': focusMain }">
       <!-- <transition :name="focusMain ? 'slide-right' : 'slide-left'"> -->
-        <div class="sidebar" key="sidebar">
-          <div class="header">
+        <div class="sidebar px-3 pb-3" key="sidebar">
+          <div class="header justify-content-center">
             <slot name="mobileTitle"></slot>
           </div>
           <slot name="sidebar"></slot>
         </div>
-        <div class="main" key="main">
-          <div v-if="!removeMobileMainNavTop" class="header pt-2">
+        <div class="main px-3 pb-3" key="main">
+          <div v-if="!removeMobileMainNavTop" class="header justify-content-center py-3">
             <slot name="mobileMainNavTop">
-              <b-btn variant="link" size="lg" @click="$emit('back')">
-                <fa-icon icon="arrow-left" fixed-width />
-                {{ $t('back') }}
+              <b-btn variant="link" size="lg" class="back-btn" @click="$emit('back')">
+                <fa-icon icon="arrow-left" size="lg" />
               </b-btn>
               <slot name="mobileMainNavTopTitle"></slot>
             </slot>
           </div>
-          <slot></slot>
+          <div class="settings-page">
+            <slot></slot>
+          </div>
         </div>
       <!-- </transition> -->
     </section>
 
     <!-- Non mobile view -->
     <section v-else class="d-flex flex-nowrap h-100 w-100">
-      <aside class="sidebar mr-3">
+      <aside class="sidebar p-3">
         <slot name="sidebar"></slot>
       </aside>
-      <main class="main flex-fill h-100 py-3">
+      <main class="main flex-fill h-100 pt-3">
         <slot></slot>
       </main>
     </section>
@@ -84,8 +85,9 @@ export default {
     width: 100vw;
     max-width: 100vw;
     height: 100%;
-    min-height: calc(100vh - 64px);
-    max-height: calc(100vh - 64px);
+    max-height: 100%;
+    overflow-y: auto;
+
     .header {
       position: sticky;
       top: 0;
@@ -93,6 +95,9 @@ export default {
       right: 0;
       z-index: 100;
       background-color: white;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #ced4da;
     }
   }
 
@@ -122,6 +127,21 @@ export default {
 .main {
   max-height: 100%;
   min-width: 20rem;
+}
+
+.back-btn {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+}
+</style>
+
+<style>
+@media (max-width: 576px) {
+  .settings-page .card {
+    border: none;
+  }
 }
 </style>
 

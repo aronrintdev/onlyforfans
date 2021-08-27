@@ -5,7 +5,7 @@
         <!-- SignUp Form -->
         <b-form @submit.prevent="signup">
           <Branding type="text" size="3x" class="mb-3 register-logo" />
-          <div class="h1 mb-3" v-text="$t('signUpLink')" />
+          <div class="h1 mb-3 text-center text-md-left" v-text="$t('signUpLink')" />
           <div class="signup-form">
             <div v-if="$route.query.beta">
               <b-alert variant="primary" v-text="$t('betaMessage')" show />
@@ -17,7 +17,7 @@
             <div v-if="verrors && verrors.token">
               <b-alert variant="danger" v-text="$t('betaFailedMessage')" show />
             </div>
-            <b-form-group :invalid-feedback="verrors.email ? verrors.email[0] : null" :state="verrors.email ? false : null">
+            <b-form-group :invalid-feedback="verrors.email ? 'Invalid email address.' : null" :state="verrors.email ? false : null">
               <b-form-input
                 id="input-email"
                 v-model="form.email"
@@ -114,7 +114,7 @@
         </div>
 
         <div class="d-flex text-center auth-bottom">
-          <p class="text-secondary mt-0 mr-3">Do you already have an account?</p>
+          <p class="text-secondary mt-0 mr-0 mr-md-3">Do you already have an account?</p>
           <router-link :to="{ name: 'login' }" v-text="$t('signInHeader')" />
         </div>
       </div>
@@ -254,6 +254,12 @@ export default {
     margin: 0 auto 25px;
   }
 }
+
+  @media (max-width: 576px) {
+    .h1 {
+      font-size: 2rem;
+    }
+  }
 </style>
 
 <i18n lang="json5">
@@ -270,8 +276,8 @@ export default {
     "continueWithFacebook": "Continue With Facebook",
     "continueWithGoogle": "Continue With Google",
     "continueWithTwitter": "Continue With Twitter",
-    "betaMessage": "Welcome to the Allfans.com closed beta. Please complete the form below to register your account",
-    "betaFailedMessage": "Allfans.com is currently in a closed beta, please use the link provided to you in your invitation email to register in the beta program"
+    "betaMessage": "Welcome to the Allfans.com. Please complete the form below to register your account",
+    "betaFailedMessage": "Allfans.com is currently only accepting invited priority users, please use the link provided to you in your invitation email to register currently"
   },
 }
 </i18n>

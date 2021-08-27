@@ -18,6 +18,12 @@ return [
 
     'default' => env('QUEUE_DRIVER', 'sync'),
 
+
+    /**
+     * Prefix to append to the beginning of queue names
+     */
+    'prefix' => env('QUEUE_PREFIX', ''),
+
     /*
     |--------------------------------------------------------------------------
     | Queue Connections
@@ -35,33 +41,102 @@ return [
             'driver' => 'sync',
         ],
 
+        /**
+         * Default database configuration
+         */
         'database' => [
             'driver' => 'database',
             'table' => 'jobs',
-            'queue' => 'default',
+            'queue' => env('QUEUE_PREFIX', '') . 'default',
             'retry_after' => 90,
+            'after_commit' => true,
         ],
 
         'beanstalkd' => [
             'driver' => 'beanstalkd',
             'host' => 'localhost',
-            'queue' => 'default',
+            'queue' =>  env('QUEUE_PREFIX', '') . 'default',
             'retry_after' => 90,
         ],
 
+        /**
+         * Default sqs configuration
+         */
         'sqs' => [
             'driver' => 'sqs',
-            'key' => 'your-public-key',
-            'secret' => 'your-secret-key',
-            'prefix' => 'https://sqs.us-east-1.amazonaws.com/your-account-id',
-            'queue' => 'your-queue-name',
-            'region' => 'us-east-1',
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'prefix' => env('QUEUE_SQS_PATH'),
+            'queue' => env('QUEUE_PREFIX', '') . 'default',
+            'region' => env('QUEUE_SQS_REGION', env('AWS_DEFAULT_REGION', 'us-east-1')),
+        ],
+
+        /**
+         * High Priority Queue
+         */
+        'high' => [
+            'driver' => env('QUEUE_HIGH_DRIVER', 'database'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'prefix' => env('QUEUE_SQS_PATH'),
+            'queue' => env('QUEUE_PREFIX', '') . 'high',
+            'region' => env('QUEUE_SQS_REGION', env('AWS_DEFAULT_REGION', 'us-east-1')),
+
+            'table' => 'jobs',
+            'after_commit' => true,
+        ],
+
+        /**
+         * Low Priority Queue
+         */
+        'low' => [
+            'driver' => env('QUEUE_LOW_DRIVER', 'database'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'prefix' => env('QUEUE_SQS_PATH'),
+            'queue' => env('QUEUE_PREFIX', '') . 'high',
+            'region' => env('QUEUE_SQS_REGION', env('AWS_DEFAULT_REGION', 'us-east-1')),
+
+            'table' => 'jobs',
+            'after_commit' => true,
+        ],
+
+        /**
+         * Queue jobs related to financial transactions, such as balance updates
+         */
+        'financial-transactions' => [
+            'driver' => env('QUEUE_FINANCIAL_TRANSACTIONS_DRIVER', 'database'),
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'prefix' => env('QUEUE_SQS_PATH'),
+            'queue' => env('QUEUE_PREFIX', '') . 'financial-transactions',
+            'region' => env('QUEUE_SQS_REGION', env('AWS_DEFAULT_REGION', 'us-east-1')),
+
+            'table' => 'jobs',
+            'after_commit' => true,
+        ],
+
+        /**
+         * Queue jobs related to financial summaries, mainly creating new summaries
+         * Note: has priority
+         * - urgent
+         * - high
+         * - default
+         */
+        'financial-summaries' => [
+            'driver' => env('QUEUE_FINANCIAL_SUMMARIES_DRIVER', 'database'),
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'prefix' => env('QUEUE_SQS_PATH'),
+            'queue' => env('QUEUE_PREFIX', '') . 'financial-summaries',
+            'region' => env('QUEUE_SQS_REGION', env('AWS_DEFAULT_REGION', 'us-east-1')),
+
+            'table' => 'jobs',
+            'after_commit' => true,
         ],
 
         'redis' => [
             'driver' => 'redis',
             'connection' => 'default',
-            'queue' => 'default',
+            'queue' =>  env('QUEUE_PREFIX', '') . 'default',
             'retry_after' => 90,
         ],
 

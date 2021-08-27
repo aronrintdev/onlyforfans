@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Financial;
 
 use Illuminate\Bus\Batch;
 use Illuminate\Console\Command;
@@ -17,7 +17,7 @@ class CreateTransactionSummaries extends Command
      *
      * @var string
      */
-    protected $signature = 'financial:summary_start {type?} {back?}';
+    protected $signature = 'financial:summary-start {type?} {back?} {recalculate?}';
 
     /**
      * The console command description.
@@ -58,6 +58,10 @@ class CreateTransactionSummaries extends Command
         if (!isset($back)) {
             $back = $this->ask('How many units back are you creating?');
         }
+        $recalculate = $this->argument('recalculate');
+        if (!isset($recalculate)) {
+            $recalculate = $this->choice('Do you wish to recalculate these summaries if they already exist?', [ false, true ]);
+        }
 
         $typeString = SummaryType::stringify($type);
         Log::info("Starting Summarize $typeString Transactions");
@@ -71,7 +75,7 @@ class CreateTransactionSummaries extends Command
         ])->then(function (Batch $batch) use ($typeString) {
             Log::info("Summarize $typeString Transactions Finished");
             $finished = true;
-        })->name("Summarize $typeString Transactions")->onQueue("$queue-low")
+        })->name("Summarize $typeString Transactions")->onConnection($queue)
             ->allowFailures()->dispatch();
 
         $bar = $this->output->createProgressBar($batch->totalJobs);

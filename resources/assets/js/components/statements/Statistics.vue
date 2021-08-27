@@ -1,17 +1,25 @@
 <template>
-  <b-card :title="$t('title')" class="mb-1 position-relative" v-if="!isLoading" no-body>
+  <div class="statistics mb-1 position-relative" v-if="!isLoading">
     <RangeSelector class="p-3" @select="onRangeSelect" />
 
     <!-- From: {{ DateTime().fromISO(totals.from).toLocaleString(DateTime().DATETIME_MED) }} <br/> -->
     <!-- To: {{ DateTime().fromISO(totals.to).toLocaleString(DateTime().DATETIME_MED) }} -->
 
     <!-- Put graph Here -->
-    <StatisticsChart :data="totals" />
+    <StatisticsChart :data="totals" :active="activeData" />
 
     <b-list-group flush>
       <CollapseGroupItem>
         <template #parent>
-          <div class="w-100 d-flex">
+          <div class="w-100 d-flex align-items-center">
+            <b-btn
+              variant="link"
+              class="mr-2"
+              :class="{ 'text-muted': !isActive('earnings') }"
+              @click.stop="toggleActive('earnings')"
+            >
+              <fa-icon icon="analytics" fixed-width />
+            </b-btn>
             <span v-text="$t('credits')" />
             <span class="ml-auto">
               {{ creditTotal | niceCurrency }}
@@ -19,9 +27,17 @@
           </div>
         </template>
 
-        <b-list-group-item v-for="(item, index) in credits" :key="index">
-          <div class="w-100 d-flex">
-            <span v-text="$t(index)" />
+        <b-list-group-item v-for="(item, key) in credits" :key="key">
+          <div class="w-100 d-flex align-items-center">
+            <b-btn
+              variant="link"
+              class="mr-2"
+              :class="{ 'text-muted': !isActive(key) }"
+              @click.stop="toggleActive(key)"
+            >
+              <fa-icon icon="analytics" fixed-width />
+            </b-btn>
+            <span v-text="$t(key)" />
             <span>
               <b-badge v-if="item.count > 0" variant="primary" class="ml-3" v-text="item.count" />
             </span>
@@ -34,7 +50,7 @@
 
       <CollapseGroupItem>
         <template #parent>
-          <div class="w-100 d-flex">
+          <div class="w-100 d-flex align-items-center">
             <span v-text="$t('debits')" />
             <span class="ml-auto">
               - {{ debitTotal | niceCurrency }}
@@ -43,7 +59,7 @@
         </template>
 
         <b-list-group-item v-for="(item, index) in debits" :key="index">
-          <div class="w-100 d-flex">
+          <div class="w-100 d-flex align-items-center">
             <span v-text="$t(index)" />
             <span>
               <b-badge v-if="item.count > 0" variant="primary" class="ml-3" v-text="item.count" />
@@ -55,7 +71,7 @@
         </b-list-group-item>
       </CollapseGroupItem>
       <b-list-group-item>
-        <div class="w-100 d-flex">
+        <div class="w-100 d-flex align-items-center">
           <span class="ml-3" v-text="$t('net')" />
           <span class="ml-auto">
             {{ total | niceCurrency }}
@@ -66,13 +82,14 @@
     </b-list-group>
 
     <LoadingOverlay :loading="loading" />
-  </b-card>
+  </div>
 </template>
 
 <script>
 /**
  * Earnings Statistics
  */
+import _ from 'lodash'
 import Vuex from 'vuex'
 import CollapseGroupItem from '@components/common/CollapseGroupItem'
 import LoadingOverlay from '@components/common/LoadingOverlay'
@@ -109,10 +126,26 @@ export default {
 
   data: () => ({
     loading: false,
+    activeData: [
+      'earnings',
+    ],
   }),
 
   methods: {
     ...Vuex.mapActions('statements', [ 'updateTotals' ]),
+
+    isActive(key) {
+      return _.indexOf(this.activeData, key) !== -1
+    },
+
+    toggleActive(key) {
+      const index = _.indexOf(this.activeData, key)
+      if (index === -1) {
+        this.activeData.push(key)
+      } else {
+        this.$delete(this.activeData, index)
+      }
+    },
 
     onRangeSelect(range) {
       this.loading = true
@@ -132,6 +165,12 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+// .statistics {
+//   height: 100%;
+// }
+</style>
 
 <i18n lang="json5" scoped>
 {

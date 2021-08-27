@@ -8,7 +8,7 @@ class InviteTypeEnum extends SmartEnum implements Selectable {
     const VAULT = 'vault'; // %TODO: this should probably be VAULTFOLDER
 
     public static $keymap = [
-        self::VAULT => 'Vault',
+        self::VAULT => 'My Media',
     ];
 
 }

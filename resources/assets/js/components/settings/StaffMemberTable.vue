@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="staff-members-table-container">
     <b-table hover class="staff-members-table" :items="members" :fields="fields" show-empty >
       <template #empty="scope">
         <div class="p-5 text-center"><i>There is no active or invited accounts yet</i></div>
@@ -150,11 +150,6 @@
     }
   }
 
-  .staff-members-table td {
-    display: flex;
-    align-items: center;
-  }
-
   .h3 {
     margin: 0;
   }
@@ -167,6 +162,22 @@
   }
   .permission {
     cursor: pointer; 
+  }
+</style>
+<style lang="scss">
+  .staff-members-table td {
+    vertical-align: middle;
+  }
+
+  @media (max-width: 576px) {
+    .staff-members-table-container {
+      overflow-x: auto;
+    }
+
+    .staff-members-table tr th,
+    .staff-members-table tr td {
+      white-space: nowrap;
+    }
   }
 </style>
 

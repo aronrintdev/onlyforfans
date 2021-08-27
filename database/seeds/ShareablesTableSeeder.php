@@ -57,7 +57,7 @@ class ShareablesTableSeeder extends Seeder
         }
 
         // Remove a few timelines so we have some without any followers for testing...
-        //   ~ [ ] %TODO: timelines w/ followers but not subcribers, & vice-versa
+        //   ~ [ ] %TODO: timelines w/ followers but not subscribers, & vice-versa
         $timelines->pop();
         $timelines->pop();
         $timelines->pop();
@@ -112,6 +112,9 @@ class ShareablesTableSeeder extends Seeder
                     $purchaseablePosts->each( function($post) use(&$follower) {
                         $customAttributes = [ 'notes' => 'ShareablesTableSeeder.purchase_post_as_follower_free_timeline' ];
 
+                        $ts = $this->faker->dateTimeBetween($startDate = '-28 day', $endDate = 'now');
+                        Carbon::setTestNow(new Carbon($ts)); // Sets mocked time
+
                         $paymentAccount = $follower->financialAccounts()->firstOrCreate([
                             'type' => AccountTypeEnum::IN,
                             'system' => 'segpay',
@@ -136,6 +139,8 @@ class ShareablesTableSeeder extends Seeder
                             }
                         }, $this->eventsToDelayOnPurchase);
 
+                        Carbon::setTestNow(); // Clears mocked time
+
                     });
                 }
             });
@@ -150,6 +155,9 @@ class ShareablesTableSeeder extends Seeder
             }
 
             $followers->random($max)->each( function($follower) use(&$timeline) {
+                // Set fake time to make subscription
+                $ts = $this->faker->dateTimeBetween($startDate = '-28 day', $endDate = 'now');
+                Carbon::setTestNow(new Carbon($ts)); // Sets mocked time
 
                 $customAttributes = [ 'notes' => 'ShareablesTableSeeder.upgraded_to_subscriber' ];
 
@@ -177,6 +185,8 @@ class ShareablesTableSeeder extends Seeder
                         }
                     }
                 }, $this->eventsToDelayOnPurchase);
+
+                Carbon::setTestNow(); // Clears mocked time
 
             });
 

@@ -37,14 +37,21 @@ class StartTransactionSummaryCreation implements ShouldQueue
     protected $amount;
 
     /**
+     * If we need to recalculate the values of existing summaries.
+     * @var bool
+     */
+    protected $recalculate;
+
+    /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(string $type, int $amount = 1)
+    public function __construct(string $type, int $amount = 1, bool $recalculate = false)
     {
         $this->type = $type;
         $this->amount = $amount;
+        $this->recalculate = $recalculate;
     }
 
     /**
@@ -100,7 +107,8 @@ class StartTransactionSummaryCreation implements ShouldQueue
                     new CreateTransactionSummary(
                         $account,
                         $this->type,
-                        ['from' => $start, 'to' => $end]
+                        ['from' => $start, 'to' => $end],
+                        $this->recalculate
                     )
                 );
             });

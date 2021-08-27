@@ -22,6 +22,12 @@ $container-max-widths: (
   xl: 1340px
 );
 
+// intercom-launcher
+.intercom-launcher {
+  bottom: 80px !important;
+}
+// intercom-launcher
+
 html,
 body,
 .app {
@@ -81,8 +87,9 @@ body .tag-ctrl .btn:focus {
 
 /* %%% superbox-post overrides for grid layout (do here as may span multiple Vue scopes) */
 
-body .feed-crate .superbox-post .card-text {
-}
+// body .feed-crate .superbox-post .card-text {
+//
+// }
 body .feed-crate.tag-grid-layout .superbox-post .card-text {
   /* Note that text will be hidden if in grid view and post has mediafiles */
   -webkit-line-clamp: 12; /* manually adjusted so that the ellipsis will show in the grid height, but may not work in all circumstances ? */
@@ -580,3 +587,25 @@ body .feed-crate.tag-grid-layout .superbox-post .media-slider {
 .single .plyr--audio {
   margin-top: 10px;
 }
+
+.media-slider .wrap {
+  max-width: 100vw !important;
+}
+
+// Settings Mobile Style
+
+// @media (max-width: 576px) {
+//   #view-settings {
+//     .sidebar {
+//       .list-group {
+//         overflow: auto;
+//       }
+//     }
+//     .main {
+//       & > .settings-page {
+//         height: calc(100% - 56px);
+//         overflow: auto;
+//       }
+//     }
+//   }
+// }

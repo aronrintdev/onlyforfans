@@ -1,19 +1,11 @@
 <template>
-  <b-navbar :toggleable="mobile" variant="light" class="bg-white" :class="{ 'pb-0': mobile }" >
+  <b-navbar :toggleable="mobile" variant="light" class="bg-white" :class="{ 'pb-0': enableSearch }" >
     <b-navbar-brand :to="{ name: 'index' }" class="navbar-brand" :class="mobile ? 'mr-2' : 'mr-5'">
       <Branding :type="mobile ? 'text' : 'text'" :size="mobile ? 'lg' : 'lg'" :variant="mobile ? 'brand' : 'brand'" />
     </b-navbar-brand>
     <div class="ml-auto mr-3" @click="showSearchBar">
       <fa-icon v-if="mobile" icon="search" class="text-secondary" />
     </div>
-    <b-navbar-toggle target="nav-collapse" class="mb-1 pr-0" :class="{'ml-auto': !mobile}">
-      <ProfileButton />
-    </b-navbar-toggle>
-    <b-collapse v-if="mobile" id="nav-collapse" is-nav>
-      <b-navbar-nav>
-        <ProfileMenu v-if="session_user" />
-      </b-navbar-nav>
-    </b-collapse>
 
     <ScrollCollapse v-if="mobile && enableSearch" ref="scrollCollapse" class="w-100" :full-open="searchOpen" :full-open-height="openHeight">
       <div class="d-flex flex-column justify-content-between h-100 pb-3">
@@ -27,7 +19,7 @@
       <SearchBar />
     </b-navbar-nav>
     <b-navbar-nav v-if="!mobile" class="ml-auto">
-      <NavButtons class="mx-3" :unread-messages-count="unread_messages_count" />
+      <NavButtons class="mx-3" :unread-notifications-count="unread_notifications_count" :unread-messages-count="unread_messages_count" />
       <b-nav-item-dropdown
         id="profile-dropdown"
         toggle-class="nav-link-custom"
@@ -38,7 +30,7 @@
         <template #button-content>
           <ProfileButton />
         </template>
-        <ProfileMenu v-if="session_user" dropdown />
+        <ProfileMenu v-if="session_user" dropdown class="meta-username" :data-username="session_user.username"/>
       </b-nav-item-dropdown>
     </b-navbar-nav>
   </b-navbar>
@@ -69,11 +61,12 @@ export default {
   props: {
     toggleMobileAt: { type: [String, Number], default: 'md', },
     unreadMessagesCount: { type: Number, default: 0 },
+    //unreadNotificationsCount: { type: Number, default: 0 },
   },
 
   computed: {
     ...Vuex.mapState([ 'mobile' ]),
-    ...Vuex.mapGetters(['session_user', 'unread_messages_count']),
+    ...Vuex.mapGetters(['session_user', 'unread_messages_count', 'unread_notifications_count']),
     openHeight() {
       var height = this.$vssHeight
       if (this.$el) {

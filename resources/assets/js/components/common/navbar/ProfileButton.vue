@@ -13,6 +13,7 @@
         size="2rem"
       />
       <b-avatar v-else class="mr-2" size="2rem" />
+      <OnlineStatus :user="session_user" size="md" :textInvisible="false" />
       <span
         v-if="showName && session_user && !mobile"
         v-text="session_user.name || session_user.username"
@@ -26,6 +27,7 @@
  * resources/assets/js/components/common/navbar/ProfileButton.vue
  */
 import Vuex from 'vuex'
+import OnlineStatus from '@components/common/OnlineStatus'
 
 export default {
   name: 'ProfileButton',
@@ -36,5 +38,16 @@ export default {
   data: () => ({
     showName: false,
   }),
+  components: {
+    OnlineStatus,
+  },
 }
 </script>
+
+<style scoped>
+.button-content .onlineStatus {
+  position: absolute;
+  top: 22px;
+  right: 7px;
+}
+</style>

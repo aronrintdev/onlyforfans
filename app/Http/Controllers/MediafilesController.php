@@ -22,6 +22,7 @@ use App\Models\Vaultfolder;
 use App\Models\Mediafile;
 use App\Models\Diskmediafile;
 use App\Enums\MediafileTypeEnum;
+use App\Enums\ContenttagAccessLevelEnum;
 
 class MediafilesController extends AppBaseController
 {
@@ -216,7 +217,6 @@ class MediafilesController extends AppBaseController
         } else {
             return \Redirect::route('admin.users.show', [$obj->slug]);
         }
-
     }
 
     // deletes a single mediafile (reference)
@@ -272,8 +272,8 @@ class MediafilesController extends AppBaseController
                     'mftype' => $mf->mftype,
                     'num_sharees' => $mf->sharees->count(),
                     'resource_type' => $mf->resource_type,
-                    'resource_name' => $mf->resource->slug,
-                    'num_resource_likes' => $mf->resource->likes ? $mf->resource->likes->count() : '-',
+                    'resource_name' => $mf->resource->slug ?? '-',
+                    'num_resource_likes' => ($mf->resource && $mf->resource->likes) ? $mf->resource->likes->count() : '-',
                 ];
             });
         }
@@ -281,6 +281,39 @@ class MediafilesController extends AppBaseController
         return response()->json([
             'stats' => $stats ?? [],
         ]);
+    }
+
+    // batch update of content tags associated with the mediafile
+    public function updateTags(Request $request, Mediafile $mediafile)
+    {
+        $this->validate($request, [
+            'contenttags' => 'array',
+            'contenttags.*' => 'string',
+        ]);
+
+        // %FIXME %DRY see PostsController::update()
+        $privateTags = collect();
+        $publicTags = collect();
+        $allTags = collect( $request->input('contenttags', []) );
+        $allTags->each( function($str) use(&$privateTags, &$publicTags) {
+            $accessLevel = (substr($str,-1)==='!') ? ContenttagAccessLevelEnum::MGMTGROUP : ContenttagAccessLevelEnum::OPEN;
+            switch ( $accessLevel ) {
+                case ContenttagAccessLevelEnum::MGMTGROUP:
+                    $privateTags->push($str);
+                    break;
+                case ContenttagAccessLevelEnum::OPEN:
+                    $publicTags->push($str);
+                    break;
+            }
+        });
+
+        // Since we are updating tags as a batch, to effect a 'delete' we first need to remove all attached tags, and then add
+        //   whatever is sent via the mediafile, which is a complete set that includes any pre-existing tags that haven't been removed
+        $mediafile->contenttags()->detach();
+        $mediafile->addTag($publicTags, ContenttagAccessLevelEnum::OPEN); // batch add
+        $mediafile->addTag($privateTags, ContenttagAccessLevelEnum::MGMTGROUP); // batch add
+
+        return new MediafileResource($mediafile);
     }
 
 }

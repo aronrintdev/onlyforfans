@@ -98,6 +98,8 @@
           :key="selectedResource && selectedResource.id"
           :is_feed="false"
           :is_public_post="true"
+          :imageIndex="imageIndex"
+          @delete-post="deletePost"
         />
       </div>
       <div
@@ -204,6 +206,7 @@ import ReportPost from '@components/modals/ReportPost.vue'
 import ExpirationPeriod from '@components/modals/ExpirationPeriod.vue'
 import PromotionCampaign from '@components/modals/PromotionCampaign.vue'
 import PurchaseMessage from '@components/modals/PurchaseMessage'
+import { beforeDestroy } from 'vue2-dropzone';
 
 export default {
   name: 'Modals',
@@ -253,6 +256,8 @@ export default {
     is_for_edit: null,
     showPostArrows: false,
     followTimelineTitle: '',
+    imageIndex: 0,
+    feedType: 'default',
   }),
 
   methods: {
@@ -299,6 +304,8 @@ export default {
           case 'show-post':
             this.selectedResource = data.post
             this.showPostArrows = data.showArrows
+            this.imageIndex = data.imageIndex
+            this.feedType = data.feedType
             this.$bvModal.show('modal-post')
             break
           case 'show-photo':
@@ -343,6 +350,29 @@ export default {
       this.$bvModal.hide(modalId)
       eventBus.$emit('close-modal');
     },
+    deletePost(postId) {
+      const url = `/posts/${postId}`
+      axios.delete(url)
+        .then(() => {
+          this.$bvToast.toast('Post was successfully removed.', {
+            title: 'Success!',
+            variant: 'success',
+            solid: true,
+            toaster: 'b-toaster-top-center',
+          });
+          eventBus.$emit('update-timelines', this.selectedResource.timeline.id)
+          this.closeModal('modal-post')
+        })
+        .catch((err) => {
+          this.$bvToast.toast(err.message, {
+            variant: 'danger',
+            title: 'Warning',
+            solid: true,
+            toaster: 'b-toaster-top-center',
+          });
+          this.closeModal('modal-post')
+        })
+    },
   },
 
   created() {
@@ -379,7 +409,7 @@ export default {
     height: 100%;
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 576px) {
     & {
       background: rgba(0, 0, 0, 0.6);
       border-radius: 2px;
@@ -405,7 +435,7 @@ export default {
 }
 
 #modal-post {
-  
+
   .modal-header {
     height: 0;
     padding: 0;
@@ -418,7 +448,12 @@ export default {
       top: 25px;
       color: #343a40;
       opacity: 1;
+      padding: 15px 15px;
     }
+  }
+
+  .post-header-tooltip {
+    margin-right: 1.2em !important;
   }
 
   .superbox-post {
@@ -457,6 +492,7 @@ export default {
               position: relative;
               z-index: 1;
               max-width: 100vw;
+              height: 100%;
 
               .video-js.vjs-fluid {
                 width: 100%;
@@ -502,7 +538,7 @@ export default {
               .swiper-wrapper {
                 align-items: center;
 
-                @media (max-width: 600px) {
+                @media (max-width: 576px) {
                   pointer-events: none;
                 }
 
@@ -560,15 +596,19 @@ export default {
     }
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 576px) {
     .modal-header {
       .close {
-        padding-left: 8px;
-        padding-right: 10px;
+        padding-left: 15px;
+        padding-right: 15px;
       }
     }
     .superbox-post {
-      height: calc(100vh - 100px);
+      border: none;
+      border-radius: 0;
+    }
+    .modal-dialog {
+      margin: 0;
     }
   }
 }

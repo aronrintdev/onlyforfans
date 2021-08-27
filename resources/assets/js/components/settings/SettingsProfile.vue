@@ -8,8 +8,17 @@
             <b-row>
               <b-col sm="12" md="6">
                 <b-form-group id="group-name" label="Name" label-for="name">
-                  <b-form-input id="name" v-model="formProfile.name" ></b-form-input>
+                  <b-form-input id="name" v-model="formProfile.name"></b-form-input>
                 </b-form-group>
+              </b-col>
+              <b-col sm="12" md="6">
+                <b-form-group id="group-slug" label="Profile URL" label-for="slug">
+                  <div class="d-flex">
+                    <h6 class="mt-2 mr-2 text-muted">https://allfans.com/</h6>
+                    <b-form-input id="slug" v-model="formProfile.slug" disabled></b-form-input>
+                  </div>
+                </b-form-group>
+                <small class="text-secondary">* Changing the profile URL is disabled during the beta testing phase.</small>
               </b-col>
             </b-row>
 
@@ -171,11 +180,11 @@
             </template>
           </fieldset>
 
-          <b-row class="mt-5">
+          <b-row class="mt-4 mb-3">
             <b-col>
               <div class="w-100 d-flex justify-content-end">
                 <b-button :disabled="isSubmitting.formProfile" class="w-25 ml-3" type="submit" variant="primary">
-                  <b-spinner v-if="isSubmitting.formProfile" small />&nbsp;
+                  <b-spinner v-if="isSubmitting.formProfile" small class="mr-1" />
                   Save
                 </b-button>
               </div>
@@ -213,6 +222,7 @@ export default {
 
     formProfile: {
       name: '',
+      slug: '',
       about: '',
       country: '',
       city: '',
@@ -335,6 +345,7 @@ export default {
 
   created() {
     this.formProfile.name = this.timeline.name || ''
+    this.formProfile.slug = this.timeline.slug || ''
     this.formProfile.about = this.timeline.about
     this.formProfile.country = this.user_settings.country
     this.formProfile.city = this.user_settings.city

@@ -74,11 +74,11 @@ export default {
     // To get queue posts meta data
     this.$store.dispatch('getQueueMetadata')
 
-    eventBus.$on('update-timelines', (timelineId) => {
-      if (timelineId === this.timeline.id) {
-        this.load()
-      }
-    })
+    // eventBus.$on('update-timelines', (timelineId) => {
+    //   if (timelineId === this.timeline.id) {
+    //     this.load()
+    //   }
+    // })
 
     eventBus.$on('set-feed-layout',  isGridLayout  => {
       this.isGridLayout = isGridLayout

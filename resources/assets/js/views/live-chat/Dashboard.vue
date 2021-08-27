@@ -17,6 +17,7 @@
         :session_user="session_user"
         :participant="participants(activeThread)"
         :timeline="activeThread ? activeThread.timeline : null"
+        :currentNotes="activeThread ? activeThread.notes : null"
       />
       <div v-if="!activeThreadId" class="d-flex h-100 align-items-center justify-content-around">
         <div class="d-flex flex-column">

@@ -97,6 +97,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+::v-deep .custom-checkbox.b-custom-control-lg .custom-control-label::before, 
+::v-deep .input-group-lg .custom-checkbox .custom-control-label::before {
+  border: solid 2px #535353 !important;
+}
+
 .image, .video {
   position: absolute;
   top: 0;

@@ -53,6 +53,7 @@ export default new Vuex.Store({
     uiFlags: [],
     unshifted_timeline_post: null,
     unread_messages_count: 0,
+    unread_notifications_count: 0,
     queue_metadata: {},
   },
 
@@ -139,6 +140,9 @@ export default new Vuex.Store({
     },
     UPDATE_UNREAD_MESSAGES_COUNT(state, payload) {
       state.unread_messages_count = propSelect(payload, 'total_unread_count')
+    },
+    UPDATE_UNREAD_NOTIFICATIONS_COUNT(state, payload) {
+      state.unread_notifications_count = propSelect(payload, 'total_unread_count')
     },
   },
 
@@ -272,6 +276,12 @@ export default new Vuex.Store({
       })
     },
 
+    getUnreadNotificationsCount({ commit }) {
+      axios.get(route('notifications.totalUnreadCount')).then((response) => {
+        commit('UPDATE_UNREAD_NOTIFICATIONS_COUNT', response.data)
+      })
+    },
+
     getUserSettings({ commit }, { userId }) {
       axios.get(route('users.showSettings', { id: userId })).then((response) => {
         commit('UPDATE_USER_SETTINGS', response.data)
@@ -316,6 +326,7 @@ export default new Vuex.Store({
     login_sessions:          state => state.login_sessions,
     uiFlags:                 state => state.uiFlags,
     unread_messages_count:   state => state.unread_messages_count,
+    unread_notifications_count:   state => state.unread_notifications_count,
     queue_metadata:          state => state.queue_metadata,
     //children: state => state.vault.children, // Flat list
     //mediafiles: state => state.vault.mediafiles, // Flat list

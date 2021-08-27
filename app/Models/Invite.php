@@ -78,23 +78,4 @@ class Invite extends BaseModel implements Guidable
 
     // %%% --- Other ---
 
-    // %FIXME: move to observer/boot 'create'
-    /*
-    public static function doCreate(string $name, User $owner) : Vault {
-        $vault = DB::transaction(function () use($vname, &$owner) {
-            $v = Vault::create([
-                'vname' => $vname,
-                'user_id' => $owner->id,
-            ]);
-            $vf = Vaultfolder::create([
-                'parent_id' => null,
-                'vault_id' => $v->id,
-                'vfname' => 'Root',
-            ]);
-            $v->refresh();
-            return $v;
-        });
-        return $vault;
-    }
-     */
 }

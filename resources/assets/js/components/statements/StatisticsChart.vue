@@ -1,5 +1,7 @@
 <template>
-  <canvas ref="chart" id="statistics-chart" width="400" height="200"></canvas>
+  <div class="statistics-chart wrapper">
+    <canvas ref="chart" id="statistics-chart" width="400" height="400"></canvas>
+  </div>
 </template>
 
 <script>
@@ -23,8 +25,12 @@ export default {
       ago_unit: 'day',
       summaries: []
     }) },
+    active: { type: Array, default: () => ([ 'earnings' ]) },
   },
 
+  /* -------------------------------------------------------------------------- */
+  /*                                  COMPUTED                                  */
+  /* -------------------------------------------------------------------------- */
   computed: {
 
     unit() {
@@ -41,6 +47,14 @@ export default {
 
     labels() {
       return this.dates
+
+
+      // unit: this.data.ago_unit,
+      // displayFormats: {
+      //   day: this.data.ago > 7 ? 'MMM d' : 'EEE d',
+      //   month: 'MMM yyyy'
+      // },
+      // tooltipFormat: 'MMM dd yyyy'
     },
 
     datasets() {
@@ -58,110 +72,71 @@ export default {
         'refund',
         'payout',
       ]
+      const dataSetKeys = [
+        'earnings',
+        'expenses',
+        'sale',
+        'tip',
+        'subscription',
+        'fee',
+        'chargeback',
+        'refund',
+        'payout',
+      ]
+      var sets = {}
 
-      var sets = {
-        earnings: {
-          key: 'earnings',
-          label: this.$t('label.earnings'),
-          borderColor: this.$t('color.earnings'),
-          backgroundColor: this.$t('color.earnings'),
-          data: []
-        },
-        expenses: {
-          key: 'expenses',
-          label: this.$t('label.expenses'),
-          borderColor: this.$t('color.expenses'),
-          backgroundColor: this.$t('color.expenses'),
-          data: []
-        },
-        net: {
-          key: 'net',
-          label: this.$t('label.net'),
-          borderColor: this.$t('color.net'),
-          backgroundColor: this.$t('color.net'),
-          data: []
-        },
-        sale: {
-          key: 'sale',
-          label: this.$t('label.sale'),
-          borderColor: this.$t('color.sale'),
-          backgroundColor: this.$t('color.sale'),
-          data: []
-        },
-        tip: {
-          key: 'tip',
-          label: this.$t('label.tip'),
-          borderColor: this.$t('color.tip'),
-          backgroundColor: this.$t('color.tip'),
-          data: []
-        },
-        subscription: {
-          key: 'subscription',
-          label: this.$t('label.subscription'),
-          borderColor: this.$t('color.subscription'),
-          backgroundColor: this.$t('color.subscription'),
-          data: []
-        },
-        fee: {
-          key: 'fee',
-          label: this.$t('label.fee'),
-          borderColor: this.$t('color.fee'),
-          backgroundColor: this.$t('color.fee'),
-          data: []
-        },
-        chargeback: {
-          key: 'chargeback',
-          label: this.$t('label.chargeback'),
-          borderColor: this.$t('color.chargeback'),
-          backgroundColor: this.$t('color.chargeback'),
-          data: []
-        },
-        refund: {
-          key: 'refund',
-          label: this.$t('label.refund'),
-          borderColor: this.$t('color.refund'),
-          backgroundColor: this.$t('color.refund'),
-          data: []
-        },
-        payout: {
-          key: 'payout',
-          label: this.$t('label.payout'),
-          borderColor: this.$t('color.payout'),
-          backgroundColor: this.$t('color.payout'),
-          data: []
+      const setsCommon = {
+        // If common items are needed
+      }
+
+      for (var key of dataSetKeys) {
+        sets[key] = {
+          ...setsCommon,
+          key,
+          label: this.$t(`label.${key}`),
+          borderColor: this.$t(`color.${key}`),
+          backgroundColor: this.$t(`color.${key}`),
         }
       }
+
+      var data = [];
+
       for( var item of this.dates) {
+        var dataPoint = { x: item }
+
         // Find summary that has same unit
         const index = _.findIndex(summaries, summary => (item.hasSame(summary.date, this.unit)))
         if (index === -1) {
-          for( var i in sets ) {
-            sets[i].data.push(0)
+          for( var key in sets ) {
+            dataPoint[key] = 0
           }
         } else {
-          sets.earnings.data.push(summaries[index].credit_sum)
-          sets.expenses.data.push(summaries[index].debit_sum)
+          dataPoint.earnings = summaries[index].credit_sum
+          dataPoint.expenses = summaries[index].debit_sum
           const payoutAmount = summaries[index].stats.payout ? summaries[index].stats.payout.debit_sum : 0
-          sets.net.data.push((summaries[index].credit_sum - summaries[index].debit_sum + payoutAmount))
+          dataPoint.net = summaries[index].credit_sum - summaries[index].debit_sum + payoutAmount
 
           for( var type of creditTypes ) {
-            summaries[index].stats[type] ? summaries[index].stats[type].credit_sum : 0
+            dataPoint[type] = summaries[index].stats[type] ? parseInt(summaries[index].stats[type].credit_sum) : 0
           }
           for( var type of debitTypes ) {
-            summaries[index].stats[type] ? summaries[index].stats[type].debit_sum : 0
+            dataPoint[type] = summaries[index].stats[type] ? parseInt(summaries[index].stats[type].debit_sum) : 0
           }
         }
+
+        data.push(dataPoint)
       }
-      return _.flatMap(sets, o => o)
+
+      return _.flatMap(sets, o => ({ ...o, data, parsing: { yAxisKey: o.key } }))
     },
 
     filteredDatasets() {
-      return _.filter(this.datasets, set => ( _.indexOf(this.shownTypes, set.key) > -1 ))
+      return _.filter(this.datasets, set => ( _.indexOf(this.active, set.key) > -1 ))
     },
 
     chartData() {
       return {
-        labels: this.labels,
+        // labels: this.labels,
         datasets: this.filteredDatasets
       }
     },
@@ -169,59 +144,96 @@ export default {
     options() {
       return {
         plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            position: 'nearest',
+            callbacks: {
+              label: (context) => {
+                var label = context.dataset.label || ''
 
-        },
-        scales: {
-            y: {
-              min: 0,
-              suggestedMax: 100,
-              ticks: {
-                  // Nice Currency on Y axis
-                  callback: function(value, index, values) {
-                      return Vue.options.filters.niceCurrencyRounded(value)
-                  }
-              }
-            },
-            x: {
-              type: 'time',
-              time: {
-                unit: this.data.ago_unit,
-                displayFormats: {
-                  day: this.data.ago > 7 ? 'MMM d' : 'EEE d',
-                  month: 'MMM yyyy'
-                },
-                tooltipFormat: 'MMM dd yyyy'
-              },
-            },
-            tooltips: {
-              callbacks: {
-                label: (tooltipItem, data) => {
-                  console.log({tooltipItem})
-                  return Vue.options.filters.niceCurrency(tooltipItem.yLabel)
+                if (label) {
+                    label += ': '
                 }
+                if (context.parsed.y !== null) {
+                    label += Vue.options.filters.niceCurrency(context.parsed.y)
+                }
+                return label;
+                // return Vue.options.filters.niceCurrency(tooltipItem.yLabel.toString())
               }
+            }
+          },
+        },
+
+        interaction: {
+          intersect: false,
+          mode: 'index',
+        },
+
+        cubicInterpolationMode: 'monotone',
+        // tension: 0.25,
+
+        scales: {
+          y: {
+            type: 'linear',
+            beginAtZero: true,
+            // min: 0,
+            suggestedMax: 100,
+            grid: {
+              display: false,
+            },
+            ticks: {
+              // major: { enabled: true },
+              // Nice Currency on Y axis
+              callback: function(value, index, values) {
+                  return Vue.options.filters.niceCurrencyRounded(value)
+              }
+            }
+          },
+          x: {
+            type: 'timeseries',
+            align: 'right',
+            time: {
+              unit: this.data.ago_unit,
+              displayFormats: {
+                day: this.data.ago > 7 ? 'MMM d' : 'EEE d',
+                month: 'MMM yyyy'
+              },
+              tooltipFormat: 'MMM dd yyyy'
+            },
+            grid: {
+              display: false,
             },
           },
-          responsive: true,
-          maintainAspectRatio: true,
+          tooltips: {
+            mode: 'index',
+          },
+        },
+        responsive: true,
+        maintainAspectRatio: false, // WARNING: Only set to false if the canvas is wrapped in a set height value
+        onResize: (chart, newSize) => {
+          // If needed
+          // this.$log.debug('Chart onResize', { newSize })
+        },
+        resizeDelay: 200, // Eases resize update by denouncing call
       }
     },
   },
 
   data: () => ({
-    shownTypes: [
-      'earnings',
-      'expenses',
-    ],
     chart: null,
   }),
 
   methods: {
 
     renderChart() {
-      // if ( this.chart ) {
-      //   return
-      // }
+      if ( this.chart ) {
+        this.chart.data = this.chartData
+        this.chart.options = this.options
+        this.chart.update()
+        return
+      }
       this.$log.debug('StatisticsChart renderChart')
       try {
         const ctx = document.getElementById('statistics-chart')
@@ -240,12 +252,18 @@ export default {
     data: {
       deep: true,
       handler() {
-        if (this.chart) {
-          this.chart.destroy()
-        }
+        // if (this.chart) {
+        //   this.chart.destroy()
+        // }
         this.renderChart()
       }
-    }
+    },
+    active() {
+      // if (this.chart) {
+      //   this.chart.destroy()
+      // }
+      this.renderChart()
+    },
   },
 
   mounted() {
@@ -254,7 +272,11 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.wrapper {
+  max-height: 30rem;
+}
+</style>
 
 <i18n lang="json5" scoped>
 {
@@ -263,9 +285,9 @@ export default {
       "earnings": "#28a745",
       "expenses": "#dc3545",
       "net": "#28a745",
-      "sale": "#28a745",
-      "tip": "#28a745",
-      "subscription": "#28a745",
+      "sale": "#0ebae6",
+      "tip": "#2a5ebe",
+      "subscription": "#961ece",
       "fee": "#dc3545",
       "chargeback": "#dc3545",
       "refund": "#dc3545",

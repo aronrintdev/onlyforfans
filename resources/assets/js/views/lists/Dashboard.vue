@@ -32,8 +32,6 @@
 
     </section>
 
-    <Modals />
-
   </div>
 </template>
 
