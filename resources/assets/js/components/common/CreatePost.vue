@@ -141,10 +141,7 @@
                   </li>
                 </ul>
                 <ul class="list-inline d-flex mb-0 pt-1">
-                  <li v-if="isMobile" @click="showTagForm()" class="selectable show-tagform">
-                    <fa-icon :icon="isTagFormVisible ? ['fas', 'hashtag'] : ['far', 'hashtag']" :class="isHashtagIconSelected ? 'text-primary' : 'text-secondary'" size="lg" />
-                  </li>
-                  <li v-else @click="showTagForm()" class="selectable show-tagform" v-b-tooltip.hover="'Add Tags TEST.A'">
+                  <li @click="showTagForm()" class="selectable show-tagform" v-b-tooltip.hover="'Add Tags'">
                     <fa-icon :icon="isTagFormVisible ? ['fas', 'hashtag'] : ['far', 'hashtag']" :class="isHashtagIconSelected ? 'text-primary' : 'text-secondary'" size="lg" />
                   </li>
 
@@ -223,9 +220,6 @@ export default {
     ]),
 
     isIOS9PlusAndAndroid() {
-      return (isIOS && parseInt(osVersion.split('.')[0]) >= 9) || isAndroid
-    },
-    isMobile() {
       return (isIOS && parseInt(osVersion.split('.')[0]) >= 9) || isAndroid
     },
 
