@@ -61,6 +61,7 @@ class RestChatmessagesTest extends TestCase
             'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
         ]);
         //dd($content->messages);
+        // test comment
 
         // Check no messages from threads in which I am not a participant
         $chatmessages = collect($content->data);
