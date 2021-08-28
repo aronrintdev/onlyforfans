@@ -57,6 +57,7 @@ class RestChatmessagegroupsTest extends TestCase
                 0 => [ 'id', 'originator_id', 'is_tip_required', 'created_at' ],
             ],
             'chatmessagegroup' => [ 'id', 'mgtype', 'sender_id' ],
+            'chatmessages' => [ 'id', 'chatthread_id', 'mcontent', 'sender_id', 'deliver_at', 'is_delivered', 'is_read', 'is_flagged' ],
         ]);
 
         $this->assertEquals($fans->count(), count($content->chatthreads));
