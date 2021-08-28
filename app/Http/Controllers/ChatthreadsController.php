@@ -310,6 +310,7 @@ class ChatthreadsController extends AppBaseController
      * @param Chatthread $chatthread
      * @return ChatmessageResource
      */
+    // %TODO: refactor to a model file
     public function sendMessage(Request $request, Chatthread $chatthread)
     {
         $request->validate([
@@ -325,7 +326,19 @@ class ChatthreadsController extends AppBaseController
             $chatmessage->setPurchaseOnly($request->price, $request->currency);
         }
 
-        $this->addAttachments($request, $chatmessage);
+        // Create mediafile refs for any attachments
+        if ($request->has('attachments')) {
+            foreach ($request->attachments as $a) {
+                if ($a['diskmediafile_id']) {
+                    Mediafile::find($a['id'])->diskmediafile->createReference(
+                        $chatmessage->getMorphString(), // string   $resourceType
+                        $chatmessage->getKey(),         // int      $resourceID
+                        $a['mfname'],                   // string   $mfname
+                        'messages'                      // string   $mftype
+                    );
+                }
+            }
+        }
 
         try {
             //broadcast( new MessageSentEvent($chatmessage) )->toOthers();
@@ -357,6 +370,7 @@ class ChatthreadsController extends AppBaseController
      * @param Chatthread $chatthread
      * @return ChatmessageResource
      */
+    // %TODO: refactor to a model file
     public function scheduleMessage(Request $request, Chatthread $chatthread)
     {
         $request->validate([
@@ -366,7 +380,20 @@ class ChatthreadsController extends AppBaseController
             'deliver_at' => 'required|numeric',
         ]);
         $chatmessage = $chatthread->scheduleMessage($request->user(), $request->mcontent, $request->deliver_at);
-        $this->addAttachments($request, $chatmessage);
+
+        // Create mediafile refs for any attachments
+        if ($request->has('attachments')) {
+            foreach ($request->attachments as $a) {
+                if ($a['diskmediafile_id']) {
+                    Mediafile::find($a['id'])->diskmediafile->createReference(
+                        $chatmessage->getMorphString(), // string   $resourceType
+                        $chatmessage->getKey(),         // int      $resourceID
+                        $a['mfname'],                   // string   $mfname
+                        'messages'                      // string   $mftype
+                    );
+                }
+            }
+        }
         return new ChatmessageResource($chatmessage);
     }
 
@@ -393,23 +420,6 @@ class ChatthreadsController extends AppBaseController
 
         $chatthread->refresh();
         return new ChatthreadResource($chatthread);
-    }
-
-    // %DRY %FIXME: use version in app/Models/Chatthread
-    private function addAttachments(Request $request, Chatmessage $chatmessage)
-    {
-        if ($request->has('attachments')) {
-            foreach ($request->attachments as $attachment) {
-                if ($attachment['diskmediafile_id']) {
-                    Mediafile::find($attachment['id'])->diskmediafile->createReference(
-                        $chatmessage->getMorphString(), // string   $resourceType
-                        $chatmessage->getKey(),         // int      $resourceID
-                        $attachment['mfname'],          // string   $mfname
-                        'messages'                      // string   $mftype
-                    );
-                }
-            }
-        }
     }
 
 }

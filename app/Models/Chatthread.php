@@ -242,8 +242,19 @@ class Chatthread extends Model implements UuidId
                     } else {
                         $message = $ct->sendMessage($sender, $rattrs->mcontent ?? '', new Collection());
                     }
+
+                    // Create mediafile refs for any attachments
                     if ( isset($rattrs->attachments) && count($rattrs->attachments) ) {
-                        Chatthread::addAttachments($rattrs->attachments, $message);
+                        foreach ($attrs->attachments??[] as $a) {
+                            if ($a['diskmediafile_id']) {
+                                Mediafile::find($a['id'])->diskmediafile->createReference(
+                                    $chatmessage->getMorphString(), // string   $resourceType
+                                    $chatmessage->getKey(),         // int      $resourceID
+                                    $a['mfname'],                   // string   $mfname
+                                    'messages'                      // string   $mftype
+                                );
+                            }
+                        }
                     }
                     if ($isMassMessage) {
                         $message->chatmessagegroup_id = $cmGroup->id;
@@ -290,21 +301,6 @@ class Chatthread extends Model implements UuidId
               'is_delivered' => false,
               'deliver_at' => Carbon::createFromTimestamp($deliverAt),
         ]);
-    }
-
-    // %DRY %FIXME: copied from chatthreads controller
-    private static function addAttachments($attachments, Chatmessage $chatmessage)
-    {
-        foreach ($attachments as $a) {
-            if ($a['diskmediafile_id']) {
-                Mediafile::find($a['id'])->diskmediafile->createReference(
-                    $chatmessage->getMorphString(), // string   $resourceType
-                    $chatmessage->getKey(),         // int      $resourceID
-                    $a['mfname'],                   // string   $mfname
-                    'messages'                      // string   $mftype
-                );
-            }
-        }
     }
 
     #endregion Methods
