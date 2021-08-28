@@ -174,6 +174,6 @@ export default {
 .content.mobile {
   padding-top: 15px;
   padding-bottom: 68px;
-  height: calc(100% - 68px);
+  // height: calc(100% - 68px);
 }
 </style>
