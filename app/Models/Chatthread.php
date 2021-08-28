@@ -237,11 +237,9 @@ class Chatthread extends Model implements UuidId
                 }
     
                 if ( ($rattrs->mcontent??null) || ($rattrs->attachments??null) ) { // if included send the first message
-                    if ( isset($rattrs->deliver_at) ) {
-                        $message = $ct->scheduleMessage($sender, $rattrs->mcontent ?? '', $rattrs->deliver_at);
-                    } else {
-                        $message = $ct->sendMessage($sender, $rattrs->mcontent ?? '', new Collection());
-                    }
+                    $chatmessage = isset($rattrs->deliver_at)
+                        ? $ct->scheduleMessage($sender, $rattrs->mcontent ?? '', $rattrs->deliver_at) // send at scheduled date
+                        : $ct->sendMessage($sender, $rattrs->mcontent ?? '', new Collection()); // send now
 
                     // Create mediafile refs for any attachments
                     if ( isset($rattrs->attachments) && count($rattrs->attachments) ) {
@@ -257,8 +255,8 @@ class Chatthread extends Model implements UuidId
                         }
                     }
                     if ($isMassMessage) {
-                        $message->chatmessagegroup_id = $cmGroup->id;
-                        $message->save();
+                        $chatmessage->chatmessagegroup_id = $cmGroup->id;
+                        $chatmessage->save();
                     }
                 } else { 
                     // ... %FIXME...what is the else case? Is this an error or does logic just fall through to below?
@@ -271,7 +269,10 @@ class Chatthread extends Model implements UuidId
             return $chatthreads;
         });
 
-        return ['chatthreads' => $chatthreads, 'chatmessagegroup' => $cmGroup];
+        return [
+            'chatthreads' => $chatthreads, 
+            'chatmessagegroup' => $cmGroup,
+        ];
     }
 
     public function addParticipant($participantID)
