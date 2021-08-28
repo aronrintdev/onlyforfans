@@ -191,9 +191,10 @@ class Chatthread extends Model implements UuidId
     // 'thin-controlller-fat-model' refacator of code from chatthreads.store
     public static function findOrCreateChat($sender, $rattrs)
     {
-        $cmGroup = null;
+        $cmGroup = null; // the created chat message group, if any (1 only)
+        $chatmessages = collect();  // the created chat messages, one or more
 
-        $chatthreads = DB::transaction( function() use(&$rattrs, &$cmGroup, &$sender) { 
+        $chatthreads = DB::transaction( function() use(&$rattrs, &$cmGroup, &$chatmessages, &$sender) { 
 
             $chatthreads = collect();
             $originator = User::find($rattrs->originator_id);
@@ -236,33 +237,38 @@ class Chatthread extends Model implements UuidId
                     $ct->addParticipant($pkid);
                 }
     
-                if ( ($rattrs->mcontent??null) || ($rattrs->attachments??null) ) { // if included send the first message
-                    $chatmessage = isset($rattrs->deliver_at)
-                        ? $ct->scheduleMessage($sender, $rattrs->mcontent ?? '', $rattrs->deliver_at) // send at scheduled date
-                        : $ct->sendMessage($sender, $rattrs->mcontent ?? '', new Collection()); // send now
+                if ( empty($rattrs->mcontent??null) && empty($rattrs->attachments??null) ) { 
+                    // can't send message without text content or media attached
+                    throw new Exception('New message requires content or media attached');
+                }
 
-                    // Create mediafile refs for any attachments
-                    if ( isset($rattrs->attachments) && count($rattrs->attachments) ) {
-                        foreach ($attrs->attachments??[] as $a) {
-                            if ($a['diskmediafile_id']) {
-                                Mediafile::find($a['id'])->diskmediafile->createReference(
-                                    $chatmessage->getMorphString(), // string   $resourceType
-                                    $chatmessage->getKey(),         // int      $resourceID
-                                    $a['mfname'],                   // string   $mfname
-                                    'messages'                      // string   $mftype
-                                );
-                            }
+                $cm = isset($rattrs->deliver_at)
+                    ? $ct->scheduleMessage($sender, $rattrs->mcontent ?? '', $rattrs->deliver_at) // send at scheduled date
+                    : $ct->sendMessage($sender, $rattrs->mcontent ?? '', new Collection()); // send now
+
+                // Create mediafile refs for any attachments
+                if ( isset($rattrs->attachments) && count($rattrs->attachments) ) {
+                    foreach ($rattrs->attachments??[] as $a) {
+                        if ($a['diskmediafile_id']) {
+                            Mediafile::find($a['id'])->diskmediafile->createReference(
+                                $cm->getMorphString(), // string   $resourceType
+                                $cm->getKey(),         // int      $resourceID
+                                $a['mfname'],          // string   $mfname
+                                'messages'             // string   $mftype
+                            );
                         }
                     }
-                    if ($isMassMessage) {
-                        $chatmessage->chatmessagegroup_id = $cmGroup->id;
-                        $chatmessage->save();
-                    }
-                } else { 
-                    // ... %FIXME...what is the else case? Is this an error or does logic just fall through to below?
                 }
+                if ($isMassMessage) {
+                    $cm->chatmessagegroup_id = $cmGroup->id;
+                    $cm->save();
+                }
+
                 $ct->refresh();
                 $chatthreads->push($ct);
+
+                $cm->refresh();
+                $chatmessages->push($cm);
 
             } // foreach
 
@@ -271,6 +277,7 @@ class Chatthread extends Model implements UuidId
 
         return [
             'chatthreads' => $chatthreads, 
+            'chatmessages' => $chatmessages, 
             'chatmessagegroup' => $cmGroup,
         ];
     }
@@ -281,7 +288,41 @@ class Chatthread extends Model implements UuidId
         return $this;
     }
 
-    // %TODO: handle mediafiles
+    // %FIXME %TODO: use transaction (??)
+    public function sendMessage(User $sender, $rattrs, Collection $cattrs = null) : Chatmessage
+    {
+        if (!isset($cattrs)) {
+            $cattrs = new Collection();
+        }
+
+        $cm = $this->chatmessages()->create([
+              'sender_id' => $sender->id,
+              'mcontent'  => $rattrs->mcontent??'',
+              'cattrs'    => $cattrs,
+        ]);
+
+        if ( isset($rattrs->price) ) {
+            $cm->setPurchaseOnly($rattrs->price, $rattrs->currency); // %FIXME: should pull a default currency from config (?)
+        }
+
+        // Create mediafile refs for any attachments
+        if ( isset($rattrs->attachments) && count($rattrs->attachments) ) {
+            foreach ($rattrs->attachments??[] as $a) {
+                if ($a['diskmediafile_id']) {
+                    Mediafile::find($a['id'])->diskmediafile->createReference(
+                        $cm->getMorphString(), // string   $resourceType
+                        $cm->getKey(),         // int      $resourceID
+                        $a['mfname'],          // string   $mfname
+                        'messages'             // string   $mftype
+                    );
+                }
+            }
+        }
+
+        return $cm;
+    }
+
+    /*
     public function sendMessage(User $sender, string $mcontent, Collection $cattrs = null) : Chatmessage
     {
         if (!isset($cattrs)) {
@@ -293,6 +334,7 @@ class Chatthread extends Model implements UuidId
               'cattrs'    => $cattrs,
         ]);
     }
+     */
 
     public function scheduleMessage(User $sender, string $mcontent, int $deliverAt) : Chatmessage
     {

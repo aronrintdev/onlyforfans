@@ -319,26 +319,10 @@ class ChatthreadsController extends AppBaseController
             'currency'    => 'required_with:price|size:3',
             'attachments' => 'required_with:price|array',
         ]);
+
+        $attrs = (object)$request->all();
+
         // Create new chat message
-        $chatmessage = $chatthread->sendMessage($request->user(), $request->mcontent ?? '', new Collection());
-
-        if ($request->has('price')) {
-            $chatmessage->setPurchaseOnly($request->price, $request->currency);
-        }
-
-        // Create mediafile refs for any attachments
-        if ($request->has('attachments')) {
-            foreach ($request->attachments as $a) {
-                if ($a['diskmediafile_id']) {
-                    Mediafile::find($a['id'])->diskmediafile->createReference(
-                        $chatmessage->getMorphString(), // string   $resourceType
-                        $chatmessage->getKey(),         // int      $resourceID
-                        $a['mfname'],                   // string   $mfname
-                        'messages'                      // string   $mftype
-                    );
-                }
-            }
-        }
 
         try {
             //broadcast( new MessageSentEvent($chatmessage) )->toOthers();
