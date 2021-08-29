@@ -53,19 +53,22 @@ class Chatthread extends Model implements UuidId
 
     public function getIsFavoritedByMeAttribute($value)
     {
-        $sessionUser = Auth::user();
+        $sessionUser = Auth::user(); // %FIXME - should not reference session user in a model!
         if (!$sessionUser) {
             return false;
         }
         $exists = Favorite::where('user_id', $sessionUser->id)
-        ->where('favoritable_id', $this->id)
-        ->where('favoritable_type', 'posts')
+            ->where('favoritable_id', $this->id)
+            ->where('favoritable_type', 'posts')
             ->first();
         return $exists ? true : false;
     }
 
     public function getNotesAttribute($value) {
-        $sessionUser = Auth::user();
+        $sessionUser = Auth::user(); // %FIXME - should not reference session user in a model!
+        if (!$sessionUser) {
+            return '';
+        }
         $otherUser = $this->participants->filter( function($u) use(&$sessionUser) {
             return $u->id !== $sessionUser->id;
         })->first();
@@ -157,14 +160,6 @@ class Chatthread extends Model implements UuidId
     //------------------------------------------------------------------------//
     #region Methods
 
-    public static function startChat(User $originator) : Chatthread
-    {
-        // %TODO: use transaction
-        $chatthread = Chatthread::create([
-            'originator_id' => $originator->id,
-        ]);
-        return $chatthread;
-    }
 
     /**
      * Finds or creates a new chatthread for two users
@@ -182,7 +177,9 @@ class Chatthread extends Model implements UuidId
         $ct = $cts->where('participants_count', 2)->first();
 
         if (!isset($ct)) {
-            $ct = static::startChat($originator);
+            $ct = Chatthread::create([
+                'originator_id' => $originator->id,
+            ]);
             $ct->addParticipant($participant->id);
         }
         return $ct;
@@ -194,7 +191,7 @@ class Chatthread extends Model implements UuidId
         $cmGroup = null; // the created chat message group, if any (1 only)
         $chatmessages = collect();  // the created chat messages, one or more
 
-        $chatthreads = DB::transaction( function() use(&$rattrs, &$cmGroup, &$chatmessages, &$sender) { 
+        //$chatthreads = DB::transaction( function() use(&$rattrs, &$cmGroup, &$chatmessages, &$sender) {  // breaks sqlite seeder when contains ->attach()! %FIXME
 
             $chatthreads = collect();
             $originator = User::find($rattrs->originator_id);
@@ -202,13 +199,13 @@ class Chatthread extends Model implements UuidId
 
             if ($isMassMessage) {
                 $cmgroupAttrs = [
-                    'gmtype'          => MessagegroupTypeEnum::MASSMSG,
+                    'mgtype'          => MessagegroupTypeEnum::MASSMSG,
                     'sender_id'       => $sender->id,
                     'cattrs' => [
                         'sender_name'     => $sender->name,
                         'participants'    => $rattrs->participants ?? null,
                         'mcontent'        => $rattrs->mcontent ?? null,
-                        'deliver_at'      => $rattrs->deliver_at ?? null,
+                        'deliver_at'      => $rattrs->deliver_at ?? null, // %TODO: expect this to be an integer, UTC unix ts in s (?)
                         'price'           => $rattrs->price ?? null,
                         'currency'        => $rattrs->currency ?? null,
                         'attachments'     => $rattrs->attachments ?? null,
@@ -217,24 +214,26 @@ class Chatthread extends Model implements UuidId
                 $cmGroup = Chatmessagegroup::create($cmgroupAttrs);
             }
     
-            foreach ($rattrs->participants as $pkid) {
+            foreach ($rattrs->participants as $participantUserId) { // rattrs->participants is an array of [users] primary keys, and should *not* include originator
                 // Check if chat with participant already exits
-                $ct = $originator->chatthreads()->whereHas('participants', function ($query) use($pkid) {
-                    $query->where('user_id', $pkid);
+                $ct = $originator->chatthreads()->whereHas('participants', function ($query) use($participantUserId) {
+                    $query->where('user_id', $participantUserId);
                 })->first();
     
                 // Add participant to originator mycontacts if they are not already there
-                if ($originator->mycontacts()->where('contact_id', $pkid)->doesntExist()) {
+                if ($originator->mycontacts()->where('contact_id', $participantUserId)->doesntExist()) {
                     Mycontact::create([
                         'owner_id' => $originator->id,
-                        'contact_id' => $pkid,
+                        'contact_id' => $participantUserId,
                     ]);
                 }
     
                 // Start new chat thread if one is not found
                 if (!isset($ct)) {
-                    $ct = Chatthread::startChat($originator);
-                    $ct->addParticipant($pkid);
+                    $ct = Chatthread::create([
+                        'originator_id' => $originator->id,
+                    ]);
+                    $ct->addParticipant($participantUserId);
                 }
     
                 if ( empty($rattrs->mcontent??null) && empty($rattrs->attachments??null) ) { 
@@ -272,8 +271,8 @@ class Chatthread extends Model implements UuidId
 
             } // foreach
 
-            return $chatthreads;
-        });
+            //return $chatthreads;
+        //});
 
         return [
             'chatthreads' => $chatthreads, 
