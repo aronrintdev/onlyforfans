@@ -361,7 +361,7 @@ class ChatthreadsController extends AppBaseController
             'mcontent' => 'required_without:attachments|string',
             'attachments' => 'array',
             //'deliver_at' => 'required|date',
-            'deliver_at' => 'required|numeric',
+            'deliver_at' => 'required|numeric', // unix timestamp in seconds utc (%TODO %CHECKME)
         ]);
         $chatmessage = $chatthread->scheduleMessage($request->user(), $request->mcontent, $request->deliver_at);
 
