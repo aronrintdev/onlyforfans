@@ -1,28 +1,29 @@
 <?php
 namespace App\Models;
 
-use App\Enums\ShareableAccessLevelEnum;
-use App\Enums\VerifyStatusTypeEnum;
-use App\Interfaces\Blockable;
-use App\Interfaces\HasFinancialAccounts;
-use App\Interfaces\Ownable;
-use App\Models\Financial\Account;
-use App\Models\Financial\Traits\HasFinancialAccounts as HasFinancialAccountsTrait;
-use App\Models\Traits\MorphFunctions;
-use App\Models\Traits\UsesUuid;
-use App\Notifications\PasswordReset as PasswordResetNotification;
+use DB;
 use Auth;
 use Carbon\Carbon;
+use App\Interfaces\Ownable;
+use App\Interfaces\Blockable;
+use Laravel\Scout\Searchable;
+use App\Models\Traits\UsesUuid;
+use App\Models\Financial\Account;
+use App\Enums\VerifyStatusTypeEnum;
+use App\Models\Traits\MorphFunctions;
+use Illuminate\Support\Facades\Config;
+use Spatie\Permission\Traits\HasRoles;
+use App\Enums\ShareableAccessLevelEnum;
 use Cmgmyr\Messenger\Traits\Messagable;
-use DB;
+use App\Interfaces\HasFinancialAccounts;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Scout\Searchable;
-use Spatie\Permission\Traits\HasRoles;
+use App\Notifications\PasswordReset as PasswordResetNotification;
+use App\Models\Financial\Traits\HasFinancialAccounts as HasFinancialAccountsTrait;
 
 /**
  * @property string      $id                 `uuid` | `unique`
@@ -599,6 +600,14 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
     {
         $sales = $this->getSales();
         return $sales > 0;
+    }
+
+    public function canMakePayments(): bool
+    {
+        if (Config::get('transactions.disableAll', false) || isset(Auth::user()->settings->cattrs['disable_payments'])) {
+            return false;
+        }
+        return true;
     }
 
     // %%% --- Misc. ---

@@ -92,10 +92,12 @@ export default {
     startOnlineMonitor() {
       if (this.session_user) {
         this.onlineMonitor = this.$echo.join(`user.status.${this.session_user.id}`)
-        this.$echo.private(`${this.session_user.id}-message`)
-          .listen('MessageSentEvent', () => {
-            this.getUnreadMessagesCount();
-          });
+
+        // TODO: Replace this with a different event channel listener, this channel no longer exists
+        // this.$echo.private(`${this.session_user.id}-message`)
+        //   .listen('MessageSentEvent', () => {
+        //     this.getUnreadMessagesCount();
+        //   });
       }
     },
 
@@ -172,6 +174,6 @@ export default {
 .content.mobile {
   padding-top: 15px;
   padding-bottom: 68px;
-  height: calc(100% - 68px);
+  // height: calc(100% - 68px);
 }
 </style>
