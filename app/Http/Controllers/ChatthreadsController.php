@@ -330,10 +330,10 @@ class ChatthreadsController extends AppBaseController
 
         $chatmessage = $chatthread->sendMessage(
             $request->user(), 
-            $request->mcontent??null, // string $mcontent = '',
-            $request->attachments??[], // array $attachments = [],
-            $request->pricecurrency??null // $price = null,
-            $request->currency??null, // $currency = null,
+            $request->mcontent ?? null, // string $mcontent = ''
+            $request->attachments ?? [], // array $attachments = []
+            $request->price ?? null, // $price = null
+            $request->currency ?? null // $currency = null
         );
 
         try {

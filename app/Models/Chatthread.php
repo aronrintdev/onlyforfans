@@ -243,12 +243,13 @@ class Chatthread extends Model implements UuidId
 
                 $cm = isset($rattrs->deliver_at)
                     ? $ct->scheduleMessage($sender, $rattrs->mcontent ?? '', $rattrs->deliver_at) // send at scheduled date
-                    : $ct->sendMessage($sender, (object)[
-                        'mcontent' => $rattrs->mcontent??'',
-                        'price' => $rattrs->price??null,
-                        'currency' => $rattrs->currency??null,
-                        'attachments' => $rattrs->attachments??null,
-                    ]); // send now
+                    : $ct->sendMessage(
+                        $sender, 
+                        $rattrs->mcontent ?? '',
+                        $rattrs->attachments ?? null,
+                        $rattrs->price ?? null,
+                        $rattrs->currency ?? null
+                    ); // send now
 
                 if ($isMassMessage) {
                     $cm->chatmessagegroup_id = $cmGroup->id;
@@ -283,8 +284,8 @@ class Chatthread extends Model implements UuidId
     //public function sendMessage(User $sender, $rattrs, Collection $cattrs = null) : Chatmessage
     public function sendMessage(
         User $sender, 
-        string $mcontent = '',
-        array $attachments = [],
+        string $mcontent = null,
+        array $attachments = null,
         $price = null,
         $currency = null,
         Collection $cattrs = null
@@ -320,20 +321,6 @@ class Chatthread extends Model implements UuidId
 
         return $cm;
     }
-
-    /*
-    public function sendMessage(User $sender, string $mcontent, Collection $cattrs = null) : Chatmessage
-    {
-        if (!isset($cattrs)) {
-            $cattrs = new Collection();
-        }
-        return $this->chatmessages()->create([
-              'sender_id' => $sender->id,
-              'mcontent'  => $mcontent,
-              'cattrs'    => $cattrs,
-        ]);
-    }
-     */
 
     public function scheduleMessage(User $sender, string $mcontent, int $deliverAt) : Chatmessage
     {
