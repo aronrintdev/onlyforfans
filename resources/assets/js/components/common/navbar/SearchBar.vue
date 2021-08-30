@@ -43,11 +43,11 @@
         </li>
       </ul>
 
-      <div v-if="selectedGroupName !== '' && results[selectedGroupName].length === 0" class="text-center">
+      <div v-if="selectedGroupName !== '' && results[selectedGroupName] && results[selectedGroupName].length === 0" class="text-center">
         {{ $t('No Results') }}
       </div>
 
-      <ul v-if="selectedGroupName !== ''" class="result-list">
+      <ul v-if="selectedGroupName !== '' && results[selectedGroupName]" class="result-list">
         <component
           :is="groups[selectedGroup].component"
           v-for="(item, index) in results[selectedGroupName]"
@@ -111,7 +111,7 @@ export default {
       if (this.groups.length === 0) {
         return ''
       }
-      return this.groups[this.selectedGroup].name
+      return this.groups[this.selectedGroup] && this.groups[this.selectedGroup].name
     },
   },
 
@@ -195,6 +195,7 @@ export default {
 
     _search() {
       this.loading = true
+      console.log('-------- do search'  )
       this.doSearch()
         .then(() => {
           this.loading = false
@@ -207,6 +208,7 @@ export default {
     },
 
     parseData(data) {
+      console.log('--------- parsed data', data)
       this.results.autoComplete = data.hasOwnProperty('autoComplete')
         ? data.autoComplete.hasOwnProperty('data')
           ? data.autoComplete.data : data.autoComplete : []
@@ -239,6 +241,7 @@ export default {
         this.highlighted = -1
         return
       }
+      console.log('---------this.results:', this.results)
       const groupLength = this.results[this.selectedGroupName].length + 1
       value = value + 1 < 0 ? value + 1 + groupLength : value + 1
       this.highlighted = ( value % groupLength ) - 1
