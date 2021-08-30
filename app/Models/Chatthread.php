@@ -186,16 +186,32 @@ class Chatthread extends Model implements UuidId
     }
 
     // 'thin-controlller-fat-model' refacator of code from chatthreads.store
-    public static function findOrCreateChat($sender, $rattrs)
-    {
+    //public static function findOrCreateChat($sender, $rattrs)
+    public static function findOrCreateChat(
+        User        $sender, 
+        string      $originatorId,
+        array       $participants, // array of user ids
+        string      $mcontent = null,
+        int         $deliverAt = null,
+        array       $attachments = null,
+        int         $price = null,
+        string      $currency = null,
+        array       $cattrs = null
+    ) {
+
+        if ( empty($mcontent) && empty($attachments??null) ) { 
+            // can't send message without text content or media attached
+            throw new Exception('New message requires content or media attached');
+        }
+
         $cmGroup = null; // the created chat message group, if any (1 only)
         $chatmessages = collect();  // the created chat messages, one or more
 
         //$chatthreads = DB::transaction( function() use(&$rattrs, &$cmGroup, &$chatmessages, &$sender) {  // breaks sqlite seeder when contains ->attach()! %FIXME
 
             $chatthreads = collect();
-            $originator = User::find($rattrs->originator_id);
-            $isMassMessage = count($rattrs->participants) > 1;
+            $originator = User::find($originatorId);
+            $isMassMessage = count($participants) > 1;
 
             if ($isMassMessage) {
                 $cmgroupAttrs = [
@@ -203,18 +219,18 @@ class Chatthread extends Model implements UuidId
                     'sender_id'       => $sender->id,
                     'cattrs' => [
                         'sender_name'     => $sender->name,
-                        'participants'    => $rattrs->participants ?? null,
-                        'mcontent'        => $rattrs->mcontent ?? null,
-                        'deliver_at'      => $rattrs->deliver_at ?? null, // %TODO: expect this to be an integer, UTC unix ts in s (?)
-                        'price'           => $rattrs->price ?? null,
-                        'currency'        => $rattrs->currency ?? null,
-                        'attachments'     => $rattrs->attachments ?? null,
+                        'participants'    => $participants,
+                        'mcontent'        => $mcontent,
+                        'deliver_at'      => $deliverAt, // %TODO: expect this to be an integer, UTC unix ts in s (?)
+                        'price'           => $price,
+                        'currency'        => $currency,
+                        'attachments'     => $attachments,
                     ],
                 ];
                 $cmGroup = Chatmessagegroup::create($cmgroupAttrs);
             }
     
-            foreach ($rattrs->participants as $participantUserId) { // rattrs->participants is an array of [users] primary keys, and should *not* include originator
+            foreach ($participants as $participantUserId) { // participants is an array of [users] primary keys, and should *not* include originator
                 // Check if chat with participant already exits
                 $ct = $originator->chatthreads()->whereHas('participants', function ($query) use($participantUserId) {
                     $query->where('user_id', $participantUserId);
@@ -232,24 +248,14 @@ class Chatthread extends Model implements UuidId
                 if (!isset($ct)) {
                     $ct = Chatthread::create([
                         'originator_id' => $originator->id,
+                        'cattrs' => $cattrs??[],
                     ]);
                     $ct->addParticipant($participantUserId);
                 }
     
-                if ( empty($rattrs->mcontent??null) && empty($rattrs->attachments??null) ) { 
-                    // can't send message without text content or media attached
-                    throw new Exception('New message requires content or media attached');
-                }
-
-                $cm = isset($rattrs->deliver_at)
-                    ? $ct->scheduleMessage($sender, $rattrs->mcontent ?? '', $rattrs->deliver_at) // send at scheduled date
-                    : $ct->sendMessage(
-                        $sender, 
-                        $rattrs->mcontent ?? '',
-                        $rattrs->attachments ?? null,
-                        $rattrs->price ?? null,
-                        $rattrs->currency ?? null
-                    ); // send now
+                $cm = isset($deliverAt)
+                    ? $ct->scheduleMessage( $sender, $mcontent, $deliverAt ) // send at scheduled date
+                    : $ct->sendMessage( $sender, $mcontent, $attachments, $price, $currency ); // send now
 
                 if ($isMassMessage) {
                     $cm->chatmessagegroup_id = $cmGroup->id;
@@ -281,24 +287,19 @@ class Chatthread extends Model implements UuidId
     }
 
     // %FIXME %TODO: use transaction (??)
-    //public function sendMessage(User $sender, $rattrs, Collection $cattrs = null) : Chatmessage
     public function sendMessage(
-        User $sender, 
-        string $mcontent = null,
-        array $attachments = null,
-        $price = null,
-        $currency = null,
-        Collection $cattrs = null
+        User        $sender, 
+        string      $mcontent = null,
+        array       $attachments = null,
+        int         $price = null,
+        string      $currency = null,
+        array       $cattrs = null
     ) : Chatmessage
     {
-        if (!isset($cattrs)) {
-            $cattrs = new Collection();
-        }
-
         $cm = $this->chatmessages()->create([
               'sender_id' => $sender->id,
               'mcontent'  => $mcontent,
-              'cattrs'    => $cattrs,
+              'cattrs'    => $cattrs??[],
         ]);
 
         if ( isset($price) ) {

@@ -64,6 +64,10 @@ class Chatmessage extends Model implements UuidId, Ownable, Purchaseable
         'is_delivered'  => 'boolean',
     ];
 
+    protected $attributes = [
+        'mcontent' => '',
+    ];
+
     //--------------------------------------------
     // Boot
     //--------------------------------------------
