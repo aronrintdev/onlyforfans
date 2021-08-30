@@ -287,7 +287,7 @@ class ChatthreadsController extends AppBaseController
             'originator_id'  => 'required|uuid|exists:users,id',
             'participants'   => 'required|array', // %FIXME: rename to 'recipients' for clairty
             'participants.*' => 'uuid|exists:users,id',
-            'mcontent'       => 'string',  // optional first message content
+            'mcontent'       => 'required_without:attachments|string',  // optional first message content
             'deliver_at'     => 'numeric', // optional to pre-schedule delivery of message if present
             'price'          => 'numeric',
             'currency'       => 'required_with:price|size:3',
@@ -314,7 +314,7 @@ class ChatthreadsController extends AppBaseController
     public function sendMessage(Request $request, Chatthread $chatthread)
     {
         $request->validate([
-            'mcontent'    => 'required_without:attachments',
+            'mcontent'    => 'required_without:attachments|string',
             'price'       => 'numeric',
             'currency'    => 'required_with:price|size:3',
             'attachments' => 'required_with:price|array',
