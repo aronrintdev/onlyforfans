@@ -19,7 +19,7 @@
       </section>
     </b-card-header>
     <transition v-if="!paymentsDisabled" name="quick-fade" mode="out-in">
-      <b-card-body>
+      <b-card-body v-if="step === 'initial'" key="initial">
         <div>
           <b-row>
             <b-col class="mb-2">
@@ -44,6 +44,17 @@
             Follow Now
           </b-button>
         </div>
+      </b-card-body>
+      <b-card-body v-if="step === 'payment'" key="payment">
+        <PurchaseForm
+          :value="timeline"
+          item-type="timeline"
+          :price="timeline.userstats.subscriptions.price_per_1_months * 100"
+          :currency="'USD'"
+          type="subscription"
+          :display-price="timeline.userstats.subscriptions.price_per_1_months | niceCurrency"
+          class="mt-3"
+        />
       </b-card-body>
     </transition>
     <PaymentsDisabled class="mx-4 mt-4 mb-2" v-if="paymentsDisabled" />
