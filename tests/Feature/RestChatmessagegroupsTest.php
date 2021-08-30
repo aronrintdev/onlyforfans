@@ -50,15 +50,16 @@ class RestChatmessagegroupsTest extends TestCase
         ];
         $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
         $content = json_decode($response->content());
-        //dd($content);
         $response->assertStatus(201);
 
         $response->assertJsonStructure([
+            'chatmessagegroup' => [ 'id', 'mgtype', 'sender_id' ],
             'chatthreads' => [
                 0 => [ 'id', 'originator_id', 'is_tip_required', 'created_at' ],
             ],
-            'chatmessagegroup' => [ 'id', 'mgtype', 'sender_id' ],
-            'chatmessages' => [ 'id', 'chatthread_id', 'mcontent', 'sender_id', 'deliver_at', 'is_delivered', 'is_read', 'is_flagged' ],
+            'chatmessages' => [ 
+                0 => [ 'id', 'chatthread_id', 'mcontent', 'sender_id', 'deliver_at', 'is_delivered', 'is_read', 'is_flagged' ],
+            ],
         ]);
 
         $this->assertEquals($fans->count(), count($content->chatthreads));
