@@ -47,7 +47,9 @@ class PostPolicy extends BasePolicy
         case PostTypeEnum::FREE:
             return true; // anyone can see content of free posts
         case PostTypeEnum::SUBSCRIBER:
-            if ( $user->staff && $post->timeline->subscribers->count() && $post->timeline->subscribers->contains($user->staff->creator_id) ) {
+            if ($post->timeline->subscribers->count()
+                && $user->staff 
+                && $post->timeline->subscribers->contains($user->staff->creator_id)) {
                 $hasPermission = false;
                 foreach($user->staff->permissions as $permission) {
                     if ($permission->name == 'Post.viewAll') {
