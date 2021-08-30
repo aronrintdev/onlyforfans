@@ -46,6 +46,7 @@ class RestChatmessagegroupsTest extends TestCase
         $payload = [
             'originator_id' => $originator->id,
             'participants' => $fans->pluck('id')->toArray(),
+            'mcontent' => $this->faker->realText,
         ];
         $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
         $content = json_decode($response->content());
@@ -94,6 +95,7 @@ class RestChatmessagegroupsTest extends TestCase
         $payload = [
             'originator_id' => $originator->id,
             'participants' => $fans->pluck('id')->toArray(),
+            'mcontent' => $this->faker->realText,
         ];
         $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
         $content = json_decode($response->content());

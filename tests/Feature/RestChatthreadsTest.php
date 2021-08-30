@@ -320,12 +320,12 @@ class RestChatthreadsTest extends TestCase
         ];
         $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
         $content = json_decode($response->content());
+        $response->assertStatus(201);
         $response->assertJsonStructure([
             'chatthreads' => [ // note: returns an array!
                 0 => ['id', 'originator_id', 'created_at' ],
             ],
         ]);
-        $response->assertStatus(201);
         $this->assertEquals( $recipients->count(), count($content->chatthreads) );
         $chatthreadPKID = $content->chatthreads[0]->id; // first & only thread
         $chatthread = Chatthread::find($chatthreadPKID);
