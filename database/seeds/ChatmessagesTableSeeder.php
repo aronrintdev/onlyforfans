@@ -33,7 +33,7 @@ class ChatmessagesTableSeeder extends Seeder
         // ----
 
         //$senderCount = $this->faker->numberBetween(2, 4); // number of senders
-        $originatorCount = 3;
+        $originatorCount = 7;
 
         if ( true || $this->appEnv !== 'testing' ) {
             $this->output->writeln("  - Chatmessages seeder: loaded ".$originatorCount." originators...");
@@ -42,8 +42,6 @@ class ChatmessagesTableSeeder extends Seeder
         $originators = User::has('timeline')->take($originatorCount)->get();
 
         $originators->each( function($o) {
-
-            $this->output->writeln("    ~ thread for ".$o->name."...");
 
             $isScheduled = false; // init
             $isDeliveredByNow = false; // init
@@ -70,6 +68,8 @@ class ChatmessagesTableSeeder extends Seeder
                 //'currency'       => 'USD', // 'required_with:price|size:3',
                 //'attachments'    => // 'required_with:price|array',   // optional first message attachments
             ];
+
+            $this->output->writeln("    ~ create 'thread' for ".$o->name." : ".json_encode($attrs)."...");
 
             ['chatthreads'=>$chatthreads, 'chatmessagegroup'=>$cmGroup, 'chatmessages'=>$chatmessages] = Chatthread::findOrCreateChat($o, $attrs);
 
