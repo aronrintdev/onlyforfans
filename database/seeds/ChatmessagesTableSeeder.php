@@ -59,7 +59,7 @@ class ChatmessagesTableSeeder extends Seeder
                     : $now->addDays( $this->faker->numberBetween(1,7) ); // future: to be delivered
             }
 
-            $attrs = (object)[
+            $rattrs = (object)[
                 'originator_id'  => $o->id, // 'required|uuid|exists:users,id',
                 'participants'   => $receivers->pluck('id')->toArray(), // 'required|array', // %FIXME: rename to 'recipients' for clairty
                 'mcontent'       => $this->faker->realText, // 'string',  // optional first message content
@@ -69,9 +69,19 @@ class ChatmessagesTableSeeder extends Seeder
                 //'attachments'    => // 'required_with:price|array',   // optional first message attachments
             ];
 
-            $this->output->writeln("    ~ create 'thread' for ".$o->name." : ".json_encode($attrs)."...");
+            $this->output->writeln("    ~ create 'thread' for ".$o->name." : ".json_encode($rattrs)."...");
 
-            ['chatthreads'=>$chatthreads, 'chatmessagegroup'=>$cmGroup, 'chatmessages'=>$chatmessages] = Chatthread::findOrCreateChat($o, $attrs);
+            ['chatthreads'=>$chatthreads, 'chatmessages'=>$chatmessages, 'chatmessagegroup'=>$cmGroup] = Chatthread::findOrCreateChat(
+                $o,                            // User     $sender
+                $rattrs->originator_id,        // string   $originatorId
+                $rattrs->participants,         // array    $participants (array of user ids)
+                $rattrs->mcontent ?? '',       // string   $mcontent
+                $rattrs->deliver_at ?? null,   // int      $deliver_at
+                $rattrs->attachments ?? null,  // array    $attachments
+                $rattrs->price ?? null,        // int      $price
+                $rattrs->currency ?? null,     // string   $currency
+                ['foo'=>'bar'],                // array    $cattrs
+            );
 
             // Set $ts & update message timestamps and possibly .is_delivered field...
             if ( $isScheduled && $isDeliveredByNow ) {
@@ -109,13 +119,19 @@ class ChatmessagesTableSeeder extends Seeder
                     $this->output->writeln("    ~ reply on ".$ct->id.", #$i of $replyCount...");
                     $senderA = $this->faker->randomElement( $ct->participants->toArray() ); // so it looks like a back-and-forth conversation
                     $sender = User::findOrFail($senderA['id']);
-                    $attrs = (object)[
+                    $rattrs = (object)[
                         'mcontent'    => $this->faker->realText, // 'string',  // optional first message content
                         //'price'       => 'numeric',
                         //'currency'    => 'required_with:price|size:3',
                         //'attachments' => 'required_with:price|array',
                     ];
-                    $cm = $ct->sendMessage($sender, $attrs);
+                    $cm = $ct->sendMessage(
+                        $sender, 
+                        $rattrs->mcontent ?? null, // string $mcontent = ''
+                        $rattrs->attachments ?? [], // array $attachments = []
+                        $rattrs->price ?? null, // $price = null
+                        $rattrs->currency ?? null // $currency = null
+                    );
                     $cm->created_at = $_ts;
                     $cm->updated_at = $_ts;
                     $cm->save();
