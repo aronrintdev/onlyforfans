@@ -294,12 +294,13 @@ class ChatthreadsController extends AppBaseController
             'attachments'    => 'required_with:price|array',   // optional first message attachments
         ]);
 
-        $attrs = (object)$request->all();
+        $rattrs = (object)$request->all();
 
-        ['chatthreads' => $chatthreads, 'chatmessagegroup' => $cmGroup] = Chatthread::findOrCreateChat($request->user(), $attrs);
+        ['chatthreads'=>$chatthreads, 'chatmessages'=>$chatmessages, 'chatmessagegroup'=>$cmGroup] = Chatthread::findOrCreateChat($request->user(), $rattrs);
 
         return response()->json([
             'chatthreads' => $chatthreads,
+            'chatmessages' => $chatmessages,
             'chatmessagegroup' => $cmGroup,
         ], 201);
     }
@@ -320,9 +321,10 @@ class ChatthreadsController extends AppBaseController
             'attachments' => 'required_with:price|array',
         ]);
 
-        $attrs = (object)$request->all();
+        $rattrs = (object)$request->all();
 
         // Create new chat message
+        $chatmessage = $chatthread->sendMessage($request->user(), $rattrs);
 
         try {
             //broadcast( new MessageSentEvent($chatmessage) )->toOthers();

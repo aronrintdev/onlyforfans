@@ -243,21 +243,13 @@ class Chatthread extends Model implements UuidId
 
                 $cm = isset($rattrs->deliver_at)
                     ? $ct->scheduleMessage($sender, $rattrs->mcontent ?? '', $rattrs->deliver_at) // send at scheduled date
-                    : $ct->sendMessage($sender, $rattrs->mcontent ?? '', new Collection()); // send now
+                    : $ct->sendMessage($sender, (object)[
+                        'mcontent' => $rattrs->mcontent??'',
+                        'price' => $rattrs->price??null,
+                        'currency' => $rattrs->currency??null,
+                        'attachments' => $rattrs->attachments??null,
+                    ]); // send now
 
-                // Create mediafile refs for any attachments
-                if ( isset($rattrs->attachments) && count($rattrs->attachments) ) {
-                    foreach ($rattrs->attachments??[] as $a) {
-                        if ($a['diskmediafile_id']) {
-                            Mediafile::find($a['id'])->diskmediafile->createReference(
-                                $cm->getMorphString(), // string   $resourceType
-                                $cm->getKey(),         // int      $resourceID
-                                $a['mfname'],          // string   $mfname
-                                'messages'             // string   $mftype
-                            );
-                        }
-                    }
-                }
                 if ($isMassMessage) {
                     $cm->chatmessagegroup_id = $cmGroup->id;
                     $cm->save();
