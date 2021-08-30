@@ -2,7 +2,7 @@
   <div class="container-fluid h-100" :class="mobile ? 'px-0' : ''">
 
     <!-- Mobile view -->
-    <section v-if="mobile" class="mobile h-100" :class="{ 'focus-main': focusMain }">
+    <section v-if="mobile" class="mobile OFF-h-100" :class="{ 'focus-main': focusMain }">
       <!-- <transition :name="focusMain ? 'slide-right' : 'slide-left'"> -->
         <div class="sidebar px-3 pb-3" key="sidebar">
           <div class="header justify-content-center">
