@@ -61,6 +61,9 @@ class Chatthread extends Model implements UuidId
 
     public function getNotesAttribute($value) {
         $sessionUser = Auth::user();
+        if (!$sessionUser) {
+            return null;
+        }
         $otherUser = $this->participants->filter( function($u) use(&$sessionUser) {
             return $u->id !== $sessionUser->id;
         })->first();
