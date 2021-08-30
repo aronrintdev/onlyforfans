@@ -31,11 +31,9 @@ $container-max-widths: (
 html,
 body,
 .app {
-  min-height: 100% !important;
-  height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  // overflow: hidden;
 }
 
 html.prevent-scrolling {

@@ -604,6 +604,7 @@ export default {
       }
     }
     .superbox-post {
+      height: calc(100vh - 80px);
       border: none;
       border-radius: 0;
     }
