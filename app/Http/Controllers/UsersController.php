@@ -59,11 +59,16 @@ class UsersController extends AppBaseController
         ]);
 
         $timeline = $user->timeline;
-        $timeline->fill($request->only([
-            'slug',
-        ]));
 
-        $timeline->save();
+        if ( $request->has('email') ) {
+            $user->email = $request->email;
+            $user->save();
+        }
+
+        if ( $request->has('slug') ) {
+            $timeline->fill( $request->only([ 'slug' ]) );
+            $timeline->save();
+        }
 
         return new UserResource($user);
     }
