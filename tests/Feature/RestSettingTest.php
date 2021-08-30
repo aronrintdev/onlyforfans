@@ -120,7 +120,6 @@ class RestSettingTest extends TestCase
      *  @group settings
      *  @group regression
      *  @group regression-base
-     *  @group here0830
      */
     // This actually updates [users]
     public function test_can_batch_edit_settings_general()
@@ -194,6 +193,7 @@ class RestSettingTest extends TestCase
      *  @group settings
      *  @group regression
      *  @group regression-base
+     *  @group here0830
      */
     public function test_can_batch_edit_settings_profile()
     {
@@ -201,6 +201,7 @@ class RestSettingTest extends TestCase
         $user = $timeline->user;
 
         $payload1 = [
+            //'name' => $this->faker->firstName.' '.$this->faker->lastName,
             'about' => $this->faker->realText,
             'country' => $this->faker->country,
             'city' => $this->faker->city,
@@ -208,14 +209,15 @@ class RestSettingTest extends TestCase
             'birthdate' => $this->faker->dateTimeThisCentury->format('Y-m-d'),
             'weblinks' => [
                 'amazon' => $this->faker->url,
-                'website' => $this->faker->url,
+                //'website' => $this->faker->url,
+                'website' => $this->faker->domainName,
                 'instagram' => $this->faker->url,
             ],
             //'email' => $this->faker->safeEmail,
         ];
         $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSettingsBatch', [$user->id]), $payload1);
-        $response->assertStatus(200);
         $content = json_decode($response->content());
+        $response->assertStatus(200);
 
         $settings = $user->settings;
         $settings->refresh();

@@ -132,7 +132,7 @@ class UsersController extends AppBaseController
     {
         $this->authorize('update', $user);
         $request->validate([
-            'name' => 'string|required',
+            'name' => 'string',
             'subscriptions.price_per_1_months' => 'numeric',
             'subscriptions.price_per_3_months' => 'numeric|nullable',
             'subscriptions.price_per_6_months' => 'numeric|nullable',
