@@ -321,10 +321,20 @@ class ChatthreadsController extends AppBaseController
             'attachments' => 'required_with:price|array',
         ]);
 
+        /*
         $rattrs = (object)$request->all();
 
         // Create new chat message
         $chatmessage = $chatthread->sendMessage($request->user(), $rattrs);
+         */
+
+        $chatmessage = $chatthread->sendMessage(
+            $request->user(), 
+            $request->mcontent??null, // string $mcontent = '',
+            $request->attachments??[], // array $attachments = [],
+            $request->pricecurrency??null // $price = null,
+            $request->currency??null, // $currency = null,
+        );
 
         try {
             //broadcast( new MessageSentEvent($chatmessage) )->toOthers();

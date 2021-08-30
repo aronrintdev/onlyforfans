@@ -280,7 +280,15 @@ class Chatthread extends Model implements UuidId
     }
 
     // %FIXME %TODO: use transaction (??)
-    public function sendMessage(User $sender, $rattrs, Collection $cattrs = null) : Chatmessage
+    //public function sendMessage(User $sender, $rattrs, Collection $cattrs = null) : Chatmessage
+    public function sendMessage(
+        User $sender, 
+        string $mcontent = '',
+        array $attachments = [],
+        $price = null,
+        $currency = null,
+        Collection $cattrs = null
+    ) : Chatmessage
     {
         if (!isset($cattrs)) {
             $cattrs = new Collection();
@@ -288,17 +296,17 @@ class Chatthread extends Model implements UuidId
 
         $cm = $this->chatmessages()->create([
               'sender_id' => $sender->id,
-              'mcontent'  => $rattrs->mcontent??'',
+              'mcontent'  => $mcontent,
               'cattrs'    => $cattrs,
         ]);
 
-        if ( isset($rattrs->price) ) {
-            $cm->setPurchaseOnly($rattrs->price, $rattrs->currency); // %FIXME: should pull a default currency from config (?)
+        if ( isset($price) ) {
+            $cm->setPurchaseOnly($price, $currency); // %FIXME: should pull a default currency from config (?)
         }
 
         // Create mediafile refs for any attachments
-        if ( isset($rattrs->attachments) && count($rattrs->attachments) ) {
-            foreach ($rattrs->attachments??[] as $a) {
+        if ( isset($attachments) && count($attachments) ) {
+            foreach ($attachments??[] as $a) {
                 if ($a['diskmediafile_id']) {
                     Mediafile::find($a['id'])->diskmediafile->createReference(
                         $cm->getMorphString(), // string   $resourceType
