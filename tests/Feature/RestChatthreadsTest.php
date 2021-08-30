@@ -100,7 +100,6 @@ class RestChatthreadsTest extends TestCase
      *  @group chatthreads
      *  @group regression
      *  @group regression-base
-     *  @group OFF-here0601
      */
     public function test_can_list_sorted_chatthreads()
     {
@@ -315,10 +314,13 @@ class RestChatthreadsTest extends TestCase
 
         // --- Create a chatthread ---
 
+        $msgs = [];
+        $msgs[] = $msg = $this->faker->realText;
+
         $payload = [
             'originator_id' => $originator->id,
             'participants' => $recipients->pluck('id')->toArray(),
-            'mcontent' => $this->faker->realText,
+            'mcontent' => $msg,
         ];
         $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
         $content = json_decode($response->content());
@@ -335,7 +337,6 @@ class RestChatthreadsTest extends TestCase
 
         // send some messages to the thread
 
-        $msgs = [];
         $msgs[] = $msg = $this->faker->realText;
         $payload = [
             $chatthread->id, // chatthread_id
@@ -359,18 +360,18 @@ class RestChatthreadsTest extends TestCase
         // -
 
         $this->assertNotNull($chatthread);
-        $this->assertEquals(1, $chatthread->chatmessages->count());
+        $this->assertEquals(2, $chatthread->chatmessages->count());
         $this->assertEquals(2, $chatthread->participants->count());
         $this->assertTrue($chatthread->participants->contains($originator->id));
         $this->assertTrue($chatthread->participants->contains($recipients[0]->id));
         $this->assertEquals($msgs[0], $chatthread->chatmessages[0]->mcontent);
+        $this->assertEquals($msgs[1], $chatthread->chatmessages[1]->mcontent);
     }
 
     /**
      *  @group chatthreads
      *  @group regression
      *  @group regression-base
-     *  @group here0830
      */
     public function test_should_create_multiple_threads_with_originator_on_all_and_single_recipient_per_and_send_message()
     {

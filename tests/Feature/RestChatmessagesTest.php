@@ -157,7 +157,6 @@ class RestChatmessagesTest extends TestCase
      *  @group mycontacts
      *  @group regression
      *  @group regression-base
-     *  @group here0607
      */
     public function test_can_list_mycontacts()
     {

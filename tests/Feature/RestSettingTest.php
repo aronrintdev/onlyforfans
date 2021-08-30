@@ -120,6 +120,7 @@ class RestSettingTest extends TestCase
      *  @group settings
      *  @group regression
      *  @group regression-base
+     *  @group here0830
      */
     // This actually updates [users]
     public function test_can_batch_edit_settings_general()
@@ -132,12 +133,13 @@ class RestSettingTest extends TestCase
             'email' => $this->faker->safeEmail,
             'slug'  => $this->faker->slug,
         ];
-        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.update', [$user->id]), $payload);
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.update', $user->id), $payload);
         $response->assertStatus(200);
         $content = json_decode($response->content());
 
         $user2 = User::findOrFail($user->id);
-        $this->assertEquals($payload['email'], $user2->email);
+        $this->assertEquals($payload['email'], $user2->email); 
+        //$this->assertEmpty($user2->email); 
         $this->assertEquals($payload['slug'], $user2->timeline->slug);
     }
 
