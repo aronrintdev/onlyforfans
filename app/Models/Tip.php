@@ -184,7 +184,7 @@ class Tip extends Model implements Messagable
         }
 
         // Save financial account if one is not yet set for this tip
-        if (!$this->has('account')) {
+        if (!isset($this->account)) {
             if (!isset($options['account_id'])) {
                 throw new AccountDoesNotExistException('', 'Account Id not provided');
                 throw  "No Valid Account";
