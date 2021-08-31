@@ -17,6 +17,7 @@ use App\Enums\Financial\AccountTypeEnum;
 use App\Models\Casts\Money as CastsMoney;
 use App\Enums\Financial\TransactionTypeEnum;
 use App\Events\ItemTipped;
+use App\Models\Financial\Exceptions\Account\AccountDoesNotExistException;
 use App\Models\Financial\Traits\HasCurrency;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -183,12 +184,17 @@ class Tip extends Model implements Messagable
         }
 
         // Save financial account if one is not yet set for this tip
-        if (!$this->has('account')) {
+        if (!isset($this->account)) {
             if (!isset($options['account_id'])) {
-                // TODO: Throw exception
-                return false;
+                throw new AccountDoesNotExistException('', 'Account Id not provided');
+                throw  "No Valid Account";
             }
-            $this->account_id = $options['account_id'];
+
+            $account = Account::find($options['account_id']);
+            if (!isset($account)) {
+                throw new AccountDoesNotExistException($options['account_id']);
+            }
+            $this->account()->associate($account);
             $this->save();
         }
 
