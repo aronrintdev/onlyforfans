@@ -59,11 +59,16 @@ class UsersController extends AppBaseController
         ]);
 
         $timeline = $user->timeline;
-        $timeline->fill($request->only([
-            'slug',
-        ]));
 
-        $timeline->save();
+        if ( $request->has('email') ) {
+            $user->email = $request->email;
+            $user->save();
+        }
+
+        if ( $request->has('slug') ) {
+            $timeline->fill( $request->only([ 'slug' ]) );
+            $timeline->save();
+        }
 
         return new UserResource($user);
     }
@@ -127,7 +132,7 @@ class UsersController extends AppBaseController
     {
         $this->authorize('update', $user);
         $request->validate([
-            'name' => 'string|required',
+            'name' => 'string',
             'subscriptions.price_per_1_months' => 'numeric',
             'subscriptions.price_per_3_months' => 'numeric|nullable',
             'subscriptions.price_per_6_months' => 'numeric|nullable',

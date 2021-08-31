@@ -61,6 +61,7 @@ class RestChatmessagesTest extends TestCase
             'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
         ]);
         //dd($content->messages);
+        // test comment
 
         // Check no messages from threads in which I am not a participant
         $chatmessages = collect($content->data);
@@ -156,7 +157,6 @@ class RestChatmessagesTest extends TestCase
      *  @group mycontacts
      *  @group regression
      *  @group regression-base
-     *  @group here0607
      */
     public function test_can_list_mycontacts()
     {

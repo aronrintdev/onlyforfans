@@ -82,9 +82,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/blockables/match', ['as'=>'blockables.match', 'uses' => 'BlockablesController@match']);
 
     // -- chatmessages --
-    Route::get('/chatmessages/search', 'ChatmessagesController@search')
-        ->name('chatmessages.search');
+    Route::get('/chatmessages/search', 'ChatmessagesController@search')->name('chatmessages.search');
     Route::apiResource('chatmessages', 'ChatmessagesController', [
+        'only' => [ 'index', ],
+    ]);
+
+    Route::apiResource('chatmessagegroups', 'ChatmessagegroupsController', [
         'only' => [ 'index', ],
     ]);
 
