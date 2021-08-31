@@ -410,8 +410,10 @@ export default {
       attachments = null,
       is_scheduled = false,
       deliver_at = null,
+      price = null,
+      currency = null,
     }) {
-      var error = false
+      let error = false
 
       if ( this.selectedContactsCount === 0 ) {
         eventBus.$emit('popWarning', {
@@ -421,7 +423,7 @@ export default {
         error = true
       }
 
-      if (!mcontent) {
+      if (!mcontent && !attachments) {
         eventBus.$emit('popWarning', {
           title: this.$t('warnings.noContentTitle'),
           message: this.$t('warnings.noContent')
@@ -437,6 +439,8 @@ export default {
         originator_id: this.session_user.id,
         participants: this.selectedContacts.map(o => o.contact_id),
       }
+      // currency
+      // price
 
       if ( mcontent ) {
         params.mcontent = mcontent
@@ -447,6 +451,12 @@ export default {
       if ( is_scheduled ) {
         params.is_scheduled = true
         params.deliver_at = deliver_at
+      }
+      if ( price ) {
+        params.price = price
+      }
+      if ( currency ) {
+        params.currency = currency
       }
 
       this.$log.debug('createChatthread', { params: params })
