@@ -306,9 +306,13 @@ export default {
         return
       }
 
+      if (this.mode !== 'segments') {
+        return
+      }
+
       window.segpay.sdk.initializePayment({
         sessionId: this.sessionId,
-        packageId: this.packageId,
+        packageId: parseInt(this.packageId),
         segments: {
           shared: {
             remoteStylesheetUrls: [
@@ -408,6 +412,14 @@ export default {
           .catch(error => reject(error))
       })
     }
+  },
+
+  watch: {
+    mode(val) {
+      if (val === 'segments') {
+        this.init()
+      }
+    },
   },
 
   mounted() {
