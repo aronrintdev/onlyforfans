@@ -248,7 +248,7 @@ class Chatthread extends Model implements UuidId
                 if (!isset($ct)) {
                     $ct = Chatthread::create([
                         'originator_id' => $originator->id,
-                        'cattrs' => $cattrs??[],
+                        //'cattrs' => $cattrs??[],
                     ]);
                     $ct->addParticipant($participantUserId);
                 }
