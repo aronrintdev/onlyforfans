@@ -33,14 +33,14 @@ class ShareablesTest extends TestCase
             //'user_id' => $creator->id,
         ]);
         $response->assertStatus(200);
+        $content = json_decode($response->content());
+        //dd($content);
         $response->assertJsonStructure([
             'data',
             'links',
             'meta' => [ 'current_page', 'from', 'last_page', 'path', 'per_page', 'to', 'total', ],
         ]);
 
-        $content = json_decode($response->content());
-        //dd($content);
         $this->assertEquals(1, $content->meta->current_page);
         $this->assertNotNull($content->data);
         $this->assertGreaterThan(0, count($content->data));

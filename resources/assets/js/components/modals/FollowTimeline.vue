@@ -18,7 +18,7 @@
         </div>
       </section>
     </b-card-header>
-    <transition v-if="!paymentsDisabled" name="quick-fade" mode="out-in">
+    <transition name="quick-fade" mode="out-in">
       <b-card-body v-if="step === 'initial'" key="initial">
         <div>
           <b-row>
@@ -46,7 +46,9 @@
         </div>
       </b-card-body>
       <b-card-body v-if="step === 'payment'" key="payment">
+        <PaymentsDisabled class="mx-4 mt-4 mb-2" v-if="paymentsDisabled" />
         <PurchaseForm
+          v-else
           :value="timeline"
           item-type="timeline"
           :price="timeline.userstats.subscriptions.price_per_1_months * 100"
@@ -57,7 +59,6 @@
         />
       </b-card-body>
     </transition>
-    <PaymentsDisabled class="mx-4 mt-4 mb-2" v-if="paymentsDisabled" />
   </b-card>
 </template>
 
@@ -167,25 +168,30 @@ export default {
       e.preventDefault()
       this.step = 'payment'
 
-      // const response = await this.axios.put( route('timelines.subscribe', this.timeline.id), {
-      //   sharee_id: this.session_user.id,
-      //   notes: '',
-      // })
-      // this.$bvModal.hide('modal-follow')
+      if (!this.paymentsDisabled) {
+        this.isInProcess = true
+        const response = await this.axios.put( route('timelines.subscribe', this.timeline.id), {
+          account_id: this.session_user.id,
+          amount: this.timeline.userstats.subscriptions.price_per_1_months * 100,
+          currency: this.timeline.currency,
+        })
+        this.$bvModal.hide('modal-follow')
+        this.isInProcess = false
 
 
-      // Needs to be moved
+        // Needs to be moved
 
-      // const msg = response.is_subscribed 
-      //   ? `You are now subscribed to ${this.timeline.name}!`
-      //   : `You are no longer subscribed to ${this.timeline.name}!`
-      // this.$root.$bvToast.toast(msg, {
-      //   toaster: 'b-toaster-top-center',
-      //   title: 'Success!',
-      // })
-      // eventBus.$emit('update-originator') // %ERIK use this
-      // eventBus.$emit('update-timeline', this.timeline.id)
-      // eventBus.$emit('update-feed') // updates feed being viewed
+        const msg = response.is_subscribed
+          ? `You are now subscribed to ${this.timeline.name}!`
+          : `You are no longer subscribed to ${this.timeline.name}!`
+        this.$root.$bvToast.toast(msg, {
+          toaster: 'b-toaster-top-center',
+          title: 'Success!',
+        })
+        eventBus.$emit('update-originator') // %ERIK use this
+        eventBus.$emit('update-timeline', this.timeline.id)
+        eventBus.$emit('update-feed') // updates feed being viewed
+      }
     },
 
     async getUserCampaign() {

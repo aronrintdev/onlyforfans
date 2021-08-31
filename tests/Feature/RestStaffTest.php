@@ -11,7 +11,7 @@ use App\Models\Staff;
 use App\Models\Permission;
 
 /**
- * @group chatmessages
+ * @group staff
  * @package Tests\Feature
  */
 class RestStaffTest extends TestCase

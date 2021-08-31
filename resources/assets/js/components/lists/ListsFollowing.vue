@@ -254,6 +254,11 @@ export default {
     })
   },
 
+  beforeDestroy() {
+    this.$bvModal.hide('modal-follow')
+    this.$bvModal.hide('modal-tip')
+  },
+
   components: {
     CtrlBar,
     WidgetTimeline,

@@ -132,12 +132,13 @@ class RestSettingTest extends TestCase
             'email' => $this->faker->safeEmail,
             'slug'  => $this->faker->slug,
         ];
-        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.update', [$user->id]), $payload);
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.update', $user->id), $payload);
         $response->assertStatus(200);
         $content = json_decode($response->content());
 
         $user2 = User::findOrFail($user->id);
-        $this->assertEquals($payload['email'], $user2->email);
+        $this->assertEquals($payload['email'], $user2->email); 
+        //$this->assertEmpty($user2->email); 
         $this->assertEquals($payload['slug'], $user2->timeline->slug);
     }
 
@@ -199,6 +200,7 @@ class RestSettingTest extends TestCase
         $user = $timeline->user;
 
         $payload1 = [
+            //'name' => $this->faker->firstName.' '.$this->faker->lastName,
             'about' => $this->faker->realText,
             'country' => $this->faker->country,
             'city' => $this->faker->city,
@@ -206,14 +208,15 @@ class RestSettingTest extends TestCase
             'birthdate' => $this->faker->dateTimeThisCentury->format('Y-m-d'),
             'weblinks' => [
                 'amazon' => $this->faker->url,
-                'website' => $this->faker->url,
+                //'website' => $this->faker->url,
+                'website' => $this->faker->domainName,
                 'instagram' => $this->faker->url,
             ],
             //'email' => $this->faker->safeEmail,
         ];
         $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSettingsBatch', [$user->id]), $payload1);
-        $response->assertStatus(200);
         $content = json_decode($response->content());
+        $response->assertStatus(200);
 
         $settings = $user->settings;
         $settings->refresh();

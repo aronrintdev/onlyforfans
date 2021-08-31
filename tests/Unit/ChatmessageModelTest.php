@@ -64,7 +64,9 @@ class ChatmessageModelTest extends TestCase
         $this->assertEquals(0, $receiver->chatthreads->count());
         $this->assertEquals(0, $receiver->sentmessages->count());
 
-        $chatthread = Chatthread::startChat($originator);
+        $chatthread = Chatthread::create([
+            'originator_id' => $originator->id,
+        ]);
         $this->assertNotNull($chatthread);
         $this->assertNotNull($chatthread->id);
         $this->assertEquals(1, $chatthread->participants->count());
@@ -110,7 +112,9 @@ class ChatmessageModelTest extends TestCase
         $originator = User::doesntHave('chatthreads')->firstOrFail();
         $receiver = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->firstOrFail();
 
-        $chatthread = Chatthread::startChat($originator);
+        $chatthread = Chatthread::create([
+            'originator_id' => $originator->id,
+        ]);
         $this->assertNotNull($chatthread);
 
         $chatthread->addParticipant($receiver->id);

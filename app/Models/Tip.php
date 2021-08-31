@@ -230,7 +230,11 @@ class Tip extends Model implements Messagable
 
         // Create a message for this tip processing
         $chatThread = Chatthread::findOrCreateDirectChat($this->sender, $this->receiver);
-        $message = $chatThread->sendMessage($this->sender, '', new Collection([ 'tip_id' => $this->getKey() ]));
+        $message = $chatThread->chatmessages()->create([
+            'sender_id' => $this->sender->id,
+            'mcontent'  => '',
+            'cattrs'    => new Collection([ 'tip_id' => $this->getKey() ]),
+        ]);
         try {
             MessageSentEvent::dispatch($message);
         } catch (Exception $e) {

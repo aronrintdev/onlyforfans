@@ -64,6 +64,10 @@ class Chatmessage extends Model implements UuidId, Ownable, Purchaseable
         'is_delivered'  => 'boolean',
     ];
 
+    protected $attributes = [
+        'mcontent' => '',
+    ];
+
     //--------------------------------------------
     // Boot
     //--------------------------------------------
@@ -84,29 +88,28 @@ class Chatmessage extends Model implements UuidId, Ownable, Purchaseable
     // %%% Relationships
     //--------------------------------------------
     #region Relationships
-    public function chatthread()
-    {
+    public function chatthread() {
         return $this->belongsTo(Chatthread::class);
     }
 
-    public function sender()
-    {
+    public function sender() {
         return $this->belongsTo(User::class, 'sender_id');
     }
 
-    public function sharees()
-    {
+    public function sharees() {
         return $this->morphToMany(User::class, 'shareable', 'shareables', 'shareable_id', 'sharee_id')->withTimestamps();
     }
 
-    public function mediafile()
-    {
+    public function mediafile() {
         return $this->morphOne(Mediafile::class, 'resource');
     }
 
-    public function mediafiles()
-    {
+    public function mediafiles() {
         return $this->morphMany(Mediafile::class, 'resource');
+    }
+
+    public function chatmessagegroup() {
+        return $this->belongsTo(Chatmessagegroup::class);
     }
 
     #endregion Relationships
