@@ -26,7 +26,6 @@ class ChatthreadsController extends AppBaseController
 {
 
     /**
-     * 
      * @param Request $request
      * @return ChatthreadCollection
      */
