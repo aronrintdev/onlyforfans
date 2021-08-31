@@ -25,15 +25,23 @@
         </b-row>
         <b-row>
           <b-col>
-            <b-form-group>
+            <b-form-group :label="$t('Card Number')">
               <div class="d-flex align-items-center">
-                <CardBrandIcon ref="brandIcon" :card-number="form.card.number" class="mr-3" size="2x" />
+                <CardBrandIcon
+                  v-if="mode === 'manual'"
+                  ref="brandIcon"
+                  :card-number="form.card.number"
+                  class="mr-3"
+                  size="2x"
+                />
                 <b-form-input
+                  v-if="mode === 'manual'"
                   v-model="form.card.number"
                   v-mask="'####-####-####-####'"
                   :placeholder="$t('Card Number')"
                   pattern="\d*"
                 />
+                <div v-else ref="cardNumber" class="w-100" />
               </div>
             </b-form-group>
           </b-col>
@@ -43,6 +51,7 @@
             <b-form-group :label="$t('Expiration Date')" >
               <div class="d-flex align-items-center">
                 <b-form-input
+                  v-if="mode === 'manual'"
                   id="new-card-month"
                   v-model="form.card.expirationMonth"
                   v-mask="masks.expirationMonth"
@@ -50,20 +59,30 @@
                   class=""
                   pattern="\d*"
                 />
+                <div v-else ref="cardMonth" />
                 <span class="mx-3" style="font-size:150%;" v-text="'/'" />
                 <b-form-input
+                  v-if="mode === 'manual'"
                   id="new-card-year"
                   v-model="form.card.expirationYear"
                   v-mask="masks.expirationYear"
                   placeholder="YY"
                   pattern="\d*"
                 />
+                <div v-else ref="cardYear" class="w-100" />
               </div>
             </b-form-group>
           </b-col>
           <b-col cols="6">
             <b-form-group :label="$t('Security Code')" >
-              <b-form-input v-model="form.card.cvv" v-mask="'####'" :placeholder="$t('CVV')" pattern="\d*" />
+              <b-form-input
+                v-if="mode === 'manual'"
+                v-model="form.card.cvv"
+                v-mask="'####'"
+                :placeholder="$t('CVV')"
+                pattern="\d*"
+              />
+              <div v-else ref="cardCvv" class="w-100" />
             </b-form-group>
           </b-col>
         </b-row>
@@ -91,6 +110,18 @@
             <b-form-checkbox v-model="form.card_is_default">
               {{ $t('isDefault') }}
             </b-form-checkbox>
+          </b-col>
+        </b-row>
+
+        <b-row>
+          <b-col>
+            <div ref="segpayTerms" class="w-100" />
+          </b-col>
+        </b-row>
+
+        <b-row>
+          <b-col>
+            <div ref="segpayDescriptor" class="w-100" />
           </b-col>
         </b-row>
 
@@ -172,6 +203,8 @@ export default {
     packageId: '',
     expirationDateTime: '',
 
+    mode: 'segments',
+
     loading: true,
     error: false,
     processing: false,
@@ -224,17 +257,12 @@ export default {
     },
 
     completePayment(type, itemId) {
-      const data = {
+      var data = {
         sessionId: this.sessionId,
         packageId: parseInt(this.packageId),
         customer: {
           ...this.form.customer,
           email: this.session_user.email,
-        },
-        card: {
-          ...this.form.card,
-          expirationYear: parseInt(`20${this.form.card.expirationYear}`),
-          expirationMonth: parseInt(this.form.card.expirationMonth),
         },
         billing: {
           pricePointId: null,
@@ -247,6 +275,15 @@ export default {
           nickname: this.form.nickname,
           card_is_default: this.form.card_is_default ? '1' : '0',
         },
+      }
+      if (this.mode === 'manual') {
+        data = { ...data,
+          card: {
+            ...this.form.card,
+            expirationYear: parseInt(`20${this.form.card.expirationYear}`),
+            expirationMonth: parseInt(this.form.card.expirationMonth),
+          },
+        }
       }
       window.segpay.sdk.completePayment(data, (result) => {
         this.$log.debug('completePayment', { result })
@@ -264,12 +301,55 @@ export default {
       })
     },
 
+    initSegpaySegments() {
+      if (!window.segpay) {
+        return
+      }
+
+      window.segpay.sdk.initializePayment({
+        sessionId: this.sessionId,
+        packageId: this.packageId,
+        segments: {
+          shared: {
+            remoteStylesheetUrls: [
+              '/css/app.css'
+            ]
+          },
+          card: {
+            number: {
+              htmlElement: this.$refs.cardNumber,
+              styleClasses: ['form-control', 'w-100'],
+            },
+            expirationMonth: {
+              htmlElement: this.$refs.cardMonth,
+              styleClasses: ['form-control', 'w-100'],
+            },
+            expirationYear: {
+              htmlElement: this.$refs.cardYear,
+              styleClasses: ['form-control', 'w-100'],
+            },
+            cvv: {
+              htmlElement: this.$refs.cardCvv,
+              styleClasses: ['form-control', 'w-100'],
+            },
+          },
+          information: {
+            terms: this.$refs.segpayTerms,
+            descriptor: this.$refs.segpayDescriptor,
+          },
+        },
+      }, value => { this.$log.debug('segpay.sdk.initializePayment callback', { value }) })
+    },
+
     init() {
       this.loading = false
       Promise.all([
         this.loadSegPaySdk(),
         this.getSessionId(),
-      ]).then(() => { this.loading = false })
+      ]).then(() => {
+        this.loading = false
+        this.$nextTick(this.initSegpaySegments)
+      })
       .catch(error => {
         eventBus.$emit('error', this, error)
         this.error = true
