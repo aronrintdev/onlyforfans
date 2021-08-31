@@ -113,7 +113,12 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.chatthread-list {
+  height: calc(100vh - 425px);
+  overflow: auto;
+}
+</style>
 
 <i18n lang="json5" scoped>
 {
