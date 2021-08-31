@@ -113,15 +113,15 @@
           </b-col>
         </b-row>
 
-        <b-row>
+        <b-row v-if="mode === 'segments'">
           <b-col>
-            <div ref="segpayTerms" class="w-100" />
+            <div ref="segpayTerms" class="w-100 m-3" />
           </b-col>
         </b-row>
 
-        <b-row>
+        <b-row v-if="mode === 'segments'">
           <b-col>
-            <div ref="segpayDescriptor" class="w-100" />
+            <div ref="segpayDescriptor" class="w-100 m-3" />
           </b-col>
         </b-row>
 
