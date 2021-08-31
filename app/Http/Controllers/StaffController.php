@@ -214,6 +214,7 @@ class StaffController extends Controller
      */
     public function changeSettings(Request $request, $id)
     {
+        $sessionUser = $request->user();
         $request->validate([
             'agreed' => 'required|boolean',
             'token' => 'required|string'
@@ -221,7 +222,7 @@ class StaffController extends Controller
 
         $manager = Staff::where('id', $id)->where('active', true)->where('role', 'manager')->first();
         
-        if ($manager->token !== $request->input('token')) {
+        if ($manager->user_id !== $sessionUser->id || $manager->token !== $request->input('token')) {
             abort(400);
         }
         

@@ -3,7 +3,7 @@
     <div v-if="!isProcessing && !hasError">
       <b-card class="w-50 m-auto">
         <b-card-text>
-          <p class="mt-0 mb-3">You have {{ agreed ? 'agreed' : 'disagreed' }} new change for the <em>Percentage of gross earnings</em></p>
+          <p class="mt-1 mb-3">You have {{ agreed ? 'agreed' : 'disagreed' }} new change for the <em>Percentage of Gross Earnings</em></p>
           <div class="text-right"><router-link :to="{ name: 'index' }">Back To Homepage</router-link></div>
         </b-card-text>
       </b-card>
@@ -35,7 +35,7 @@ export default {
       .catch(() => {
         this.isProcessing = false;
         this.hasError = true;
-        this.$root.$bvToast.toast('Invalid token or email', {
+        this.$root.$bvToast.toast('Invalid user or token', {
           toaster: 'b-toaster-top-center',
           title: 'Failed!',
           variant: 'danger',

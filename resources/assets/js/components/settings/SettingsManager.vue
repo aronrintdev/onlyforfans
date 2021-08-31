@@ -11,7 +11,7 @@
         <b-form @submit.prevent="submitManagerSettings($event)">
           <div class="manager-setttings row">
             <div class="col-12 col-md-6">
-              <b-form-group label="Percentage of gross earnings" label-for="settings.earnings">
+              <b-form-group label="Percentage of Gross Earnings" label-for="settings.earnings">
                 <b-input-group class="mb-2 mr-sm-2 mb-sm-0">
                   <b-form-input 
                     v-model="settings.earnings.value"
