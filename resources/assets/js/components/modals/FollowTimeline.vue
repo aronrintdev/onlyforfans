@@ -18,8 +18,8 @@
         </div>
       </section>
     </b-card-header>
-    <transition v-if="step == 'initial' || !paymentsDisabled" name="quick-fade" mode="out-in">
-      <b-card-body>
+    <transition name="quick-fade" mode="out-in">
+      <b-card-body v-if="step === 'initial'" key="initial">
         <div>
           <b-row>
             <b-col class="mb-2">
@@ -45,8 +45,20 @@
           </b-button>
         </div>
       </b-card-body>
+      <b-card-body v-if="step === 'payment'" key="payment">
+        <PaymentsDisabled class="mx-4 mt-4 mb-2" v-if="paymentsDisabled" />
+        <PurchaseForm
+          v-else
+          :value="timeline"
+          item-type="timeline"
+          :price="timeline.userstats.subscriptions.price_per_1_months * 100"
+          :currency="'USD'"
+          type="subscription"
+          :display-price="timeline.userstats.subscriptions.price_per_1_months | niceCurrency"
+          class="mt-3"
+        />
+      </b-card-body>
     </transition>
-    <PaymentsDisabled class="mx-4 mt-4 mb-2" v-if="step == 'payment' && paymentsDisabled" />
   </b-card>
 </template>
 
