@@ -18,6 +18,16 @@ class Shareable extends JsonResource
             $is_favorited = count($this->whenLoaded('shareable')->favorites->where('user_id', $this->sharee_id));
         }
 
+        if ($this->avatar_id && $this->cover_id) {
+            $shareable = $this->whenLoaded('shareable')->load('avatar', 'cover', 'user')->makeVisible(['user']);
+        } else if ($this->avatar_id) {
+            $shareable = $this->whenLoaded('shareable')->load('avatar', 'user')->makeVisible(['user']);
+        } else if ($this->cover_id) {
+            $shareable = $this->whenLoaded('shareable')->load('cover', 'user')->makeVisible(['user']);
+        } else {
+            $shareable = $this->whenLoaded('shareable')->load('user')->makeVisible(['user']);
+        }
+
         return [
             'id' => $this->id,
             'shareable_id' => $this->shareable_id,
@@ -28,7 +38,7 @@ class Shareable extends JsonResource
             'sharee' => $this->whenLoaded('sharee'),
             'sharee_timeline_id' => $this->whenLoaded('sharee')->timeline->id,
             'sharee_timeline_slug' => $this->whenLoaded('sharee')->timeline->slug,
-            'shareable' => $this->whenLoaded('shareable')->load('avatar', 'cover', 'user')->makeVisible(['user']),
+            'shareable' => $shareable,
             'is_favorited' => $is_favorited,
             'notes' => $this->notes,
             'created_at' => $this->created_at,
