@@ -82,12 +82,18 @@ class StoriesTableSeeder extends Seeder
                 case 'text':
                     break;
                 case 'image':
-                    $mf = FactoryHelpers::createImage(
-                        $story->getPrimaryOwner(),
-                        MediafileTypeEnum::STORY, 
-                        $story->id, 
-                        $this->doS3Upload
-                    );
+                    try { 
+                        $mf = FactoryHelpers::createImage(
+                            $story->getPrimaryOwner(),
+                            MediafileTypeEnum::STORY, 
+                            $story->id, 
+                            $this->doS3Upload
+                        );
+                    } catch (Exception $e) {
+                        if ( $this->appEnv !== 'testing' ) {
+                            $this->output->writeln("  - Could not create fake media for story id ".$story->id.", skipping - ".$e->getMessage() );
+                        }
+                    }
                     break;
                 }
             });
