@@ -4,6 +4,10 @@
       <template #empty="scope">
         <div class="p-5 text-center"><i>There is no active or invited accounts yet</i></div>
       </template>
+      <template #cell(name)="data">
+        <router-link :to="{ name: 'settings.manager', params: { id: data.item.id } }" v-if="data.item.active">{{ data.item.name }}</router-link>
+        <span v-else>{{ data.item.name }}</span>
+      </template>
       <template #cell(active)="data">
         <b-badge variant="info" v-if="data.item.pending">Invited</b-badge>
         <b-badge variant="success" v-else-if="data.item.active">Active</b-badge>

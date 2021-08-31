@@ -57,6 +57,28 @@ class StaffController extends Controller
         return response()->json($teams);
     }
 
+
+    /**
+     * Retrieve staff account
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function getManager(Request $request, $id)
+    {
+        $manager = Staff::where('id', $id)->where('role', 'manager')->first();
+        if (!$manager->settings) {
+            $manager->settings = [
+                'earnings' => [
+                    'value' => null
+                ]
+            ];
+        } else {
+            $manager->settings = json_decode($manager->settings);
+        }
+        return response()->json($manager);
+    }
+
     /**
      * Remove staff account
      *
@@ -92,6 +114,7 @@ class StaffController extends Controller
             $staff->active = true;
             $staff->pending = false;
             $staff->user_id = $sessionUser->id;
+            $staff->settings = [];
             $staff->save();
 
             return response()->json([
@@ -130,5 +153,35 @@ class StaffController extends Controller
         $permissions = Permission::where('guard_name', 'staff')->get();
 
         return response()->json($permissions);
+    }
+
+    /**
+     * Return updated settings
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function updateManagerSettings(Request $request, $id)
+    {
+        $request->validate([
+            'settings' => 'required',
+            'settings.earnings' => 'required|numeric',
+        ]);
+
+        $manager = Staff::where('id', $id)->where('active', true)->where('role', 'manager')->first();
+        $settings = $request->input('settings');
+        foreach($settings as $key => $value) {
+            $settings[$key] = [
+                'value' => $value,
+                'pending' => true,
+            ];
+        }
+        $manager->settings = $settings;
+        $manager->save();
+        
+        // Send email notification
+        
+
+        return $manager->settings;
     }
 }

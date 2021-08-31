@@ -87,6 +87,11 @@ export default [
     path: 'staff-members',
   },
   {
+    name: 'settings.manager',
+    component: settings.Manager,
+    path: 'managers/:id',
+  },
+  {
     name: 'settings.default',
     // component: settings.General,
     path: '',
