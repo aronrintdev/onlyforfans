@@ -100,7 +100,6 @@ class RestChatthreadsTest extends TestCase
      *  @group chatthreads
      *  @group regression
      *  @group regression-base
-     *  @group OFF-here0601
      */
     public function test_can_list_sorted_chatthreads()
     {
@@ -281,6 +280,7 @@ class RestChatthreadsTest extends TestCase
         $payload = [
             'originator_id' => $originator->id,
             'participants' => $participants->pluck('id')->toArray(),
+            'mcontent' => $this->faker->realText,
         ];
         $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
         $content = json_decode($response->content());
@@ -314,26 +314,29 @@ class RestChatthreadsTest extends TestCase
 
         // --- Create a chatthread ---
 
+        $msgs = [];
+        $msgs[] = $msg = $this->faker->realText;
+
         $payload = [
             'originator_id' => $originator->id,
             'participants' => $recipients->pluck('id')->toArray(),
+            'mcontent' => $msg,
         ];
         $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
         $content = json_decode($response->content());
+        $response->assertStatus(201);
         $response->assertJsonStructure([
             'chatthreads' => [ // note: returns an array!
                 0 => ['id', 'originator_id', 'created_at' ],
             ],
         ]);
-        $response->assertStatus(201);
         $this->assertEquals( $recipients->count(), count($content->chatthreads) );
         $chatthreadPKID = $content->chatthreads[0]->id; // first & only thread
         $chatthread = Chatthread::find($chatthreadPKID);
-        $this->assertEquals(0, $chatthread->chatmessages->count()); // no messages on thread yet
+        $this->assertEquals(1, $chatthread->chatmessages->count()); // creates initial message on thread
 
         // send some messages to the thread
 
-        $msgs = [];
         $msgs[] = $msg = $this->faker->realText;
         $payload = [
             $chatthread->id, // chatthread_id
@@ -357,11 +360,12 @@ class RestChatthreadsTest extends TestCase
         // -
 
         $this->assertNotNull($chatthread);
-        $this->assertEquals(1, $chatthread->chatmessages->count());
+        $this->assertEquals(2, $chatthread->chatmessages->count());
         $this->assertEquals(2, $chatthread->participants->count());
         $this->assertTrue($chatthread->participants->contains($originator->id));
         $this->assertTrue($chatthread->participants->contains($recipients[0]->id));
         $this->assertEquals($msgs[0], $chatthread->chatmessages[0]->mcontent);
+        $this->assertEquals($msgs[1], $chatthread->chatmessages[1]->mcontent);
     }
 
     /**
@@ -371,10 +375,7 @@ class RestChatthreadsTest extends TestCase
      */
     public function test_should_create_multiple_threads_with_originator_on_all_and_single_recipient_per_and_send_message()
     {
-        Event::fake([
-            MessageSentEvent::class,
-        ]);
-
+        Event::fake([ MessageSentEvent::class, ]);
         $MAX = 3;
 
         // create chat
@@ -386,11 +387,14 @@ class RestChatthreadsTest extends TestCase
         $this->assertLessThanOrEqual( $MAX, $recipients->count() );
         $numberOfParticipantsExcludingOriginator = $recipients->count();
 
-        // --- Create a chatthread ---
+        // --- Create a chatthread (send message #1) ---
 
+        $msgs = [];
+        $msgs[] = $msg = $this->faker->realText;
         $payload = [
             'originator_id' => $originator->id,
             'participants' => $recipients->pluck('id')->toArray(),
+            'mcontent' => $msg,
         ];
         $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
         $content = json_decode($response->content());
@@ -399,11 +403,11 @@ class RestChatthreadsTest extends TestCase
                 0 => ['id', 'originator_id', 'created_at' ],
             ],
         ]);
-        //dd($content);
         $response->assertStatus(201);
         $this->assertEquals( $numberOfParticipantsExcludingOriginator, count($content->chatthreads) ); // check # of threads created
 
         $chatthreads = Chatthread::whereIn('id', collect($content->chatthreads)->pluck('id'))->get();
+        //dd($chatthreads[0]->chatmessages);
         $this->assertTrue( $chatthreads->contains($content->chatthreads[0]->id) ); // sanity check
         if ( count($content->chatthreads) > 1 ) {
             $this->assertTrue( $chatthreads->contains($content->chatthreads[1]->id) ); // sanity check
@@ -411,9 +415,13 @@ class RestChatthreadsTest extends TestCase
         if ( count($content->chatthreads) > 2 ) {
             $this->assertTrue( $chatthreads->contains($content->chatthreads[2]->id) ); // sanity check
         }
+        $this->assertNotNull($chatthreads[0]);
+        $this->assertNotNull($chatthreads[0]->id);
+        $this->assertNotNull($chatthreads[0]->chatmessages);
+        $this->assertNotNull($chatthreads[0]->chatmessages[0]);
+        $this->assertEquals($msgs[0], $chatthreads[0]->chatmessages[0]->mcontent);
 
         // --- Send messages ---
-        $msgs = [];
 
         // - Chatthread [0]
         $thisCT = $chatthreads[0];
@@ -428,7 +436,7 @@ class RestChatthreadsTest extends TestCase
         //dd($out);
         $this->assertEquals(2, $out->count() );
 
-        // Send message 1
+        // Send message #2
         $msgs[] = $msg = $this->faker->realText;
         $payload = [
             $thisCT->id, // chatthread_id
@@ -437,6 +445,8 @@ class RestChatthreadsTest extends TestCase
         $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.sendMessage', $payload) );
         $response->assertStatus(201);
         $content = json_decode($response->content());
+        $thisCT->refresh();
+//dd($content);
         $response->assertJsonStructure([
             'data' => ['id', 'chatthread_id', 'mcontent', 'sender_id', 'is_delivered', 'deliver_at', 'created_at', 'is_read', 'is_flagged'],
         ]);
@@ -451,7 +461,7 @@ class RestChatthreadsTest extends TestCase
             return $event->chatmessage->id === $content->data->id;
         });
 
-        // Send message 2
+        // Send message #3
         $msgs[] = $msg = $this->faker->realText;
         $payload = [
             $thisCT->id, // chatthread_id
@@ -460,6 +470,7 @@ class RestChatthreadsTest extends TestCase
         $response = $this->actingAs($in[0])->ajaxJSON( 'POST', route('chatthreads.sendMessage', $payload) );
         $response->assertStatus(201);
         $content = json_decode($response->content());
+        $thisCT->refresh();
         
         // Check event dispatching
         Event::assertDispatched(MessageSentEvent::class);
@@ -470,15 +481,24 @@ class RestChatthreadsTest extends TestCase
             return $event->chatmessage->id === $content->data->id;
         });
 
-        $this->assertEquals(2, $thisCT->chatmessages->count());
+        $this->assertEquals(3, $thisCT->chatmessages->count());
         $this->assertEquals(2, $thisCT->participants->count());
         $this->assertTrue($thisCT->participants->contains($originator->id));
         $this->assertTrue($thisCT->participants->contains($in[0]->id));
         $this->assertFalse($thisCT->participants->contains($out[0]->id));
         $this->assertFalse($thisCT->participants->contains($out[1]->id));
 
+        /*
+dd('msgs', $msgs, 'chatmessages.mcontent', 
+    $thisCT->chatmessages[0]->mcontent,
+    $thisCT->chatmessages[1]->mcontent,
+    $thisCT->chatmessages[2]->mcontent
+);
+         */
+
         $this->assertEquals($msgs[0], $thisCT->chatmessages[0]->mcontent);
         $this->assertEquals($msgs[1], $thisCT->chatmessages[1]->mcontent);
+        $this->assertEquals($msgs[2], $thisCT->chatmessages[2]->mcontent);
 
     }
 
@@ -638,6 +658,7 @@ class RestChatthreadsTest extends TestCase
         $payload = [
             'originator_id' => $originator->id,
             'participants' => $recipients->pluck('id')->toArray(),
+            'mcontent' => $this->faker->realText,
         ];
         $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
         $content = json_decode($response->content());

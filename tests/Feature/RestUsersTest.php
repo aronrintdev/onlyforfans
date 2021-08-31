@@ -40,8 +40,6 @@ class RestUsersTest extends TestCase
                     'id', 
                     'email', 
                     'username', 
-                    'firstname', 
-                    'lastname', 
                     'created_at', 
                 ],
             ],

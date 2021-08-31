@@ -45,6 +45,11 @@ class Chatmessage extends JsonResource
             'is_read' => $this->is_read,
             'is_flagged' => $this->is_flagged,
             'attachments' => $attachments->all(),
+            'mediafile_counts' => [
+                'images' => $this->mediafiles->where('is_image', true)->count(),
+                'videos' => $this->mediafiles->where('is_video', true)->count(),
+                'audios' => $this->mediafiles->where('is_audio', true)->count(),
+            ],
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

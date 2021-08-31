@@ -61,7 +61,7 @@ class PostPolicy extends BasePolicy
             return $post->timeline->subscribers->count()
                 && $post->timeline->subscribers->contains($user->id);
         case PostTypeEnum::PRICED:
-            if ($user->staff && $post->user_id == $user->staff->creator_id) {
+            if ( $user->staff && ($post->user_id === $user->staff->creator_id) ) {
                 $hasPermission = false;
                 $permissions = $user->staff->permissions;
                 foreach($permissions as $permission) {
