@@ -74,10 +74,18 @@ return [
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
             'region' => env('AWS_DEFAULT_REGION'),
             'bucket' => env('AWS_BUCKET'),
-            'endpoint' => env('AWS_URL'),
+            'endpoint' => env('AWS_CDN_URL'),
+            'url' => env('AWS_CDN_URL'),
+            'bucket_endpoint' => env('AWS_BUCKET_ENDPOINT'),
             'visibility' => 'private',
         ],
 
     ],
+
+    'useSigned' => env('AWS_USE_SIGNED', false),
+    /**
+     * How long the temp signed urls will be available for
+     */
+    'availabilityMinutes' => env('CDN_AVAILABILITY_MINUTES', 5),
 
 ];
