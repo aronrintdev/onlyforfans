@@ -33,6 +33,8 @@
           :items="messagestats"
           :fields="fields"
           :current-page="currentPage"
+          :sort-by="sortBy"
+          :sort-desc="sortDesc"
           @sort-changed="sortHandler"
         >
           <template #cell(mcontent)="data">
@@ -105,6 +107,8 @@ export default {
     itemsPerPage: 20,
     totalItems: 0,
     totalPages: 0,
+    sortBy: 'created_at',
+    sortDesc: false,
     messagestats: [],
 
     filters: {
@@ -125,10 +129,18 @@ export default {
     //...Vuex.mapActions([ 'getMe', ]),
 
     async getData() {
-      const params = { take: this.itemsPerPage, page: this.currentPage }
+
+      const params = { 
+        take: this.itemsPerPage, 
+        page: this.currentPage,
+        sortBy: this.sortBy,
+        sortDir: this.sortDesc ? 'desc' : 'asc',
+      }
+
       if (this.filters.qsearch) {
         params.qsearch = this.filters.qsearch
       }
+
       let response
       try { 
         response = await this.axios.get( this.$apiRoute('chatmessagegroups.index'), { params } )
@@ -143,12 +155,10 @@ export default {
     },
 
     sortHandler(context) {
-      /* %HERE %FIXME
-      this.tobj.sortBy = context.sortBy
-      this.tobj.sortDesc = context.sortDesc
-      this.tobj.currentPage = 1
+      this.sortBy = context.sortBy
+      this.sortDesc = context.sortDesc
+      this.currentPage = 1
       this.getData()
-       */
     },
 
     truncated(str) {
