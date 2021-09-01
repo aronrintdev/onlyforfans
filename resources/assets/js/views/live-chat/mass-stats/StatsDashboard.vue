@@ -15,13 +15,18 @@
             <b-button v-for="(f,idx) in postFilters.booleans" :key="idx" @click="toggleFilter('booleans', f)" :variant="f.is_active ? 'primary' : 'outline-primary'" class="mr-3">{{ f.label }}</b-button>
           </div>
           -->
-          <div class="box-filter p-3">
-            <h6>Search</h6>
-            <b-form-input v-model="filters.qsearch" placeholder="Enter search text"></b-form-input>
+        </section>
+
+        <section class="crate-pagination d-sm-flex flex-row-reverse align-items-center mb-3">
+          <div class="box-search ml-auto mb-3 mb-sm-0">
+            <b-form-input v-model="filters.qsearch" class="" placeholder="Enter search text"></b-form-input>
+          </div>
+          <div class="box-pagination d-flex align-items-center">
+            <b-pagination v-model="currentPage" :total-rows="totalItems" :per-page="itemsPerPage" class="m-0" aria-controls="earnings-transactions-table" />
+            <div class="ml-3">({{ totalItems }})</div>
           </div>
         </section>
 
-        <b-pagination v-model="currentPage" :total-rows="totalItems" :per-page="itemsPerPage" aria-controls="earnings-transactions-table" />
         <b-table
           responsive
           id="mass-message-stats-table"
@@ -41,7 +46,11 @@
             </div>
           </template>
         </b-table>
-        <b-pagination v-model="currentPage" :total-rows="totalItems" :per-page="itemsPerPage" aria-controls="earnings-transactions-table" />
+        
+        <section class="crate-pagination d-flex align-items-center my-3">
+          <b-pagination v-model="currentPage" :total-rows="totalItems" :per-page="itemsPerPage" class="m-0" aria-controls="earnings-transactions-table" />
+          <div class="ml-3">({{ totalItems }})</div>
+        </section>
 
       </b-card>
 
@@ -144,7 +153,6 @@ export default {
   },
 
   created() { 
-    //this.getMe()
     this.getData()
   },
 
