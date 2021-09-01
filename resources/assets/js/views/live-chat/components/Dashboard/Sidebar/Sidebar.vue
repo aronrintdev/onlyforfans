@@ -11,7 +11,7 @@
       @filterInput="value => selectedFilter = value"
       @sortByInput="value => sortBy = value"
     />
-    <MarkAllRead />
+    <MarkAllRead @updateThreadsAllRead="getChatthreads" />
     <ThreadList
       :threads="renderedThreads"
       :loading="loading"
