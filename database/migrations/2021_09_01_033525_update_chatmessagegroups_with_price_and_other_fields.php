@@ -12,7 +12,7 @@ class UpdateChatmessagegroupsWithPriceAndOtherFields extends Migration
             $table->boolean('purchase_only')->default(false)->after('sender_id');
             $table->bigInteger('price')->default(0)->after('sender_id');
             $table->string('currency', 3)->default('USD')->after('sender_id');
-            $table->longtext('mcontent')->after('sender_id');
+            $table->longtext('mcontent')->nullable()->after('sender_id');
         });
     }
 

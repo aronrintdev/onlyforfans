@@ -124,10 +124,7 @@ export default {
     },
 
     sortHandler(context) {
-      console.log('sortHandler', {
-        sortBy: context.sortBy,
-        sortDesc: context.sortDesc,
-      })
+      //console.log('sortHandler', { sortBy: context.sortBy, sortDesc: context.sortDesc, })
       this.tobj.sortBy = context.sortBy
       this.tobj.sortDesc = context.sortDesc
       this.tobj.currentPage = 1
@@ -142,7 +139,7 @@ export default {
         this.getData()
       },
       deep: true,
-    }
+    },
   },
 
   created() { 
