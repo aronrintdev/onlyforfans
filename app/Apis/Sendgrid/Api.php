@@ -101,6 +101,7 @@ class Api
             'campaign-goal-reached'                                    => 'd-a24f3ec1d11f4bd2b71ba2b9faf30609', 
             'new-tip-received'                                         => 'd-d2220b0b64a442958aad5bdf99dd58e3', 
             'new-comment-received'                                     => 'd-8bc8911ea1424d8591e0ba05f92476f1', 
+            'change-percentage-of-gross-earnings'                      => 'd-455641d888d94f228c6d95a9f36f3e8b',
         ];
     }
 

@@ -524,7 +524,7 @@ export default {
     top: 0;
     left: 0;
     right: 0;
-    background-color: var(--light);
+    background-color: #fff;
     padding: 0.5rem;
     z-index: 5;
   }
@@ -536,7 +536,7 @@ export default {
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: var(--light);
+    background-color: #fff;
     padding: 0.5rem;
     z-index: 5;
   }

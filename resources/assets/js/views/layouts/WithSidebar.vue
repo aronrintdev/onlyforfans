@@ -1,6 +1,5 @@
 <template>
-  <div class="container-fluid h-100" :class="mobile ? 'px-0' : ''">
-
+  <div class="container-fluid" :class="mobile ? 'px-0' : ''">
     <!-- Mobile view -->
     <section v-if="mobile" class="mobile h-100" :class="{ 'focus-main': focusMain }">
       <!-- <transition :name="focusMain ? 'slide-right' : 'slide-left'"> -->
@@ -28,7 +27,7 @@
 
     <!-- Non mobile view -->
     <section v-else class="d-flex flex-nowrap h-100 w-100">
-      <aside class="sidebar p-3 mr-3 border-class">
+      <aside class="sidebar h-100 p-3 mr-3 border-class">
         <slot name="sidebar"></slot>
       </aside>
       <main class="main flex-fill h-100 pt-3">
@@ -97,7 +96,6 @@ export default {
       background-color: white;
       display: flex;
       align-items: center;
-      border-bottom: 1px solid #ced4da;
     }
   }
 
