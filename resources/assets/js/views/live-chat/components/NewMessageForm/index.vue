@@ -63,6 +63,7 @@
               max-rows="6"
               spellcheck="false"
               @keypress.enter="onEnterPress"
+              :disabled="sending"
             ></b-form-textarea>
           </b-form-group>
         </div>
