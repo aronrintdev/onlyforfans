@@ -95,33 +95,33 @@
           </b-col>
           <b-col lg="6">
             <b-form-group>
-              <b-form-input v-model="form.customer.countryCode" />
+              <CountrySelectInput v-model="form.customer.countryCode" :label="null" />
             </b-form-group>
           </b-col>
         </b-row>
 
         <b-row>
-          <b-col cols="8">
+          <b-col cols="6">
             <b-form-group :label="$t('nickname')">
               <b-form-input v-model="form.nickname" />
             </b-form-group>
           </b-col>
-          <b-col cols="4" class="d-flex align-items-center">
+          <b-col cols="6" class="d-flex align-items-center">
             <b-form-checkbox v-model="form.card_is_default">
-              {{ $t('isDefault') }}
+              <div class="font-size-small">{{ $t('isDefault') }}</div>
             </b-form-checkbox>
           </b-col>
         </b-row>
 
-        <b-row v-if="mode === 'segments'">
+        <b-row class=" m-3">
           <b-col>
-            <div ref="segpayTerms" class="w-100 m-3" />
+            <div ref="segpayTerms" class="w-100" />
           </b-col>
         </b-row>
 
-        <b-row v-if="mode === 'segments'">
+        <b-row class=" m-3">
           <b-col>
-            <div ref="segpayDescriptor" class="w-100 m-3" />
+            <div ref="segpayDescriptor" class="w-100" />
           </b-col>
         </b-row>
 
@@ -144,6 +144,7 @@
  */
 import { eventBus } from '@/eventBus'
 import Vuex from 'vuex'
+import CountrySelectInput from '@components/forms/elements/CountrySelectInput'
 import CardBrandIcon from './CardBrandIcon'
 import Skeleton from './SegpayNewSkeleton'
 import { monthMask, shortYearMask } from '@helpers/masks'
@@ -153,6 +154,7 @@ export default {
 
   components: {
     CardBrandIcon,
+    CountrySelectInput,
     Skeleton,
   },
 
@@ -203,7 +205,7 @@ export default {
     packageId: '',
     expirationDateTime: '',
 
-    mode: 'segments',
+    mode: 'manual', // manual | segments
 
     loading: true,
     error: false,
@@ -306,11 +308,7 @@ export default {
         return
       }
 
-      if (this.mode !== 'segments') {
-        return
-      }
-
-      window.segpay.sdk.initializePayment({
+      var data = {
         sessionId: this.sessionId,
         packageId: parseInt(this.packageId),
         segments: {
@@ -319,30 +317,44 @@ export default {
               '/css/app.css'
             ]
           },
-          card: {
-            number: {
-              htmlElement: this.$refs.cardNumber,
-              styleClasses: ['form-control', 'w-100'],
-            },
-            expirationMonth: {
-              htmlElement: this.$refs.cardMonth,
-              styleClasses: ['form-control', 'w-100'],
-            },
-            expirationYear: {
-              htmlElement: this.$refs.cardYear,
-              styleClasses: ['form-control', 'w-100'],
-            },
-            cvv: {
-              htmlElement: this.$refs.cardCvv,
-              styleClasses: ['form-control', 'w-100'],
-            },
-          },
           information: {
-            terms: this.$refs.segpayTerms,
-            descriptor: this.$refs.segpayDescriptor,
+            terms: {
+              htmlElement: this.$refs.segpayTerms,
+              styleClasses: ['text-center'],
+            },
+            descriptor: {
+              htmlElement: this.$refs.segpayDescriptor,
+              styleClasses: ['text-center'],
+            },
           },
         },
-      }, value => { this.$log.debug('segpay.sdk.initializePayment callback', { value }) })
+      }
+
+      if ( this.mode === 'segments' ) {
+        data.segments.card = {
+          number: {
+            htmlElement: this.$refs.cardNumber,
+            styleClasses: ['form-control', 'w-100'],
+          },
+          expirationMonth: {
+            htmlElement: this.$refs.cardMonth,
+            styleClasses: ['form-control', 'w-100'],
+          },
+          expirationYear: {
+            htmlElement: this.$refs.cardYear,
+            styleClasses: ['form-control', 'w-100'],
+          },
+          cvv: {
+            htmlElement: this.$refs.cardCvv,
+            styleClasses: ['form-control', 'w-100'],
+          },
+        }
+      }
+
+      window.segpay.sdk.initializePayment(
+        data,
+        value => { this.$log.debug('segpay.sdk.initializePayment callback', { value }) }
+      )
     },
 
     init() {
@@ -416,9 +428,7 @@ export default {
 
   watch: {
     mode(val) {
-      if (val === 'segments') {
-        this.init()
-      }
+      this.init()
     },
   },
 
@@ -454,7 +464,7 @@ export default {
     "Postal Code": "Zip Code",
     "Finish": "Complete Transaction",
     "An Error Has Occurred": "An Error Has Occurred",
-    "nickname": "Save card name as",
+    "nickname": "Save card as",
     "isDefault": "Save as default payment method",
     "error": "There was an error processing your payment."
   }
