@@ -6,6 +6,21 @@
       <b-card>
 
         <h1>Mass Message Stats</h1>
+
+        <section class="crate-filters mb-3 d-flex">
+          <!-- filters -->
+            <!--
+          <div class="box-filter p-3">
+            <h6>Boolean</h6>
+            <b-button v-for="(f,idx) in postFilters.booleans" :key="idx" @click="toggleFilter('booleans', f)" :variant="f.is_active ? 'primary' : 'outline-primary'" class="mr-3">{{ f.label }}</b-button>
+          </div>
+          -->
+          <div class="box-filter p-3">
+            <h6>Search</h6>
+            <b-form-input v-model="filters.qsearch" placeholder="Enter search text"></b-form-input>
+          </div>
+        </section>
+
         <b-pagination v-model="currentPage" :total-rows="totalItems" :per-page="itemsPerPage" aria-controls="earnings-transactions-table" />
         <b-table
           responsive
@@ -20,9 +35,12 @@
 
           <template #cell(mediafile_counts)="data">
             <div class="d-flex">
-              <span v-if="data.item.mediafile_counts.images" class="ml-0"><fa-icon :icon="['far', 'image']" class="fa-sm" fixed-width /> {{ data.item.mediafile_counts.images }}</span>
-              <span v-if="data.item.mediafile_counts.videos" class="ml-2"><fa-icon :icon="['far', 'video']" class="fa-sm" fixed-width /> {{ data.item.mediafile_counts.videos }}</span>
-              <span v-if="data.item.mediafile_counts.audios" class="ml-2"><fa-icon :icon="['far', 'microphone']" class="fa-sm" fixed-width /> {{ data.item.mediafile_counts.audios }}</span>
+              <!--
+              <span class="ml-0"><fa-icon :icon="['far', 'image']" class="fa-sm" fixed-width /> {{ JSON.stringify(data.item.attachment_counts) }}</span>
+              -->
+              <span v-if="data.item.attachment_counts.images_count" class="ml-0"><fa-icon :icon="['far', 'image']" class="fa-sm" fixed-width /> {{ data.item.attachment_counts.images_count }}</span>
+              <span v-if="data.item.attachment_counts.videos_count" class="ml-2"><fa-icon :icon="['far', 'video']" class="fa-sm" fixed-width /> {{ data.item.attachment_counts.videos_count }}</span>
+              <span v-if="data.item.attachment_counts.audios_count" class="ml-2"><fa-icon :icon="['far', 'microphone']" class="fa-sm" fixed-width /> {{ data.item.attachment_counts.audios_count }}</span>
             </div>
           </template>
         </b-table>
@@ -59,13 +77,14 @@ export default {
      */
     fields() {
       return [
-        { key: 'created_at', label: 'Created', formatter: v => Vue.options.filters.niceDateTime(v, false) },
-        { key: 'mcontent', label: 'Text', tdClass: 'tag-col-mcontent' },
-        { key: 'mediafile_counts', label: 'Attachment', /*formatter: v => Array.isArray(v) ? v.length : ''*/ },
-        { key: 'price', label: 'Price', formatter: v => Vue.options.filters.niceCurrency(v) },
-        { key: 'is_delivered', label: 'Sent (Delivered?)', formatter: v => Vue.options.filters.niceBool(v) },
-        { key: 'is_read', label: 'Viewed (Read?)', formatter: v => Vue.options.filters.niceBool(v) },
-        { key: 'purchase', label: 'Purchased ??', formatter: v => 'tbd' },
+        { key: 'created_at', label: 'Date', formatter: v => Vue.options.filters.niceDateTime(v, false), sortable: true },
+        { key: 'mcontent', label: 'Text', tdClass: 'tag-col-mcontent', },
+        { key: 'mediafile_counts', label: 'Attachment', },
+        { key: 'price', label: 'Price', formatter: v => Vue.options.filters.niceCurrency(v), sortable: true },
+        //{ key: 'deliver_at', label: 'Delivered At', formatter: v => Vue.options.filters.niceBool(v) },
+        { key: 'sent_count', label: 'Sent', },
+        { key: 'read_count', label: 'Viewed (Read?)', },
+        { key: 'purchased_count', label: 'Purchased', },
       ]
     },
 
@@ -81,6 +100,17 @@ export default {
     totalPages: 0,
     messagestats: [],
 
+    filters: {
+      /*
+      booleans: [
+        { key: 'is_flagged', label: 'Reported', is_active: false, }, 
+      ],
+       */
+      qsearch: null, // search query string
+      //start_date: null,
+      //end_date: null,
+    },
+
   }), // data
 
   methods: {
@@ -89,9 +119,12 @@ export default {
 
     async getStats() {
       const params = { take: this.itemsPerPage, page: this.currentPage }
+      if (this.qsearch) {
+        params.qsearch = this.qsearch
+      }
       let response
       try { 
-        response = await this.axios.get( this.$apiRoute('chatmessages.index'), { params } )
+        response = await this.axios.get( this.$apiRoute('chatmessagegroups.index'), { params } )
         this.messagestats = response.data.data
         this.totalPages = response.data.meta.last_page
         this.totalItems = response.data.meta.total

@@ -19,7 +19,8 @@ class Chatmessagegroup extends JsonResource
                 'videos_count' => 0,
                 'audios_count' => 0,
             ];
-            foreach ($this->attachments ?? [] as $a) {
+            $firstCM = $this->chatmessages[0];
+            foreach ($firstCM->mediafiles ?? [] as $a) {
                 if ($a->is_image) {
                     $result['images_count'] += 1;
                 }
@@ -39,20 +40,21 @@ class Chatmessagegroup extends JsonResource
             //'sender' => $this->sender,
             'mgtype' => $this->mgtype,
 
-            'price' => $this->cattrs['price'] ?? '',
-            'currency' => $this->cattrs['currency'] ?? '',
-            'deliver_at' => $this->cattrs['deliver_at'] ?? '',
-            'mcontent' => $this->cattrs['mcontent'] ?? '',
+            'price' => $this->price ?? '',
+            'currency' => $this->currency ?? '',
+            'mcontent' => $this->mcontent ?? '',
             'sender_name' => $this->cattrs['sender_name'] ?? '',
+            'deliver_at' => $this->cattrs['deliver_at'] ?? '',
             'participant_count' => array_key_exists('participants', $this->cattrs['participants']??[])
                 ? count($this->cattrs['participants'])
                 : null,
             'attachment_counts' => $attachmentCounts,
             'sent_count' => $this->chatmessages->count(),
+            'read_count' => $this->chatmessages()->where('is_read', true)->count(),
+            'purchased_count' => '??',
             'scheduled_count' => 'tbd',
             'delivered_count' => 'tbd',
             'verified_count' => 'tbd',
-            'purchased_count' => 'tbd',
 
             'cattrs' => $this->cattrs,
 

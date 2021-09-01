@@ -35,7 +35,7 @@ class ChatmessagesTableSeeder extends Seeder
         //$senderCount = $this->faker->numberBetween(2, 4); // number of senders
         $originatorCount = 7;
 
-        if ( true || $this->appEnv !== 'testing' ) {
+        if ( $this->appEnv !== 'testing' ) {
             $this->output->writeln("  - Chatmessages seeder: loaded ".$originatorCount." originators...");
         }
 
@@ -59,13 +59,17 @@ class ChatmessagesTableSeeder extends Seeder
                     : $now->addDays( $this->faker->numberBetween(1,7) ); // future: to be delivered
             }
 
+            $isPriced = $this->faker->boolean(50);
+            $currency = $isPriced ? 'USD' : null;
+            $price = $isPriced ? ($this->faker->numberBetween(5, 199) * 100) : null;
+
             $rattrs = (object)[
                 'originator_id'  => $o->id, // 'required|uuid|exists:users,id',
                 'participants'   => $receivers->pluck('id')->toArray(), // 'required|array', // %FIXME: rename to 'recipients' for clairty
                 'mcontent'       => $this->faker->realText, // 'string',  // optional first message content
                 'deliver_at'     => $isScheduled ? $deliverAt->timestamp : null, // 'numeric', // optional to pre-schedule delivery of message if present
-                //'price'          => // 'numeric',
-                //'currency'       => 'USD', // 'required_with:price|size:3',
+                'price'          => $price, // 'numeric',
+                'currency'       => $currency, // 'required_with:price|size:3',
                 //'attachments'    => // 'required_with:price|array',   // optional first message attachments
             ];
 
