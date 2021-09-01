@@ -275,39 +275,14 @@ export default {
     position: relative;
     top: 0;
     bottom: 0;
-    height: calc(100vh - 64px);
-    max-height: calc(100vh - 64px);
     padding-left: 0;
     padding-right: 0;
-
   }
 
-  height: calc(100vh - 10rem);
-  max-height: calc(100vh - 10rem);
-
-  .chatthread-list {
-    height: calc(100vh - 350px);
-    overflow: auto;
-
-    .list-group-item.active {
-      background: rgba(0,145,234,.06);
-      color: inherit;
-      border-top: none;
-      border-left: 1px solid rgba(138,150,163,.25);
-      border-right: 1px solid rgba(138,150,163,.25);
-      border-bottom: 1px solid rgba(138,150,163,.25);
-    }
-  }
-
+  height: calc(100vh - 6rem);
+  max-height: calc(100vh - 6rem);
 }
 
-.top-bar {
-  //display: flex;
-  //align-items: center;
-  //justify-content: space-between;
-  //padding: 15px 4px 16px;
-  border-bottom: 1px solid rgba(138,150,163,.25);
-}
 </style>
 
 <i18n lang="json5">
