@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
 use Ramsey\Uuid\Uuid;
 
+use App\Models\Casts\Money as CastsMoney;
 use App\Models\Traits\UsesUuid;
 use App\Enums\MessagegroupTypeEnum;
 
@@ -20,10 +21,31 @@ class Chatmessagegroup extends Model
     protected $guarded = [ 'id', 'created_at', 'updated_at', ];
 
     //--------------------------------------------
+    // Boot
+    //--------------------------------------------
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $price = $model->price->getAmount();
+            if ( isset($price) && $price > 0 ) {
+                $model->purchase_only = true;
+            }
+        });
+    }
+
+    //--------------------------------------------
     // Accessors/Mutators | Casts | Attributes
     //--------------------------------------------
 
-    protected $casts = [ 'cattrs' => 'array', 'meta' => 'array', ];
+    protected $casts = [
+        'price'         => CastsMoney::class,
+        'purchase_only' => 'boolean',
+        'cattrs'        => 'array',
+        'meta'          => 'array',
+    ];
 
     protected $attributes = [ // set defaults
         'mgtype' => MessagegroupTypeEnum::MASSMSG,
