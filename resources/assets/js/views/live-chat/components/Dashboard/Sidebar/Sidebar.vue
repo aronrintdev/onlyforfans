@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-column p-3">
+  <div class="d-flex flex-column">
     <Navigation />
     <SearchAndFilter
       :filters="selectFilters"

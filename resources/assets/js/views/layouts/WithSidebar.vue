@@ -28,7 +28,7 @@
 
     <!-- Non mobile view -->
     <section v-else class="d-flex flex-nowrap h-100 w-100">
-      <aside class="sidebar p-3">
+      <aside class="sidebar p-3 mr-3 border-class">
         <slot name="sidebar"></slot>
       </aside>
       <main class="main flex-fill h-100 pt-3">
@@ -123,6 +123,9 @@ export default {
 .sidebar {
   width: 25rem;
   min-width: 20rem;
+}
+.border-class {
+  border-right: solid 1px #dfdfdf;
 }
 .main {
   max-height: 100%;

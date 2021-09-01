@@ -78,8 +78,6 @@
       </div>
     </section>
 
-    <hr v-if="!mobile" />
-
     <transition-group name="quick-fade" mode="out-in" class="flex-fill scroll-wrapper">
       <section v-if="vaultSelectionOpen" key="vaultSelect" class="vault-selection">
         <VaultSelector @close="vaultSelectionOpen = false" />
