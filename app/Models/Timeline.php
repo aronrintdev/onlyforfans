@@ -268,7 +268,11 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     {
         // TODO: Don't want to hard code price per 1 month, Price is also stored incorrectly
         $amount = $this->asMoney($amount);
-        $price = $this->asMoney($this->getUserstats()['subscriptions']['price_per_1_months'] * 100);
+        if (isset($this->getUserstats()['subscriptions']) && isset($this->getUserstats()['subscriptions']['price_per_1_months'])) {
+            $price = $this->asMoney($this->getUserstats()['subscriptions']['price_per_1_months'] * 100);
+        } else {
+            $price = $this->price;
+        }
         return $price->equals($amount);
     }
 
