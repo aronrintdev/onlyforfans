@@ -35,9 +35,6 @@
 
           <template #cell(mediafile_counts)="data">
             <div class="d-flex">
-              <!--
-              <span class="ml-0"><fa-icon :icon="['far', 'image']" class="fa-sm" fixed-width /> {{ JSON.stringify(data.item.attachment_counts) }}</span>
-              -->
               <span v-if="data.item.attachment_counts.images_count" class="ml-0"><fa-icon :icon="['far', 'image']" class="fa-sm" fixed-width /> {{ data.item.attachment_counts.images_count }}</span>
               <span v-if="data.item.attachment_counts.videos_count" class="ml-2"><fa-icon :icon="['far', 'video']" class="fa-sm" fixed-width /> {{ data.item.attachment_counts.videos_count }}</span>
               <span v-if="data.item.attachment_counts.audios_count" class="ml-2"><fa-icon :icon="['far', 'microphone']" class="fa-sm" fixed-width /> {{ data.item.attachment_counts.audios_count }}</span>
@@ -117,10 +114,10 @@ export default {
 
     //...Vuex.mapActions([ 'getMe', ]),
 
-    async getStats() {
+    async getData() {
       const params = { take: this.itemsPerPage, page: this.currentPage }
-      if (this.qsearch) {
-        params.qsearch = this.qsearch
+      if (this.filters.qsearch) {
+        params.qsearch = this.filters.qsearch
       }
       let response
       try { 
@@ -148,15 +145,23 @@ export default {
 
   created() { 
     //this.getMe()
-    this.getStats()
+    this.getData()
   },
 
   mounted() { },
 
   watch: { 
     currentPage(value) {
-      this.getStats()
-    }
+      this.getData()
+    },
+
+    'filters.qsearch': function (n, o) {
+      if ( n === o ) {
+        return
+      }
+      this.getData()
+    },
+
   }, // watch
 
   name: 'StatsDashboard',

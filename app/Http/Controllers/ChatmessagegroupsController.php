@@ -27,7 +27,7 @@ class ChatmessagegroupsController extends AppBaseController
             // filters
             'sender_id'  => 'uuid|exists:users,id',
             'mgtype'     => 'string|in:mass-message',
-            'qsearch' => 'string',
+            'qsearch'    => 'string', // not a filter
         ]);
         $filters = $request->only([
             'sender_id',
@@ -48,9 +48,10 @@ class ChatmessagegroupsController extends AppBaseController
         }
 
         if ( $request->has('qsearch') && (strlen($request->qsearch)>2) ) {
-            $query->orWhere( function($q1) use(&$request) {
-                $q1->where('description', 'LIKE', '%'.$request->qsearch.'%');
+            $query->where( function($q1) use(&$request) {
+                $q1->where('mcontent', 'LIKE', '%'.$request->qsearch.'%');
                 $q1->orWhere('id', 'LIKE', $request->qsearch.'%');
+                $q1->orWhere('sender_id', 'LIKE', $request->qsearch.'%');
             });
         }
 

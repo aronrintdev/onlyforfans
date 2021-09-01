@@ -142,7 +142,7 @@ export default {
         this.getData()
       },
       deep: true,
-    }
+    },
   },
 
   created() { 
