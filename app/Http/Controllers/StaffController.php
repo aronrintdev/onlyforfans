@@ -174,18 +174,13 @@ class StaffController extends Controller
         foreach($settings as $key => $value) {
             $settings[$key] = [
                 'value' => $value,
-                'pending' => true,
             ];
         }
         $manager->settings = $settings;
-        $token = str_random(60);
-        $manager->token = $token;
         $manager->save();
         
         // Send email notification
         $sessionUser = $request->user();
-        $accept_link = url('/staff/managers/'.$manager->id.'/settings/earnings?agreed=true&token='.$token);
-        $cancel_link = url('/staff/managers/'.$manager->id.'/settings/earnings?agreed=false&token='.$token);
 
         SendgridApi::send('change-percentage-of-gross-earnings', [
             'to' => [
@@ -194,8 +189,6 @@ class StaffController extends Controller
             'dtdata' => [
                 'manager_name' => $manager->first_name.' '.$manager->last_name,
                 'username' => $sessionUser->name,
-                'accept_link' => $accept_link,
-                'cancel_link' => $cancel_link,
                 'percent' => $settings['earnings']['value'],
                 'home_url' => url('/'),
                 'referral_url' => url('/referrals'),
@@ -204,52 +197,6 @@ class StaffController extends Controller
         ]);
 
         return $manager->settings;
-    }
-
-    /**
-     * Return updated settings
-     *
-     * @param Request $request
-     * @return array
-     */
-    public function changeSettings(Request $request, $id)
-    {
-        $sessionUser = $request->user();
-        $request->validate([
-            'agreed' => 'required|boolean',
-            'token' => 'required|string'
-        ]);
-
-        $manager = Staff::where('id', $id)->where('active', true)->where('role', 'manager')->first();
-        
-        if ($manager->user_id !== $sessionUser->id || $manager->token !== $request->input('token')) {
-            abort(400);
-        }
-        
-        $settings = json_decode($manager->settings);
-        $settings->earnings->pending = false;
-        $settings->earnings->agreed = $request->input('agreed');
-        $manager->settings = json_encode($settings);
-        $manager->token = null;
-        $manager->save();
-
-
-        // SendgridApi::send('notify-percentage-of-gross-earnings-acceptance', [
-        //     'to' => [
-        //         'email' => $creator->email,
-        //     ],
-        //     'dtdata' => [
-        //         'manager_name' => $manager->first_name.' '.$manager->last_name,
-        //         'username' => $sessionUser->name,
-        //         'accept_link' => $accept_link,
-        //         'cancel_link' => $cancel_link,
-        //         'percent' => $settings['earnings']['value'],
-        //         'home_url' => url('/'),
-        //         'referral_url' => url('/referrals'),
-        //         'privacy_url' => url('/privacy'),
-        //     ],
-        // ]);
-        return ['status' => 'success'];
     }
 
 }

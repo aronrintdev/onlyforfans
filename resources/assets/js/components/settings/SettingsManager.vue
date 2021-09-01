@@ -25,7 +25,6 @@
                   <b-form-invalid-feedback id="input-live-feedback">{{ verrors['earnings'] }}</b-form-invalid-feedback>
                 </b-input-group>
               </b-form-group>
-              <b-badge variant="info" class="setting-status" v-if="settings.earnings.pending">Pending</b-badge>
             </div>
           </div>
           <b-row class="mt-3">
@@ -69,7 +68,6 @@ export default {
     settings: {
       earnings: {
         value: null,
-        pending: false,
       }
     },
     verrors: {},

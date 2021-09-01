@@ -192,17 +192,6 @@ export const routes = [
     props: false,
   },
 
-
-  /**
-   * Accept/Cancel the "percentage of gross earnings" changes
-   */
-   {
-    name: 'users.acceptstaffinvite',
-    path: '/staff/managers/:id/settings/earnings',
-    component: users.SetPercentageOfEarnings,
-    props: false,
-  },
-
   /**
    * timeline.show must be declared after other routes due to it only being a slug
    */

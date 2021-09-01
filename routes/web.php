@@ -397,7 +397,6 @@ Route::patch('/staff-members/{id}/status', ['as'=>'staff.changestatus', 'uses' =
 Route::get('/staff-members/permissions', ['as'=>'staff.permissions', 'uses' => 'StaffController@listPermissions']);
 Route::get('/staff-members/managers/{id}', ['as'=>'staff.getManager', 'uses' => 'StaffController@getManager']);
 Route::patch('/staff-members/managers/{id}/settings', ['as'=>'staff.updateManagerSettings', 'uses' => 'StaffController@updateManagerSettings']);
-Route::patch('/staff-members/{id}/settings', ['as'=>'staff.changeSettings', 'uses' => 'StaffController@changeSettings']);
 
 // 
 /**
