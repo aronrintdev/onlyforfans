@@ -16,6 +16,7 @@ class Staff extends JsonResource
             'active' => $this->active,
             'pending' => $this->pending,
             'email' => $this->email,
+            'settings' => $this->settings ? $this->settings : [],
             'last_login_at' => $this->user ? $this->user->last_logged : null,
         ];
     }

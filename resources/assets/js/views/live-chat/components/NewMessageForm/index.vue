@@ -63,6 +63,7 @@
               max-rows="6"
               spellcheck="false"
               @keypress.enter="onEnterPress"
+              :disabled="sending"
             ></b-form-textarea>
           </b-form-group>
         </div>
@@ -364,7 +365,7 @@ export default {
     // Called when dropzone completes processing its queue, *OR* manually in 'sendMessage()' 
     //   when sending a message without any attachements
     async finalizeMessageSend() {
-      var params = {
+      let params = {
         mcontent: this.newMessageForm.mcontent,
       }
       if (this.setPriceActive) {

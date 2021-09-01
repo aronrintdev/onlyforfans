@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 
 use Laravel\Scout\Searchable;
 
+use App\Models\Casts\Money as CastsMoney;
 use App\Interfaces\UuidId;
 
 use App\Models\Traits\UsesUuid;
@@ -22,7 +23,6 @@ class Chatthread extends Model implements UuidId
     use UsesUuid, Searchable;
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
-
     //------------------------------------------------------------------------//
     // Boot
     //------------------------------------------------------------------------//
@@ -206,6 +206,7 @@ class Chatthread extends Model implements UuidId
 
         $cmGroup = null; // the created chat message group, if any (1 only)
         $chatmessages = collect();  // the created chat messages, one or more
+        $currency = $currency ?? 'USD';
 
         //$chatthreads = DB::transaction( function() use(&$rattrs, &$cmGroup, &$chatmessages, &$sender) {  // breaks sqlite seeder when contains ->attach()! %FIXME
 
@@ -217,13 +218,13 @@ class Chatthread extends Model implements UuidId
                 $cmgroupAttrs = [
                     'mgtype'          => MessagegroupTypeEnum::MASSMSG,
                     'sender_id'       => $sender->id,
+                    'mcontent'        => $mcontent,
+                    'price'           => CastsMoney::toMoney($price, $currency),
+                    'currency'        => $currency,
                     'cattrs' => [
                         'sender_name'     => $sender->name,
                         'participants'    => $participants,
-                        'mcontent'        => $mcontent,
                         'deliver_at'      => $deliverAt, // %TODO: expect this to be an integer, UTC unix ts in s (?)
-                        'price'           => $price,
-                        'currency'        => $currency,
                         'attachments'     => $attachments,
                     ],
                 ];
@@ -248,7 +249,7 @@ class Chatthread extends Model implements UuidId
                 if (!isset($ct)) {
                     $ct = Chatthread::create([
                         'originator_id' => $originator->id,
-                        'cattrs' => $cattrs??[],
+                        //'cattrs' => $cattrs??[],
                     ]);
                     $ct->addParticipant($participantUserId);
                 }
@@ -309,7 +310,7 @@ class Chatthread extends Model implements UuidId
         // Create mediafile refs for any attachments
         if ( isset($attachments) && count($attachments) ) {
             foreach ($attachments??[] as $a) {
-                if ($a['diskmediafile_id']) {
+                if ($a['diskmediafile_id']) { // ie [mediafiles].diskmediafile_id (the FK)
                     Mediafile::find($a['id'])->diskmediafile->createReference(
                         $cm->getMorphString(), // string   $resourceType
                         $cm->getKey(),         // int      $resourceID

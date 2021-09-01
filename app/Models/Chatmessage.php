@@ -189,7 +189,6 @@ class Chatmessage extends Model implements UuidId, Ownable, Purchaseable
         $this->save();
     }
 
-
     public function deliver()
     {
         // deliver this (scheduled) message (ie, 'unschedule' ?)

@@ -137,18 +137,21 @@ class UsersTableSeeder extends Seeder
 
             if ( $this->appEnv !== 'testing' ) {
                 $this->output->writeln("Creating new user with avatar & cover: " . $u->name." (iter: $iter)");
-                $avatar = FactoryHelpers::createImage(
-                    $u,
-                    MediafileTypeEnum::AVATAR, 
-                    $u->id, 
-                    $this->doS3Upload
-                );
-                $cover = FactoryHelpers::createImage(
-                    $u,
-                    MediafileTypeEnum::COVER, 
-                    $u->id, 
-                    $this->doS3Upload
-                );
+                try {
+                    $avatar = FactoryHelpers::createImage( $u, MediafileTypeEnum::AVATAR, $u->id, $this->doS3Upload );
+                } catch (Exception $e) {
+                    if ( $this->appEnv !== 'testing' ) {
+                        $this->output->writeln("  - Could not create fake media for user ".$user->name.", skipping - ".$e->getMessage() );
+                    }
+                }
+
+                try {
+                    $cover = FactoryHelpers::createImage( $u, MediafileTypeEnum::COVER, $u->id, $this->doS3Upload );
+                } catch (Exception $e) {
+                    if ( $this->appEnv !== 'testing' ) {
+                        $this->output->writeln("  - Could not create fake media for user ".$user->name.", skipping - ".$e->getMessage() );
+                    }
+                }
             } else {
                 //$this->output->writeln("Creating new user without avatar & cover: " . $u->name." (iter: $iter)");
                 $avatar = null;

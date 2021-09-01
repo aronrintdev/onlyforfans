@@ -103,13 +103,19 @@ class PostsTableSeeder extends Seeder
                     $numberOfImages = $this->faker->randomElement([1,1,1,2,3]); // multiple images per post
                     for ( $i = 0 ; $i < $numberOfImages ; $i++ ) {
                         $imgDim = $this->faker->randomElement(self::$IMAGE_SIZES);
-                        $mf = FactoryHelpers::createImage(
-                            $post->getPrimaryOwner(),
-                            MediafileTypeEnum::POST,  // mftype
-                            $post->id,  // resourceID
-                            $this->doS3Upload, // true, // doS3Upload
-                            [ 'width' => $imgDim['width'], 'height' => $imgDim['height'] ] // attrs
-                        );
+                        try {
+                            $mf = FactoryHelpers::createImage(
+                                $post->getPrimaryOwner(),
+                                MediafileTypeEnum::POST,  // mftype
+                                $post->id,  // resourceID
+                                $this->doS3Upload, // true, // doS3Upload
+                                [ 'width' => $imgDim['width'], 'height' => $imgDim['height'] ] // attrs
+                            );
+                        } catch (Exception $e) {
+                            if ( $this->appEnv !== 'testing' ) {
+                                $this->output->writeln("  - Could not create fake media for post id ".$post->id.", skipping - ".$e->getMessage() );
+                            }
+                        }
                     }
                 }
 

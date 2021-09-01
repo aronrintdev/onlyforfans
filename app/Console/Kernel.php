@@ -24,7 +24,6 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\MakeBlurs::class,
         \App\Console\Commands\MakeThumbnails::class,
         \App\Console\Commands\SetMediafileBasename::class,
-        \App\Console\Commands\TruncateData::class,
         \App\Console\Commands\UpdateCanceledSubscriptions::class,
         \App\Console\Commands\UpdateMediafilesNullResource::class,
         \App\Console\Commands\UpdateSlugs::class,
@@ -38,6 +37,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\SetTimestamps::class,
         \App\Console\Commands\UpdateStoryqueues::class,
 
+        \App\Console\Commands\Dev\TruncateData::class,
         \App\Console\Commands\Dev\PopulateChargebacks::class,
 
         // Financial Commands

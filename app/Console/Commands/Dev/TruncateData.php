@@ -1,5 +1,5 @@
 <?php
-namespace App\Console\Commands;
+namespace App\Console\Commands\Dev;
 
 use DB;
 use App;
@@ -54,9 +54,11 @@ class TruncateData extends Command
             $this->info( ' - Truncate "'.$t.'"...');
             switch ($t) {
                 case 'mediafiles':
+                    $this->info( ' - Removing mediafiles...');
                     Mediafile::cursor()->each(function($mf) {
                         $this->removeMediafile($mf);
                     });
+                    DB::table('mediafiles')->delete();
                     break;
                 default:
                     //DB::table($t)->truncate();
@@ -130,7 +132,19 @@ class TruncateData extends Command
             \App\Models\Financial\TransactionSummary::class,
         ],
         'tables' => [
+            'webhooks',
             'websockets_statistics_entries',
+            'verifyrequests',
+            'staff',
+            'referrals',
+            'notes',
+            'contenttaggables',
+            'contenttags',
+            'contentflags',
+            'chatthread_user',
+            'chatmessagegroups',
+            'chatthreads',
+            'chatmessages',
             'favorites',
             'mycontacts',
             'notifications',
@@ -143,9 +157,10 @@ class TruncateData extends Command
             'sessions',
             'settings',
             'user_settings',
-            'websockets_statistics_entries',
             // 'migrations',
             'invites',
+            'failed_jobs',
+            'job_batches',
             'jobs',
             'links',
             'locations',
@@ -153,11 +168,15 @@ class TruncateData extends Command
             'shareables',
             'likeables',
             'comments',
+
             'diskmediafiles',
             'mediafiles',
+
+            'storyqueues',
             'stories',
 
             'user_settings',
+            'permissibles',
             'permissions',
             'roles',
 

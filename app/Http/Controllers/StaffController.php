@@ -10,6 +10,7 @@ use App\Models\Timeline;
 use App\Http\Resources\StaffCollection;
 use App\Http\Resources\UserCollection;
 use App\Models\Permission;
+use App\Apis\Sendgrid\Api as SendgridApi;
 
 
 class StaffController extends Controller
@@ -57,6 +58,28 @@ class StaffController extends Controller
         return response()->json($teams);
     }
 
+
+    /**
+     * Retrieve staff account
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function getManager(Request $request, $id)
+    {
+        $manager = Staff::where('id', $id)->where('role', 'manager')->first();
+        if (!$manager->settings) {
+            $manager->settings = [
+                'earnings' => [
+                    'value' => null
+                ]
+            ];
+        } else {
+            $manager->settings = json_decode($manager->settings);
+        }
+        return response()->json($manager);
+    }
+
     /**
      * Remove staff account
      *
@@ -92,6 +115,7 @@ class StaffController extends Controller
             $staff->active = true;
             $staff->pending = false;
             $staff->user_id = $sessionUser->id;
+            $staff->settings = [];
             $staff->save();
 
             return response()->json([
@@ -131,4 +155,48 @@ class StaffController extends Controller
 
         return response()->json($permissions);
     }
+
+    /**
+     * Return updated settings
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function updateManagerSettings(Request $request, $id)
+    {
+        $request->validate([
+            'settings' => 'required',
+            'settings.earnings' => 'required|numeric',
+        ]);
+
+        $manager = Staff::where('id', $id)->where('active', true)->where('role', 'manager')->first();
+        $settings = $request->input('settings');
+        foreach($settings as $key => $value) {
+            $settings[$key] = [
+                'value' => $value,
+            ];
+        }
+        $manager->settings = $settings;
+        $manager->save();
+        
+        // Send email notification
+        $sessionUser = $request->user();
+
+        SendgridApi::send('change-percentage-of-gross-earnings', [
+            'to' => [
+                'email' => $manager->email,
+            ],
+            'dtdata' => [
+                'manager_name' => $manager->first_name.' '.$manager->last_name,
+                'username' => $sessionUser->name,
+                'percent' => $settings['earnings']['value'],
+                'home_url' => url('/'),
+                'referral_url' => url('/referrals'),
+                'privacy_url' => url('/privacy'),
+            ],
+        ]);
+
+        return $manager->settings;
+    }
+
 }
