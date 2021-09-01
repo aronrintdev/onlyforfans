@@ -33,6 +33,7 @@
           :items="messagestats"
           :fields="fields"
           :current-page="currentPage"
+          @sort-changed="sortHandler"
         >
           <template #cell(mcontent)="data">
             <ContentViewer :str=data.item.mcontent />
@@ -139,6 +140,15 @@ export default {
         //eventBus.$emit('error', { error, message: this.$t('error.load') })
         //this.transactionsLoading = false
       }
+    },
+
+    sortHandler(context) {
+      /* %HERE %FIXME
+      this.tobj.sortBy = context.sortBy
+      this.tobj.sortDesc = context.sortDesc
+      this.tobj.currentPage = 1
+      this.getData()
+       */
     },
 
     truncated(str) {

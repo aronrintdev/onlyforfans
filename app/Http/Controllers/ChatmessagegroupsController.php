@@ -47,6 +47,7 @@ class ChatmessagegroupsController extends AppBaseController
             }
         }
 
+        // Text search
         if ( $request->has('qsearch') && (strlen($request->qsearch)>2) ) {
             $query->where( function($q1) use(&$request) {
                 $q1->where('mcontent', 'LIKE', '%'.$request->qsearch.'%');
