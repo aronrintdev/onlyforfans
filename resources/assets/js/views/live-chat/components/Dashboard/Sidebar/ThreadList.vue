@@ -1,5 +1,5 @@
 <template>
-  <article class="chatthread-list position-relative">
+  <article class="chatthread-list position-relative flex-grow-1">
     <b-list-group>
       <Thread
         v-for="thread in threads"
@@ -113,7 +113,11 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.chatthread-list {
+  overflow: auto;
+}
+</style>
 
 <i18n lang="json5" scoped>
 {
