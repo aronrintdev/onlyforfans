@@ -203,7 +203,7 @@ export default {
     packageId: '',
     expirationDateTime: '',
 
-    mode: 'segments',
+    mode: 'manual', // manual | segments
 
     loading: true,
     error: false,
@@ -306,11 +306,7 @@ export default {
         return
       }
 
-      if (this.mode !== 'segments') {
-        return
-      }
-
-      window.segpay.sdk.initializePayment({
+      var data = {
         sessionId: this.sessionId,
         packageId: parseInt(this.packageId),
         segments: {
@@ -319,30 +315,44 @@ export default {
               '/css/app.css'
             ]
           },
-          card: {
-            number: {
-              htmlElement: this.$refs.cardNumber,
-              styleClasses: ['form-control', 'w-100'],
-            },
-            expirationMonth: {
-              htmlElement: this.$refs.cardMonth,
-              styleClasses: ['form-control', 'w-100'],
-            },
-            expirationYear: {
-              htmlElement: this.$refs.cardYear,
-              styleClasses: ['form-control', 'w-100'],
-            },
-            cvv: {
-              htmlElement: this.$refs.cardCvv,
-              styleClasses: ['form-control', 'w-100'],
-            },
-          },
           information: {
-            terms: this.$refs.segpayTerms,
-            descriptor: this.$refs.segpayDescriptor,
+            terms: {
+              htmlElement: this.$refs.segpayTerms,
+              styleClasses: ['text-center'],
+            },
+            descriptor: {
+              htmlElement: this.$refs.segpayDescriptor,
+              styleClasses: ['text-center'],
+            },
           },
         },
-      }, value => { this.$log.debug('segpay.sdk.initializePayment callback', { value }) })
+      }
+
+      if ( this.mode === 'segments' ) {
+        data.segments.card = {
+          number: {
+            htmlElement: this.$refs.cardNumber,
+            styleClasses: ['form-control', 'w-100'],
+          },
+          expirationMonth: {
+            htmlElement: this.$refs.cardMonth,
+            styleClasses: ['form-control', 'w-100'],
+          },
+          expirationYear: {
+            htmlElement: this.$refs.cardYear,
+            styleClasses: ['form-control', 'w-100'],
+          },
+          cvv: {
+            htmlElement: this.$refs.cardCvv,
+            styleClasses: ['form-control', 'w-100'],
+          },
+        }
+      }
+
+      window.segpay.sdk.initializePayment(
+        data,
+        value => { this.$log.debug('segpay.sdk.initializePayment callback', { value }) }
+      )
     },
 
     init() {
@@ -416,9 +426,7 @@ export default {
 
   watch: {
     mode(val) {
-      if (val === 'segments') {
-        this.init()
-      }
+      this.init()
     },
   },
 
