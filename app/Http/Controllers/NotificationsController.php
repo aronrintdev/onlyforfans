@@ -20,7 +20,7 @@ class NotificationsController extends AppBaseController
         $sessionUser = $request->user();
 
         $request->validate([
-            'type' => 'string|in:ResourcePurchased,TipReceived,ResourceLiked,TimelineFollowed,TimelineSubscribed,CommentReceived,MessageReceived',
+            'type' => 'string|in:ResourcePurchased,TipReceived,ResourceLiked,TimelineFollowed,TimelineSubscribed,CommentReceived,MessageReceived,StaffSettingsChanged',
         ]);
         $filters = $request->only(['type']) ?? [];
 
