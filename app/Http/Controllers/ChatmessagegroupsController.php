@@ -27,6 +27,7 @@ class ChatmessagegroupsController extends AppBaseController
             // filters
             'sender_id'  => 'uuid|exists:users,id',
             'mgtype'     => 'string|in:mass-message',
+            'qsearch' => 'string',
         ]);
         $filters = $request->only([
             'sender_id',
@@ -44,6 +45,26 @@ class ChatmessagegroupsController extends AppBaseController
             default:
                 $query->where($key, $v);
             }
+        }
+
+        if ( $request->has('qsearch') && (strlen($request->qsearch)>2) ) {
+            $query->orWhere( function($q1) use(&$request) {
+                $q1->where('description', 'LIKE', '%'.$request->qsearch.'%');
+                $q1->orWhere('id', 'LIKE', $request->qsearch.'%');
+            });
+        }
+
+        // Sorting
+        switch ($request->sortBy) {
+        case 'created_at':
+        case 'updated_at':
+        case 'mgtype':
+        case 'sender_id':
+            $sortDir = $request->sortDir==='asc' ? 'asc' : 'desc';
+            $query->orderBy($request->sortBy, $sortDir);
+            break;
+        default:
+            $query->orderBy('updated_at', 'desc');
         }
 
         $data = $query->latest()->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );

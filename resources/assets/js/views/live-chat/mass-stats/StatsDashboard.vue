@@ -77,10 +77,10 @@ export default {
      */
     fields() {
       return [
-        { key: 'created_at', label: 'Date', formatter: v => Vue.options.filters.niceDateTime(v, false) },
+        { key: 'created_at', label: 'Date', formatter: v => Vue.options.filters.niceDateTime(v, false), sortable: true },
         { key: 'mcontent', label: 'Text', tdClass: 'tag-col-mcontent', },
         { key: 'mediafile_counts', label: 'Attachment', },
-        { key: 'price', label: 'Price', formatter: v => Vue.options.filters.niceCurrency(v) },
+        { key: 'price', label: 'Price', formatter: v => Vue.options.filters.niceCurrency(v), sortable: true },
         //{ key: 'deliver_at', label: 'Delivered At', formatter: v => Vue.options.filters.niceBool(v) },
         { key: 'sent_count', label: 'Sent', },
         { key: 'read_count', label: 'Viewed (Read?)', },
