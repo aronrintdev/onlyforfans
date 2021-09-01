@@ -29,7 +29,8 @@ php artisan serve & \
 
 ### Starting Laravel Queue Workers ###
 php artisan queue:listen --tries=3 --backoff=3 & \
-php artisan queue:listen --queue=financial-summaries-urgent,financial-summaries-high,financial-summaries-mid,financial-summaries-low --tries=3 --backoff=3 & \
+php artisan queue:listen financial-transactions --tries=3 --backoff=3 & \
+php artisan queue:listen financial-summaries --tries=3 --backoff=3 & \
 
 ### Starting Websockets Server ###
 php artisan websockets:serve & \

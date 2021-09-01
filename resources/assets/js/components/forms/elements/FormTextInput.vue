@@ -5,13 +5,16 @@
         <b-input-group-text>$</b-input-group-text>
       </template>
       <b-form-input 
-        v-model="dvalue" 
-        :state="isValid" 
+        v-model="dvalue"
+        :state="isValid"
         @update="doUpdate()" 
         :placeholder="placeholder" 
         :disabled="disabled"
-        :type="itype==='currency' ? 'text' : itype"
+        :type="inputType"
       ></b-form-input>
+      <template v-if="itype==='percent'" #append>
+        <b-input-group-text>%</b-input-group-text>
+      </template>
       <b-form-invalid-feedback id="input-live-feedback">{{ vmsg }}</b-form-invalid-feedback>
     </b-input-group>
   </b-form-group>
@@ -44,6 +47,12 @@ export default {
     vmsg() {
       return (this.dverrors && this.dverrors[this.ikey]) ?  this.dverrors[this.ikey][0]: ''
     },
+    inputType() {
+      if (this.itype === 'percent' || this.itype === 'currency') {
+        return 'text'
+      }
+      return this.itype
+    }
   },
 
   data: () => ({
@@ -53,7 +62,7 @@ export default {
 
   watch: {
     dvalue(v) {
-      this.$emit('input', this.dvalue)
+      this.$emit('input', v)
     },
     verrors(v) {
       this.dverrors = v

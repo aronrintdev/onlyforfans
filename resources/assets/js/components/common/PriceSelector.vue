@@ -8,14 +8,16 @@
       <b-input-group :prepend="currencySymbol">
         <b-form-input
           ref="price-input"
-          class="input"
+          :class="{ 'limit-width': limitWidth }"
           v-model="price"
           v-mask="currencyMask"
           :state="valid"
+          inputmode="numeric"
           @focus="onFocus"
           @blur="onBlur"
           @wheel.prevent="onMousewheel"
         />
+        <slot name="append"></slot>
       </b-input-group>
     </b-form-group>
     <div v-if="showSlider" class="d-flex mb-3">
@@ -60,6 +62,7 @@ export default {
     currency:   { type: String, default: 'USD' },
     label:      { type: String },
     autofocus:  { type: Boolean, default: false },
+    limitWidth: { type: Boolean, default: true },
   },
 
   computed: {
@@ -109,17 +112,17 @@ export default {
       }
       const value = this.price !== ''
         ? typeof this.price === 'string'
-          ? this.$parseNumber(this.price) * this.currencyModifier
-          : this.price * this.currencyModifier
+          ? Math.round(this.$parseNumber(this.price) * this.currencyModifier)
+          : Math.round(this.price * this.currencyModifier)
         : 0
       if ( value < this.min ) {
         this.valid = false
-        this.validationMessage = this.$t('minError', { price: this.formatCurrency(this.min)})
+        this.validationMessage = this.$t('minError', { label: this.label || $t('label'), price: this.formatCurrency(this.min)})
         return
       }
       if (value > this.max) {
         this.valid = false
-        this.validationMessage = this.$t('maxError', { price: this.formatCurrency(this.max) })
+        this.validationMessage = this.$t('maxError', { label: this.label || $t('label'), price: this.formatCurrency(this.max) })
         return
       }
       this.valid = null
@@ -128,7 +131,7 @@ export default {
     onInput(value) {
       this.validate(true)
       if (value !== '') {
-        this.$emit('input', this.$parseNumber(value) * this.currencyModifier)
+        this.$emit('input', Math.round(this.$parseNumber(value) * this.currencyModifier))
       } else {
         this.$emit('input', 0)
       }
@@ -136,7 +139,7 @@ export default {
     onSliderChange(value) {
       this.price = this.numberFormatter.format(value / this.currencyModifier)
       this.validate()
-      this.$emit('input', value)
+      this.$emit('input', Math.round(value))
     },
     onFocus(e) {
       this.focus = true
@@ -148,7 +151,7 @@ export default {
       this.focus = false
       this.price = this.numberFormatter.format(this.price)
       this.validate()
-      this.$emit('input', this.$parseNumber(this.price) * this.currencyModifier)
+      this.$emit('input', Math.round(this.$parseNumber(this.price) * this.currencyModifier))
     },
 
     onMousewheel(e) {
@@ -208,7 +211,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.input {
+.limit-width {
   max-width: 7rem;
 }
 </style>
@@ -217,8 +220,8 @@ export default {
 {
   "en": {
     "label": "Price",
-    "minError": "Price cannot be lower than {price}",
-    "maxError": "Price cannot be higher than {price}"
+    "minError": "{label} cannot be lower than {price}",
+    "maxError": "{label} cannot be higher than {price}"
   }
 }
 </i18n>

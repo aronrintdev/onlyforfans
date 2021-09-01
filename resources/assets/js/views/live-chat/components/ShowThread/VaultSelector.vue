@@ -1,15 +1,14 @@
 <template>
   <div class="component-vault-selector">
     <div class="d-flex">
-      <div class="h5" v-text="$t('header')" />
-      <b-btn variant="link" class="ml-auto" @click="onClose">
+      <div v-if="isTopCtrlVisible" class="h5" v-text="$t('header')" />
+      <b-btn v-if="isTopCtrlVisible" variant="link" class="ml-auto" @click="onClose">
         <fa-icon icon="times" size="lg" />
       </b-btn>
     </div>
-    <div class="d-flex mb-2">
+    <div v-if="isTopCtrlVisible" class="d-flex mb-2">
       <b-btn variant="success" class="ml-auto clickme_to-apply_selected" @click="applySelection">
-        <fa-icon icon="check" size="lg" class="mr-2" />
-        {{ $t('selectButton') }}
+        <fa-icon icon="check" size="lg" class="mr-2" /> {{ $t('selectButton') }}
       </b-btn>
     </div>
     <!-- <Dashboard
@@ -69,7 +68,11 @@ export default {
     },
 
     context() {
-      return payload.context || ''
+      return this.payload?.context || ''
+    },
+
+    isTopCtrlVisible() { // hide in modal context
+      return this.context !== 'create-post' && this.context !== 'story-bar'
     },
   },
 
@@ -140,7 +143,7 @@ export default {
     "error": {
       "loading": "An error has occurred while loading your vault, please try again later."
     },
-    "header": "Select from your Vault",
+    "header": "Select from My Media",
     "selectButton": "Select"
   }
 }

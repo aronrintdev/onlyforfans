@@ -87,11 +87,15 @@ Vue.filter('niceDate', function (value, isShort=false) {
   }
 })
 
-Vue.filter('niceDateTime', function (value) {
+Vue.filter('niceDateTime', function (value, is24=true) {
   if (typeof value === 'undefined' || value === null || value === '') {
     return ''
   }
-  return moment(value).format('MMMM Do, YYYY HH:mm:ss')
+  if (is24) {
+    return moment(value).format('MMMM Do, YYYY HH:mm:ss')
+  } else {
+    return moment(value).format('MMMM Do, YYYY h:mm:ss a')
+  }
 })
 
 Vue.filter('niceDateTimeShort', function (value) {

@@ -63,8 +63,8 @@
                 </div>
               </template>
             </b-form-tags>
-            <div class="ml-2" v-b-tooltip.hover.html="{title: 'Enter tags in post body, use hash at start for <em>#publictag</em> or hash and exclamation at end for <em>#privatetag!</em>', variant: 'info'}">
-              <fa-icon :icon="['fas', 'info']" class="text-warning" />
+            <div class="ml-2" v-b-tooltip.hover.html="{title: 'Enter tags in post body, use hash at start for <em>#publictag</em> or hash and exclamation at end for <em>#privatetag!</em>' }">
+              <fa-icon :icon="['far', 'info-circle']" class="text-secondary" />
             </div>
           </b-col>
         </b-row>

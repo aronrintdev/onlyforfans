@@ -124,5 +124,13 @@ return [
         'sendGridTemplateId' => env('AUTH_BETA_SEND_GRID_TEMPLATE_ID', 'd-f70c0e1dfa9d48b5b6c1841f4dfe9514')
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Seeder
+    |   Admins seeded with this password on production
+    |--------------------------------------------------------------------------
+    |
+    */
+    'startingAdminPass' => env('AUTH_STARTING_ADMIN_PASS', 'zK331u9nUs6PX4w'),
 
 ];

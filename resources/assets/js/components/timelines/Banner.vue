@@ -6,7 +6,7 @@
       class="masthead text-white text-center"
       v-bind:style="{ backgroundImage: 'url(' + coverImage + ')' }"
     >
-      <input type="file" id="cover-upload-btn" class="file-input" @change="onCoverChange" />
+      <input type="file" id="cover-upload-btn" class="file-input" accept="image/*" @change="onCoverChange" />
       <label v-if="uploadCoverVisible" for="cover-upload-btn" class="btn photo-btn">
         <fa-icon :icon="['far', 'camera']" size="2x" class="text-white" />
       </label>
@@ -31,6 +31,9 @@
         <b-dropdown-item disabled>Block</b-dropdown-item>
         <b-dropdown-item disabled>Report</b-dropdown-item>
       </b-dropdown>
+      <div class="loading-cover" v-if="isLoadingCover">
+        <b-spinner label="Spinning"></b-spinner>
+      </div>
     </header>
 
     <section
@@ -47,7 +50,7 @@
         :title="timeline.name"
       />
       <OnlineStatus :user="timeline.user" size="lg" :textInvisible="false" />
-      <input type="file" id="avatar-upload-btn" class="file-input" @change="onAvatarChange" />
+      <input type="file" id="avatar-upload-btn" class="file-input" accept="image/*" @change="onAvatarChange" />
       <label v-if="uploadAvatarVisible" for="avatar-upload-btn" class="btn photo-btn">
         <fa-icon :icon="['far', 'camera']" size="2x" class="text-white" />
       </label>
@@ -55,7 +58,7 @@
 
     <b-container fluid>
       <b-row class="avatar-profile py-3">
-        <b-col cols="12" md="4" offset-md="1" class="pl-5 avatar-details text-right text-md-left">
+        <b-col cols="12" md="4" offset-md="1" class="pl-5 avatar-details text-md-left">
           <h2 class="avatar-name my-0">
             {{ timeline.name }}
             <span v-if="timeline.verified" class="verified-badge">
@@ -83,6 +86,7 @@ import Vuex from 'vuex'
 import { eventBus } from '@/eventBus'
 import OnlineStatus from '@components/common/OnlineStatus'
 import Stats from './banner/Stats'
+import heic2any from 'heic2any'
 
 export default {
   components: {
@@ -100,11 +104,6 @@ export default {
       return !this.session_user || !this.timeline
     },
 
-    coverImage() {
-      const { cover } = this.timeline
-      return cover ? cover.filepath : '/images/locked_post.png'
-    },
-
     avatarImage() {
       const { avatar } = this.timeline
       return avatar ? avatar.filepath : '/images/default_avatar.png'
@@ -120,6 +119,8 @@ export default {
     uploadAvatarVisible: false,
 
     isFavoritedByMe: false, // is timeline/feed a favorite
+    coverImage: null,
+    isLoadingCover: false,
   }),
 
   methods: {
@@ -143,10 +144,13 @@ export default {
       const formData = new FormData()
       formData.append('cover', files[0])
 
+      this.isLoadingCover = true
       this.axios
         .post('/users/cover', formData)
         .then((response) => {
           eventBus.$emit('update-timelines', this.timeline.id)
+          const { cover } = response.data;
+          this.getCoverImage(cover)
         })
         .catch((error) => {
           this.$log.error(error)
@@ -203,10 +207,28 @@ export default {
       this.showCopyToClipboardModal = false;
       alert("Copy to Clipboard has been failed. Please try again later.");
     },
+
+    async getCoverImage(cover) {
+      if (cover.mimetype == 'image/heif' || cover.mimetype == 'image/heic') {
+        const url = await fetch(cover.filepath)
+          .then((res) => res.blob())
+          .then((blob) => heic2any({
+            blob
+          }))
+          .then((conversionResult) => URL.createObjectURL(conversionResult))
+        this.coverImage = url ? url : '/images/locked_post.png'
+      } else {
+        this.coverImage = cover ? cover.filepath : '/images/locked_post.png'
+      }
+      this.isLoadingCover = false;
+    },
+
   },
 
   created() {
     this.isFavoritedByMe = this.timeline.is_favorited;
+    this.isLoadingCover = true;
+    this.getCoverImage(this.timeline.cover);
   },
 }
 </script>
@@ -221,9 +243,6 @@ export default {
 }
 
 header.masthead {
-  position: relative;
-  padding-top: 12rem;
-  padding-bottom: 12rem;
   position: relative;
   background-color: #343a40;
   background-position: center;
@@ -243,12 +262,6 @@ header.masthead .profile-ctrl.dropdown button {
   color: red !important;
   border: none;
   background: transparent;
-}
-
-.banner-online-status {
-  @media (max-width: 576px) {
-    float: right;
-  }
 }
 
 .avatar-img {
@@ -310,5 +323,47 @@ header.masthead .profile-ctrl.dropdown button {
 .tag-stats {
   margin-top: -0.5em;
   cursor: default;
+}
+
+.loading-cover {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@media (max-width: 576px) {
+  header.masthead {
+    padding-top: 5em;
+    padding-bottom: 5em;
+  }
+
+  .avatar-img {
+    width: 80px;
+    height: 80px;
+    left: 25px;
+    top: 120px;
+
+    .img-thumbnail {
+      padding: 0.1rem;
+    }
+
+    .onlineStatus {
+      bottom: 8px;
+      right: -3px;
+    }
+  }
+  
+  .tag-stats {
+    margin-top: 0.8em;
+
+    ul {
+      margin-bottom: 0;
+    }
+  }
+
+  .avatar-details {
+    margin-left: 56px;
+  }
 }
 </style>

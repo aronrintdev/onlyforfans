@@ -52,10 +52,7 @@
     <b-modal v-model="isSelectFileModalVisible" id="modal-select-file" size="md" title="Select a Story Type" hide-footer >
       <div>
         <b-button block variant="primary" class="" @click="selectFromFiles">Add from Device</b-button>
-        <!--
-        <b-button block variant="primary" class="" :to="{ name: 'vault.dashboard', params: { context: 'storybar' } }">Add from Vault</b-button>
-        -->
-        <b-button block variant="primary" class="" @click="renderVaultSelector()">Add from Vault</b-button>
+        <b-button block variant="primary" class="" @click="renderVaultSelector()">Add from My Media</b-button>
         <b-button block variant="primary" class="" @click="selectTextOnly">Add Text Only</b-button>
         <template v-if="!timeline.is_storyqueue_empty">
           <hr />
@@ -196,12 +193,10 @@ export default {
     // %TODO: move to common library
     isFileVideo(file) { // for form input File type
       const is = file.type && file.type.startsWith('video/')
-      console.log('isFileVideo', { file, is })
       return is
     },
     isFileImage(file) { // for form input File type
       const is = file.type && file.type.startsWith('image/')
-      console.log('isFileImage', { file, is })
       return is
     },
 

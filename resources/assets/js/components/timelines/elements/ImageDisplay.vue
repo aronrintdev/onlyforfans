@@ -16,11 +16,15 @@
             :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
             :alt="mediafile.mfname" />
         </div>
-        <MediaSlider v-else-if="mediafile.is_video" 
-          @click="renderFull"
-          :mediafiles="[mediafile]" 
-          :session_user="session_user" 
-          :use_mid="use_mid" />
+        <div class="image-preview" @click="renderFull" v-if="mediafile.is_video">
+          <video v-if="mediafile.is_video">
+            <source :src="`${mediafile.filepath}#t=2`" type="video/mp4" />
+            <source :src="`${mediafile.filepath}#t=2`" type="video/webm" />
+          </video>
+          <div class="icon-video">
+            <fa-icon :icon="['fas', 'play']" class="text-white icon" />
+          </div>
+        </div> 
       </template>
       <template v-else-if="mediafile.resource_type==='posts'">
         <PostCta :post="mediafile.resource" :session_user="session_user" :primary_mediafile="mediafile" />
@@ -111,7 +115,7 @@ export default {
       const post = response.data.data
       const imageIndex = post.mediafiles.filter(file => !file.is_audio).findIndex(file => file.id === this.mediafile.id)
       if (post.access) {
-        eventBus.$emit('open-modal', { key: 'show-post', data: { post, imageIndex } })
+        eventBus.$emit('open-modal', { key: 'show-post', data: { post, imageIndex, feedType: 'photos' } })
       } else {
         if ( this.$options.filters.isSubscriberOnly(post) ) {
           eventBus.$emit('open-modal', { key: 'render-subscribe', data: { timeline: this.timeline } })
@@ -132,7 +136,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 ul {
   margin: 0;
 }
@@ -192,9 +196,11 @@ ul {
   height: 0;
   padding-top: 100%;
   background: transparent;
+  cursor: pointer;
 }
 
-.image-preview img {
+.image-preview img,
+.image-preview video {
   position: absolute;
   top: 0;
   left: 0;
@@ -202,4 +208,28 @@ ul {
   height: 100%;
   object-fit: cover;
 }
+
+.icon-video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+
+  .icon {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@media (max-width: 767px) {
+  .icon-video {
+    width: 30px;
+    height: 30px;
+  }
+}
+
 </style>

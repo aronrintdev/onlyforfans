@@ -1150,7 +1150,8 @@ class RestPostsTest extends TestCase
             'description' => $this->faker->realText,
         ];
         $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('posts.update', $content->post->id), $payload);
-        $response->assertStatus(403);
+        //$response->assertStatus(403);
+        $response->assertStatus(200); // %PSG %NOTE: we *are* allowing this now 20210830
     }
 
     /**

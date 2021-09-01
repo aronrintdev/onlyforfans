@@ -21,11 +21,13 @@ import payments from '@views/payments'
 
 import LivechatDashboard from '@views/live-chat/Dashboard'
 import LivechatCreateThread from '@views/live-chat/CreateThread'
+import LivechatStats from '@views/live-chat/mass-stats/StatsDashboard'
 import livechatRoutes from './livechat.routes'
 
 import settingsRoutes from './settings.routes'
 import listRoutes from './list.routes'
 //import notificationsRoutes from './notifications.routes'
+import statementsRoutes from './statements.routes'
 
 export const routes = [
   {
@@ -48,6 +50,11 @@ export const routes = [
   },
 
   // Live Chat
+  {
+    component: LivechatStats,
+    name: 'chatthreads.stats',
+    path: '/messages/stats',
+  },
   {
     component: LivechatCreateThread,
     name: 'chatthreads.create',
@@ -93,6 +100,7 @@ export const routes = [
     name: 'statements.dashboard',
     path: '/statements',
     component: statements.Dashboard,
+    children: statementsRoutes,
   },
 
   {
@@ -124,7 +132,7 @@ export const routes = [
   // Vaults
   {
     name: 'vault.dashboard',
-    path: '/my-vault',
+    path: '/my-media',
     component: vaults.Dashboard,
   },
 
@@ -208,6 +216,15 @@ export const routes = [
 const router = new VueRouter({
   mode: 'history',
   routes: routes,
+  scrollBehavior (to, from, savedPosition) {
+    if (to.hash) {
+      return {
+        selector: to.hash,
+        offset: { x: 0, y: 10 }
+      }
+    }
+    return { x: 0, y: 0 }
+  }
 })
 
 export default router

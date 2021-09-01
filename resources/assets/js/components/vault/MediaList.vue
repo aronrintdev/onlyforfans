@@ -1,5 +1,7 @@
 <template>
-  <b-row :no-gutters="true">
+  <b-row :no-gutters="true" class="component-vault-MediaList">
+
+    <!-- mediafiles -->
     <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button">
       <PreviewFile
         :data-mf_id="mf.id"
@@ -9,20 +11,22 @@
         class="p-1"
       />
     </b-col>
+
+    <!-- 'child' vaultfolders -->
     <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3" role="button">
-      <b-img-lazy fluid @click="doNav(vf.id)" src="/images/tmp-placeholders/folder-icon.jpg" :alt="`Folder ${vf.slug}`"></b-img-lazy>
+      <b-img fluid @click="doNav(vf.id)" src="/images/tmp-placeholders/folder-icon.jpg" :alt="`Folder ${vf.slug}`"></b-img>
       <div class="text-center">{{ vf.name }}</div>
     </b-col>
+
     <b-modal v-model="isMediaLightboxModalVisible" id="modal-media-lightbox" title="" hide-footer body-class="p-0" size="xl">
       <MediaLightbox :session_user="session_user" :mediafile="lightboxSelection" />
     </b-modal>
+
   </b-row>
 </template>
 
 <script>
-/**
- * resources/assets/js/components/vault/MediaList.vue
- */
+// resources/assets/js/components/vault/MediaList.vue
 import Vue from 'vue'
 import Vuex from 'vuex'
 import PreviewFile from './PreviewFile'
@@ -54,6 +58,7 @@ export default {
     ...Vuex.mapMutations('vault', [ 'UPDATE_CURRENT_FOLDER_ID' ]),
 
     async doNav(vaultfolderId) {
+      console.log('doNav')
       this.UPDATE_CURRENT_FOLDER_ID(vaultfolderId)
       this.$store.dispatch('getVaultfolder', vaultfolderId)
     },

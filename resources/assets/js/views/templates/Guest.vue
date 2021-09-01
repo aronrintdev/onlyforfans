@@ -4,18 +4,18 @@
     <div v-if="isVisible" class="header">
       <b-navbar variant="light" >
         <b-navbar-brand :to="{ name: 'index' }" class="navbar-brand mr-5">
-          <Branding type="text" size="3x" class="mb-3" />
+          <Branding type="text" size="lg" class="my-1" :variant="'brand'" />
         </b-navbar-brand>
         <b-btn variant="dark" @click="$router.push({ name: 'login' })" class="ml-auto">{{ $t('login') }}</b-btn>
       </b-navbar>
     </div>
-    <div class="content d-flex flex-grow-1" :class="{ 'px-0': mobile, 'p-3': isVisible }">
+    <div class="content d-flex flex-grow-1" :class="{ 'px-0': mobile, 'py-3': isVisible }">
       <router-view />
     </div>
     <div v-if="isVisible" class="footer">
       <b-navbar variant="dark">
         <b-nav-text class="text-light mx-auto">
-          &copy; {{ $DateTime().year }} All Fans. All rights reserved.
+          &copy; {{ $DateTime().year }} AllFans. All rights reserved.
         </b-nav-text>
       </b-navbar>
     </div>
@@ -96,12 +96,6 @@ export default {
   },
 }
 </script>
-
-<style lang="scss" scoped>
-.content {
-  min-height: 100%;
-}
-</style>
 
 <i18n lang="json5" scoped>
 {

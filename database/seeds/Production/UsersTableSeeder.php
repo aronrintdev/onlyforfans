@@ -42,7 +42,7 @@ class UsersTableSeeder extends Seeder
                     'city' => 'Las Vegas',
                     'country' => 'US',
                     'is_follow_for_free' => 1,
-                    'password' => bcrypt('foo-123'), // secret
+                    'password' => bcrypt(Config::get('auth.startingAdminPass')), // secret
                     'email_verified' => 1,
                 ],
                 [
@@ -50,12 +50,13 @@ class UsersTableSeeder extends Seeder
                     'real_firstname' => 'Erik',
                     'real_lastname' => 'H',
                     'username' => 'erikh',
-                    'email' => 'erik@hattervigsoftwaresolutions.com',
+                    // 'email' => 'erik@hattervigsoftwaresolutions.com',
+                    'email' => 'ehattervig@allfans.com',
                     'gender' => 'male',
                     'city' => 'Rapid City',
                     'country' => 'US',
                     'is_follow_for_free' => 1, // if not free need to set price as well
-                    'password' => bcrypt('foo-123'), // secret
+                    'password' => bcrypt(Config::get('auth.startingAdminPass')), // secret
                     'email_verified' => 1,
                 ],
                 [
@@ -68,7 +69,7 @@ class UsersTableSeeder extends Seeder
                     'city' => 'Tokyo',
                     'country' => 'Japan',
                     'is_follow_for_free' => 1, // if not free need to set price as well
-                    'password' => bcrypt('foo-123'), // secret
+                    'password' => bcrypt(Config::get('auth.startingAdminPass')), // secret
                     'email_verified' => 1,
                 ],
                 [
@@ -82,7 +83,7 @@ class UsersTableSeeder extends Seeder
                     'city' => 'Las Vegas',
                     'country' => 'US',
                     'is_follow_for_free' => 1, // if not free need to set price as well
-                    'password' => bcrypt('foo-123'), // secret
+                    'password' => bcrypt(Config::get('auth.startingAdminPass')), // secret
                     'email_verified' => 1,
                 ],
                 [
@@ -96,6 +97,8 @@ class UsersTableSeeder extends Seeder
                     'city' => 'Las Vegas',
                     'country' => 'US',
                     'is_follow_for_free' => 1, // if not free need to set price as well
+                    'password' => bcrypt(Config::get('auth.startingAdminPass')), // secret
+                    'email_verified' => 1,
                 ],
                 [
                     'name' => 'Fujio H',
@@ -107,7 +110,7 @@ class UsersTableSeeder extends Seeder
                     'city' => 'Tokyo',
                     'country' => 'Japan',
                     'is_follow_for_free' => 1, // if not free need to set price as well
-                    'password' => bcrypt('foo-123'), // secret
+                    'password' => bcrypt(Config::get('auth.startingAdminPass')), // secret
                     'email_verified' => 1,
                 ],
             ];

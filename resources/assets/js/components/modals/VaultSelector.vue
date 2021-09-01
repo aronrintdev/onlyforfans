@@ -45,7 +45,8 @@ export default {
 
     isSaveable() {
       return !this.isLoading
-    }
+    },
+
   },
 
   data: () => ({

@@ -214,6 +214,11 @@ class SegPayController extends Controller
             'currency' => 'required',
         ]);
 
+        // Validate Payment allowed
+        if (!$request->user()->canMakePayments()) {
+            abort(403, 'Payments Forbidden');
+        }
+
         // Get payment item
         if ($request->type === PaymentTypeEnum::PURCHASE) {
             $description = Config::get('segpay.description.purchase', 'All Fans Purchase');
@@ -292,8 +297,8 @@ class SegPayController extends Controller
             return PurchasableHelpers::getPurchasableItem($request->item);
         }
         if ($request->type === PaymentTypeEnum::TIP) {
-            return Tip::find($request->item);
-            // return TippableHelpers::getTippableItem($request->item);
+            // return Tip::find($request->item);
+            return TippableHelpers::getTippableItem($request->item);
         }
         if ($request->type === PaymentTypeEnum::SUBSCRIPTION) {
             return SubscribableHelpers::getSubscribableItem($request->item);

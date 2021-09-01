@@ -4,7 +4,7 @@
     <b-card-header>
       <section class="user-avatar">
         <router-link :to="tippedTimelineUrl">
-          <b-img-lazy :src="tippedTimeline.avatar.filepath" :alt="tippedTimeline.name" :title="tippedTimeline.name" />
+          <b-img-lazy :src="avatarImage" :alt="tippedTimeline.name" :title="tippedTimeline.name" />
         </router-link>
       </section>
       <section class="user-details">
@@ -102,7 +102,7 @@ export default {
     },
 
     tippedTimelineUrl() {
-      return route('timelines.show', this.tippedTimeline.slug)
+      return { name: 'timeline.show', params: { slug: this.tippedTimeline.slug } }
     },
 
     renderDetails() {
@@ -115,6 +115,14 @@ export default {
         default:
           return null
       }
+    },
+
+    avatarImage() {
+      if (this.tippedTimeline) {
+        const { avatar } = this.tippedTimeline
+        return avatar ? avatar.filepath : '/images/default_avatar.png'
+      }
+      return '/images/default_avatar.png'
     },
   },
 
@@ -137,9 +145,11 @@ export default {
   }),
 
   created() {
-    if ( paymentsDisabled || window.paymentsDisabled ) {
-      this.paymentsDisabled = true
-    }
+    try {
+      if ( window.paymentsDisabled || paymentsDisabled ) {
+        this.paymentsDisabled = true
+      }
+    } catch (e) {}
   },
 
   methods: {

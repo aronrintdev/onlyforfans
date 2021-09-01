@@ -59,6 +59,13 @@ class ProcessSegPayWebhook implements ShouldQueue
         FormatMoney;
 
     /**
+     * Delete the job if its models no longer exist.
+     *
+     * @var bool
+     */
+    public $deleteWhenMissingModels = true;
+
+    /**
      * Webhook instance
      * @var \App\Models\Webhook
      */

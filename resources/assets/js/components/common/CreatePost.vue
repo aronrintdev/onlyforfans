@@ -74,11 +74,11 @@
             </vue-dropzone>
             <AudioRecorder
               v-if="showAudioRec"
-              @close="showAudioRec=false;selectedMedia=null"
+              @close="showAudioRec=false; selectedIcon=null"
               @complete="audioRecordFinished"
             />
 
-            <b-progress v-if="isBusy" :value="uploadProgress" max="100" animated />
+            <b-progress class="progress-widget" v-if="isBusy" :value="uploadProgress" max="100" animated />
           </div>
 
           <template #footer>
@@ -100,8 +100,8 @@
                     </div>
                   </template>
                 </b-form-tags>
-                <div class="ml-2" v-b-tooltip.hover.html="{title: 'Enter tags in post body, use hash at start for <em>#publictag</em> or hash and exclamation at end for <em>#privatetag!</em>', variant: 'info'}">
-                  <fa-icon :icon="['fas', 'info']" class="text-warning" />
+                <div class="ml-2" v-b-tooltip.hover.html="{title: 'Enter tags in post body, use hash at start for <em>#publictag</em> or hash and exclamation at end for <em>#privatetag!</em>' }">
+                  <fa-icon :icon="['far', 'info-circle']" class="text-secondary" />
                 </div>
                 <!-- <small>Enter tags in post body, use hash at start for <i>#publictag</i> or hash and exclamation at end for <i>#privatetag!</i></small> -->
               </b-col>
@@ -111,17 +111,19 @@
 
               <b-col cols="12" md="8" class="post-create-footer-ctrl d-flex">
                 <ul class="list-inline d-flex mb-0 OFF-border-right pt-1">
-                  <li id="clickme_to-select" class="selectable select-pic">
-                    <fa-icon :icon="selectedMedia==='pic' ? ['fas', 'image'] : ['far', 'image']" size="lg" :class="selectedMedia==='pic' ? 'text-primary' : 'text-secondary'" />
+
+                  <li v-b-tooltip.hover="'Add Photo'" id="clickme_to-select" class="selectable select-pic">
+                    <fa-icon :icon="selectedIcon==='pic' ? ['fas', 'image'] : ['far', 'image']" size="lg" :class="selectedIcon==='pic' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li v-if="!isIOS9PlusAndAndroid" @click="recordVideo()" class="selectable select-video">
-                    <fa-icon :icon="selectedMedia==='video' ? ['fas', 'video'] : ['far', 'video']" size="lg" :class="selectedMedia==='video' ? 'text-primary' : 'text-secondary'" />
+
+                  <li v-b-tooltip.hover="'Record Video'" v-if="!isIOS9PlusAndAndroid" @click="recordVideo()" class="selectable select-video">
+                    <fa-icon :icon="selectedIcon==='video' ? ['fas', 'video'] : ['far', 'video']" size="lg" :class="selectedIcon==='video' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li @click="recordAudio()" class="selectable select-audio">
-                    <fa-icon :icon="selectedMedia==='audio' ? ['fas', 'microphone'] : ['far', 'microphone']" size="lg" :class="selectedMedia==='audio' ? 'text-primary' : 'text-secondary'" />
+                  <li v-b-tooltip.hover="'Record Audio'" @click="recordAudio()" class="selectable select-audio">
+                    <fa-icon :icon="selectedIcon==='audio' ? ['fas', 'microphone'] : ['far', 'microphone']" size="lg" :class="selectedIcon==='audio' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li @click="renderVaultSelector()" class="selectable">
-                    <fa-icon :icon="selectedMedia==='vault' ? ['fas', 'archive'] : ['far', 'archive']" size="lg" :class="selectedMedia==='vault' ? 'text-primary' : 'text-secondary'" />
+                  <li v-b-tooltip.hover="'Add Photo From My Media'" @click="renderVaultSelector()" class="selectable">
+                    <fa-icon :icon="selectedIcon==='vault' ? ['fas', 'archive'] : ['far', 'archive']" size="lg" :class="selectedIcon==='vault' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
                 <ul class="list-inline d-flex mb-0 pt-1">
@@ -131,19 +133,20 @@
                   <li class="selectable select-timer"><span><TimerIcon /></span></li>
                   <li class="selectable select-calendar" @click="showSchedulePicker()"><span><CalendarIcon /></span></li>
                   -->
-                  <li class="selectable select-expire-date" :disabled="expirationPeriod" @click="showExpirationPicker()">
+                  <li v-b-tooltip.hover="'Set Expiration Date'" class="selectable select-expire-date" :disabled="expirationPeriod" @click="showExpirationPicker()">
                     <fa-icon :icon="showedModal === 'expiration' ? ['fas', 'hourglass-half'] : ['far', 'hourglass-half']" size="lg" :class="showedModal === 'expiration' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li class="selectable select-calendar" :disabled="scheduled_at" @click="showSchedulePicker()">
+                  <li v-b-tooltip.hover="'Schedule Publish Date'" class="selectable select-calendar" :disabled="scheduled_at" @click="showSchedulePicker()">
                     <fa-icon :icon="showedModal === 'schedule' ? ['fas', 'calendar-alt'] : ['far', 'calendar-alt']" size="lg" :class="showedModal === 'schedule' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
                 <ul class="list-inline d-flex mb-0 pt-1">
-                  <li @click="togglePostPrice()" class="selectable select-pic" title="Set Price">
-                    <fa-icon :icon="postType === 'price' ? ['fas', 'tag'] : ['far', 'tag']" size="lg" :class="postType === 'price' ? 'text-primary' : 'text-secondary'" />
+                  <li @click="showTagForm()" class="selectable show-tagform" v-b-tooltip.hover="'Add Tags'">
+                    <fa-icon :icon="isTagFormVisible ? ['fas', 'hashtag'] : ['far', 'hashtag']" :class="isHashtagIconSelected ? 'text-primary' : 'text-secondary'" size="lg" />
                   </li>
-                  <li @click="showTagForm()" class="selectable show-tagform" title="Add Tags">
-                    <fa-icon :icon="isTagFormVisible ? ['fas', 'hashtag'] : ['far', 'hashtag']" class="text-secondary" size="lg" />
+
+                  <li @click="togglePostPrice()" class="selectable select-pic" v-b-tooltip.hover="'Set Post Unlock Price'">
+                    <fa-icon :icon="postType === 'price' ? ['fas', 'tag'] : ['far', 'tag']" size="lg" :class="postType === 'price' ? 'text-primary' : 'text-secondary'" />
                   </li>
                 </ul>
               </b-col>
@@ -155,7 +158,7 @@
                     </button>
                   </li>
                   <li class="w-100 mx-0">
-                    <button :disabled="isBusy || (!description && ( selectedMediafiles && selectedMediafiles.length === 0 ))" @click="savePost()" class="btn btn-submit btn-primary w-100">
+                    <button :disabled="isSaveButtonDisabled" @click="savePost()" class="btn btn-submit btn-primary w-100">
                       <span v-if="isBusy" class="text-white spinner-border spinner-border-sm pr-2" role="status" aria-hidden="true"></span>
                       Post
                     </button>
@@ -173,7 +176,7 @@
       </div>
     </section>
 
-    <VideoRecorder v-if="showVideoRec" @close="showVideoRec=false; selectedMedia=null" @complete="videoRecCompleted" />
+    <VideoRecorder v-if="showVideoRec" @close="showVideoRec=false; selectedIcon=null" @complete="videoRecCompleted" />
 
   </div>
 </template>
@@ -182,6 +185,7 @@
 import Vuex from 'vuex'
 import moment from 'moment'
 import { isAndroid, isIOS, osVersion } from 'mobile-device-detect'
+import heic2any from 'heic2any'
 
 import { eventBus } from '@/eventBus'
 import vue2Dropzone from 'vue2-dropzone'
@@ -209,6 +213,16 @@ export default {
 
   computed: {
 
+    ...Vuex.mapState('vault', [
+      'mobile',
+      'selectedMediafiles',
+      'uploadsVaultFolder',
+    ]),
+
+    isIOS9PlusAndAndroid() {
+      return (isIOS && parseInt(osVersion.split('.')[0]) >= 9) || isAndroid
+    },
+
     hashtags: {
       // tag representation in the create post footer (can be deleted here but not added)
       get: function () {
@@ -223,15 +237,6 @@ export default {
         })
       }
     },
-
-    isIOS9PlusAndAndroid() {
-      return (isIOS && parseInt(osVersion.split('.')[0]) >= 9) || isAndroid
-    },
-
-    ...Vuex.mapState('vault', [
-      'selectedMediafiles',
-      'uploadsVaultFolder',
-    ]),
 
     // ref:
     //  ~ https://github.com/rowanwins/vue-dropzone/blob/master/docs/src/pages/SendAdditionalParamsDemo.vue
@@ -258,13 +263,20 @@ export default {
       }
     },
 
+    isSaveButtonDisabled() {
+      const descriptionWithoutAdminTags = this.description.replace(/\B#\w\w+!/g,'').trim()
+      return this.isBusy || (!descriptionWithoutAdminTags && ( this.selectedMediafiles && this.selectedMediafiles.length===0 ))
+    },
+
+
   }, // computed
 
   data: () => ({
     moment,
     newPostId: null,
     description: '',
-    selectedMedia: null, // 'pic',
+    selectedIcon: null, // 'pic',
+    isHashtagIconSelected: false,
     showedModal: null,
     postType: 'free',
     ptypes: [
@@ -289,7 +301,8 @@ export default {
     formErr: null, // null if no error, otherwise string (error message)
 
     uploadProgress: 0,
-
+    uploadFailedFilesCount: 0,
+    uploadingFilesCount: 0,
   }), // data
 
   methods: {
@@ -310,7 +323,8 @@ export default {
       this.$refs.myVueDropzone.removeAllFiles()
       this.description = ''
       this.newPostId = null
-      this.selectedMedia = 'pic'
+      this.selectedIcon = 'pic'
+      this.isHashtagIconSelected = false
       this.ptype = 'free'
       this.price = 0
       this.priceForPaidSubscribers = 0
@@ -374,6 +388,7 @@ export default {
         // %NOTE: files added manually don't seem to be put into the queue, thus onDropzoneSending won't be called for them (?)
 
         if (queued.length) {
+          this.uploadingFilesCount = queued.length
           console.log('CreatePost::savePost() - process queue', { queued, })
           this.$refs.myVueDropzone.processQueue() // this will call createCompleted() via callback
         }  else {
@@ -398,13 +413,28 @@ export default {
       this.$refs.myVueDropzone.dropzone.hiddenFileInput.click()
     },
 
-    onDropzoneAdded(file) {
+    async onDropzoneAdded(file) {
       this.$log.debug('onDropzoneAdded', {file})
       let payload = { ...file, type: file.type }
       if (!file.filepath) {
-        payload.filepath = URL.createObjectURL(file)
+        if (file.type == 'image/heic' || file.type == 'image/heif') {
+          const url = await heic2any({ blob: file })
+            .then((conversionResult) => {
+              let newFile = new File([conversionResult], file.name.replace(/.hei[c,f]/i, '.jpg'), {type:"image/jpeg", lastModified:new Date().getTime()});
+              this.$refs.myVueDropzone.addFile(newFile)
+              return URL.createObjectURL(conversionResult)
+            })
+          payload.filepath = url
+          payload.type = "image/jpeg"
+        } else {
+          payload.filepath = URL.createObjectURL(file)
+        }
       }
       this.ADD_SELECTED_MEDIAFILES(payload)
+      if (file.type == 'image/heic' || file.type == 'image/heif') {
+        this.$refs.myVueDropzone.removeFile(file)
+        this.removeFileFromSelected(file)
+      }
       this.$nextTick(() => this.$forceUpdate())
     },
 
@@ -438,6 +468,7 @@ export default {
     onDropzoneError(file, message, xhr) {
       this.$log.error('Dropzone Error Event', { file, message, xhr })
       if (file) {
+        this.uploadFailedFilesCount += 1;
         this.$refs.myVueDropzone.removeFile(file)
         this.removeFileFromSelected(file)
       }
@@ -500,6 +531,16 @@ export default {
     // ---
 
     async createCompleted() {
+      if (this.uploadFailedFilesCount > 0 && this.uploadingFilesCount === this.uploadFailedFilesCount) {
+        this.$root.$bvToast.toast('Uploading files failed.', {
+          title: 'Warning!',
+          variant: 'danger',
+          solid: true,
+        })
+        await axios.delete(`/posts/${this.newPostId}`)
+        this.resetForm()
+        this.isBusy = false
+      }
       // Take care of any files attached from vault (disk files have already been removed from selectedMediafiles)...
       this.selectedMediafiles.forEach( async mf => {
         await axios.post(this.$apiRoute('mediafiles.store'), {
@@ -526,14 +567,14 @@ export default {
     },
 
     takePicture() { // %TODO
-      this.selectedMedia = this.selectedMedia!=='pic' ? 'pic' : null
+      this.selectedIcon = this.selectedIcon!=='pic' ? 'pic' : null // toggle
     },
     recordVideo() { // %TODO
-      this.selectedMedia = this.selectedMedia!=='video' ? 'video' : null
+      this.selectedIcon = this.selectedIcon!=='video' ? 'video' : null // toggle
       this.showVideoRec = true
     },
     recordAudio() { // %TODO
-      this.selectedMedia = this.selectedMedia!=='audio' ? 'audio' : null
+      this.selectedIcon = this.selectedIcon!=='audio' ? 'audio' : null // toggle
       this.showAudioRec = true
     },
 
@@ -556,7 +597,14 @@ export default {
       })
     },
 
-    showTagForm() {
+    showTagForm() { // toggles visiblity
+      if ( this.isTagFormVisible && this.isHashtagIconSelected ) { 
+        // toggling to hidden, deselect icon if selected
+        this.isHashtagIconSelected = false
+      } else {
+        // toggling to viewable, always select icon
+        this.isHashtagIconSelected = true
+      }
       this.isTagFormVisible = !this.isTagFormVisible
     },
 
@@ -670,6 +718,7 @@ export default {
 
     hashtags(newVal, oldVal) {
       this.isTagFormVisible = this.hashtags.length > 0
+      this.isHashtagIconSelected = this.isTagFormVisible // highlight if we have tags
     },
 
     description(newVal, oldVal) {
@@ -772,6 +821,10 @@ li.selectable[disabled] {
 
 .price-select-container {
   border-bottom: 1px solid rgba(0,0,0,.125)
+}
+
+.progress-widget {
+  margin: 0.5rem 1rem !important;
 }
 </style>
 

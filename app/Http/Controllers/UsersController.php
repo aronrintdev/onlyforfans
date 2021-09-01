@@ -42,6 +42,12 @@ class UsersController extends AppBaseController
         return new UserCollection($data);
     }
 
+    public function show(Request $request, User $user)
+    {
+        $this->authorize('view', $user);
+        return new UserResource($user);
+    }
+
     public function update(Request $request, User $user)
     {
         $this->authorize('update', $user);
@@ -53,11 +59,16 @@ class UsersController extends AppBaseController
         ]);
 
         $timeline = $user->timeline;
-        $timeline->fill($request->only([
-            'slug',
-        ]));
 
-        $timeline->save();
+        if ( $request->has('email') ) {
+            $user->email = $request->email;
+            $user->save();
+        }
+
+        if ( $request->has('slug') ) {
+            $timeline->fill( $request->only([ 'slug' ]) );
+            $timeline->save();
+        }
 
         return new UserResource($user);
     }
@@ -121,7 +132,7 @@ class UsersController extends AppBaseController
     {
         $this->authorize('update', $user);
         $request->validate([
-            'name' => 'string|required',
+            'name' => 'string',
             'subscriptions.price_per_1_months' => 'numeric',
             'subscriptions.price_per_3_months' => 'numeric|nullable',
             'subscriptions.price_per_6_months' => 'numeric|nullable',
@@ -291,6 +302,16 @@ class UsersController extends AppBaseController
 
         $timeline->userstats = $sessionUser->getStats();
         $timeline->is_storyqueue_empty = $timeline->isStoryqueueEmpty();
+
+        // get companies
+        $models = Staff::with('permissions')->where('user_id', $sessionUser->id)->where('role', 'staff')->get();
+        $companies = [];
+        foreach( $models as $model) {
+            $user = Timeline::with(['cover', 'avatar'])->where('user_id', $model->creator_id)->first()->makeVisible(['user']);
+            $user->permissions = $model->permissions;
+            array_push($companies, $user);
+        }
+        $sessionUser->companies = $companies;
 
         /** Flags for the common UI elements */
         $uiFlags = [
@@ -542,5 +563,15 @@ class UsersController extends AppBaseController
         }
 
         return response()->json( ['status' => 200] );
+    }
+
+    public function loginAsUser(Request $request, User $user)
+    {
+        $sessionUser = $request->user();
+        if ( !$sessionUser->isAdmin() ) {
+            abort(404);
+        }
+        Auth::loginUsingId($user->id);
+        return response()->json([]);
     }
 }

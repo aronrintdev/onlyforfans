@@ -13,7 +13,7 @@
         <PreviewUpgrade :session_user="session_user" :timeline="timeline" :viewMorePhotos="setCurrentFeedType" :key="timeline.id" />
       </aside>
       <main :class="mainClass">
-        <CreatePost v-if="isOwner" :session_user="session_user" :timeline="timeline" class="mt-3" />
+        <CreatePost v-if="isOwner || canCreatePostAsStaff" :session_user="session_user" :timeline="timeline" class="mt-3" />
         <PostFeed
           :session_user="session_user"
           :timeline="timeline"
@@ -68,6 +68,11 @@ export default {
 
     isOwner() {
       return this.session_user.id === this.timeline.user.id
+    },
+
+    canCreatePostAsStaff() {
+      const index = this.session_user.companies.findIndex(company => company.id == this.timeline.id);
+      return index > -1 && this.session_user.companies[index].permissions.findIndex(permission => permission.name   == 'Post.create') > -1
     }
   },
 
@@ -98,6 +103,9 @@ export default {
       try {
         const response = await this.axios.get(this.$apiRoute('timelines.show', { timeline: this.slug }))
         this.timeline = response.data.data
+        if (this.timeline && this.timeline.id) {
+          this.$store.dispatch('getPreviewposts', { timelineId: this.timeline.id, limit: 6 })
+        }
       } catch (error) {
         this.$log.error(error)
       }

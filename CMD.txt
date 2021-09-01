@@ -66,15 +66,17 @@ $ SCOUT_DRIVER=null php artisan db:seed --class=UsersTableSeeder
 $ SCOUT_DRIVER=null php artisan db:seed --class=StoriesTableSeeder
 $ SCOUT_DRIVER=null php artisan db:seed --class=PostsTableSeeder
 $ SCOUT_DRIVER=null php artisan db:seed --class=ShareablesTableSeeder
+$ SCOUT_DRIVER=null php artisan db:seed --class=ChatmessagesTableSeeder
 
 # Production seed test
 $ SCOUT_DRIVER=null DB_DATABASE=fansplat_dev_test php artisan db:seed --class="\Database\Seeders\Production\DatabaseSeeder"
 
-# Run all seeds in test env (.env.testing)
-$ php artisan db:seed --class=TestDatabaseSeeder
+# Run specific seeder in test env (.env.testing)
+$ DB_DATABASE="database/template.sqlite" DB_FINANCIAL_DATABASE="database/template.sqlite"  php artisan db:seed --env="testing" --database="template" --class=ChatmessagesTableSeeder
 
 # Run all seeds in dev/staging/demo env (eg localhost, .env)
 $ php artisan db:seed --class=DatabaseSeeder
+$ SCOUT_DRIVER=null  php artisan db:seed --class=DatabaseSeeder
 
 %%% Clear route cache...may need to run this post-deployment
 $ php artisan route:cache

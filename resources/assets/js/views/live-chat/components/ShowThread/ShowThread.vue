@@ -13,7 +13,9 @@
           :participant="participant"
           :favorited="isFavorite"
           :muted="!!isMuted"
+          :hasNotes="!!notes"
           @tip="tip"
+          @addNotes="addNotes"
           @toggleMute="toggleMute"
           @toggleFavorite="toggleFavorite"
         />
@@ -111,6 +113,15 @@
       @toggleVaultSelect="vaultSelectionOpen = !vaultSelectionOpen"
     />
 
+    <b-modal id="modal-notes" hide-footer body-class="p-0" v-model="isNotesModalVisible" size="md" :title="modalTitle" >
+      <AddNotes
+        :timeline="timeline"
+        :notes="notes"
+        :onClose="hideNotesModal"
+        :onUpdate="updateNotes"
+      />
+    </b-modal>
+
   </div>
 </template>
 
@@ -125,6 +136,7 @@ import _ from 'lodash'
 import moment from 'moment'
 
 import AvatarWithStatus from '@components/user/AvatarWithStatus'
+import AddNotes from '@components/common/AddNotes'
 import Gallery from './Gallery'
 import MessageDisplay from '@views/live-chat/components/MessageDisplay'
 import MessageForm from '@views/live-chat/components/NewMessageForm'
@@ -145,11 +157,13 @@ export default {
     SearchInput,
     TypingIndicator,
     VaultSelector,
+    AddNotes,
   },
 
   props: {
     timeline: null,
     id: null, // the chatthread PKID
+    currentNotes: null,
   },
 
   computed: {
@@ -180,6 +194,14 @@ export default {
       return this._thread()(this.id)
     },
 
+    modalTitle() {
+      if (this.notes) {
+        return 'Edit Notes'
+      } else {
+        return 'Add Notes'
+      }
+    }
+
   },
 
   data: () => ({
@@ -208,13 +230,17 @@ export default {
 
     vaultSelectionOpen: false,
 
+    isNotesModalVisible: false,
+    notes: null,
   }), // data
 
   created() {
     this.search = _.debounce(this._search, this.debounceAmount)
+    this.notes = this.currentNotes
   },
 
   mounted() {
+    console.log(`live-chat/components/ShowThread::mounted() - calling getChatmessages with id ${this.id}`)
     this.getMuteStatus(this.id)
     this.getChatmessages(this.id)
 
@@ -225,14 +251,14 @@ export default {
     }).catch(error => eventBus.$emit('error', { error, message: this.$t('error')}))
 
     this.markRead(this.id)
-    this.$log.debug('ShowThread Mounted', { channelName: this.channelName })
+    //this.$log.debug('ShowThread Mounted', { channelName: this.channelName })
     this.$echo.join(this.channelName)
       .listen('.chatmessage.sent', e => {
-        this.$log.debug('Event Received: .chatmessage.sent', { e })
+        //this.$log.debug('Event Received: .chatmessage.sent', { e })
         this.addMessage(e.chatmessage)
       })
       .listenForWhisper('sendMessage', e => {
-        this.$log.debug('Whisper Received: sendMessage', { e })
+        //this.$log.debug('Whisper Received: sendMessage', { e })
         this.addTempMessage(e.message)
       })
   },
@@ -253,7 +279,7 @@ export default {
      * Add official message from db, overwrite temp message if necessary
      */
     addMessage(message) {
-      this.$log.debug('ShowThread addMessage', { message })
+      //this.$log.debug('ShowThread addMessage', { message })
       var replaced = false
       for (var i in this.chatmessages) {
         if (
@@ -261,13 +287,13 @@ export default {
           this.chatmessages[i].sender_id === message.sender_id &&
           this.chatmessages[i].mcontent === message.mcontent
         ) {
-          this.$log.debug('ShowThread addMessage replaced message', { i, message: this.chatmessages[i] })
+          //this.$log.debug('ShowThread addMessage replaced message', { i, message: this.chatmessages[i] })
           Vue.set(this.chatmessages, i, message)
           replaced = true
           break;
         }
       }
-      this.$log.debug('ShowThread addMessage', { replaced })
+      //this.$log.debug('ShowThread addMessage', { replaced })
       if (!replaced) {
         this.chatmessages = [
           message,
@@ -280,7 +306,7 @@ export default {
      * Quickly add a temp message to data set while official one is processed in db
      */
     addTempMessage(message) {
-      this.$log.debug('ShowThread addTempMessage', { message })
+      //this.$log.debug('ShowThread addTempMessage', { message })
       this.chatmessages = [
         { id: moment().valueOf(), temp: true, ...message },
         ...this.chatmessages,
@@ -288,7 +314,8 @@ export default {
     },
 
     endVisible(isVisible) {
-      this.$log.debug('endVisible', { isVisible })
+      //this.$log.debug('endVisible', { isVisible })
+      console.log(`live-chat/components/ShowThread::endVisible()`)
       this.isEndVisible = isVisible
       if (isVisible && !this.moreLoading && !this.isLastPage) {
         this.loadNextPage()
@@ -296,9 +323,10 @@ export default {
     },
 
     loadNextPage() {
+      console.log(`live-chat/components/ShowThread::loadNextPage() - calling getChatmessages with no id `)
       this.currentPage += 1
       this.moreLoading = true
-      this.getChatmessages()
+      this.getChatmessages(this.id)
     },
 
     isDateBreak(cm, idx) {
@@ -316,6 +344,7 @@ export default {
         take: this.perPage,
         chatthread_id: chatthreadID,
       }
+      console.log('live-chat/components/ShowThread::getChatmessages() - chatmessages.index', { params })
       const response = await axios.get( this.$apiRoute('chatmessages.index'), { params } )
 
       // Filter out any messages that we already have
@@ -323,7 +352,7 @@ export default {
         _.findIndex(this.chatmessages, message => message.id === incoming.id) === -1
       ))
 
-      this.$log.debug('getChatmessages', { newMessages })
+      //this.$log.debug('getChatmessages', { newMessages })
 
       this.chatmessages = [
         ...this.chatmessages,
@@ -397,6 +426,18 @@ export default {
       })
     },
 
+    addNotes() {
+      this.isNotesModalVisible = true
+    },
+
+    hideNotesModal() {
+      this.isNotesModalVisible = false
+    },
+
+    updateNotes(notes) {
+      this.notes = notes
+    },
+
     toggleFavorite() {
       const isFavorite = this.thread.is_favorite
       this.UPDATE_THREAD({ ...this.thread, is_favorite: isFavorite ? false : true })
@@ -451,6 +492,7 @@ export default {
 
     id (newValue, oldValue) {
       if ( newValue && (newValue !== oldValue) ) {
+        console.log(`live-chat/components/ShowThread::watch(id) - calling getChatmessages with id ${newValue}`)
         this.getChatmessages(newValue)
         this.markRead(newValue)
         this.getMuteStatus(newValue)

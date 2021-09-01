@@ -17,9 +17,9 @@
             <router-link :to="{ name: 'static.blog' }" class="col-sm-2 col-2 col-lg-1 col-xs-12" style="margin-bottom:5px">Blog</router-link>
           </div> -->
           <div class="fans-terms text-center">
-            Copyright © 2021 <a href="/">AllFans</a>. All rights reserved.
+            Copyright © 2021 <a href="/" class="text-primary">AllFans</a>. All rights reserved.
             <br />
-            1027 S. Rainbow Blvd. #119, Las Vegas, NV 89145
+            3651 Lindell Road, Suite D407, Las Vegas, NV 89103
             <br />
             <!-- %MATT: here is the flag dropdown
             <span class="dropup" style="margin-left: 20px">

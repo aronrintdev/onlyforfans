@@ -85,6 +85,7 @@ dev-server-deploy.sh
 
 # IDE Helper
 _ide_helper.php
+_ide_helper_models.php
 
 # Generated Reports
 analyzerReport.html
@@ -140,7 +141,7 @@ dot-npmrc--hide
 database/template.sqlite--bak
 dot-npmrc-save--0607
 
-
 # Deployment Scripts
 *deploy.sh
 *build.sh
+psg-deploy.sh

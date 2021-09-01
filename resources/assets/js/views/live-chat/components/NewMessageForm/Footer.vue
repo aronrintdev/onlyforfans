@@ -1,14 +1,13 @@
 <template>
-  <div class="toolbar d-flex">
-    <div class="tool-items d-flex flex-shrink-1 py-2 mr-3">
+  <div class="toolbar align-items-center pb-sm-5" :class="{'d-flex': !mobile}">
+    <div class="tool-items d-flex flex-shrink-1 mr-3">
       <b-btn
         v-for="item in buttons"
         :key="item.key"
         variant="link"
         :disabled="item.disabled"
         :class="item.class"
-        v-b-tooltip.hover
-        :title="item.tooltip"
+        v-b-tooltip.hover.bottom="{boundary: 'viewport', title: item.tooltip}"
         @click="item.onClick"
       >
         <fa-icon
@@ -19,31 +18,23 @@
         />
       </b-btn>
     </div>
-    <div class="py-2 ml-auto d-flex align-items-end">
+    <div class="ml-auto d-flex align-items-end" :class="{'float-right': mobile}">
       <b-btn
         variant="success"
         class="mr-3 text-nowrap"
         v-b-tooltip.hover="mobile ? null :$t('tooltips.sendWithTip')"
       >
         <fa-icon icon="dollar-sign" class="mr-2" />
-        <span v-if="!mobile">{{ $t('sendWithTip') }}</span>
-        <span v-else>
-          <fa-icon icon="arrow-right" class="ml-2" />
-        </span>
+        <span>{{ $t('sendWithTip') }}</span>
       </b-btn>
       <div class="d-flex flex-column">
-        <div
-          v-if="!mobile"
-          class="font-size-smaller text-muted text-right mr-2"
-          v-text="$t('sendHint')"
-        />
         <b-btn
           variant="primary"
           class="submit text-nowrap"
           :disabled="false"
           @click="$emit('submit')"
         >
-          <span v-if="!mobile">{{ $t('send') }}</span>
+          <span>{{ $t('send') }}</span>
           <fa-icon icon="arrow-right" class="ml-2" />
         </b-btn>
       </div>
@@ -160,13 +151,12 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
-    "sendHint": "Ctrl + Enter",
     "send": "Send",
     "tooltips": {
       "uploadFiles": "Add Photo",
       "recordVideo": "Record Video",
       "recordAudio": "Record Audio",
-      "vaultSelect": "Add Photo From Your Vault",
+      "vaultSelect": "Add Photo From My Media",
       "openScheduleMessage": "Schedule Message To Be Sent At",
       "setPrice": "Set Message Unlock Price",
       "sendWithTip": "Include a tip with your message",

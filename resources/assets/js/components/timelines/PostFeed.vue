@@ -183,17 +183,14 @@ export default {
   },
   beforeDestroy() {
     // window.removeEventListener('scroll', this.onScroll)
+    eventBus.$off('update-timelines');
   },
 
   created() {
     this.feedType = this.is_schedulefeed ? 'schedule' : this.feedType;
 
     // Get photos & videos feed total count
-    axios.get(route('timelines.getPhotosVideosCount', this.timelineId))
-      .then((response) => {
-        this.totalPhotosCount = response.data.photos || 0;
-        this.totalVideosCount = response.data.videos || 0;
-      })
+    this.getMediaCount()
 
     this.$store.dispatch('getFeeddata', { 
       feedType: this.feedType,
@@ -362,6 +359,7 @@ export default {
         hidePromotions: this.hidePromotions,
       })
       this.$store.dispatch('getQueueMetadata')
+      this.getMediaCount()
     },
 
     doReset() {
@@ -371,6 +369,13 @@ export default {
       this.moreLoading = true
     },
 
+    getMediaCount() {
+      axios.get(route('timelines.getPhotosVideosCount', this.timelineId))
+        .then((response) => {
+          this.totalPhotosCount = response.data.photos || 0;
+          this.totalVideosCount = response.data.videos || 0;
+        })
+    }
   },
 
   watch: {
@@ -401,7 +406,23 @@ export default {
           if (!this.isLastPage && this.renderedItems.length >= 5) {
             this.renderedItems.pop();
           }
-          this.renderedItems.unshift(newVal);
+          newVal.mediafiles.forEach(mf => {
+            if (this.feedType === 'photos' && mf.is_image) {
+              this.renderedItems.unshift(mf);
+              this.totalPhotosCount += 1;
+            } else if (this.feedType === 'videos' && mf.is_video) {
+              this.renderedItems.unshift(mf);
+              this.totalVideosCount += 1;
+            } else if (this.feedType === 'default') {
+              if (mf.is_image) {
+                this.totalPhotosCount += 1;
+              }
+              if (mf.is_video) {
+                this.totalVideosCount += 1;
+              }
+              this.renderedItems.unshift(newVal);
+            }
+          })
         }
       } else {
         if (newVal.schedule_datetime) {

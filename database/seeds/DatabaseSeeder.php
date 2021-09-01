@@ -31,10 +31,10 @@ class DatabaseSeeder extends Seeder
             StoriesTableSeeder::class,
             FavoritesTableSeeder::class,
             LikeablesTableSeeder::class,
-            TipsTableSeeder::class,
             RandomTimestampSeeder::class,
             ChatmessagesTableSeeder::class,
             MediafilesTableSeeder::class,
+            TipsTableSeeder::class,
             PermissionsTableSeeder::class,
             StaffTableSeeder::class,
 

@@ -1,15 +1,21 @@
 <?php
 namespace App\Models;
 
+use DB;
 use Exception;
 use Carbon\Carbon;
-use App\Interfaces\UuidId;
-use Laravel\Scout\Searchable;
 
-use App\Models\Traits\UsesUuid;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
+
+use Laravel\Scout\Searchable;
+
+use App\Models\Casts\Money as CastsMoney;
+use App\Interfaces\UuidId;
+
+use App\Models\Traits\UsesUuid;
+use App\Enums\MessagegroupTypeEnum;
 //use App\Models\Traits\UsesShortUuid;
 
 class Chatthread extends Model implements UuidId
@@ -17,7 +23,6 @@ class Chatthread extends Model implements UuidId
     use UsesUuid, Searchable;
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
-
     //------------------------------------------------------------------------//
     // Boot
     //------------------------------------------------------------------------//
@@ -44,19 +49,33 @@ class Chatthread extends Model implements UuidId
     // %%% Accessors/Mutators | Casts
     //------------------------------------------------------------------------//
 
-    protected $appends = ['isFavoritedByMe'];
+    protected $appends = ['isFavoritedByMe', 'notes'];
 
     public function getIsFavoritedByMeAttribute($value)
     {
-        $sessionUser = Auth::user();
+        $sessionUser = Auth::user(); // %FIXME - should not reference session user in a model!
         if (!$sessionUser) {
             return false;
         }
         $exists = Favorite::where('user_id', $sessionUser->id)
-        ->where('favoritable_id', $this->id)
-        ->where('favoritable_type', 'posts')
+            ->where('favoritable_id', $this->id)
+            ->where('favoritable_type', 'posts')
             ->first();
         return $exists ? true : false;
+    }
+
+    public function getNotesAttribute($value) {
+        $sessionUser = Auth::user();
+        if (!$sessionUser) {
+            return null;
+        }
+        $otherUser = $this->participants->filter( function($u) use(&$sessionUser) {
+            return $u->id !== $sessionUser->id;
+        })->first();
+
+        return Notes::where('user_id', $sessionUser->id)
+            ->where('notes_id', $otherUser->timeline->id)
+            ->first();
     }
 
     //------------------------------------------------------------------------//
@@ -141,14 +160,6 @@ class Chatthread extends Model implements UuidId
     //------------------------------------------------------------------------//
     #region Methods
 
-    public static function startChat(User $originator) : Chatthread
-    {
-        // %TODO: use transaction
-        $chatthread = Chatthread::create([
-            'originator_id' => $originator->id,
-        ]);
-        return $chatthread;
-    }
 
     /**
      * Finds or creates a new chatthread for two users
@@ -166,10 +177,108 @@ class Chatthread extends Model implements UuidId
         $ct = $cts->where('participants_count', 2)->first();
 
         if (!isset($ct)) {
-            $ct = static::startChat($originator);
+            $ct = Chatthread::create([
+                'originator_id' => $originator->id,
+            ]);
             $ct->addParticipant($participant->id);
         }
         return $ct;
+    }
+
+    // 'thin-controlller-fat-model' refacator of code from chatthreads.store
+    //public static function findOrCreateChat($sender, $rattrs)
+    public static function findOrCreateChat(
+        User        $sender, 
+        string      $originatorId,
+        array       $participants, // array of user ids
+        string      $mcontent = null,
+        int         $deliverAt = null,
+        array       $attachments = null,
+        int         $price = null,
+        string      $currency = null,
+        array       $cattrs = null
+    ) {
+
+        if ( empty($mcontent) && empty($attachments??null) ) { 
+            // can't send message without text content or media attached
+            throw new Exception('New message requires content or media attached');
+        }
+
+        $cmGroup = null; // the created chat message group, if any (1 only)
+        $chatmessages = collect();  // the created chat messages, one or more
+        $currency = $currency ?? 'USD';
+
+        //$chatthreads = DB::transaction( function() use(&$rattrs, &$cmGroup, &$chatmessages, &$sender) {  // breaks sqlite seeder when contains ->attach()! %FIXME
+
+            $chatthreads = collect();
+            $originator = User::find($originatorId);
+            $isMassMessage = count($participants) > 1;
+
+            if ($isMassMessage) {
+                $cmgroupAttrs = [
+                    'mgtype'          => MessagegroupTypeEnum::MASSMSG,
+                    'sender_id'       => $sender->id,
+                    'mcontent'        => $mcontent,
+                    'price'           => CastsMoney::toMoney($price, $currency),
+                    'currency'        => $currency,
+                    'cattrs' => [
+                        'sender_name'     => $sender->name,
+                        'participants'    => $participants,
+                        'deliver_at'      => $deliverAt, // %TODO: expect this to be an integer, UTC unix ts in s (?)
+                        'attachments'     => $attachments,
+                    ],
+                ];
+                $cmGroup = Chatmessagegroup::create($cmgroupAttrs);
+            }
+    
+            foreach ($participants as $participantUserId) { // participants is an array of [users] primary keys, and should *not* include originator
+                // Check if chat with participant already exits
+                $ct = $originator->chatthreads()->whereHas('participants', function ($query) use($participantUserId) {
+                    $query->where('user_id', $participantUserId);
+                })->first();
+    
+                // Add participant to originator mycontacts if they are not already there
+                if ($originator->mycontacts()->where('contact_id', $participantUserId)->doesntExist()) {
+                    Mycontact::create([
+                        'owner_id' => $originator->id,
+                        'contact_id' => $participantUserId,
+                    ]);
+                }
+    
+                // Start new chat thread if one is not found
+                if (!isset($ct)) {
+                    $ct = Chatthread::create([
+                        'originator_id' => $originator->id,
+                        //'cattrs' => $cattrs??[],
+                    ]);
+                    $ct->addParticipant($participantUserId);
+                }
+    
+                $cm = isset($deliverAt)
+                    ? $ct->scheduleMessage( $sender, $mcontent, $deliverAt ) // send at scheduled date
+                    : $ct->sendMessage( $sender, $mcontent, $attachments, $price, $currency ); // send now
+
+                if ($isMassMessage) {
+                    $cm->chatmessagegroup_id = $cmGroup->id;
+                    $cm->save();
+                }
+
+                $ct->refresh();
+                $chatthreads->push($ct);
+
+                $cm->refresh();
+                $chatmessages->push($cm);
+
+            } // foreach
+
+            //return $chatthreads;
+        //});
+
+        return [
+            'chatthreads' => $chatthreads, 
+            'chatmessages' => $chatmessages, 
+            'chatmessagegroup' => $cmGroup,
+        ];
     }
 
     public function addParticipant($participantID)
@@ -178,17 +287,41 @@ class Chatthread extends Model implements UuidId
         return $this;
     }
 
-    // %TODO: handle mediafiles
-    public function sendMessage(User $sender, string $mcontent, Collection $cattrs = null) : Chatmessage
+    // %FIXME %TODO: use transaction (??)
+    public function sendMessage(
+        User        $sender, 
+        string      $mcontent = null,
+        array       $attachments = null,
+        int         $price = null,
+        string      $currency = null,
+        array       $cattrs = null
+    ) : Chatmessage
     {
-        if (!isset($cattrs)) {
-            $cattrs = new Collection();
-        }
-        return $this->chatmessages()->create([
+        $cm = $this->chatmessages()->create([
               'sender_id' => $sender->id,
               'mcontent'  => $mcontent,
-              'cattrs'    => $cattrs,
+              'cattrs'    => $cattrs??[],
         ]);
+
+        if ( isset($price) ) {
+            $cm->setPurchaseOnly($price, $currency); // %FIXME: should pull a default currency from config (?)
+        }
+
+        // Create mediafile refs for any attachments
+        if ( isset($attachments) && count($attachments) ) {
+            foreach ($attachments??[] as $a) {
+                if ($a['diskmediafile_id']) { // ie [mediafiles].diskmediafile_id (the FK)
+                    Mediafile::find($a['id'])->diskmediafile->createReference(
+                        $cm->getMorphString(), // string   $resourceType
+                        $cm->getKey(),         // int      $resourceID
+                        $a['mfname'],          // string   $mfname
+                        'messages'             // string   $mftype
+                    );
+                }
+            }
+        }
+
+        return $cm;
     }
 
     public function scheduleMessage(User $sender, string $mcontent, int $deliverAt) : Chatmessage

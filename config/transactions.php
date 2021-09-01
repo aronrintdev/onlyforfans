@@ -18,6 +18,7 @@ return [
     'defaultCurrency' => env('TRANSACTIONS_DEFAULT_CURRENCY', 'USD'),
 
     'disableAll' => env('TRANSACTIONS_DISABLE_ALL', 0),
+    'disableUserAbilityAtRegister' => env('TRANSACTIONS_USER_DISABLE_AT_START', 0),
 
     /**
      * All transactions live within a system, all background money in a system must live in same location, e.i. bank
@@ -119,6 +120,7 @@ return [
 
     /**
      * Name of the queue running summarizations
+     *      Note this is now the connection name
      */
     'summarizeQueue' => 'financial-summaries',
 
@@ -127,17 +129,14 @@ return [
      */
     'summarizeAt' => [
         [
-            'priority' => 'low',
-            'count'    => 1000, // 1k
+            'priority' => env('QUEUE_PREFIX', '') . 'financial-summaries',
+            'count'    => env('TRANSACTIONS_SUMMARIZE_AT', 1000), // 1k
         ], [
-            'priority' => 'mid',
-            'count'    => 10000, // 10k
+            'priority' => env('QUEUE_PREFIX', '') . 'financial-summaries-high',
+            'count'    => env('TRANSACTIONS_SUMMARIZE_AT_HIGH', 10000), // 10k
         ], [
-            'priority' => 'high',
-            'count'    => 100000, // 100k
-        ], [
-            'priority' => 'urgent',
-            'count'    => 1000000 // 1M
+            'priority' => env('QUEUE_PREFIX', '') . 'financial-summaries-urgent',
+            'count'    => env('TRANSACTIONS_SUMMARIZE_AT_URGENT', 100000) // 100k
         ],
     ],
 

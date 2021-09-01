@@ -23,10 +23,10 @@
         </li>
       </ul>
       <ul class="d-flex list-inline footer-ctrl mb-0">
-        <li class="mr-3">
+        <li class="ml-3">
           <span @click="toggleFavorite()" class="tag-clickable">
             <fa-icon size="lg" v-if="isFavoritedByMe" fixed-width :icon="['fas', 'star']" class="clickable text-primary" style="font-size:1.2rem" />
-            <fa-icon size="lg" v-else fixed-width :icon="['far', 'star']" class="clickable text-primary" style="font-size:1.2rem" />
+            <fa-icon size="lg" v-else fixed-width :icon="['far', 'star']" class="clickable text-secondary" style="font-size:1.2rem" />
           </span>
         </li>
       </ul>
@@ -211,5 +211,6 @@ li {
 
 .panel-footer {
   user-select: none;
+  margin: 0 -0.4em;
 }
 </style>

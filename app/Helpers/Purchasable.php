@@ -18,9 +18,9 @@ class Purchasable
 
         $models = getModels([ Purchaseable::class ]);
         foreach ($models as $model) {
-            $item = app($model)::find($item);
-            if (isset($item)) {
-                return $item;
+            $foundItem = app($model)::find($item);
+            if (isset($foundItem)) {
+                return $foundItem;
             }
         }
         return $item;

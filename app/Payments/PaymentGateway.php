@@ -18,6 +18,10 @@ class PaymentGateway implements PaymentGatewayContract
 
     public function purchase(Account $account, Purchaseable $item, Money $price)
     {
+        // Validate Payment allowed
+        if (!$account->owner->canMakePayments()) {
+            abort(403, 'Payments Forbidden');
+        }
         switch($account->system) {
             case 'segpay':
                 return (new SegpayPaymentGateway)->purchase($account, $item, $price);
@@ -28,6 +32,10 @@ class PaymentGateway implements PaymentGatewayContract
 
     public function tip(Account $account, Tip $tip, Money $price)
     {
+        // Validate Payment allowed
+        if (!$account->owner->canMakePayments()) {
+            abort(403, 'Payments Forbidden');
+        }
         switch ($account->system) {
             case 'segpay':
                 return (new SegpayPaymentGateway)->tip($account, $tip, $price);
@@ -38,6 +46,10 @@ class PaymentGateway implements PaymentGatewayContract
 
     public function subscribe(Account $account, Subscribable $item, Money $price)
     {
+        // Validate Payment allowed
+        if (!$account->owner->canMakePayments()) {
+            abort(403, 'Payments Forbidden');
+        }
         switch ($account->system) {
             case 'segpay':
                 return (new SegpayPaymentGateway)->subscribe($account, $item, $price);

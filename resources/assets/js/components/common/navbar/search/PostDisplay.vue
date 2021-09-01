@@ -19,7 +19,7 @@
     >
       <b-media>
         <template #aside>
-          <b-avatar v-if="value.mediafiles[0]" :src="value.mediafiles[0].filepath" />
+          <b-avatar v-if="value.mediafiles && value.mediafiles[0]" :src="value.mediafiles[0].filepath" />
           <b-avatar v-else>
             <fa-icon icon="pen" />
           </b-avatar>
@@ -41,7 +41,10 @@ export default {
 
   computed: {
     text() {
-      return `${this.value.description.slice(0, this.maxCharacters)}...`
+      if (this.value.description) {
+        return `${this.value.description.slice(0, this.maxCharacters)}...`
+      }
+      return ''
     }
   },
 }

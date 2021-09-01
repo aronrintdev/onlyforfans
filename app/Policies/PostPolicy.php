@@ -47,9 +47,30 @@ class PostPolicy extends BasePolicy
         case PostTypeEnum::FREE:
             return true; // anyone can see content of free posts
         case PostTypeEnum::SUBSCRIBER:
+            if ($post->timeline->subscribers->count()
+                && $user->staff 
+                && $post->timeline->subscribers->contains($user->staff->creator_id)) {
+                $hasPermission = false;
+                foreach($user->staff->permissions as $permission) {
+                    if ($permission->name == 'Post.viewAll') {
+                        $hasPermission = true;
+                    }
+                }
+                return $hasPermission;
+            }
             return $post->timeline->subscribers->count()
                 && $post->timeline->subscribers->contains($user->id);
         case PostTypeEnum::PRICED:
+            if ( $user->staff && ($post->user_id === $user->staff->creator_id) ) {
+                $hasPermission = false;
+                $permissions = $user->staff->permissions;
+                foreach($permissions as $permission) {
+                    if ($permission->name == 'Post.viewAll') {
+                        $hasPermission = true;
+                    }
+                }
+                return $hasPermission;
+            }
             return $post->sharees->count()
                 && $post->sharees->contains($user->id); // premium (?)
         }

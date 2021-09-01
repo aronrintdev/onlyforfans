@@ -97,6 +97,7 @@ class PostsController extends AppBaseController
 
     public function store(Request $request)
     {
+        $sessionUser = $request->user();
         $vrules = [
             'timeline_id' => 'required|uuid|exists:timelines,id',
             'type' => [ 'sometimes', 'required', new InEnum(new PostTypeEnum()) ],
@@ -116,7 +117,10 @@ class PostsController extends AppBaseController
 
         $timeline = Timeline::find($request->timeline_id); // timeline being posted on
 
-        $this->authorize('update', $timeline); // create post considered timeline update
+        // $this->authorize('update', $timeline); // create post considered timeline update
+        if ($sessionUser->id !== $timeline->user_id && $sessionUser->canChangePostForTimeline($timeline, 'Post.create') == false) {
+            abort(403, 'This action is unauthorized.');
+        }
 
         $attrs = $request->except(['timeline_id', 'description']); // timeline_id is now postable
         $attrs['user_id'] = $timeline->user->id; // %FIXME: remove this field, redundant
@@ -183,10 +187,15 @@ class PostsController extends AppBaseController
 
     public function update(Request $request, Post $post)
     {
-        $this->authorize('update', $post);
+        // $this->authorize('update', $post);
+        $sessionUser = $request->user();
+        if ($sessionUser->id !== $post->timeline->user_id && $sessionUser->canChangePostForTimeline($post->timeline, 'Post.edit') == false) {
+            abort(403, 'This action is unauthorized.');
+        }
 
         if ($post->price->isPositive() && $post->sharees()->count() > 0) {
-            abort(403, 'Post has sharees');
+            //abort(403, 'Post has sharees'); // removed as per AF-540 20210823
+            // %PSG: this was too broad in any case, as it restricted user from adding tags, etc
         }
 
         $request->validate([
@@ -274,7 +283,12 @@ class PostsController extends AppBaseController
 
     public function destroy(Request $request, Post $post)
     {
-        $this->authorize('delete', $post);
+        // $this->authorize('delete', $post);
+        $sessionUser = $request->user();
+        if ($sessionUser->id !== $post->timeline->user_id && $sessionUser->canChangePostForTimeline($post->timeline, 'Post.delete') == false) {
+            abort(403, 'This action is unauthorized.');
+        }
+
         if ($post->sharees()->count() > 0 ) {
             abort(403, 'Post has sharees');
         }

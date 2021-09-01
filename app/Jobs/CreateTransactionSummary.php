@@ -31,6 +31,13 @@ class CreateTransactionSummary implements ShouldQueue, ShouldBeUnique
     public $backoff = [5, 15, 60];
 
     /**
+     * Delete the job if its models no longer exist.
+     *
+     * @var bool
+     */
+    public $deleteWhenMissingModels = true;
+
+    /**
      * Account instance
      * @var \App\Models\Financial\Account
      */
@@ -57,7 +64,7 @@ class CreateTransactionSummary implements ShouldQueue, ShouldBeUnique
      */
     public function uniqueId()
     {
-        return "{$this->account->id}-{$this->type}-{$this->range['from']}-{$this->range['to']}";
+        return "create-transaction-summary-{$this->account->id}-{$this->type}-{$this->range['from']}-{$this->range['to']}";
     }
 
     public function middleware()

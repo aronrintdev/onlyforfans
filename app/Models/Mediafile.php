@@ -17,6 +17,8 @@ use App\Models\Traits\SluggableTraits;
 use App\Traits\OwnableFunctions;
 use App\Models\Traits\ContenttaggableTraits;
 use Cviebrock\EloquentSluggable\Sluggable;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Config;
 use Intervention\Image\Facades\Image;
 
 class Mediafile extends BaseModel implements Guidable, Ownable, Messagable, Contenttaggable
@@ -56,7 +58,7 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Messagable, Cont
     }
 
     public function contenttags() {
-        return $this->morphToMany(Contenttag::class, 'contenttaggable')->withTimestamps();
+        return $this->morphToMany(Contenttag::class, 'contenttaggable')->withPivot('access_level')->withTimestamps();
     }
 
     //--------------------------------------------
@@ -135,25 +137,39 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Messagable, Cont
     }
 
     public function getFilepathAttribute($value) {
-        return !empty($this->diskmediafile->filepath) ? Storage::disk('s3')->url($this->diskmediafile->filepath) : null;
-        //return !empty($this->filename) ? Storage::disk('s3')->temporaryUrl( $this->filename, now()->addMinutes(5) ) : null;
+        return $this->getS3Url($this->diskmediafile->filepath);
     }
 
     public function getMidFilepathAttribute($value) {
         $subfolder = $this->diskmediafile->owner_id;
         $path = $subfolder.'/mid/'.$this->diskmediafile->basename.'.jpg';
-        return !empty($path) ? Storage::disk('s3')->url($path) : null;
+        return $this->getS3Url($path);
     }
 
     public function getThumbFilepathAttribute($value) {
         $subfolder = $this->diskmediafile->owner_id;
         $path = $subfolder.'/thumb/'.$this->diskmediafile->basename.'.jpg';
-        return !empty($path) ? Storage::disk('s3')->url($path) : null;
+        return $this->getS3Url($path);
     }
 
     public function getBlurFilepathAttribute($value) {
         $subfolder = $this->diskmediafile->owner_id;
         $path = $subfolder.'/blur/'.$this->diskmediafile->basename.'.jpg';
+        return $this->getS3Url($path);
+    }
+
+    /**
+     * Get s3 path from relative storage path
+     */
+    private function getS3Url($path) {
+        if (Config::get('filesystems.useSigned', false)) {
+            return !empty($path)
+                ? Storage::disk('s3')->temporaryUrl(
+                    $path,
+                    Carbon::now()->addMinutes(Config::get('filesystems.availabilityMinutes'))
+                )
+                : null;
+        }
         return !empty($path) ? Storage::disk('s3')->url($path) : null;
     }
 

@@ -12,9 +12,6 @@
 </template>
 
 <script>
-/**
- * resources/assets/js/components/vault/Breadcrumb.vue
- */
 import Vuex from 'vuex'
 
 export default {

@@ -304,7 +304,7 @@ export default {
       "profile": "My Profile",
       "settings": "Settings",
       "statements": "Statements",
-      "vault": "My Vault"
+      "vault": "My Media"
     }
   }
 }

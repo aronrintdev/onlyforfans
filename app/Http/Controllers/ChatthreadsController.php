@@ -2,13 +2,14 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use DB;
 use Illuminate\Support\Facades\Config;
 use App\Models\User;
 use App\Models\Favorite;
 use App\Models\Mediafile;
 use App\Models\Mycontact;
 use App\Models\Chatthread;
-//use App\Http\Resources\ChatmessageCollection;
+use App\Models\Chatmessagegroup;
 use App\Models\Chatmessage;
 use Illuminate\Http\Request;
 use App\Events\MessageSentEvent;
@@ -16,6 +17,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\MessageReceived;
 use App\Enums\ShareableAccessLevelEnum;
+use App\Enums\MessagegroupTypeEnum;
 use App\Http\Resources\ChatthreadCollection;
 use App\Http\Resources\Chatthread as ChatthreadResource;
 use App\Http\Resources\Chatmessage as ChatmessageResource;
@@ -24,7 +26,6 @@ class ChatthreadsController extends AppBaseController
 {
 
     /**
-     * 
      * @param Request $request
      * @return ChatthreadCollection
      */
@@ -67,7 +68,7 @@ class ChatthreadsController extends AppBaseController
 
         // If user is admin and originator or participant ids are not specified then can perform query where user is
         // not a part of the participants
-        if (
+        if ( true || 
             !(
                 $request->user()->isAdmin() &&
                 ($request->has('originator_id') || $request->has('participant_id'))
@@ -285,49 +286,28 @@ class ChatthreadsController extends AppBaseController
             'originator_id'  => 'required|uuid|exists:users,id',
             'participants'   => 'required|array', // %FIXME: rename to 'recipients' for clairty
             'participants.*' => 'uuid|exists:users,id',
-            'mcontent'       => 'string',  // optional first message content
+            'mcontent'       => 'required_without:attachments|string',  // optional first message content
             'deliver_at'     => 'numeric', // optional to pre-schedule delivery of message if present
             'price'          => 'numeric',
             'currency'       => 'required_with:price|size:3',
             'attachments'    => 'required_with:price|array',   // optional first message attachments
         ]);
-        $originator = User::find($request->originator_id);
 
-        $chatthreads = collect();
-        foreach ($request->participants as $pkid) {
-            // Check if chat with participant already exits
-            $ct = $originator->chatthreads()->whereHas('participants', function ($query) use($pkid) {
-                $query->where('user_id', $pkid);
-            })->first();
-
-            // Add participant to originator mycontacts if they are not already there
-            if ($originator->mycontacts()->where('contact_id', $pkid)->doesntExist()) {
-                Mycontact::create([
-                    'owner_id' => $originator->id,
-                    'contact_id' => $pkid,
-                ]);
-            }
-
-            // Start new chat thread if one is not found
-            if (!isset($ct)) {
-                $ct = Chatthread::startChat($originator);
-                $ct->addParticipant($pkid);
-            }
-
-            if ( $request->has('mcontent') || $request->has('attachments') ) { // if included send the first message
-                if ( $request->has('deliver_at') ) {
-                    $message = $ct->scheduleMessage($request->user(), $request->mcontent ?? '', $request->deliver_at);
-                } else {
-                    $message = $ct->sendMessage($request->user(), $request->mcontent ?? '', new Collection());
-                }
-                $this->addAttachments($request, $message);
-            }
-            $ct->refresh();
-            $chatthreads->push($ct);
-        }
+        ['chatthreads'=>$chatthreads, 'chatmessages'=>$chatmessages, 'chatmessagegroup'=>$cmGroup] = Chatthread::findOrCreateChat(
+            $request->user(),               // User      $sender
+            $request->originator_id,        // int       $originator_id
+            $request->participants,         // array     $participants (array of user ids)
+            $request->mcontent??'',         // string    $mcontent
+            $request->deliver_at ?? null,   // int       $deliver_at
+            $request->attachments ?? null,  // array     $attachments
+            $request->price ?? null,        // int       $price
+            $request->currency ?? null      // string    $currency
+        );
 
         return response()->json([
             'chatthreads' => $chatthreads,
+            'chatmessages' => $chatmessages,
+            'chatmessagegroup' => $cmGroup,
         ], 201);
     }
 
@@ -337,22 +317,23 @@ class ChatthreadsController extends AppBaseController
      * @param Chatthread $chatthread
      * @return ChatmessageResource
      */
+    // %TODO: refactor to a model file
     public function sendMessage(Request $request, Chatthread $chatthread)
     {
         $request->validate([
-            'mcontent'    => 'required_without:attachments',
+            'mcontent'    => 'required_without:attachments|string',
             'price'       => 'numeric',
             'currency'    => 'required_with:price|size:3',
             'attachments' => 'required_with:price|array',
         ]);
-        // Create new chat message
-        $chatmessage = $chatthread->sendMessage($request->user(), $request->mcontent ?? '', new Collection());
 
-        if ($request->has('price')) {
-            $chatmessage->setPurchaseOnly($request->price, $request->currency);
-        }
-
-        $this->addAttachments($request, $chatmessage);
+        $chatmessage = $chatthread->sendMessage(
+            $request->user(), 
+            $request->mcontent ?? null, // string $mcontent = ''
+            $request->attachments ?? [], // array $attachments = []
+            $request->price ?? null, // $price = null
+            $request->currency ?? null // $currency = null
+        );
 
         try {
             //broadcast( new MessageSentEvent($chatmessage) )->toOthers();
@@ -384,16 +365,30 @@ class ChatthreadsController extends AppBaseController
      * @param Chatthread $chatthread
      * @return ChatmessageResource
      */
+    // %TODO: refactor to a model file
     public function scheduleMessage(Request $request, Chatthread $chatthread)
     {
         $request->validate([
             'mcontent' => 'required_without:attachments|string',
             'attachments' => 'array',
             //'deliver_at' => 'required|date',
-            'deliver_at' => 'required|numeric',
+            'deliver_at' => 'required|numeric', // unix timestamp in seconds utc (%TODO %CHECKME)
         ]);
         $chatmessage = $chatthread->scheduleMessage($request->user(), $request->mcontent, $request->deliver_at);
-        $this->addAttachments($request, $chatmessage);
+
+        // Create mediafile refs for any attachments
+        if ($request->has('attachments')) {
+            foreach ($request->attachments as $a) {
+                if ($a['diskmediafile_id']) {
+                    Mediafile::find($a['id'])->diskmediafile->createReference(
+                        $chatmessage->getMorphString(), // string   $resourceType
+                        $chatmessage->getKey(),         // int      $resourceID
+                        $a['mfname'],                   // string   $mfname
+                        'messages'                      // string   $mftype
+                    );
+                }
+            }
+        }
         return new ChatmessageResource($chatmessage);
     }
 
@@ -420,22 +415,6 @@ class ChatthreadsController extends AppBaseController
 
         $chatthread->refresh();
         return new ChatthreadResource($chatthread);
-    }
-
-    private function addAttachments(Request $request, Chatmessage $chatmessage)
-    {
-        if ($request->has('attachments')) {
-            foreach ($request->attachments as $attachment) {
-                if ($attachment['diskmediafile_id']) {
-                    Mediafile::find($attachment['id'])->diskmediafile->createReference(
-                        $chatmessage->getMorphString(), // string   $resourceType
-                        $chatmessage->getKey(),         // int      $resourceID
-                        $attachment['mfname'],          // string   $mfname
-                        'messages'                      // string   $mftype
-                    );
-                }
-            }
-        }
     }
 
 }

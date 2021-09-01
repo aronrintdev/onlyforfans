@@ -11,7 +11,7 @@ use App\Models\Staff;
 use App\Models\Permission;
 
 /**
- * @group chatmessages
+ * @group staff
  * @package Tests\Feature
  */
 class RestStaffTest extends TestCase
@@ -47,6 +47,7 @@ class RestStaffTest extends TestCase
                     'pending',
                     'email',
                     'last_login_at',
+                    'settings',
                 ],
             ],
             'links',
@@ -176,6 +177,7 @@ class RestStaffTest extends TestCase
                 'pending',
                 'owner_id',
                 'user_id',
+                'settings',
             ],
         ]);
 
@@ -230,6 +232,7 @@ class RestStaffTest extends TestCase
                         'user_id',
                         'permissions',
                         'user',
+                        'settings',
                     ]
                 ]
             ],
@@ -388,6 +391,7 @@ class RestStaffTest extends TestCase
                 'pending',
                 'owner_id',
                 'user_id',
+                'settings',
             ],
         ]);
 
@@ -396,6 +400,35 @@ class RestStaffTest extends TestCase
         $this->assertEquals('staff', $data->role);
         $this->assertEquals($sessionUser->id, $data->owner_id);
         $this->assertEquals($staff->email, $data->email);
+    }
+
+    /**
+     *  @group regression
+     *  @group regression-base
+     *  @group staff
+     */
+    public function test_can_set_percentage_of_earnings()
+    {
+        // Find the creator account with managers
+        $manager = Staff::where('role', 'manager')->where('active', true)->firstOrFail();
+        $sessionUser = User::where('id', $manager->owner_id)->firstOrFail();
+
+        $payload = [
+            'settings' => [
+                'earnings' => 40,
+            ]
+        ];
+
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'PATCH', route('staff.updateManagerSettings', $manager->id), $payload );
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'earnings' => [
+                'value',
+            ]
+        ]);
+        $content = json_decode($response->content());
+        $this->assertEquals('40', $content->earnings->value);
     }
 
         
@@ -430,7 +463,6 @@ class RestStaffTest extends TestCase
 
         $response->assertStatus(200);
     }
-
 
     // ------------------------------
 

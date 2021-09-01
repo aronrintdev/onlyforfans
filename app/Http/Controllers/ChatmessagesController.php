@@ -40,7 +40,7 @@ class ChatmessagesController extends AppBaseController
         $query->where('is_delivered', true); 
 
         // Check permissions
-        if ( !$request->user()->isAdmin() ) {
+        if ( true || !$request->user()->isAdmin() ) {
             //$query->where('user_id', $request->user()->id); // non-admin: can only view own...
             //unset($filters['user_id']);
 

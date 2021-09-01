@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="mediafile-crate" v-bind:data-mediafile_guid="mediafile.id">
+  <div v-if="!isLoading" class="tag-media-lightbox" v-bind:data-mediafile_guid="mediafile.id">
     <b-card
       no-body
       header-tag="header"
@@ -29,8 +29,43 @@
       </template>
 
       <template footer>
-        <div class="panel-footer">
-        </div>
+        <section class="panel-footer">
+
+          <div v-if="context==='vault-dashboard'" class="crate-tag_mgmt p-3">
+            <b-form-tags v-model="contenttags" separator=" ," no-outer-focus class="mb-2">
+
+              <template v-slot="{ tags, inputAttrs, inputHandlers, tagVariant, addTag, removeTag }">
+                <b-input-group class="mb-2 d-flex align-items-center">
+                  <b-form-input
+                    v-bind="inputAttrs"
+                    v-on="inputHandlers"
+                    placeholder="New tag - Press enter to add"
+                    class="OFF-form-control"
+                  ></b-form-input>
+                  <div class="ml-2" v-b-tooltip.hover.html="{title: 'Add tags - use hash at start for <em>#publictag</em> or hash and exclamation at end for <em>#privatetag!</em>' }">
+                    <fa-icon :icon="['far', 'info-circle']" class="text-secondary" />
+                  </div>
+                </b-input-group>
+                <div class="d-inline-block">
+                  <b-form-tag v-for="tag in tags"
+                    @remove="removeTag(tag)"
+                    :key="tag"
+                    :title="tag"
+                    :variant="isHashtagPrivate(tag) ? 'danger' : 'secondary'" 
+                    class="mr-1"
+                  >{{ tag }}</b-form-tag>
+                </div>
+              </template>
+
+            </b-form-tags>
+
+            <div class="d-flex justify-content-end">
+              <b-button @click="updateTags" style="width: 10rem;" variant="primary">Save</b-button>
+            </div>
+
+          </div>
+
+        </section>
       </template>
 
     </b-card>
@@ -44,6 +79,7 @@ import MediaSlider from '@components/posts/MediaSlider'
 
 export default {
   props: {
+    context: null, // to determine which UI elements to show conditionally
     mediafile: null,
     session_user: null,
     use_mid: { type: Boolean, default: false }, // use mid-sized images instead of full
@@ -57,14 +93,52 @@ export default {
 
   data: () => ({
     stats: null,
+    contenttags: [],
   }),
 
   methods: {
+    handleTagInput(tags) {
+      console.log('handleTagInput', { value })
+    },
+
+    isHashtagPrivate(s) {
+      return s.endsWith('!')
+    },
+
+    async updateTags() {
+      const payload = {
+        contenttags: this.contenttags,
+      }
+      let response = null
+      try { 
+        console.log('updateTags', { payload })
+        response = await axios.patch( this.$apiRoute('mediafiles.updateTags', this.mediafile.id), payload )
+        this.$emit('reload')
+        this.$emit('close')
+      } catch (e) {
+        console.log('err', { e, })
+        return
+      }
+      this.contenttags = []
+    },
+
   },
 
   created() {
     this.axios.get(this.$apiRoute('mediafiles.diskStats', this.mediafile.id)).then(response => {
       this.stats = response.data.stats
+    })
+  },
+
+  mounted() {
+    console.log(this.mediafile, this.mediafile.contenttags)
+    this.contenttags = this.mediafile.contenttags.map( ct => {
+      switch ( ct.pivot.access_level ) {
+        case 'management-group':
+          return `#${ct.ctag}!`
+        case 'open':
+          return `#${ct.ctag}`
+      }
     })
   },
 
@@ -75,7 +149,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 ul {
   margin: 0;
 }

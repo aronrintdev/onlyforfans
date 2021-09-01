@@ -95,7 +95,7 @@ if ($doS3Upload) {
         $url .= '/'.$keyword;
         if ($doS3Upload) {
             $url .= '?random='.$faker->uuid;
-            $json = json_decode(file_get_contents($url));
+            $json = json_decode(file_get_contents($url)); // may throw exception
             $info = pathinfo($json->file);
         } else {
             $url .= '/'.$faker->uuid.'.png';

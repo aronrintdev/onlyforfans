@@ -1,11 +1,17 @@
 <template>
-  <WithSidebar v-if="!isLoading" id="view-create-thread">
+  <WithSidebar :focusMain="focusMain" v-if="!isLoading" id="view-create-thread" @back="backToPrevious">
     <template #sidebar>
-      <article class="top-bar d-flex justify-content-between align-items-center">
+      <article class="top-bar d-flex align-items-center" :class="{'justify-content-between' : !mobile}">
+        <b-btn v-if="mobile" variant="link" :to="{ name: 'chatthreads.dashboard' }" class="mb-1">
+          <fa-icon icon="arrow-left" fixed-width size="lg" />
+        </b-btn>
         <div class="h4" v-text="$t('title')" />
-        <b-btn variant="link" :to="{ name: 'chatthreads.dashboard' }">
+        <b-btn v-if="!mobile" variant="link" :to="{ name: 'chatthreads.dashboard' }">
           <fa-icon icon="arrow-left" fixed-width size="lg" />
           <span v-text="$t('nav.return')" />
+        </b-btn>
+        <b-btn v-if="mobile" :disabled="!isNextEnabled" :variant="isNextEnabled ? 'primary' : 'secondary'" class="mb-1 px-3 ml-auto mr-0" @click="createMessage">
+          <span v-text="$t('nav.next')" />
         </b-btn>
       </article>
 
@@ -213,6 +219,13 @@ export default {
       'selectedContactsCount',
     ]),
 
+    isNextEnabled() {
+      if (this.selectedContactsCount > 0) {
+        return true
+      }
+      return false
+    },
+
     isLoading() {
       return !this.session_user
     },
@@ -287,6 +300,8 @@ export default {
     showSearchResults: false,
     searchResults: [],
     searchDebounceDuration: 500,
+
+    focusMain: false,
   }), // data
 
   created() {
@@ -395,8 +410,10 @@ export default {
       attachments = null,
       is_scheduled = false,
       deliver_at = null,
+      price = null,
+      currency = null,
     }) {
-      var error = false
+      let error = false
 
       if ( this.selectedContactsCount === 0 ) {
         eventBus.$emit('popWarning', {
@@ -406,7 +423,7 @@ export default {
         error = true
       }
 
-      if (!mcontent) {
+      if (!mcontent && !attachments) {
         eventBus.$emit('popWarning', {
           title: this.$t('warnings.noContentTitle'),
           message: this.$t('warnings.noContent')
@@ -422,6 +439,8 @@ export default {
         originator_id: this.session_user.id,
         participants: this.selectedContacts.map(o => o.contact_id),
       }
+      // currency
+      // price
 
       if ( mcontent ) {
         params.mcontent = mcontent
@@ -432,6 +451,12 @@ export default {
       if ( is_scheduled ) {
         params.is_scheduled = true
         params.deliver_at = deliver_at
+      }
+      if ( price ) {
+        params.price = price
+      }
+      if ( currency ) {
+        params.currency = currency
       }
 
       this.$log.debug('createChatthread', { params: params })
@@ -497,6 +522,14 @@ export default {
       this.selectAll = true
       this.UNSELECT_ALL()
       this.SELECT_CONTACTS(this.renderedItems)
+    },
+
+    backToPrevious() {
+      this.focusMain = false
+    },
+
+    createMessage() {
+      this.focusMain = true
     },
 
   }, // methods
@@ -604,7 +637,8 @@ export default {
       "tippers": "Tippers"
     },
     "nav": {
-      "return": "Back"
+      "return": "Back",
+      "next": "Next",
     },
     "no-results": "No Results",
     "search": {

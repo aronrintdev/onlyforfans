@@ -1,13 +1,20 @@
 <template>
-  <div>
+  <div class="staff-members-table-container">
     <b-table hover class="staff-members-table" :items="members" :fields="fields" show-empty >
       <template #empty="scope">
         <div class="p-5 text-center"><i>There is no active or invited accounts yet</i></div>
+      </template>
+      <template #cell(name)="data">
+        <router-link :to="{ name: 'settings.manager', params: { id: data.item.id } }" v-if="data.item.active">{{ data.item.name }}</router-link>
+        <span v-else>{{ data.item.name }}</span>
       </template>
       <template #cell(active)="data">
         <b-badge variant="info" v-if="data.item.pending">Invited</b-badge>
         <b-badge variant="success" v-else-if="data.item.active">Active</b-badge>
         <b-badge variant="secondary" v-else class="text-white">Inactive</b-badge>
+      </template>
+      <template #cell(permissions)="data">
+        <b-badge v-b-tooltip.hover variant="primary" class="mr-2 permission" :title="permission.description" v-for="permission in data.item.permissions" :key="permission.id">{{ permission.name }}</b-badge>
       </template>
       <template #cell(actions)="data">
         <div class="text-right">
@@ -90,11 +97,8 @@
           }
         },
         {
-          key: 'last_login_at',
-          label: 'Last Login',
-          formatter: (value, key, item) => {
-            return value ? moment.utc(value).local().fromNow() : '';
-          }
+          key: 'permissions',
+          label: 'Permissions',
         },
         {
           key: 'actions',
@@ -150,11 +154,6 @@
     }
   }
 
-  .staff-members-table td {
-    display: flex;
-    align-items: center;
-  }
-
   .h3 {
     margin: 0;
   }
@@ -164,6 +163,25 @@
     padding: 5px;
     height: auto;
     cursor: pointer;
+  }
+  .permission {
+    cursor: pointer; 
+  }
+</style>
+<style lang="scss">
+  .staff-members-table td {
+    vertical-align: middle;
+  }
+
+  @media (max-width: 576px) {
+    .staff-members-table-container {
+      overflow-x: auto;
+    }
+
+    .staff-members-table tr th,
+    .staff-members-table tr td {
+      white-space: nowrap;
+    }
   }
 </style>
 
