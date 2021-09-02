@@ -76,7 +76,7 @@ export default {
 
   methods: { 
     renderFollow() {
-      this.$log.debug('FollowCtrl.renderFollow() - emit');
+      //this.$log.debug('FollowCtrl.renderFollow() - emit');
       eventBus.$emit('open-modal', {
         key: 'render-follow',
         data: {
@@ -85,7 +85,7 @@ export default {
       })
     },
     renderSubscribe() {
-      this.$log.debug('FollowCtrl.renderSubscribe() - emit');
+      //this.$log.debug('FollowCtrl.renderSubscribe() - emit');
       eventBus.$emit('open-modal', {
         key: 'render-subscribe',
         data: {
@@ -108,7 +108,7 @@ export default {
       })
     },
     renderSubscribe() {
-      this.$log.debug('FollowCtrl.renderSubscribe() - emit');
+      //this.$log.debug('FollowCtrl.renderSubscribe() - emit');
       eventBus.$emit('open-modal', {
         key: 'render-subscribe',
         data: {
