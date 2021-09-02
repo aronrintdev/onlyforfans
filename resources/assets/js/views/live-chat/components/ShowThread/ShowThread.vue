@@ -23,7 +23,7 @@
       <div class="d-flex align-items-center">
         <b-btn variant="link" class="text-nowrap" @click="toggleFavorite">
           <fa-icon :icon="isFavorite ? [ 'fas', 'star' ] : ['far', 'star']" size="lg" class="mr-1" />
-          <span v-text="$t('buttons.favorite')" />
+          <span v-if="!mobile" v-text="$t('buttons.favorite')" />
         </b-btn>
         <div class="text-muted">|</div>
         <b-btn
@@ -49,7 +49,7 @@
             title="Notifications OFF"
             class="muted mr-1"
           />
-          <span v-text="$t('buttons.notifications')" />
+          <span v-if="!mobile" v-text="$t('buttons.notifications')" />
         </b-btn>
         <div class="text-muted">|</div>
         <b-btn
@@ -60,7 +60,7 @@
           @click="toggleGallery"
         >
           <fa-icon :icon="showGallery ? ['fas', 'image'] : ['far', 'image']" size="lg" class="mr-1" />
-          <span v-text="$t('buttons.gallery')" />
+          <span v-if="!mobile" v-text="$t('buttons.gallery')" />
         </b-btn>
         <div class="text-muted">|</div>
         <b-btn
@@ -71,7 +71,7 @@
           @click="tip"
         >
           <fa-icon icon="dollar-sign" fixed-width size="lg" class="mr-1" />
-          <span v-text="$t('buttons.tip')" />
+          <span v-if="!mobile" v-text="$t('buttons.tip')" />
         </b-btn>
         <div class="text-muted">|</div>
         <SearchInput v-model="searchQuery" size="lg" />
