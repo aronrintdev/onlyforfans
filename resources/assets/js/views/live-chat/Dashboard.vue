@@ -246,13 +246,13 @@ export default {
       if (value) {
         this.state = 'loaded'
         // if (!this.chatthreads) { // initial load only, depends on sesssion user (synchronous)
-          this.$log.debug('live-chat/Dashboard - watch session_user: reloadFromFirstPage()')
+        //this.$log.debug('live-chat/Dashboard - watch session_user: reloadFromFirstPage()')
         // }
       }
     },
 
     sortBy (newVal) {
-      this.$log.debug('live-chat/Dashboard - watch sortBy : reloadFromFirstPage()')
+      //this.$log.debug('live-chat/Dashboard - watch sortBy : reloadFromFirstPage()')
       this.reloadFromFirstPage()
     },
 
