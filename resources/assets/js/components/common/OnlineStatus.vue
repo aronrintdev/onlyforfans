@@ -71,25 +71,25 @@ export default {
       this.loading = true
       this.channel = this.$echo.join(`user.status.${this.user.id}`)
         .here(users => {
-          this.$log.debug(`user.status.${this.user.id}.here`, { users })
+          //this.$log.debug(`user.status.${this.user.id}.here`, { users })
           this.checkStatus(users)
           this.loading = false
         })
         .joining(user => {
-          this.$log.debug(`user.status.${this.user.id}.joining`,{ user })
+          //this.$log.debug(`user.status.${this.user.id}.joining`,{ user })
           if (user.id == this.user.id) {
             this.pendingOffline = false
             this.status = user.status || 'online'
           }
         })
         .leaving(user => {
-          this.$log.debug(`user.status.${this.user.id}.leaving`, { user })
+          //this.$log.debug(`user.status.${this.user.id}.leaving`, { user })
           if (user.id == this.user.id) {
             this._pendingOffline()
           }
         })
         .listen('statusUpdate', $e => {
-          this.$log.debug(`user.status.${this.user.id}.listen('statusUpdate')`, { $e })
+          //this.$log.debug(`user.status.${this.user.id}.listen('statusUpdate')`, { $e })
           this.status = $e.status
         })
       if (this.channel.subscription && this.channel.subscription.members) {

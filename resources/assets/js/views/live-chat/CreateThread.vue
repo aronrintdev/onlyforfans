@@ -370,10 +370,10 @@ export default {
      * @param {Bool} force - Forces the set to load from server, even if set is in cache
      */
     getContacts(force = false) {
-      this.$log.debug('getContacts', {
-        pageObject: this.currentPageObject,
-        cached: this.getContactsFor(this.currentPageObject)
-      })
+      //this.$log.debug('getContacts', {
+      //pageObject: this.currentPageObject,
+      //cached: this.getContactsFor(this.currentPageObject)
+      //})
       if (this.getContactsFor(this.currentPageObject) != null && !force) {
         // Page is already loaded in cache
         this.isLoadingContacts = false
@@ -459,7 +459,7 @@ export default {
         params.currency = currency
       }
 
-      this.$log.debug('createChatthread', { params: params })
+      //this.$log.debug('createChatthread', { params: params })
       const response = await axios.post( this.$apiRoute('chatthreads.store'), params )
 
       this.$router.push({ name: 'chatthreads.dashboard' })
@@ -584,14 +584,14 @@ export default {
       if (value) {
          // initial load only, depends on session user (synchronous)
         if (this.contactsCount === 0) {
-          this.$log.debug('live-chat/CreateThread - watch session_user: reloadFromFirstPage()')
+          //this.$log.debug('live-chat/CreateThread - watch session_user: reloadFromFirstPage()')
           this.reloadFromFirstPage()
         }
       }
     },
 
     sortBy(newVal) {
-      this.$log.debug('live-chat/CreateThread - watch sortBy : reloadFromFirstPage()')
+      //this.$log.debug('live-chat/CreateThread - watch sortBy : reloadFromFirstPage()')
       this.reloadFromFirstPage()
     },
 
