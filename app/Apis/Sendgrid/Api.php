@@ -16,8 +16,8 @@ use App\Models\User;
 //  ~ https://github.com/sendgrid/sendgrid-php/blob/main/USE_CASES.md#kitchen-sink
 class Api
 {
-    private static $fromEmail = 'info@allfans.com';
-    private static $fromName = 'AllFans NoReply';
+    private static $fromEmail = 'no-reply@allfans.com';
+    private static $fromName = 'AllFans';
 
     public static function send(string $templateID, array $attrs)
     {
