@@ -56,7 +56,7 @@
         </section>
 
         <section v-if="mobile" class="crate-as_cards"> <!-- responsive 'table' using cards -->
-          <b-card v-for="(cmg,idx) in chatmessagegroups" v-observe-visibility="idx===chatmessagegroups.length-1 ? visibilityChanged : false" class="mb-3">
+          <b-card v-for="(cmg,idx) in chatmessagegroups" :key="idx" v-observe-visibility="idx===chatmessagegroups.length-1 ? visibilityChanged : false" class="mb-3">
             <b-list-group flush>
               <b-list-group-item><span class="tag-label">Date:</span> {{ cmg.created_at | niceDateTime(false) }}</b-list-group-item>
               <b-list-group-item><span class="tag-label">Text:</span> <ContentViewer :str=cmg.mcontent /></b-list-group-item>
