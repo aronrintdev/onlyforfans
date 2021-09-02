@@ -179,6 +179,7 @@ export default {
     display: block;
     float: none;  
     margin-top: 120px;
+    margin-bottom: 120px;
     margin-right: auto;
     width: 350px;
     margin-left: auto;
