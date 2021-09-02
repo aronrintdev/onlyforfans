@@ -13,7 +13,7 @@
     </div>
 
     <div class="store-chatmessage mt-auto">
-      <SetPrice v-if="setPriceActive" v-model="newMessageForm.price" class="mt-3" />
+      <SetPrice v-if="isSetPriceFormActive" v-model="newMessageForm.price" class="mt-3" />
 
       <AudioRecorder
         v-if="showAudioRec"
@@ -201,7 +201,7 @@ export default {
       if (this.showAudioRec) {
         selected.push('recordAudio')
       }
-      if (this.setPriceActive) {
+      if (this.isSetPriceFormActive) {
         selected.push('setPrice')
       }
 
@@ -225,7 +225,7 @@ export default {
     showVideoRec: false,
     showAudioRec: false,
 
-    setPriceActive: false,
+    isSetPriceFormActive: false,
 
     // If client is sending message
     sending: false,
@@ -368,7 +368,7 @@ export default {
       let params = {
         mcontent: this.newMessageForm.mcontent,
       }
-      if (this.setPriceActive) {
+      if (this.isSetPriceFormActive) {
         params.price    = this.newMessageForm.price
         params.currency = this.newMessageForm.currency
       }
@@ -460,7 +460,7 @@ export default {
     },
 
     clearPrice() {
-      this.setPriceActive = false
+      this.isSetPriceFormActive = false
       this.newMessageForm.price = 0
       this.newMessageForm.currency = 'USD'
     },
@@ -510,7 +510,7 @@ export default {
 
     setPrice() {
       // Toggle on click
-      this.setPriceActive = !this.setPriceActive
+      this.isSetPriceFormActive = !this.isSetPriceFormActive
     },
 
     _isTyping() {
@@ -562,9 +562,16 @@ export default {
         }
       }
     },
+    isSetPriceFormActive(val,last) {
+      // if form goes from active to not-active, clear out price inputs
+      if (val===last) {
+        return
+      }
+      if (!val) {
+        this.clearPrice() 
+      }
+    },
   }, // watch
-
-
 
 }
 </script>
