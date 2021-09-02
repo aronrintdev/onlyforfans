@@ -629,12 +629,12 @@ textarea.form-control {
 {
   "en": {
     "clearFiles": "Clear Images",
-    "pricedValidation": "Priced images must contain media, please provide for this message",
+    "pricedValidation": "Priced messages must contain media, please provide for this message.",
     "scheduled": {
       "title": "Scheduled",
-      "message": "Messages has successfully been schedule to send at {time}"
+      "message": "Messages has successfully been schedule to send at {time}."
     },
-    "validation": "Please enter a message or select files to send",
+    "validation": "Please enter a message or select files to send.",
   }
 }
 </i18n>

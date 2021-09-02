@@ -3,9 +3,14 @@
 
     <section>
 
-      <b-card>
+      <b-card class="pt-3 px-sm-3" no-body>
 
-        <h1>Mass Message Stats</h1>
+        <div class="d-flex align-items-center">
+          <b-btn variant="link" class="" @click="onBackClicked">
+            <fa-icon :icon="['fas', 'arrow-left']" class="fa-lg" />
+          </b-btn>
+          <h4 class="m-0">Mass Message Stats</h4>
+        </div>
 
         <section class="crate-filters mb-3 d-flex">
           <!-- filters -->
@@ -17,7 +22,7 @@
           -->
         </section>
 
-        <section class="crate-pagination d-sm-flex flex-row-reverse align-items-center mb-3">
+        <section class="crate-pagination d-sm-flex flex-row-reverse align-items-center mb-3 px-2 px-sm-0">
           <div class="box-search ml-auto mb-3 mb-sm-0">
             <b-form-input v-model="filters.qsearch" class="" placeholder="Enter search text"></b-form-input>
           </div>
@@ -56,26 +61,28 @@
         </section>
 
         <section v-if="mobile" class="crate-as_cards"> <!-- responsive 'table' using cards -->
-          <b-card v-for="(cmg,idx) in chatmessagegroups" v-observe-visibility="idx===chatmessagegroups.length-1 ? visibilityChanged : false" class="mb-3">
+          <b-card v-for="(cmg,idx) in chatmessagegroups" v-observe-visibility="idx===chatmessagegroups.length-1 ? visibilityChanged : false" class="px-1 py-2 mb-3" no-body>
             <b-list-group flush>
-              <b-list-group-item><span class="tag-label">Date:</span> {{ cmg.created_at | niceDateTime(false) }}</b-list-group-item>
-              <b-list-group-item><span class="tag-label">Text:</span> <ContentViewer :str=cmg.mcontent /></b-list-group-item>
-              <b-list-group-item><span class="tag-label">Attachment:</span>
+              <b-list-group-item class="d-flex"><div class="text-muted tag-label">Date</div> <div class="ml-auto">{{ cmg.created_at | niceDateTime(false) }}</div></b-list-group-item>
+              <b-list-group-item class="d-flex"><div class="text-muted tag-label">Text</div> <div class="ml-auto" style="width: 80%;"><ContentViewer :str=cmg.mcontent /></div></b-list-group-item>
+              <b-list-group-item class="d-flex"><div class="text-muted tag-label">Attachment</div>
+                <div class="ml-auto">
                   <span v-if="cmg.attachment_counts.images_count" class="ml-0"><fa-icon :icon="['far', 'image']" class="fa-sm" fixed-width /> {{ cmg.attachment_counts.images_count }}</span>
                   <span v-if="cmg.attachment_counts.videos_count" class="ml-2"><fa-icon :icon="['far', 'video']" class="fa-sm" fixed-width /> {{ cmg.attachment_counts.videos_count }}</span>
                   <span v-if="cmg.attachment_counts.audios_count" class="ml-2"><fa-icon :icon="['far', 'microphone']" class="fa-sm" fixed-width /> {{ cmg.attachment_counts.audios_count }}</span>
+                </div>
               </b-list-group-item>
-              <b-list-group-item><span class="tag-label">Price:</span> {{ cmg.price | niceCurrency }}</b-list-group-item>
-              <b-list-group-item><span class="tag-label">Sent:</span> {{ cmg.sent_count }}</b-list-group-item>
-              <b-list-group-item><span class="tag-label">Viewed:</span> {{ cmg.read_count }}</b-list-group-item>
-              <b-list-group-item><span class="tag-label">Purchased:</span> {{ cmg.purchased_count }}</b-list-group-item>
+              <b-list-group-item class="d-flex"><div class="text-muted tag-label">Price</div> <div class="ml-auto">{{ cmg.price | niceCurrency }}</div></b-list-group-item>
+              <b-list-group-item class="d-flex"><div class="text-muted tag-label">Sent</div> <div class="ml-auto">{{ cmg.sent_count }}</div></b-list-group-item>
+              <b-list-group-item class="d-flex"><div class="text-muted tag-label">Viewed</div> <div class="ml-auto">{{ cmg.read_count }}</div></b-list-group-item>
+              <b-list-group-item class="d-flex"><div class="text-muted tag-label">Purchased</div> <div class="ml-auto">{{ cmg.purchased_count }}</div></b-list-group-item>
             </b-list-group>
           </b-card>
 
           <div v-if="!isScrollingViewFullyLoaded" class="d-flex justify-content-center align-content-center">
             <b-button @click="loadMore" variant="primary" class="w-100" :disabled="isScrollingViewFullyLoaded||isDataLoading">
               <fa-icon v-if="isDataLoading" icon="spinner" size="2x" fixed-width spin />
-              <span v-else>Load More</span>
+              <div v-else>Load More</div>
             </b-button>
           </div>
 
@@ -137,7 +144,7 @@ export default {
     totalItems: 0,
     totalPages: 0,
     sortBy: 'created_at',
-    sortDesc: false,
+    sortDesc: true,
     chatmessagegroups: [],
     iisDataLoading: false,
 
@@ -205,7 +212,11 @@ export default {
       if ( isVisible && !this.isDataLoading && !this.isScrollingViewFullyLoaded ) { 
         this.loadMore()
       }
-    }
+    },
+
+    onBackClicked() {
+      this.$router.push({name: 'chatthreads.dashboard'})
+    },
 
   },
 
@@ -243,18 +254,24 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.clickable {
-  cursor: pointer;
-}
-::v-deep .tag-col-mcontent {
-  max-width: 20rem;
-}
-td { 
-}
-.crate-as_cards {
-  .tag-label {
-    font-weight: bold;
-    margin-right: 1rem;
+#component-stats_dashboard {
+  .clickable {
+    cursor: pointer;
+  }
+  ::v-deep .tag-col-mcontent {
+    max-width: 20rem;
+  }
+  td { 
+  }
+  .crate-as_cards {
+    .tag-label {
+      //font-weight: bold;
+      margin-right: 2rem;
+    }
+  }
+  ::v-deep .crate-as_cards .list-group .list-group-item {
+    border: none !important;
+    padding: 0 0.50rem;
   }
 }
 </style>

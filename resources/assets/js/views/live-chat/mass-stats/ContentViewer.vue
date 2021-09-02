@@ -1,15 +1,19 @@
 <template>
-  <div class="tag-preview">
+  <div @click="isExpanded=!isExpanded" class="tag-preview clickable">
     <div v-if="!isTooLong">
-      <p class="m-0">{{ str }}...</p> 
+      <p class="m-0" :class="{ 'text-right': mobile }">{{ str }}</p> 
     </div>
     <div v-else-if="isExpanded">
-      <p class="m-0">{{ str }}...</p> 
-      <span @click="isExpanded=false" class="clickable"><em>Collapse</em></span>
+      <p class="m-0 OFF-truncate-single-line">{{ str }}</p> 
+      <!--
+      <div v-if="!mobile" @click="isExpanded=false" class="clickable"><span class="text-primary">Collapse</span></div>
+      -->
     </div>
     <div v-else>
-      <p class="m-0">{{ truncated(str) }}...</p> 
-      <span @click="isExpanded=true" class="clickable"><em>Read more...</em></span>
+      <p class="m-0 truncate-single-line"  :class="{ 'text-right': mobile }">{{ truncated(str) }}...</p> 
+      <!--
+      <div v-if="!mobile" @click="isExpanded=true" class="clickable"><span class="text-primary">Read more</span></div>
+      -->
     </div>
   </div>
 </template>
@@ -20,6 +24,7 @@ import Vue from 'vue'
 
 export default {
   computed: {
+    ...Vuex.mapState(['mobile']),
   }, // computed()
 
   props: {
@@ -61,6 +66,10 @@ export default {
   cursor: pointer;
 }
 
-td { 
+.tag-preview .truncate-single-line { 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 </style>
