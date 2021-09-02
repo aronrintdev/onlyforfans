@@ -78,25 +78,23 @@
       </div>
     </section>
 
-    <transition-group name="quick-fade" mode="out-in" class="flex-fill scroll-wrapper">
-      <section v-if="vaultSelectionOpen" key="vaultSelect" class="vault-selection">
-        <VaultSelector @close="vaultSelectionOpen = false" />
-      </section>
-      <section v-else-if="showGallery" key="gallery" class="gallery flex-fill">
-        <Gallery :threadId="id" @close="showGallery = false" />
-      </section>
-      <MessageDisplay
-        v-else
-        :items="searchResults === null ? chatmessages: searchResults"
-        :loading="moreLoading"
-        :isLastPage="isLastPage"
-        :isSearch="searchResults !== null"
-        :searchQuery="searchQuery"
-        key="messages"
-        class="flex-fill"
-        @endVisible="endVisible"
-      />
-    </transition-group>
+    <section v-if="vaultSelectionOpen" key="vaultSelect" class="vault-selection">
+      <VaultSelector @close="vaultSelectionOpen = false" />
+    </section>
+    <section v-else-if="showGallery" key="gallery" class="gallery flex-fill">
+      <Gallery :threadId="id" @close="showGallery = false" />
+    </section>
+    <MessageDisplay
+      v-else
+      :items="searchResults === null ? chatmessages: searchResults"
+      :loading="moreLoading"
+      :isLastPage="isLastPage"
+      :isSearch="searchResults !== null"
+      :searchQuery="searchQuery"
+      key="messages"
+      class="flex-fill"
+      @endVisible="endVisible"
+    />
 
     <TypingIndicator :threadId="id" />
 

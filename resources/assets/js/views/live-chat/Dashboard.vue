@@ -268,6 +268,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// thread view should be full screen on mobile
+.content.thread #view-livechat.mobile {
+  height: 100vh;
+  max-height: 100vh;
+}
+
 #view-livechat {
   background-color: #fff;
 
@@ -277,7 +283,8 @@ export default {
     bottom: 0;
     padding-left: 0;
     padding-right: 0;
-
+    height: calc(100vh - 64px);
+    max-height: calc(100vh - 64px);
   }
 
   .chatthread-list {

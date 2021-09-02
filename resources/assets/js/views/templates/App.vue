@@ -6,15 +6,15 @@
     <!-- Header -->
     <MainNavBar class="header" />
 
-    <div class="content flex-grow-1 d-flex" :class="{ 'p-3': !mobile, 'mobile': mobile }">
+    <div class="content flex-grow-1 d-flex" :class="{ 'p-3': !mobile, 'mobile': mobile, 'messages': isMessagesView, 'thread': isThreadView }">
       <MobileSidebarMenu v-if="mobile" :show="mobileMenuOpen" fromRight @change="onMobileMenuChange" />
       <transition name="quick-fade" mode="out-in">
         <router-view />
       </transition>
     </div>
 
-    <NavButtonsMobile v-if="mobile" :mobile-style="mobile" class="bottom-nav" />
-    <SiteFooter v-if="!isFooterHidden && !mobile" />
+    <NavButtonsMobile v-if="mobile && !isThreadView" :mobile-style="mobile" class="bottom-nav" />
+    <SiteFooter v-if="isFooterVisible" />
 
     <Modals />
 
@@ -68,13 +68,31 @@ export default {
       return parseInt(getComputedStyle(document.documentElement)
         .getPropertyValue(`--breakpoint-${this.toggleMobileAt}`).replace('px', ''))
     },
+
     screenSizes() {
       return _.mapValues(this.screenSizesTypes ,(value, key) => {
         return parseInt(getComputedStyle(document.documentElement)
           .getPropertyValue(`--breakpoint-${key}`).replace('px', ''))
           || value
       })
-    }
+    },
+
+    isFooterVisible() {
+      if (this.mobile || this.$route.path.startsWith('/messages')) {
+        // hide footer if we're in Messages, or on mobile
+        return false
+      }
+
+      return true
+    },
+
+    isMessagesView() {
+      return this.$route.path.startsWith('/messages')
+    },
+
+    isThreadView() {
+      return this.$route.path.startsWith('/messages') && this.$route.params.id
+    },
   },
 
   data: () => ({
@@ -83,7 +101,6 @@ export default {
     onlineMonitor: null,
     unreadMessagesCount: 0,
     unreadNotificationsCount: 0,
-    isFooterHidden: false,
   }),
 
   methods: {
@@ -132,10 +149,6 @@ export default {
       this.updateScreenSize(value)
     },
     $route: function(newVal) {
-      if (newVal.name.indexOf('messages') > -1) {
-        this.isFooterHidden = true;
-      }
-
       // whenever the route changes, go to the top of the new page
       this.scrollToTop()
     }, 
@@ -154,9 +167,6 @@ export default {
   },
 
   created() {
-    if (this.$route.name && this.$route.name.indexOf('messages') > -1) {
-      this.isFooterHidden = true;
-    }
     if (!this.session_user) {
       this.loading = true
       this.getMe();
@@ -175,5 +185,13 @@ export default {
   padding-top: 15px;
   padding-bottom: 68px;
   min-height: calc(100% - 68px);
+
+  &.messages {
+    padding-top: 0;
+  }
+
+  &.thread {
+    padding-bottom: 0;
+  }
 }
 </style>

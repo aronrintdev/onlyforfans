@@ -75,7 +75,6 @@ export default {
 
 <style lang="scss" scoped>
 .messages {
-  height: 100%;
   width: 100%;
   overflow-y: auto;
   display: flex;
