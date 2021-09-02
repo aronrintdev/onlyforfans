@@ -108,7 +108,7 @@
 
       </article>
 
-      <article class="contact-list position-relative">
+      <article class="contact-list position-relative" :class="{ mobile: mobile }">
         <!-- Select All -->
         <div class="mb-2 d-flex justify-content-end align-items-center">
           <span
@@ -614,9 +614,6 @@ export default {
   max-width: 30rem;
 }
 
-.top-bar {
-  border-bottom: 1px solid rgba(138,150,163,.25);
-}
 </style>
 
 <i18n lang="json5">

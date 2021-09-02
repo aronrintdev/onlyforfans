@@ -1,13 +1,13 @@
 <template>
-  <b-navbar :toggleable="mobile" variant="light" class="bg-white" :class="{ 'pb-0': enableSearch }" >
+  <b-navbar v-if="navbarVisible" :toggleable="mobile" variant="light" class="bg-white" :class="{ 'pb-0': searchVisible }" >
     <b-navbar-brand :to="{ name: 'index' }" class="navbar-brand" :class="mobile ? 'mr-2' : 'mr-5'">
-      <Branding :type="mobile ? 'text' : 'text'" :size="mobile ? 'lg' : 'lg'" :variant="mobile ? 'brand' : 'brand'" />
+      <Branding type="text" size="lg" variant="brand" />
     </b-navbar-brand>
-    <div class="ml-auto mr-3" @click="showSearchBar">
+    <div class="ml-auto mr-3" @click="toggleSearchBar">
       <fa-icon v-if="mobile" icon="search" class="text-secondary" />
     </div>
 
-    <ScrollCollapse v-if="mobile && enableSearch" ref="scrollCollapse" class="w-100" :full-open="searchOpen" :full-open-height="openHeight">
+    <ScrollCollapse v-if="mobile && searchVisible" ref="scrollCollapse" class="w-100" :full-open="searchOpen" :full-open-height="openHeight">
       <div class="d-flex flex-column justify-content-between h-100 pb-3">
         <SearchBar class="w-100 mt-3" :mobile="true" @opening="searchOpen = true" @closing="searchOpen = false" @scroll="onScroll" />
       </div>
@@ -67,6 +67,7 @@ export default {
   computed: {
     ...Vuex.mapState([ 'mobile' ]),
     ...Vuex.mapGetters(['session_user', 'unread_messages_count', 'unread_notifications_count']),
+
     openHeight() {
       var height = this.$vssHeight
       if (this.$el) {
@@ -78,15 +79,25 @@ export default {
       }
       return height
     },
+
     mobileOpenHeight() {
       this.openHeight
+    },
+
+    navbarVisible() {
+      if (this.mobile && this.$route.path.startsWith('/messages')) {
+        // on mobile, if we're in the messages, hide navbar
+        return false
+      }
+
+      return true
     }
   },
 
   data: () => ({
     searchOpen: false,
     screenWidth: null,
-    enableSearch: false,
+    searchVisible: false,
   }),
 
   methods: {
@@ -96,8 +107,8 @@ export default {
       }
     },
 
-    showSearchBar() {
-      this.enableSearch = !this.enableSearch
+    toggleSearchBar() {
+      this.searchVisible = !this.searchVisible
     },
   },
 

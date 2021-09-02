@@ -90,6 +90,8 @@ _ide_helper_models.php
 # Generated Reports
 analyzerReport.html
 
+dev-server-deploy.sh
+
 dot-env.txt
 .*.swp
 *.vim
@@ -138,4 +140,8 @@ dot-npmrc--hide
 
 database/template.sqlite--bak
 dot-npmrc-save--0607
+
+# Deployment Scripts
+*deploy.sh
+*build.sh
 psg-deploy.sh

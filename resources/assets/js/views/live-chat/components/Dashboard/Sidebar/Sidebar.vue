@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-column p-3">
+  <div class="d-flex flex-column h-100 p-3 pb-0">
     <Navigation />
     <SearchAndFilter
       :filters="selectFilters"
@@ -11,7 +11,7 @@
       @filterInput="value => selectedFilter = value"
       @sortByInput="value => sortBy = value"
     />
-    <MarkAllRead />
+    <MarkAllRead @updateThreadsAllRead="getChatthreads" />
     <ThreadList
       :threads="renderedThreads"
       :loading="loading"

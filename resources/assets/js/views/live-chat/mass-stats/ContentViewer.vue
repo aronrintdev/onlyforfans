@@ -5,11 +5,11 @@
     </div>
     <div v-else-if="isExpanded">
       <p class="m-0">{{ str }}...</p> 
-      <span @click="isExpanded=false" class="clickable">Collapse</span>
+      <span @click="isExpanded=false" class="clickable"><em>Collapse</em></span>
     </div>
     <div v-else>
       <p class="m-0">{{ truncated(str) }}...</p> 
-      <span @click="isExpanded=true" class="clickable">Read more...</span>
+      <span @click="isExpanded=true" class="clickable"><em>Read more...</em></span>
     </div>
   </div>
 </template>
