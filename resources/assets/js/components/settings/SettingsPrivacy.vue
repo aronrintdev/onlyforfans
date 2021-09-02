@@ -45,7 +45,7 @@
       </b-card-text>
     </b-card>
 
-    <b-card title="Blocked">
+    <b-card class="mt-5" title="Blocked">
       <b-card-text>
         <b-form @submit.prevent="submitBlocked($event)" @reset="onReset">
           <fieldset :disabled="isSubmitting.formBlocked">
@@ -109,7 +109,7 @@
       </b-card-text>
     </b-card>
 
-    <b-card title="Watermark">
+    <b-card class="mt-5" title="Watermark">
       <b-card-text>
         <b-form @submit.prevent="submitWatermark($event)" @reset="onReset">
           <fieldset :disabled="isSubmitting.formWatermark">
