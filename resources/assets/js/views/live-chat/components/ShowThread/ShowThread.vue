@@ -240,7 +240,7 @@ export default {
   },
 
   mounted() {
-    console.log(`live-chat/components/ShowThread::mounted() - calling getChatmessages with id ${this.id}`)
+    //console.log(`live-chat/components/ShowThread::mounted() - calling getChatmessages with id ${this.id}`)
     this.getMuteStatus(this.id)
     this.getChatmessages(this.id)
 
@@ -315,7 +315,7 @@ export default {
 
     endVisible(isVisible) {
       //this.$log.debug('endVisible', { isVisible })
-      console.log(`live-chat/components/ShowThread::endVisible()`)
+      //console.log(`live-chat/components/ShowThread::endVisible()`)
       this.isEndVisible = isVisible
       if (isVisible && !this.moreLoading && !this.isLastPage) {
         this.loadNextPage()
@@ -323,7 +323,7 @@ export default {
     },
 
     loadNextPage() {
-      console.log(`live-chat/components/ShowThread::loadNextPage() - calling getChatmessages with no id `)
+      //console.log(`live-chat/components/ShowThread::loadNextPage() - calling getChatmessages with no id `)
       this.currentPage += 1
       this.moreLoading = true
       this.getChatmessages(this.id)
@@ -344,7 +344,7 @@ export default {
         take: this.perPage,
         chatthread_id: chatthreadID,
       }
-      console.log('live-chat/components/ShowThread::getChatmessages() - chatmessages.index', { params })
+      //console.log('live-chat/components/ShowThread::getChatmessages() - chatmessages.index', { params })
       const response = await axios.get( this.$apiRoute('chatmessages.index'), { params } )
 
       // Filter out any messages that we already have
@@ -492,7 +492,7 @@ export default {
 
     id (newValue, oldValue) {
       if ( newValue && (newValue !== oldValue) ) {
-        console.log(`live-chat/components/ShowThread::watch(id) - calling getChatmessages with id ${newValue}`)
+        //console.log(`live-chat/components/ShowThread::watch(id) - calling getChatmessages with id ${newValue}`)
         this.getChatmessages(newValue)
         this.markRead(newValue)
         this.getMuteStatus(newValue)
