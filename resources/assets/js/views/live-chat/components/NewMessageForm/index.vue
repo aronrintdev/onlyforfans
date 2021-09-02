@@ -424,10 +424,12 @@ export default {
       const mediafileCount = this.selectedMediafiles ? this.selectedMediafiles.length : 0
       if (this.newMessageForm.mcontent === '' && mediafileCount === 0) {
         eventBus.$emit('validation', { message: this.$t('validation') })
+        this.sending = false
         return
       }
       if (this.newMessageForm.price > 0 && mediafileCount === 0) {
         eventBus.$emit('validation', { message: this.$t('pricedValidation')})
+        this.sending = false
         return
       }
 
