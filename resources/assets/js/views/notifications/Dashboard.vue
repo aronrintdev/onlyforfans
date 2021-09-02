@@ -75,6 +75,13 @@
               </b-card-text>
             </b-tab>
 
+            <b-tab data-filter="staff">
+              <template #title> <fa-icon fixed-width icon="sitemap" /><span> Staff</span></template>
+              <b-card-text>
+                <NotifyList filter="staff" :session_user="session_user" />
+              </b-card-text>
+            </b-tab>
+
           </b-tabs>
         </b-card>
 
@@ -146,6 +153,7 @@ export default {
       padding: 1em;
     }
     #notification-tabs {
+      margin: 0 -0.5em;
       .card-title {
         font-size: 1.2rem;
       }
@@ -196,7 +204,7 @@ export default {
       .card-header {
         .nav-tabs {
           .nav-link {
-            padding: 0.1em 0.6em;
+            padding: 0.1em 0.4em;
           }
         }
       }

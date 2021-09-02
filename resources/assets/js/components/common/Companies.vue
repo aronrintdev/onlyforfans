@@ -8,7 +8,7 @@
     <ul class="list-suggested list-group">
       <li v-for="(timeline, i) in timelines" :key="timeline.id || i">
         <div class="d-flex align-items-center mb-3 ml-3">
-          <div class="avatar-img">
+          <div class="avatar-img" :class="hasStaffNotification(timeline) ? 'has-staff-notification' : ''">
             <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
               <b-img-lazy
                 thumbnail
@@ -53,6 +53,7 @@ export default {
 
   props: {
     session_user: null,
+    unread_notifications: Array,
   },
 
   computed: {
@@ -61,8 +62,14 @@ export default {
     },
     timelines() {
       return this.session_user.companies || []
-    }
+    },
   },
+
+  methods: {
+    hasStaffNotification(timeline) {
+      return this.unread_notifications.filter(n => n.data.actor.id == timeline.user_id && n.type == 'App\\Notifications\\StaffSettingsChanged').length > 0;
+    }
+  }
 }
 </script>
 
@@ -75,6 +82,10 @@ export default {
   .avatar-img {
     width: 50px;
     height: 50px;
+
+    &.has-staff-notification img {
+      border: 2px solid var(--danger);
+    }
 
     img {
       border: 0;

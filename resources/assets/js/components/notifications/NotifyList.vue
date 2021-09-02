@@ -56,6 +56,12 @@
             </template>
             <template v-else>message</template>
           </template>
+          <template v-if="n.type==='App\\Notifications\\StaffSettingsChanged'">
+            <template v-if="n.data.settings.earnings">
+              updated your management percentage to {{ n.data.settings.earnings.value }}%
+            </template>
+            <template v-else>changed your staff settings</template>
+          </template>
         </p>
         <small>{{ moment(n.created_at).format('MMM DD, YYYY') }}</small>
         <hr class="mt-2 mb-3" />
@@ -113,6 +119,8 @@ export default {
           return 'CommentReceived'
         case 'messages':
           return 'MessageReceived'
+        case 'staff':
+          return 'StaffSettingsChanged'
         case 'none':
         default:
           return null
@@ -134,6 +142,8 @@ export default {
           return 'Comments'
         case 'messages':
           return 'Messages'
+        case 'staff':
+          return 'Staff'
         case 'none':
         default:
           return 'All'
