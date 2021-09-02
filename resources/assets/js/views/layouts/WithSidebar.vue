@@ -1,23 +1,16 @@
 <template>
   <div class="container-fluid" :class="mobile ? 'px-0' : ''">
     <!-- Mobile view -->
-    <section v-if="mobile && !isMessages" class="mobile h-100" :class="{ 'focus-main': focusMain }">
+    <section v-if="mobile && !isMessages" class="mobile-settings-content" :class="{ 'focus-main': focusMain }">
       <!-- <transition :name="focusMain ? 'slide-right' : 'slide-left'"> -->
         <div class="sidebar px-3 pb-3" key="sidebar">
-          <div class="header justify-content-center">
-            <slot name="mobileTitle"></slot>
-          </div>
           <slot name="sidebar"></slot>
         </div>
         <div class="main px-3 pb-3" key="main">
-          <div v-if="!removeMobileMainNavTop" class="header justify-content-center py-3">
-            <slot name="mobileMainNavTop">
-              <b-btn variant="link" size="lg" class="back-btn" @click="$emit('back')">
-                <fa-icon icon="arrow-left" size="lg" />
-              </b-btn>
-              <slot name="mobileMainNavTopTitle"></slot>
-            </slot>
-          </div>
+          <b-btn variant="link" size="lg" class="back-btn" @click="$emit('back')">
+            <fa-icon icon="arrow-left" size="lg" />
+          </b-btn>
+
           <div class="settings-page">
             <slot></slot>
           </div>
@@ -27,7 +20,7 @@
 
     <!-- Messages Mobile view -->
     <!-- FIXME: This is one of the dirtiest 💩 fixes I've done as I don't have another choice -->
-    <section v-if="mobile && isMessages" class="mobile h-100" :class="{ 'focus-main': focusMain }">
+    <section v-else-if="mobile && isMessages" class="mobile h-100" :class="{ 'focus-main': focusMain }">
       <div class="sidebar px-3 pb-3" key="sidebar">
         <slot name="sidebar"></slot>
       </div>
@@ -132,7 +125,7 @@ export default {
 }
 
 .sidebar {
-  width: 25rem;
+  width: 20rem;
   min-width: 20rem;
 }
 .border-class {
@@ -143,18 +136,54 @@ export default {
   min-width: 20rem;
 }
 
-.back-btn {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
+.mobile-settings-content {
+  overflow-x: hidden;
+  .main {
+    position: relative;
+    transform: translate3d(100%, 0, 0);
+  }
+
+  .back-btn {
+    display: none;
+  }
+
+  &.focus-main {
+    .back-btn {
+      display: block;
+      padding-left: 2px;
+      padding-right: 2px;
+    }
+    .sidebar {
+      transform: translate3d(-100%, 0, 0);
+      position: absolute;
+    }
+    .main{
+      transform: translate3d(0, 0, 0);
+      position: relative;
+    }
+  }
 }
+
 </style>
 
-<style>
-@media (max-width: 576px) {
-  .settings-page .card {
+<style lang="scss">
+#view-settings {
+  .border-class {
     border: none;
+  }
+}
+
+@media (max-width: 576px) {
+  #view-settings {
+    .container-fluid {
+      overflow-x: hidden;
+    }
+  }
+
+  .settings-page {
+    .card {
+      border: none;
+    }
   }
 }
 </style>
