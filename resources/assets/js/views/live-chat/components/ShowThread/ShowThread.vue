@@ -23,7 +23,7 @@
       <div class="d-flex align-items-center">
         <b-btn variant="link" class="text-nowrap" @click="toggleFavorite">
           <fa-icon :icon="isFavorite ? [ 'fas', 'star' ] : ['far', 'star']" size="lg" class="mr-1" />
-          <span v-text="$t('buttons.favorite')" />
+          <span v-if="!mobile" v-text="$t('buttons.favorite')" />
         </b-btn>
         <div class="text-muted">|</div>
         <b-btn
@@ -49,7 +49,7 @@
             title="Notifications OFF"
             class="muted mr-1"
           />
-          <span v-text="$t('buttons.notifications')" />
+          <span v-if="!mobile" v-text="$t('buttons.notifications')" />
         </b-btn>
         <div class="text-muted">|</div>
         <b-btn
@@ -60,7 +60,7 @@
           @click="toggleGallery"
         >
           <fa-icon :icon="showGallery ? ['fas', 'image'] : ['far', 'image']" size="lg" class="mr-1" />
-          <span v-text="$t('buttons.gallery')" />
+          <span v-if="!mobile" v-text="$t('buttons.gallery')" />
         </b-btn>
         <div class="text-muted">|</div>
         <b-btn
@@ -71,34 +71,30 @@
           @click="tip"
         >
           <fa-icon icon="dollar-sign" fixed-width size="lg" class="mr-1" />
-          <span v-text="$t('buttons.tip')" />
+          <span v-if="!mobile" v-text="$t('buttons.tip')" />
         </b-btn>
         <div class="text-muted">|</div>
         <SearchInput v-model="searchQuery" size="lg" />
       </div>
     </section>
 
-    <hr v-if="!mobile" />
-
-    <transition-group name="quick-fade" mode="out-in" class="flex-fill scroll-wrapper">
-      <section v-if="vaultSelectionOpen" key="vaultSelect" class="vault-selection">
-        <VaultSelector @close="vaultSelectionOpen = false" />
-      </section>
-      <section v-else-if="showGallery" key="gallery" class="gallery flex-fill">
-        <Gallery :threadId="id" @close="showGallery = false" />
-      </section>
-      <MessageDisplay
-        v-else
-        :items="searchResults === null ? chatmessages: searchResults"
-        :loading="moreLoading"
-        :isLastPage="isLastPage"
-        :isSearch="searchResults !== null"
-        :searchQuery="searchQuery"
-        key="messages"
-        class="flex-fill"
-        @endVisible="endVisible"
-      />
-    </transition-group>
+    <section v-if="vaultSelectionOpen" key="vaultSelect" class="vault-selection">
+      <VaultSelector @close="vaultSelectionOpen = false" />
+    </section>
+    <section v-else-if="showGallery" key="gallery" class="gallery flex-fill">
+      <Gallery :threadId="id" @close="showGallery = false" />
+    </section>
+    <MessageDisplay
+      v-else
+      :items="searchResults === null ? chatmessages: searchResults"
+      :loading="moreLoading"
+      :isLastPage="isLastPage"
+      :isSearch="searchResults !== null"
+      :searchQuery="searchQuery"
+      key="messages"
+      class="flex-fill"
+      @endVisible="endVisible"
+    />
 
     <TypingIndicator :threadId="id" />
 

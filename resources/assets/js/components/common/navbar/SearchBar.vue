@@ -195,7 +195,6 @@ export default {
 
     _search() {
       this.loading = true
-      console.log('-------- do search'  )
       this.doSearch()
         .then(() => {
           this.loading = false
@@ -208,7 +207,6 @@ export default {
     },
 
     parseData(data) {
-      console.log('--------- parsed data', data)
       this.results.autoComplete = data.hasOwnProperty('autoComplete')
         ? data.autoComplete.hasOwnProperty('data')
           ? data.autoComplete.data : data.autoComplete : []
@@ -241,7 +239,6 @@ export default {
         this.highlighted = -1
         return
       }
-      console.log('---------this.results:', this.results)
       const groupLength = this.results[this.selectedGroupName].length + 1
       value = value + 1 < 0 ? value + 1 + groupLength : value + 1
       this.highlighted = ( value % groupLength ) - 1
@@ -270,7 +267,7 @@ $border-radius: 0.25 * $spacer;
 $border: 1px var(--gray) solid;
 
 .search-bar.mobile {
-  flex-grow: 1;
+  height: auto;
   .form-inline {
     height: 100%;
     display: flex;
@@ -279,7 +276,7 @@ $border: 1px var(--gray) solid;
     .results {
       display: none;
       position: relative;
-      flex-grow: 0;
+      height: 0;
       top: 0;
       width: 100%;
       transition: flex-grow var(--transition-rate, 0.25s) var(--transition-easing, ease);
@@ -287,7 +284,7 @@ $border: 1px var(--gray) solid;
       margin-bottom: auto;
       &.open {
         display: block;
-        flex-grow: 1;
+        height: auto;
         overflow-y: auto;
       }
       .result-list {
@@ -345,7 +342,7 @@ $border: 1px var(--gray) solid;
 
   .result-list {
     overflow-y: auto;
-    max-height: 90vh;
+    max-height: calc(100vh - 208px);
     padding: 0;
     .result-list-item {
       list-style: none;

@@ -115,7 +115,12 @@ export default {
 
 <style lang="scss" scoped>
 .chatthread-list {
+  height: calc(100vh - 340px);
   overflow: auto;
+  .list-group-item {
+    border-radius: inherit;
+    border: none;
+  }
 }
 </style>
 

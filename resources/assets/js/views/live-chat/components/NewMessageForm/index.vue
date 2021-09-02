@@ -53,7 +53,7 @@
         </div>
 
         <!-- Text area -->
-        <div class="mt-3">
+        <div class="mt-1">
           <b-form-group>
             <b-form-textarea
               class="message"
@@ -586,7 +586,6 @@ export default {
 
 .conversation-footer {
   background-color: #fff;
-  border-top: solid 1px rgba(138,150,163,.25);
 }
 button.clickme_to-submit_message {
   width: 9rem;
@@ -620,7 +619,7 @@ textarea {
 }
 
 textarea.form-control {
-  border: none;
+  border: solid 1px #dfdfdf;
   overflow-y: auto;
 }
 </style>

@@ -3,12 +3,14 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification as NotificationFacade;
 
 use Tests\TestCase;
 
 use App\Models\User;
 use App\Models\Staff;
 use App\Models\Permission;
+use App\Notifications\StaffSettingsChanged;
 
 /**
  * @group staff
@@ -409,6 +411,7 @@ class RestStaffTest extends TestCase
      */
     public function test_can_set_percentage_of_earnings()
     {
+        NotificationFacade::fake();
         // Find the creator account with managers
         $manager = Staff::where('role', 'manager')->where('active', true)->firstOrFail();
         $sessionUser = User::where('id', $manager->owner_id)->firstOrFail();

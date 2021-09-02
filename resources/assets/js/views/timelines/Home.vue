@@ -14,7 +14,7 @@
       <aside v-if="!isGridLayout" class="col-md-5 col-lg-4">
         <MiniMyStatsWidget :session_user="session_user" :timeline="timeline" />
         <!-- CompaniesWidget -->
-        <Companies :session_user="session_user" />
+        <Companies :session_user="session_user" :unread_notifications="unread_notifications" />
         <!--
         <SuggestedFeed :session_user="session_user" :timeline="timeline" class="mt-3" />
         -->
@@ -49,7 +49,8 @@ export default {
     ...Vuex.mapGetters([
       'session_user',
       'timeline',
-      'queue_metadata'
+      'queue_metadata',
+      'unread_notifications',
     ]),
 
     mainClass() {

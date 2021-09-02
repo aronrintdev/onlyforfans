@@ -68,8 +68,8 @@ export default {
 
   mounted() {
     if(this.$route && (this.$route.name === 'login' || this.$route.name === "register" || this.$route.name === 'error-not-found' || this.$route.name === 'forgot-password')) {
-      this.isVisible = false
-    }
+        this.isVisible = false
+      }
   },
 
   methods: {
@@ -77,6 +77,11 @@ export default {
   },
 
   watch: {
+    $route(val) {
+      if(val && (val.name === 'login' || val.name === "register" || val.name === 'error-not-found' || val.name === 'forgot-password')) {
+        this.isVisible = false
+      }
+    },
     $vssWidth(value) {
       var mobile = value < this.mobileWidth
       if (this.mobile !== mobile) {

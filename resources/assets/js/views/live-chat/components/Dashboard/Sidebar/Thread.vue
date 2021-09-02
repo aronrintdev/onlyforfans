@@ -23,20 +23,20 @@
             </b-badge>
           </span>
         </div>
-        <div class="wrap-msg-snippet">
+        <div class="wrap-msg-snippet d-flex">
 
           <VueMarkdown
-            class="msg-snippet mb-0"
+            class="msg-snippet mb-0 flex-grow-1"
             inline
             :breaks="false"
             :html="false"
             :linkify="false"
             :source="chatthread.chatmessages[0].mcontent || ''"
           />
+          <small class="ml-auto mr-0">
+            <timeago :converterOptions="{addSuffix: false}" :datetime="chatthread.updated_at" :auto-update="60" />
+          </small>
         </div>
-        <small>
-          <timeago :converterOptions="{addSuffix: false}" :datetime="chatthread.updated_at" :auto-update="60" />
-        </small>
       </div>
       <div class="pl-2 tag-ctrl ml-auto">
         <fa-icon :icon="['fas', 'ellipsis-h']" class="clickable fa-sm" />
@@ -113,6 +113,7 @@ body {
 
   .msg-snippet {
     display: block;
+    max-width: 9rem;
     font-size: 14px;
     overflow: hidden;
     text-overflow: ellipsis;
