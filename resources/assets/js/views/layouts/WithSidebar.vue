@@ -1,7 +1,7 @@
 <template>
   <div class="container-fluid" :class="mobile ? 'px-0' : ''">
     <!-- Mobile view -->
-    <section v-if="mobile" class="mobile h-100" :class="{ 'focus-main': focusMain }">
+    <section v-if="mobile && !isMessages" class="mobile h-100" :class="{ 'focus-main': focusMain }">
       <!-- <transition :name="focusMain ? 'slide-right' : 'slide-left'"> -->
         <div class="sidebar px-3 pb-3" key="sidebar">
           <div class="header justify-content-center">
@@ -25,9 +25,20 @@
       <!-- </transition> -->
     </section>
 
+    <!-- Messages Mobile view -->
+    <!-- FIXME: This is one of the dirtiest 💩 fixes I've done as I don't have another choice -->
+    <section v-if="mobile && isMessages" class="mobile h-100" :class="{ 'focus-main': focusMain }">
+      <div class="sidebar px-3 pb-3" key="sidebar">
+        <slot name="sidebar"></slot>
+      </div>
+      <div class="main px-3 pb-3" key="main">
+        <slot></slot>
+      </div>
+    </section>
+
     <!-- Non mobile view -->
     <section v-else class="d-flex flex-nowrap h-100 w-100">
-      <aside class="sidebar h-100 p-3">
+      <aside class="sidebar h-100 p-3 mr-3 border-class">
         <slot name="sidebar"></slot>
       </aside>
       <main class="main flex-fill h-100 pt-3">
@@ -53,6 +64,8 @@ export default {
     focusMain: { type: Boolean, default: false },
 
     removeMobileMainNavTop: { type: Boolean, default: false },
+
+    isMessages: { type: Boolean, default: false },
   },
 
   computed: {
@@ -121,6 +134,9 @@ export default {
 .sidebar {
   width: 25rem;
   min-width: 20rem;
+}
+.border-class {
+  border-right: solid 1px #dfdfdf;
 }
 .main {
   max-height: 100%;

@@ -4,6 +4,7 @@
     id="view-livechat"
     :class="{ mobile: mobile }"
     :focusMain="threadOpen"
+    :isMessages="true"
     removeMobileMainNavTop
   >
     <template #sidebar>
@@ -268,6 +269,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// thread view should be full screen on mobile
+.content.thread #view-livechat.mobile {
+  height: 100vh;
+  max-height: 100vh;
+}
+
 #view-livechat {
   background-color: #fff;
 
@@ -277,6 +284,22 @@ export default {
     bottom: 0;
     padding-left: 0;
     padding-right: 0;
+    height: calc(100vh - 64px);
+    max-height: calc(100vh - 64px);
+  }
+
+  .chatthread-list {
+    height: calc(100vh - 350px);
+    overflow: auto;
+
+    .list-group-item.active {
+      background: rgba(0,145,234,.06);
+      color: inherit;
+      border-top: none;
+      border-left: 1px solid rgba(138,150,163,.25);
+      border-right: 1px solid rgba(138,150,163,.25);
+      border-bottom: 1px solid rgba(138,150,163,.25);
+    }
   }
 
   height: calc(100vh - 6rem);

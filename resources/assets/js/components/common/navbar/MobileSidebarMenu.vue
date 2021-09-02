@@ -178,21 +178,10 @@ export default {
       this.$forceCompute('topSection')
       this.$forceCompute('bottomSection')
     },
-
-    show(value) {
-      if (value) {
-        // TODO: Having some issues with resetting page scroll with this at the moment
-        // document.querySelector('html').classList.add('prevent-scrolling')
-      } else {
-        document.querySelector('html').classList.remove('prevent-scrolling')
-      }
-    },
   },
 
   destroyed() {
     this.onClose()
-    // Incase this component is removed when switching back to desktop mode
-    document.querySelector('html').classList.remove('prevent-scrolling')
   },
 
   created() {},
