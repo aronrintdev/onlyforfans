@@ -106,7 +106,7 @@ class ChatmessagesTableSeeder extends Seeder
                     $cm->save();
                 });
             } else {
-                $ts = new Carbon( $this->faker->dateTimeBetween($startDate = '-2 years', $endDate = '-1 months') );
+                $ts = new Carbon( $this->faker->dateTimeBetween($startDate = '-3 years', $endDate = '-2 months') );
                 $chatmessages->each( function($cm) use($ts) {
                     $cm->created_at = $ts;
                     $cm->updated_at = $ts;
@@ -116,9 +116,9 @@ class ChatmessagesTableSeeder extends Seeder
 
             // Replies to simulate a conversation
             //$baseTS = $ts->copy();
-            $chatthreads->each( function($ct) use($ts) {
+            $chatthreads->each( function($ct) use($ts, $now) {
                 $replyCount = $this->faker->numberBetween(1, 18);
-                $_ts = $ts->copy()->addMinutes( $this->faker->numberBetween(1,70) );
+                $_ts = $ts->copy()->addSeconds( $this->faker->numberBetween(1,99) );
                 for ( $i = 0 ; $i < $replyCount ; $i++ ) {
                     $this->output->writeln("    ~ reply on ".$ct->id.", #$i of $replyCount...");
                     $senderA = $this->faker->randomElement( $ct->participants->toArray() ); // so it looks like a back-and-forth conversation
@@ -136,10 +136,13 @@ class ChatmessagesTableSeeder extends Seeder
                         $rattrs->price ?? null, // $price = null
                         $rattrs->currency ?? null // $currency = null
                     );
+                    if ( $_ts->greaterThan($now) ) {
+                        $_ts = $now; // (max): safety code to prevent conversation replies extending into future
+                    }
                     $cm->created_at = $_ts;
                     $cm->updated_at = $_ts;
                     $cm->save();
-                    $_ts->addMinutes( $this->faker->numberBetween(1,70) );
+                    $_ts->addSeconds( $this->faker->numberBetween(1,99) );
                 }
             });
 
