@@ -7,8 +7,8 @@
       <fa-icon v-if="mobile" icon="search" class="text-secondary" />
     </div>
 
-    <ScrollCollapse v-if="mobile && searchVisible" ref="scrollCollapse" class="w-100" :full-open="searchOpen" :full-open-height="openHeight">
-      <div class="d-flex flex-column justify-content-between h-100 pb-3">
+    <ScrollCollapse v-if="mobile && searchVisible" ref="scrollCollapse" class="scrollCollapse w-100" :full-open="searchOpen" :full-open-height="0">
+      <div class="d-flex flex-column justify-content-between pb-3">
         <SearchBar class="w-100 mt-3" :mobile="true" @opening="searchOpen = true" @closing="searchOpen = false" @scroll="onScroll" />
       </div>
     </ScrollCollapse>
@@ -71,7 +71,7 @@ export default {
     openHeight() {
       var height = this.$vssHeight
       if (this.$el) {
-        height = height - this.$el.clientHeight
+        height = height - this.$el.clientHeight - 68
       }
 
       if(this.$refs['scrollCollapse']) {
@@ -153,6 +153,9 @@ export default {
       }
     }
   }
+}
+.scrollCollapse {
+  height: auto !important;
 }
 
 .scroll-collapse-nav {

@@ -114,7 +114,7 @@ export default {
       this.UPDATE_MOBILE_MENU_OPEN(!this.mobileMenuOpen)
     },
     scrollToTop() {
-      $('.app').animate({ scrollTop: 0 }, 'slow')
+      $('html').animate({ scrollTop: 0 }, 'slow')
     }
   },
 
