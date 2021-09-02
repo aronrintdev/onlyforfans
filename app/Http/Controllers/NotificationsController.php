@@ -67,12 +67,15 @@ class NotificationsController extends AppBaseController
     public function getTotalUnreadCount(Request $request)
     {
         $sessionUser = $request->user();
-        $unreadCount = NotificationModel::whereNull('read_at')
+        $unreadNotifications = NotificationModel::whereNull('read_at')
             ->where('notifiable_type', 'users')
             ->where('notifiable_id', $sessionUser->id)
-            ->count();
+            ->get();
         return response()->json(
-            ['total_unread_count' => $unreadCount]
+            [
+                'total_unread_count' => $unreadNotifications->count(),
+                'unread_notifications' => $unreadNotifications,
+            ]
         );
     }
 

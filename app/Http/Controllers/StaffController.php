@@ -115,7 +115,7 @@ class StaffController extends Controller
             $staff->active = true;
             $staff->pending = false;
             $staff->user_id = $sessionUser->id;
-            $staff->settings = [];
+            $staff->settings = null;
             $staff->save();
 
             return response()->json([

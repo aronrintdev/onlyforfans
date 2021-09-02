@@ -86,6 +86,7 @@ class StaffSettingsChanged extends Notification
             'settings' => $this->settings,
             'actor' => [
                 'username' => $this->actor->username,
+                'id' => $this->actor->id,
                 'name' => $this->actor->name,
                 'avatar' => $this->actor->avatar->filepath ?? null,
             ],
