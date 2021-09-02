@@ -1,7 +1,7 @@
 <template>
   <div class="container-fluid" :class="mobile ? 'px-0' : ''">
     <!-- Mobile view -->
-    <section v-if="mobile" class="mobile h-100" :class="{ 'focus-main': focusMain }">
+    <section v-if="mobile && !isMessages" class="mobile h-100" :class="{ 'focus-main': focusMain }">
       <!-- <transition :name="focusMain ? 'slide-right' : 'slide-left'"> -->
         <div class="sidebar px-3 pb-3" key="sidebar">
           <div class="header justify-content-center">
@@ -23,6 +23,17 @@
           </div>
         </div>
       <!-- </transition> -->
+    </section>
+
+    <!-- Messages Mobile view -->
+    <!-- FIXME: This is one of the dirtiest 💩 fixes I've done as I don't have another choice -->
+    <section v-if="mobile && isMessages" class="mobile h-100" :class="{ 'focus-main': focusMain }">
+      <div class="sidebar px-3 pb-3" key="sidebar">
+        <slot name="sidebar"></slot>
+      </div>
+      <div class="main px-3 pb-3" key="main">
+        <slot></slot>
+      </div>
     </section>
 
     <!-- Non mobile view -->
@@ -53,6 +64,8 @@ export default {
     focusMain: { type: Boolean, default: false },
 
     removeMobileMainNavTop: { type: Boolean, default: false },
+
+    isMessages: { type: Boolean, default: false },
   },
 
   computed: {

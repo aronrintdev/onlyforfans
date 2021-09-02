@@ -4,6 +4,7 @@
     id="view-livechat"
     :class="{ mobile: mobile }"
     :focusMain="threadOpen"
+    :isMessages="true"
     removeMobileMainNavTop
   >
     <template #sidebar>
