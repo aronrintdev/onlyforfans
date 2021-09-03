@@ -201,7 +201,7 @@ class StoriesController extends AppBaseController
             if ( count($item->mediafiles) ) {
                 $fn = $item->mediafiles[0]->filename;
                 $a['mf_filename'] = $fn;
-                $a['mf_url'] = Storage::disk('s3')->url($fn); // %FIXME: use model attribute
+                $a['mf_url'] = $item->mediafiles[0]->getCdnUrl();
             }
             return $a;
         });

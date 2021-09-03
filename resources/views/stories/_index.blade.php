@@ -20,7 +20,7 @@
     @elseif ($s->stype==='image')
       <article class="col-sm-1">
         <a class="box-story" style="background-color: {{ $bgColor }};" href="{{ route('stories.player', $sessionUser->username) }}">
-          <img src="{{ Storage::disk('s3')->url($s->mediafiles->first()->filename) }}" alt="" />
+          <img src="{{ $s->mediafiles->first()->filepath }}" alt="" />
         </a>
       </article>
     @endif
