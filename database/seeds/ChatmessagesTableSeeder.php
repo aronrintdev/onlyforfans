@@ -97,6 +97,7 @@ class ChatmessagesTableSeeder extends Seeder
                     $cm->save();
                 });
             } else if ( $isScheduled ) {
+                /* %PSG: remove as this is not correct
                 //$ts = $deliverAt;
                 //$ts = new Carbon( $this->faker->dateTimeBetween($startDate = '-2 weeks', $endDate = '-1 days') );
                 $ts = $now->subDays( $this->faker->numberBetween(1,14) );
@@ -105,6 +106,7 @@ class ChatmessagesTableSeeder extends Seeder
                     $cm->updated_at = $ts;
                     $cm->save();
                 });
+                 */
             } else {
                 $ts = new Carbon( $this->faker->dateTimeBetween($startDate = '-3 years', $endDate = '-2 months') );
                 $chatmessages->each( function($cm) use($ts) {
@@ -114,99 +116,39 @@ class ChatmessagesTableSeeder extends Seeder
                 });
             }
 
-            // Replies to simulate a conversation
-            //$baseTS = $ts->copy();
-            $chatthreads->each( function($ct) use($ts, $now) {
-                $replyCount = $this->faker->numberBetween(1, 18);
-                $_ts = $ts->copy()->addSeconds( $this->faker->numberBetween(1,99) );
-                for ( $i = 0 ; $i < $replyCount ; $i++ ) {
-                    $this->output->writeln("    ~ reply on ".$ct->id.", #$i of $replyCount...");
-                    $senderA = $this->faker->randomElement( $ct->participants->toArray() ); // so it looks like a back-and-forth conversation
-                    $sender = User::findOrFail($senderA['id']);
-                    $rattrs = (object)[
-                        'mcontent'    => $this->faker->realText, // 'string',  // optional first message content
-                        //'price'       => 'numeric',
-                        //'currency'    => 'required_with:price|size:3',
-                        //'attachments' => 'required_with:price|array',
-                    ];
-                    $cm = $ct->sendMessage(
-                        $sender, 
-                        $rattrs->mcontent ?? null, // string $mcontent = ''
-                        $rattrs->attachments ?? [], // array $attachments = []
-                        $rattrs->price ?? null, // $price = null
-                        $rattrs->currency ?? null // $currency = null
-                    );
-                    if ( $_ts->greaterThan($now) ) {
-                        $_ts = $now; // (max): safety code to prevent conversation replies extending into future
-                    }
-                    $cm->created_at = $_ts;
-                    $cm->updated_at = $_ts;
-                    $cm->save();
-                    $_ts->addSeconds( $this->faker->numberBetween(1,99) );
-                }
-            });
-
-                /*
-            $threadCount = $this->faker->numberBetween(1, 3); // number of receivers *per* originator (ie threads)
-            $receivers = User::has('timeline')->where('id', '<>', $o->id)->take($threadCount)->get();
-
-            $receivers->each( function($r) use(&$o) {
-                //dump('ts', $ts->toDateTimeString());
-
-                $chatthread = Chatthread::create([
-                    'originator_id' => $o->id,
-                ]);
-
-                $chatthread->participants()->attach($r->id);
-
-                $msgCount = $this->faker->numberBetween(1, 18);
-
-                $senderID = $o->id; // init sender
-                for ( $i = 0 ; $i < $msgCount ; $i++ ) {
-                    $isScheduled = $this->faker->boolean(20);
-                    if ($isScheduled) {
-                        // Pre-schedules messages (some may be marked delivered)
-                        $now = Carbon::now();
-                        $isDeliveredByNow = $this->faker->boolean(50);
-                        if ( $isDeliveredByNow ) {
-                            $deliverAt = $now->subDays( $this->faker->numberBetween(1,5) );
-                            $ts = $deliverAt;
-                            $isDelivered = true;
-                        } else {
-                            $deliverAt = $now->addDays( $this->faker->numberBetween(1,7) );
-                            $ts = $now->subDays( $this->faker->numberBetween(1,7) );
-                            $isDelivered = false;
+            if ( !$isScheduled || $isDeliveredByNow) ) { // skips if scheduled & not delivered yet
+                // Replies to simulate a conversation
+                //$baseTS = $ts->copy();
+                $chatthreads->each( function($ct) use($ts, $now) {
+                    $replyCount = $this->faker->numberBetween(1, 18);
+                    $_ts = $ts->copy()->addSeconds( $this->faker->numberBetween(1,99) );
+                    for ( $i = 0 ; $i < $replyCount ; $i++ ) {
+                        $this->output->writeln("    ~ reply on ".$ct->id.", #$i of $replyCount...");
+                        $senderA = $this->faker->randomElement( $ct->participants->toArray() ); // so it looks like a back-and-forth conversation
+                        $sender = User::findOrFail($senderA['id']);
+                        $rattrs = (object)[
+                            'mcontent'    => $this->faker->realText, // 'string',  // optional first message content
+                            //'price'       => 'numeric',
+                            //'currency'    => 'required_with:price|size:3',
+                            //'attachments' => 'required_with:price|array',
+                        ];
+                        $cm = $ct->sendMessage(
+                            $sender, 
+                            $rattrs->mcontent ?? null, // string $mcontent = ''
+                            $rattrs->attachments ?? [], // array $attachments = []
+                            $rattrs->price ?? null, // $price = null
+                            $rattrs->currency ?? null // $currency = null
+                        );
+                        if ( $_ts->greaterThan($now) ) {
+                            $_ts = $now; // (max): safety code to prevent conversation replies extending into future
                         }
-                        //Carbon( $this->faker->dateTimeBetween($startDate = '-2 years', $endDate = '-1 months') );
-                        $m = Chatmessage::create([
-                            'chatthread_id' => $chatthread->id,
-                            'sender_id' => $senderID,
-                            'mcontent' => $this->faker->realText,
-                            'is_delivered' => $isDelivered,
-                            'deliver_at' => $deliverAt,
-                        ]);
-                        $m->created_at = $ts;
-                        $m->updated_at = $ts;
-                        $m->save();
-                    } else {
-                        // 'Instantanious' Messages
-                        $ts = new Carbon( $this->faker->dateTimeBetween($startDate = '-2 years', $endDate = '-1 months') );
-                        $m = Chatmessage::create([
-                            'chatthread_id' => $chatthread->id,
-                            'sender_id' => $senderID,
-                            'mcontent' => $this->faker->realText,
-                            'is_read' => $this->faker->boolean(60),
-                        ]);
-                        $m->created_at = $ts;
-                        $m->updated_at = $ts;
-                        $m->save();
+                        $cm->created_at = $_ts;
+                        $cm->updated_at = $_ts;
+                        $cm->save();
+                        $_ts->addSeconds( $this->faker->numberBetween(1,99) );
                     }
-                    $ts->addMinutes( $this->faker->numberBetween(1,70) );
-                    $senderID = $this->faker->randomElement([ $o->id, $r->id ]); // so it looks like a back-and-forth conversation
-                }
-
-            }); // each($r)
-                 */
+                });
+            }
 
         }); // each($o)
 
