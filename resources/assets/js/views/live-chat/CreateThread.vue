@@ -1,5 +1,5 @@
 <template>
-  <WithSidebar :focusMain="focusMain" v-if="!isLoading" id="view-create-thread" @back="backToPrevious">
+  <WithSidebar :focusMain="focusMain" v-if="!isLoading" id="view-create-thread" @back="backToPrevious" :hasBorder="true">
     <template #sidebar>
       <article class="top-bar d-flex align-items-center" :class="{'justify-content-between' : !mobile}">
         <b-btn v-if="mobile" variant="link" :to="{ name: 'chatthreads.dashboard' }" class="mb-1">

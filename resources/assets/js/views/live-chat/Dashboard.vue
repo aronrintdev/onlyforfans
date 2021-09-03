@@ -5,6 +5,7 @@
     :class="{ mobile: mobile }"
     :focusMain="threadOpen"
     :isMessages="true"
+    :hasBorder="true"
     removeMobileMainNavTop
   >
     <template #sidebar>

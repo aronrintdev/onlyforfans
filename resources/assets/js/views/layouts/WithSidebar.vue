@@ -31,7 +31,7 @@
 
     <!-- Non mobile view -->
     <section v-else class="d-flex flex-nowrap h-100 w-100">
-      <aside class="sidebar h-100 p-3 mr-3 border-class">
+      <aside class="sidebar h-100 p-3 mr-3" :class="{'border-class': hasBorder}">
         <slot name="sidebar"></slot>
       </aside>
       <main class="main flex-fill h-100 pt-3">
@@ -59,6 +59,8 @@ export default {
     removeMobileMainNavTop: { type: Boolean, default: false },
 
     isMessages: { type: Boolean, default: false },
+
+    hasBorder: { type: Boolean, default: false },
   },
 
   computed: {
