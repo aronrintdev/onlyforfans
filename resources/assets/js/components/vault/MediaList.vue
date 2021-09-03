@@ -2,7 +2,7 @@
   <b-row :no-gutters="true" class="component-vault-MediaList">
 
     <!-- mediafiles -->
-    <b-col cols="12" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button">
+    <b-col cols="4" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button">
       <PreviewFile
         :data-mf_id="mf.id"
         :mediafile="mf"
@@ -13,7 +13,7 @@
     </b-col>
 
     <!-- 'child' vaultfolders -->
-    <b-col v-for="(vf) in children" :key="vf.id" cols="12" md="3" role="button">
+    <b-col v-for="(vf) in children" :key="vf.id" cols="4" md="3" role="button">
       <b-img fluid @click="doNav(vf.id)" src="/images/tmp-placeholders/folder-icon.jpg" :alt="`Folder ${vf.slug}`"></b-img>
       <div class="text-center">{{ vf.name }}</div>
     </b-col>
