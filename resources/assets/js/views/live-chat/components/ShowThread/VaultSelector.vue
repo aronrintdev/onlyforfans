@@ -1,15 +1,6 @@
 <template>
   <div class="component-vault-selector">
     <div class="d-flex">
-      <div v-if="isTopCtrlVisible" class="h5" v-text="$t('header')" />
-      <b-btn v-if="isTopCtrlVisible" variant="link" class="ml-auto" @click="onClose">
-        <fa-icon icon="times" size="lg" />
-      </b-btn>
-    </div>
-    <div v-if="isTopCtrlVisible" class="d-flex mb-2">
-      <b-btn variant="success" class="ml-auto clickme_to-apply_selected" @click="applySelection">
-        <fa-icon icon="check" size="lg" class="mr-2" /> {{ $t('selectButton') }}
-      </b-btn>
     </div>
     <!-- <Dashboard
       v-if="!isLoading"
@@ -69,10 +60,6 @@ export default {
 
     context() {
       return this.payload?.context || ''
-    },
-
-    isTopCtrlVisible() { // hide in modal context
-      return this.context !== 'create-post' && this.context !== 'story-bar'
     },
   },
 

@@ -72,7 +72,7 @@
       <!-- Bottom Toolbar -->
       <Footer
         :selected="selectedOptions"
-        @vaultSelect="toggleVaultSelect"
+        @vaultSelect="renderVaultSelector"
         @openScheduleMessage="openScheduleMessageModal"
         @recordAudio="recordAudio"
         @recordVideo="recordVideo"
@@ -138,7 +138,6 @@ export default {
   props: {
     session_user: null,
     chatthread_id: null,
-    vaultOpen: { type: Boolean, default: false },
   },
 
   computed: {
@@ -189,9 +188,11 @@ export default {
 
     selectedOptions() {
       var selected = []
+        /*
       if (this.vaultOpen) {
         selected.push('vaultSelect')
       }
+         */
       if (this.scheduleMessageOpen) {
         selected.push('openScheduleMessage')
       }
@@ -482,8 +483,16 @@ export default {
       this.scheduleMessageOpen = true
     },
 
-    toggleVaultSelect() {
-      this.$emit('toggleVaultSelect')
+    //toggleVaultSelect() {
+    //this.$emit('toggleVaultSelect')
+    //},
+    renderVaultSelector() {
+      eventBus.$emit('open-modal', {
+        key: 'render-vault-selector',
+        data: { 
+          context: 'create-message',
+        },
+      })
     },
 
     recordAudio() {
@@ -519,6 +528,7 @@ export default {
           name: this.session_user.name || this.session_user.username
         })
     },
+
 
   }, // methods
 
