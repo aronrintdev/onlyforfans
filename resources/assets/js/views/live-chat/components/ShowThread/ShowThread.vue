@@ -179,10 +179,6 @@ export default {
       return _.find(this.thread.participants, participant => participant.id !== this.session_user.id)
     },
 
-    thread() {
-      return this._thread()(this.id)
-    },
-
     modalTitle() {
       if (this.notes) {
         return 'Edit Notes'
@@ -219,6 +215,8 @@ export default {
 
     isNotesModalVisible: false,
     notes: null,
+
+    thread: null,
   }), // data
 
   created() {
@@ -232,6 +230,7 @@ export default {
     this.getChatmessages(this.id)
 
     this.getThread(this.id).then(response => {
+      this.thread = response.data.data
       this.$nextTick(() => {
         this.computeThread()
       })
@@ -254,10 +253,8 @@ export default {
     ...Vuex.mapActions(['getUnreadMessagesCount']),
     ...Vuex.mapActions('messaging', ['getThread']),
     ...Vuex.mapMutations('messaging', [ 'UPDATE_THREAD' ]),
-    ...Vuex.mapGetters('messaging', { _thread: 'thread' }),
 
     computeThread() {
-      this.$forceCompute('thread')
       this.$forceCompute('participant')
       this.$forceCompute('isFavorite')
     },
