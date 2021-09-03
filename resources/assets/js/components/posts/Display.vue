@@ -382,6 +382,10 @@ ul {
 
 .post-crate-content {
   position: relative;
+
+  ::v-deep p:last-child {
+    margin: 0 !important;
+  }
 }
 
 .post-crate-content-eventbox {
