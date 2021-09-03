@@ -378,6 +378,10 @@ export default {
         params.attachments = this.selectedMediafiles
       }
 
+      if (this.isScheduled) {
+        params.is_scheduled = this.this.deliverAtTimestamp
+      }
+
       if (this.chatthread_id === 'new') {
         // %NOTE - Creating a new thread, delegate to parent template (CreateThreadForm), as
         //   that's where the selectedContact data resides
@@ -387,37 +391,42 @@ export default {
         }
         this.$emit('create-chatthread', params)
 
-      } else if (this.isScheduled) {
-        // 'send' a pre-scheduled message (on an existing thread)
-        params.deliver_at = this.deliverAtTimestamp
-        await axios.post( this.$apiRoute('chatthreads.scheduleMessage', this.chatthread_id), params )
-        this.$root.$bvToast.toast(
-          this.$t('scheduled.message', { time: this.deliverAtTimestamp }),
-          { variant: 'primary', title: this.$t('scheduled.title') }
-        )
       } else {
-        // send an immediate message (on an existing thread)
-        const message = {
-          chatthread_id: this.chatthread_id,
-          mcontent: this.newMessageForm.mcontent,
-          sender_id: this.session_user.id,
-          is_delivered: true,
-          imageCount: this.selectedMediafiles.length,
-          created_at: this.moment().toISOString(),
-          updated_at: this.moment().toISOString(),
+        if (!this.isScheduled) {
+          this.whisperMessage()
         }
-        // Whisper the message to the channel so that is shows up for other users as fast as possible if they are
-        //   currently viewing this thread
-        this.$echo.join(this.channelName).whisper('sendMessage', { message })
         this.$emit('sendMessage', message)
 
-        await axios.post( this.$apiRoute('chatthreads.sendMessage', this.chatthread_id), params )
+        await axios.post( this.$apiRoute('chatthreads.addMessage', this.chatthread_id), params )
+
+        if (this.isScheduled) {
+          // Message was scheduled toast notification
+          this.$root.$bvToast.toast(
+            this.$t('scheduled.message', { time: this.deliverAtTimestamp }),
+            { variant: 'primary', title: this.$t('scheduled.title') }
+          )
+        }
       }
 
       this.clearForm() // removes mediafiles from store list and from Dropzone queue
       this.sending = false
 
     }, // finalizeMessageSend()
+
+    whisperMessage() {
+      // send an immediate message (on an existing thread)
+      const message = {
+        chatthread_id: this.chatthread_id,
+        mcontent:      this.newMessageForm.mcontent,
+        sender_id:     this.session_user.id,
+        is_delivered:  true,
+        imageCount:    this.selectedMediafiles.length,
+        delivered_at:  this.moment().toISOString(),
+      }
+      // Whisper the message to the channel so that is shows up for other users as fast as possible if they are
+      //   currently viewing this thread
+      this.$echo.join(this.channelName).whisper('sendMessage', { message })
+    },
 
     async sendMessage() {
       this.sending = true

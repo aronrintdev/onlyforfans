@@ -10,6 +10,8 @@ use App\Jobs\StartTransactionSummaryCreation;
 
 use App\Jobs\Financial\StartUpdatePendingBalances;
 use App\Enums\Financial\TransactionSummaryTypeEnum;
+use App\Jobs\StartDeliverMessagesBatch;
+use App\Models\Chatmessage;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel
@@ -27,7 +29,6 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\UpdateCanceledSubscriptions::class,
         \App\Console\Commands\UpdateMediafilesNullResource::class,
         \App\Console\Commands\UpdateSlugs::class,
-        \App\Console\Commands\SendScheduleMessages::class,
         \App\Console\Commands\WebhooksDispatch::class,
         \App\Console\Commands\WebhooksRetry::class,
         \App\Console\Commands\PublishScheduledPosts::class,
@@ -124,9 +125,26 @@ class Kernel extends ConsoleKernel
         })->everyFifteenMinutes();
         /* -------------------------------------------------------------------------- */
 
+        /* -------------------------------------------------------------------------- */
+        /*                         Deliver Scheduled Messages                         */
+        /* -------------------------------------------------------------------------- */
+        $schedule->call(function () {
+            // Check for any schedule ready messages
+            $count = Chatmessage::notDelivered()->scheduleReady()->count();
+            if ($count === 0) {
+                return;
+            }
+            Log::info("Starting Deliver Messages on [{$count}] due messages");
+            $batch = Bus::batch([
+                new StartDeliverMessagesBatch(),
+            ])->then(function (Batch $batch) {
+                Log::info('Deliver scheduled Messages Finished');
+            });
+        })->everyMinute();
+        /* -------------------------------------------------------------------------- */
+
 
         // $schedule->command('subscription:update-canceled')->everyHour();
-        // $schedule->command('send:schdule-messages')->everyMinute()->appendOutputTo(storage_path('logs/publish_posts.log'))->runInBackground();
         $schedule->command('publish:schduled-posts')->everyMinute()->appendOutputTo(storage_path('logs/publish_posts.log'))->runInBackground();
         // $schedule->command('publish:posts')
         //           ->everyMinute()->appendOutputTo(storage_path('logs/publish_posts.log'));

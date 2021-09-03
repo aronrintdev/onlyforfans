@@ -320,8 +320,8 @@ export default {
       if (idx === this.chatmessages.length - 1) {
         return true
       }
-      const current = moment(this.chatmessages[idx].created_at);
-      const next = moment(this.chatmessages[idx + 1].created_at,);
+      const current = moment(this.chatmessages[idx].delivered_at);
+      const next = moment(this.chatmessages[idx + 1].delivered_at,);
       return !current.isSame(next, 'date')
     },
 

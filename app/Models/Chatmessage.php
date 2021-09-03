@@ -2,18 +2,20 @@
 namespace App\Models;
 
 use Money\Money;
-
 use Carbon\Carbon;
+
 use App\Interfaces\UuidId;
 use App\Interfaces\Ownable;
 use Laravel\Scout\Searchable;
 use App\Models\Traits\UsesUuid;
+use App\Events\MessageSentEvent;
 use App\Interfaces\Purchaseable;
 use App\Models\Financial\Account;
 use App\Models\Traits\FormatMoney;
 use Illuminate\Support\Collection;
 use App\Models\Traits\OwnableTraits;
 use App\Models\Traits\ShareableTraits;
+use App\Notifications\MessageReceived;
 use App\Models\Casts\Money as CastsMoney;
 use App\Models\Financial\Traits\HasCurrency;
 
@@ -25,7 +27,8 @@ use App\Models\Financial\Traits\HasCurrency;
  * @property bool       $purchase_only
  * @property Money      $price
  * @property string     $currency
- * @property Carbon     $deliver_at
+ * @property Carbon     $deliver_at   - When the message is scheduled to be delivered at
+ * @property Carbon     $delivered_at - When the message was delivered at
  * @property bool       $is_delivered
  * @property bool       $is_read
  * @property bool       $is_flagged
@@ -64,8 +67,12 @@ class Chatmessage extends Model implements UuidId, Ownable, Purchaseable
         'is_delivered'  => 'boolean',
     ];
 
+    /**
+     * Default attribute values
+     */
     protected $attributes = [
         'mcontent' => '',
+        'is_delivered' => false,
     ];
 
     //--------------------------------------------
@@ -113,6 +120,45 @@ class Chatmessage extends Model implements UuidId, Ownable, Purchaseable
     }
 
     #endregion Relationships
+
+    /* -------------------------------------------------------------------------- */
+    /*                                   Scopes                                   */
+    /* -------------------------------------------------------------------------- */
+    #region Scopes
+
+    /**
+     * Messages that are delivered
+     */
+    public function scopeDelivered($query)
+    {
+        return $query->where('is_delivered', true);
+    }
+
+    /**
+     * Order by latest delivered
+     */
+    public function scopeLatestDelivered($query)
+    {
+        return $query->delivered()->latest('delivered_at');
+    }
+
+    /**
+     * Messages that are not delivered
+     */
+    public function scopeNotDelivered($query)
+    {
+        return $query->where('is_delivered', false);
+    }
+
+    /**
+     * Scheduled messages that are ready to be delivered
+     */
+    public function scopeScheduleReady($query)
+    {
+        return $query->whereNotNull('deliver_at')->where('deliver_at', '<=', Carbon::now());
+    }
+
+    #endregion Scopes
 
     /* ---------------------------------------------------------------------- */
     /*                               Searchable                               */
@@ -182,30 +228,95 @@ class Chatmessage extends Model implements UuidId, Ownable, Purchaseable
     // %%% Methods
     //--------------------------------------------
 
-    public function setPurchaseOnly($price, $currency) {
+    /**
+     * Add an array of mediafile attachments
+     */
+    public function addAttachments(array $attachments = null)
+    {
+        if (isset($attachments) && count($attachments)) {
+            foreach($attachments ?? [] as $attachment) {
+                $this->addAttachment($attachment);
+            }
+        }
+    }
+
+    // Add a mediafile attachment
+    public function addAttachment($attachment)
+    {
+        if ($attachment instanceof Mediafile) {
+            $diskmediafile = $attachment->diskmediafile;
+        } else if ($attachment instanceof Diskmediafile) {
+            $diskmediafile = $attachment;
+        } else {
+            if (gettype($attachment) === 'string') {
+                $id = $attachment;
+            } else if (gettype($attachment) === 'array') {
+                $id = $attachment['id'];
+            } else if (gettype($attachment) === 'object') {
+                $id = $attachment->id;
+            }
+            $diskmediafile = Mediafile::with('diskmediafile')->find($id)->diskmediafile;
+        }
+
+        $diskmediafile->createReference(
+            $this->getMorphString(),
+            $this->getKey(),
+            $attachment['mfname'],
+            'messages'
+        );
+    }
+
+
+    public function setPurchaseOnly($price, $currency) : Chatmessage
+    {
         $this->purchase_only = true;
         $this->price = CastsMoney::toMoney($price, $currency);
         $this->currency = $currency;
         $this->save();
+        return $this;
     }
 
-    public function deliver()
+    public function setDeliverAt(Carbon $deliver_at) : Chatmessage
     {
-        // deliver this (scheduled) message (ie, 'unschedule' ?)
+        $this->deliver_at = $deliver_at;
+        $this->save();
+        return $this;
     }
 
-    public static function deliverScheduled(int $take=null)
+    /**
+     * Deliver this message
+     */
+    public function deliver() : bool
     {
-        // deliver all (scheduled) messages if delivery date has passed
-        $query = Chatmessage::where('deliver_at', '<=', Carbon::now())->where('is_delivered', 0);
-        if ($take) {
-            $query->take($take);
+        if ( isset($this->deliver_at) && $this->deliver_at > Carbon::now() ) {
+            // Message should not be sent yet
+            return false;
         }
-        $chatmessages = $query->get();
-        $chatmessages->each( function($cm) {
-            $cm->is_delivered = true;
-            $cm->save();
-        });
+
+        $this->delivered_at = Carbon::now();
+        $this->is_delivered = true;
+        $this->save();
+
+        // Dispatch Message Sent Event for broadcaster
+        MessageSentEvent::dispatch($this);
+
+        // send notifications
+        foreach ($this->chatthread->participants as $participant) {
+            // don't send notification to sender
+            if ($participant->id === $this->sender_id) {
+                if (isset($this->deliver_at)) {
+                    // ?? Notify that scheduled message was sent here?
+                }
+                continue;
+            }
+
+            // check is_muted pivot field ON/OFF state
+            if (!$participant->pivot->is_muted) {
+                $participant->notify(new MessageReceived($this, $this->sender));
+            }
+        }
+
+        return true;
     }
 
     public function getOwner(): ?Collection
@@ -218,7 +329,7 @@ class Chatmessage extends Model implements UuidId, Ownable, Purchaseable
         return $this->sender;
     }
 
-    public function rescheduleMessage(int $deliverAt) : Chatmessage
+    public function schedule(int $deliverAt) : Chatmessage
     {
         if ( !$this->is_delivered ) {
             $this->deliver_at = Carbon::createFromTimestamp($deliverAt);

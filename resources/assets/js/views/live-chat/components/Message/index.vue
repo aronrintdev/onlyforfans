@@ -1,7 +1,7 @@
 <template>
   <b-list-group-item class="message" :class="{ mobile }" v-if="shown">
     <section v-if="isDateBreak" class="grouping-day-divider">
-      <span>{{ moment(value.created_at).format('MMM DD, YYYY') }}</span>
+      <span>{{ moment(value.delivered_at).format('MMM DD, YYYY') }}</span>
     </section>
 
     <Unlocked v-if="!value.purchase_only || value.is_sender || havePurchased()" :value="value" />
