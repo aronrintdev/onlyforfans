@@ -1,9 +1,15 @@
 <template>
   <div v-if="!isLoading">
+
+    <!-- === Privacy === -->
+
     <b-card :title="mobile ? null : $t('title')">
       <b-card-text>
+
         <b-form @submit.prevent="submitPrivacy($event)" @reset="onReset">
+
           <fieldset :disabled="isSubmitting.formPrivacy">
+
             <table class="w-100 table">
               <tr>
                 <td class="align-middle">
@@ -41,9 +47,13 @@
               </div>
             </b-col>
           </b-row>
+
         </b-form>
+
       </b-card-text>
     </b-card>
+
+    <!-- === Blocked === -->
 
     <b-card class="mt-5" title="Blocked">
       <b-card-text>
@@ -109,6 +119,8 @@
       </b-card-text>
     </b-card>
 
+    <!-- === Watermark === -->
+
     <b-card class="mt-5" title="Watermark">
       <b-card-text>
         <b-form @submit.prevent="submitWatermark($event)" @reset="onReset">
@@ -139,9 +151,48 @@
               </div>
             </b-col>
           </b-row>
+
         </b-form>
+
       </b-card-text>
     </b-card>
+
+    <!-- === Blur Strength === -->
+
+    <b-card class="mt-5" :title="mobile ? null : 'Blur Strength'">
+      <b-card-text>
+
+        <b-form @submit.prevent="submitBlurStrength($event)" @reset="onReset">
+
+          <fieldset :disabled="true || isSubmitting.formBlurStrength">
+
+            <table class="w-100 table">
+              <tr>
+                <td class="align-middle">
+                  <label id="group-who_can_comment_on_post" label-for="who_can_comment_on_post" class="">Set the amount of blur on private images uploaded to posts, sent in messages, etc.</label>
+                </td>
+                <td class="">
+                  <b-form-select v-model="formBlurStrength.blur_setting.value" :options="options.blurStrength" class=""></b-form-select>
+                </td>
+              </tr>
+            </table>
+            <b-row class="mt-2 mb-2 mb-md-0">
+              <b-col>
+                <div class="w-100 d-flex justify-content-end">
+                  <b-button class="w-25 ml-3" type="submit" variant="primary">
+                    <b-spinner v-if="isSubmitting.formBlurStrength" small class="mr-1" />
+                    Save
+                  </b-button>
+                </div>
+              </b-col>
+            </b-row>
+          </fieldset>
+
+        </b-form>
+
+      </b-card-text>
+    </b-card>
+
   </div>
 </template>
 
@@ -171,6 +222,7 @@ export default {
       formPrivacy: false,
       formBlocked: false,
       formWatermark: false,
+      formBlurStength: false,
     },
 
     formPrivacy: {
@@ -194,11 +246,24 @@ export default {
       },
     },
 
+    formBlurStrength: {
+      blur_setting: {
+        value: null,
+      },
+    },
+
     options: {
       privacy: [ 
         { value: null, text: 'Please select an option' },
         { value: 'everyone', text: 'Everyone' },
         { value: 'followees', text: 'People I Follow' },
+      ],
+      blurStrength: [ 
+        { value: null, text: 'Please select an option' },
+        { value: 'off', text: 'Off' },
+        { value: 'light', text: 'Light' },
+        { value: 'medium', text: 'Medium' },
+        { value: 'strong', text: 'Strong' },
       ],
     },
   }),
@@ -248,6 +313,12 @@ export default {
     async unblock(slug) {
       const response = await axios.delete(`/blockables/${this.session_user.id}/unblock/${slug}`)
       this.$store.dispatch('getUserSettings', { userId: this.session_user.id })
+    },
+    async submitBlurStrength(e) {
+      this.isSubmitting.formBlurStrength = true
+      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formBlurStrength)
+      this.onSuccess()
+      this.isBlurStrength.formPrivacy = false
     },
 
     onReset(e) {
@@ -313,7 +384,7 @@ label {
         border-top: none;
 
         &:first-child {
-          border-top: 1px solid #dee2e6;
+          //border-top: 1px solid #dee2e6;
           padding-bottom: 0;
         }
       }
