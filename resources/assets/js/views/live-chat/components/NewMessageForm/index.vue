@@ -13,7 +13,7 @@
     </div>
 
     <div class="store-chatmessage mt-auto">
-      <SetPrice v-if="setPriceActive" v-model="newMessageForm.price" class="mt-3" />
+      <SetPrice v-if="isSetPriceFormActive" v-model="newMessageForm.price" class="mt-3" />
 
       <AudioRecorder
         v-if="showAudioRec"
@@ -72,7 +72,7 @@
       <!-- Bottom Toolbar -->
       <Footer
         :selected="selectedOptions"
-        @vaultSelect="toggleVaultSelect"
+        @vaultSelect="renderVaultSelector"
         @openScheduleMessage="openScheduleMessageModal"
         @recordAudio="recordAudio"
         @recordVideo="recordVideo"
@@ -138,7 +138,6 @@ export default {
   props: {
     session_user: null,
     chatthread_id: null,
-    vaultOpen: { type: Boolean, default: false },
   },
 
   computed: {
@@ -189,9 +188,11 @@ export default {
 
     selectedOptions() {
       var selected = []
+        /*
       if (this.vaultOpen) {
         selected.push('vaultSelect')
       }
+         */
       if (this.scheduleMessageOpen) {
         selected.push('openScheduleMessage')
       }
@@ -201,7 +202,7 @@ export default {
       if (this.showAudioRec) {
         selected.push('recordAudio')
       }
-      if (this.setPriceActive) {
+      if (this.isSetPriceFormActive) {
         selected.push('setPrice')
       }
 
@@ -225,7 +226,7 @@ export default {
     showVideoRec: false,
     showAudioRec: false,
 
-    setPriceActive: false,
+    isSetPriceFormActive: false,
 
     // If client is sending message
     sending: false,
@@ -368,7 +369,7 @@ export default {
       let params = {
         mcontent: this.newMessageForm.mcontent,
       }
-      if (this.setPriceActive) {
+      if (this.isSetPriceFormActive) {
         params.price    = this.newMessageForm.price
         params.currency = this.newMessageForm.currency
       }
@@ -424,10 +425,12 @@ export default {
       const mediafileCount = this.selectedMediafiles ? this.selectedMediafiles.length : 0
       if (this.newMessageForm.mcontent === '' && mediafileCount === 0) {
         eventBus.$emit('validation', { message: this.$t('validation') })
+        this.sending = false
         return
       }
       if (this.newMessageForm.price > 0 && mediafileCount === 0) {
         eventBus.$emit('validation', { message: this.$t('pricedValidation')})
+        this.sending = false
         return
       }
 
@@ -458,7 +461,7 @@ export default {
     },
 
     clearPrice() {
-      this.setPriceActive = false
+      this.isSetPriceFormActive = false
       this.newMessageForm.price = 0
       this.newMessageForm.currency = 'USD'
     },
@@ -480,8 +483,16 @@ export default {
       this.scheduleMessageOpen = true
     },
 
-    toggleVaultSelect() {
-      this.$emit('toggleVaultSelect')
+    //toggleVaultSelect() {
+    //this.$emit('toggleVaultSelect')
+    //},
+    renderVaultSelector() {
+      eventBus.$emit('open-modal', {
+        key: 'render-vault-selector',
+        data: { 
+          context: 'create-message',
+        },
+      })
     },
 
     recordAudio() {
@@ -508,7 +519,7 @@ export default {
 
     setPrice() {
       // Toggle on click
-      this.setPriceActive = !this.setPriceActive
+      this.isSetPriceFormActive = !this.isSetPriceFormActive
     },
 
     _isTyping() {
@@ -517,6 +528,7 @@ export default {
           name: this.session_user.name || this.session_user.username
         })
     },
+
 
   }, // methods
 
@@ -560,9 +572,16 @@ export default {
         }
       }
     },
+    isSetPriceFormActive(val,last) {
+      // if form goes from active to not-active, clear out price inputs
+      if (val===last) {
+        return
+      }
+      if (!val) {
+        this.clearPrice() 
+      }
+    },
   }, // watch
-
-
 
 }
 </script>
@@ -619,12 +638,12 @@ textarea.form-control {
 {
   "en": {
     "clearFiles": "Clear Images",
-    "pricedValidation": "Priced images must contain media, please provide for this message",
+    "pricedValidation": "Priced messages must contain media, please provide for this message.",
     "scheduled": {
       "title": "Scheduled",
-      "message": "Messages has successfully been schedule to send at {time}"
+      "message": "Messages has successfully been schedule to send at {time}."
     },
-    "validation": "Please enter a message or select files to send",
+    "validation": "Please enter a message or select files to send.",
   }
 }
 </i18n>
