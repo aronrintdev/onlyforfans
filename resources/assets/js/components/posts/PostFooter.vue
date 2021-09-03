@@ -1,6 +1,6 @@
 <template>
   <div class="panel-footer fans">
-
+    <div v-if="renderComments" @click="toggleComments" class="comments-box-bg"></div>
     <div class="d-flex justify-content-between">
       <ul class="d-flex list-inline footer-ctrl mb-0">
         <li class="mr-3">
@@ -212,5 +212,21 @@ li {
 .panel-footer {
   user-select: none;
   margin: 0 -0.4em;
+}
+
+.comments-box-bg {
+  position: absolute;
+  top: calc(100% - 100vh + 130px);
+  left: 0;
+  width: 100%;
+  height: calc(100vh - 130px - 100%);
+  background: rgba(0, 0, 0, 0.01);
+}
+
+@media (max-width: 576px) {
+  .comments-box-bg {
+    top: calc(100% - 100vh + 110px);
+    height: calc(100vh - 110px - 100%);
+  }
 }
 </style>
