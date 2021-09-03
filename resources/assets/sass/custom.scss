@@ -36,6 +36,10 @@ body,
   // overflow: hidden;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 .app {
   position: relative;
   min-height: 100vh;

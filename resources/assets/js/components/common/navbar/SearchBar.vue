@@ -310,7 +310,7 @@ $border: 1px var(--gray) solid;
   top: 100%;
   right: 0;
   left: 0;
-  z-index: 9999;
+  z-index: 990;
   background-color: var(--white, #ffffff);
   padding-top: 0;
   border-radius: 0 0 $border-radius $border-radius;
@@ -366,6 +366,10 @@ $border: 1px var(--gray) solid;
         color: var(--white);
         background-color: var(--primary)
       }
+    }
+
+    @media (max-width: 576px) {
+      max-height: unset;
     }
   }
 

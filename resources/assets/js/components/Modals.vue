@@ -597,19 +597,32 @@ export default {
   }
 
   @media (max-width: 576px) {
+    height: 100%;
+
     .modal-header {
       .close {
         padding-left: 15px;
         padding-right: 15px;
       }
     }
-    .superbox-post {
-      height: calc(100vh - 80px);
-      border: none;
-      border-radius: 0;
-    }
+
     .modal-dialog {
       margin: 0;
+      height: 100%;
+      min-height: 100%;
+
+      .modal-content {
+        background: transparent;
+        height: calc(100% - 40px);
+      }
+      .modal-body, .post-content, .post-crate {
+        height: 100%;
+      }
+      .superbox-post {
+        height: 100%;
+        border: none;
+        border-radius: 0;
+      }
     }
   }
 }
