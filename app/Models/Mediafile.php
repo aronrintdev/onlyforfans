@@ -137,40 +137,44 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Messagable, Cont
     }
 
     public function getFilepathAttribute($value) {
-        return $this->getS3Url($this->diskmediafile->filepath);
+        return $this->getCdnUrl($this->diskmediafile->filepath);
     }
 
     public function getMidFilepathAttribute($value) {
         $subfolder = $this->diskmediafile->owner_id;
         $path = $subfolder.'/mid/'.$this->diskmediafile->basename.'.jpg';
-        return $this->getS3Url($path);
+        return $this->getCdnUrl($path);
     }
 
     public function getThumbFilepathAttribute($value) {
         $subfolder = $this->diskmediafile->owner_id;
         $path = $subfolder.'/thumb/'.$this->diskmediafile->basename.'.jpg';
-        return $this->getS3Url($path);
+        return $this->getCdnUrl($path);
     }
 
     public function getBlurFilepathAttribute($value) {
         $subfolder = $this->diskmediafile->owner_id;
         $path = $subfolder.'/blur/'.$this->diskmediafile->basename.'.jpg';
-        return $this->getS3Url($path);
+        return $this->getCdnUrl($path);
     }
 
     /**
      * Get s3 path from relative storage path
      */
-    private function getS3Url($path) {
+    public function getCdnUrl($path = null) {
+        if (!isset($path)) {
+            $path = $this->diskmediafile->filepath;
+        }
+
         if (Config::get('filesystems.useSigned', false)) {
             return !empty($path)
-                ? Storage::disk('s3')->temporaryUrl(
+                ? Storage::disk('cdn')->temporaryUrl(
                     $path,
                     Carbon::now()->addMinutes(Config::get('filesystems.availabilityMinutes'))
                 )
                 : null;
         }
-        return !empty($path) ? Storage::disk('s3')->url($path) : null;
+        return !empty($path) ? Storage::disk('cdn')->url($path) : null;
     }
 
     //--------------------------------------------

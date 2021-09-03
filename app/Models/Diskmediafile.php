@@ -3,19 +3,21 @@ namespace App\Models;
 
 use DB;
 use Auth;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
 use App\Interfaces\Cloneable;
+use Illuminate\Support\Carbon;
 use App\Models\Traits\UsesUuid;
 use App\Enums\MediafileTypeEnum;
-use App\Models\Traits\SluggableTraits;
 use App\Traits\OwnableFunctions;
-use Cviebrock\EloquentSluggable\Sluggable;
+use Illuminate\Support\Collection;
 use Intervention\Image\Facades\Image;
+use App\Models\Traits\SluggableTraits;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Storage;
+use Cviebrock\EloquentSluggable\Sluggable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 //class Diskmediafile extends BaseModel implements Guidable, Ownable, Cloneable
 class Diskmediafile extends BaseModel implements Guidable, Ownable
@@ -199,12 +201,12 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
 
     // %%% --- Other ---
 
-    public function flagCount() {
-        return !empty($this->filepath) ? Storage::disk('s3')->url($this->filepath) : null; // %FIXME?: this doesn't look right
-    }
+    // public function flagCount() {
+    //     return !empty($this->filepath) ? Storage::disk('s3')->url($this->filepath) : null; // %FIXME?: this doesn't look right
+    // }
 
     public function renderUrl() {
-        return !empty($this->filepath) ? Storage::disk('s3')->url($this->filepath) : null;
+        return !empty($this->filepath) ? $this->getCdnUrl() : null;
     }
 
     public function renderUrlBlur() {
@@ -223,6 +225,26 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
         $subfolder = $this->owner_id;
         $path = $subfolder.'/thumb/'.$this->basename.'.jpg';
         return !empty($path) ? Storage::disk('s3')->url($path) : null;
+    }
+
+    /**
+     * Get s3 path from relative storage path
+     */
+    public function getCdnUrl($path = null)
+    {
+        if (!isset($path)) {
+            $path = $this->filepath;
+        }
+
+        if (Config::get('filesystems.useSigned', false)) {
+            return !empty($path)
+                ? Storage::disk('cdn')->temporaryUrl(
+                    $path,
+                    Carbon::now()->addMinutes(Config::get('filesystems.availabilityMinutes'))
+                )
+                : null;
+        }
+        return !empty($path) ? Storage::disk('cdn')->url($path) : null;
     }
 
     // creates diskmediafile and associated mediafile reference
