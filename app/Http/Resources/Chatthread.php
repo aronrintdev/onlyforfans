@@ -29,7 +29,7 @@ class Chatthread extends JsonResource
             'originator_id' => $this->originator_id,
             'is_tip_required' => $this->is_tip_required,
             //'chatmessages' => $this->chatmessages,
-            'chatmessages' => $this->chatmessages()->latest()->take(1)->get(), // limit to 1, for preview only, save bw
+            'chatmessages' => $this->chatmessages()->latestDelivered()->take(1)->get(), // limit to 1, for preview only, save bw
             'msg_count' => $this->chatmessages()->count(),
             'unread_count' => $this->chatmessages()->where([
                 ['is_read', '=', 0],

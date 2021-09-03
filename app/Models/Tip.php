@@ -236,7 +236,7 @@ class Tip extends Model implements Messagable
             'cattrs'    => new Collection([ 'tip_id' => $this->getKey() ]),
         ]);
         try {
-            MessageSentEvent::dispatch($message);
+            $message->deliver();
         } catch (Exception $e) {
             Log::warning('Tip->process()::sendMessage().broadcast Failed', [
                 'msg' => $e->getMessage(),

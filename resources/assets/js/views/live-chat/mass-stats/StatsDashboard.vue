@@ -77,7 +77,7 @@ export default {
      */
     fields() {
       return [
-        { key: 'created_at', label: 'Date', formatter: v => Vue.options.filters.niceDateTime(v, false), sortable: true },
+        { key: 'delivered_at', label: 'Date', formatter: v => Vue.options.filters.niceDateTime(v, false), sortable: true },
         { key: 'mcontent', label: 'Text', tdClass: 'tag-col-mcontent', },
         { key: 'mediafile_counts', label: 'Attachment', },
         { key: 'price', label: 'Price', formatter: v => Vue.options.filters.niceCurrency(v), sortable: true },
