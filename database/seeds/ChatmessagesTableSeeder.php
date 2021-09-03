@@ -116,7 +116,7 @@ class ChatmessagesTableSeeder extends Seeder
                 });
             }
 
-            if ( !$isScheduled || $isDeliveredByNow) ) { // skips if scheduled & not delivered yet
+            if ( !$isScheduled || $isDeliveredByNow ) { // skips if scheduled & not delivered yet
                 // Replies to simulate a conversation
                 //$baseTS = $ts->copy();
                 $chatthreads->each( function($ct) use($ts, $now) {
