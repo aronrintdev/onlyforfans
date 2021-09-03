@@ -1,5 +1,5 @@
 <template>
-  <WithSidebar :focusMain="focusMain" v-if="!isLoading" id="view-create-thread" @back="backToPrevious">
+  <WithSidebar :focusMain="focusMain" v-if="!isLoading" id="view-create-thread" @back="backToPrevious" :hasBorder="true">
     <template #sidebar>
       <article class="top-bar d-flex align-items-center" :class="{'justify-content-between' : !mobile}">
         <b-btn v-if="mobile" variant="link" :to="{ name: 'chatthreads.dashboard' }" class="mb-1">
@@ -108,7 +108,7 @@
 
       </article>
 
-      <article class="contact-list position-relative">
+      <article class="contact-list position-relative" :class="{ mobile: mobile }">
         <!-- Select All -->
         <div class="mb-2 d-flex justify-content-end align-items-center">
           <span
@@ -370,10 +370,10 @@ export default {
      * @param {Bool} force - Forces the set to load from server, even if set is in cache
      */
     getContacts(force = false) {
-      this.$log.debug('getContacts', {
-        pageObject: this.currentPageObject,
-        cached: this.getContactsFor(this.currentPageObject)
-      })
+      //this.$log.debug('getContacts', {
+      //pageObject: this.currentPageObject,
+      //cached: this.getContactsFor(this.currentPageObject)
+      //})
       if (this.getContactsFor(this.currentPageObject) != null && !force) {
         // Page is already loaded in cache
         this.isLoadingContacts = false
@@ -459,7 +459,7 @@ export default {
         params.currency = currency
       }
 
-      this.$log.debug('createChatthread', { params: params })
+      //this.$log.debug('createChatthread', { params: params })
       const response = await axios.post( this.$apiRoute('chatthreads.store'), params )
 
       this.$router.push({ name: 'chatthreads.dashboard' })
@@ -584,14 +584,14 @@ export default {
       if (value) {
          // initial load only, depends on session user (synchronous)
         if (this.contactsCount === 0) {
-          this.$log.debug('live-chat/CreateThread - watch session_user: reloadFromFirstPage()')
+          //this.$log.debug('live-chat/CreateThread - watch session_user: reloadFromFirstPage()')
           this.reloadFromFirstPage()
         }
       }
     },
 
     sortBy(newVal) {
-      this.$log.debug('live-chat/CreateThread - watch sortBy : reloadFromFirstPage()')
+      //this.$log.debug('live-chat/CreateThread - watch sortBy : reloadFromFirstPage()')
       this.reloadFromFirstPage()
     },
 
@@ -614,9 +614,6 @@ export default {
   max-width: 30rem;
 }
 
-.top-bar {
-  border-bottom: 1px solid rgba(138,150,163,.25);
-}
 </style>
 
 <i18n lang="json5">

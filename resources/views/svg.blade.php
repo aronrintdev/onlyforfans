@@ -1,4 +1,4 @@
-<svg width="0" height="0">
+<svg width="0" height="0" style="display: none;">
   <linearGradient id="brand-gradient-fill" x1="80.64" y1="80.64" x2="431.36" y2="431.36" gradientUnits="userSpaceOnUse">
     <stop offset="0" stop-color="#f39"/>
     <stop offset="0.09" stop-color="#f8369c"/>

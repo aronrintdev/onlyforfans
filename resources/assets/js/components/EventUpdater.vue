@@ -33,7 +33,7 @@ export default {
       const channel = `user.${this.session_user.id}.events`
       this.$echo.private(channel)
         .listen('PaymentMethodAdded', e => {
-          this.$log.debug('Event', { channel, event: 'PaymentMethodAdded', e })
+          //this.$log.debug('Event', { channel, event: 'PaymentMethodAdded', e })
           this['payments/updateSavedPaymentMethods']()
         })
     },
@@ -43,15 +43,15 @@ export default {
       const channel = `user.${this.session_user.id}.purchases`
       this.$echo.private(channel)
         .listen('ItemPurchased', (e) => {
-          this.$log.debug('Event', { channel, event: 'ItemPurchased', e })
+          //this.$log.debug('Event', { channel, event: 'ItemPurchased', e })
           eventBus.$emit(`update-${e.item_type}`, e.item_id)
         })
         .listen('ItemSubscribed', (e) => {
-          this.$log.debug('Event', { channel, event: 'ItemSubscribed', e })
+          //this.$log.debug('Event', { channel, event: 'ItemSubscribed', e })
           eventBus.$emit(`update-${e.item_type}`, e.item_id)
         })
         .listen('ItemTipped', (e) => {
-          this.$log.debug('Event', { channel, event: 'ItemTipped', e })
+          //this.$log.debug('Event', { channel, event: 'ItemTipped', e })
           eventBus.$emit(`update-${e.item_type}`, e.item_id)
         })
     },

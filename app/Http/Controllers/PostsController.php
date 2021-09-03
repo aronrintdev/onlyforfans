@@ -62,6 +62,7 @@ class PostsController extends AppBaseController
             }
         }
 
+        // Text search
         if ( $request->has('qsearch') && (strlen($request->qsearch)>2) ) {
             $query->orWhere( function($q1) use(&$request) {
                 $q1->where('description', 'LIKE', '%'.$request->qsearch.'%');

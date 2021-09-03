@@ -206,7 +206,7 @@ export default {
     })
 
     eventBus.$on('update-timelines', (timelineId) => {
-      this.$log.debug('components.timelines.PostFeed - eventBus.$on(update-timelines)')
+      //this.$log.debug('components.timelines.PostFeed - eventBus.$on(update-timelines)')
       this.reloadFromFirstPage();
     })
 
@@ -331,7 +331,7 @@ export default {
     loadNextPage() {
       if ( !this.moreLoading && !this.isLoading && (this.nextPage <= this.lastPage) ) {
         this.moreLoading = true;
-        this.$log.debug('loadNextPage', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
+        //this.$log.debug('loadNextPage', { current: this.currentPage, last: this.lastPage, next: this.nextPage });
         this.$store.dispatch('getFeeddata', { 
         feedType: this.feedType,
           timelineId: this.timelineId,  // only valid if not home feed
@@ -400,7 +400,7 @@ export default {
     },
 
     unshifted_timeline_post (newVal, oldVal) {
-      this.$log.debug('PostFeed - watch:unshifted_timeline_post', { newVal, oldVal })
+      //this.$log.debug('PostFeed - watch:unshifted_timeline_post', { newVal, oldVal })
       if (this.feedType !== 'schedule') {
         if (!newVal.schedule_datetime) {
           if (!this.isLastPage && this.renderedItems.length >= 5) {

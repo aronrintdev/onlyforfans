@@ -36,15 +36,8 @@ body,
   // overflow: hidden;
 }
 
-html.prevent-scrolling {
-  position: relative;
-  overflow: hidden !important;
-  body {
-    position: fixed;
-    width: 100%;
-    top: 0;
-    min-height: 100%;
-  }
+body.modal-open {
+  overflow: hidden;
 }
 
 .app {

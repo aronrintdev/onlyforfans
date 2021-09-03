@@ -203,11 +203,11 @@ export default {
     },
     canEditPostAsStaff() {
       const index = this.session_user.companies.findIndex(company => company.id == this.post.timeline.id);
-      return index > -1 && this.session_user.companies[index].permissions.findIndex(permission => permission.name   == 'Post.edit') > -1
+      return index > -1 && this.session_user.companies[index].permissions && this.session_user.companies[index].permissions.findIndex(permission => permission.name   == 'Post.edit') > -1
     },
     canDeletePostAsStaff() {
       const index = this.session_user.companies.findIndex(company => company.id == this.post.timeline.id);
-      return index > -1 && this.session_user.companies[index].permissions.findIndex(permission => permission.name   == 'Post.delete') > -1
+      return index > -1 && this.session_user.companies[index].permissions && this.session_user.companies[index].permissions.findIndex(permission => permission.name   == 'Post.delete') > -1
     }
   },
 

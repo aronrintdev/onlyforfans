@@ -23,7 +23,7 @@
       <div class="d-flex align-items-center">
         <b-btn variant="link" class="text-nowrap" @click="toggleFavorite">
           <fa-icon :icon="isFavorite ? [ 'fas', 'star' ] : ['far', 'star']" size="lg" class="mr-1" />
-          <span v-text="$t('buttons.favorite')" />
+          <span v-if="!mobile" v-text="$t('buttons.favorite')" />
         </b-btn>
         <div class="text-muted">|</div>
         <b-btn
@@ -49,7 +49,7 @@
             title="Notifications OFF"
             class="muted mr-1"
           />
-          <span v-text="$t('buttons.notifications')" />
+          <span v-if="!mobile" v-text="$t('buttons.notifications')" />
         </b-btn>
         <div class="text-muted">|</div>
         <b-btn
@@ -60,7 +60,7 @@
           @click="toggleGallery"
         >
           <fa-icon :icon="showGallery ? ['fas', 'image'] : ['far', 'image']" size="lg" class="mr-1" />
-          <span v-text="$t('buttons.gallery')" />
+          <span v-if="!mobile" v-text="$t('buttons.gallery')" />
         </b-btn>
         <div class="text-muted">|</div>
         <b-btn
@@ -71,34 +71,27 @@
           @click="tip"
         >
           <fa-icon icon="dollar-sign" fixed-width size="lg" class="mr-1" />
-          <span v-text="$t('buttons.tip')" />
+          <span v-if="!mobile" v-text="$t('buttons.tip')" />
         </b-btn>
         <div class="text-muted">|</div>
         <SearchInput v-model="searchQuery" size="lg" />
       </div>
     </section>
 
-    <hr v-if="!mobile" />
-
-    <transition-group name="quick-fade" mode="out-in" class="flex-fill scroll-wrapper">
-      <section v-if="vaultSelectionOpen" key="vaultSelect" class="vault-selection">
-        <VaultSelector @close="vaultSelectionOpen = false" />
-      </section>
-      <section v-else-if="showGallery" key="gallery" class="gallery flex-fill">
-        <Gallery :threadId="id" @close="showGallery = false" />
-      </section>
-      <MessageDisplay
-        v-else
-        :items="searchResults === null ? chatmessages: searchResults"
-        :loading="moreLoading"
-        :isLastPage="isLastPage"
-        :isSearch="searchResults !== null"
-        :searchQuery="searchQuery"
-        key="messages"
-        class="flex-fill"
-        @endVisible="endVisible"
-      />
-    </transition-group>
+    <section v-if="showGallery" key="gallery" class="gallery flex-fill">
+      <Gallery :threadId="id" @close="showGallery = false" />
+    </section>
+    <MessageDisplay
+      v-else
+      :items="searchResults === null ? chatmessages: searchResults"
+      :loading="moreLoading"
+      :isLastPage="isLastPage"
+      :isSearch="searchResults !== null"
+      :searchQuery="searchQuery"
+      key="messages"
+      class="flex-fill"
+      @endVisible="endVisible"
+    />
 
     <TypingIndicator :threadId="id" />
 
@@ -106,11 +99,9 @@
       v-if="!showGallery"
       :session_user="session_user"
       :chatthread_id="id"
-      :vaultOpen="vaultSelectionOpen"
       class="message-form"
       :class="{ mobile: mobile }"
       @sendMessage="addTempMessage"
-      @toggleVaultSelect="vaultSelectionOpen = !vaultSelectionOpen"
     />
 
     <b-modal id="modal-notes" hide-footer body-class="p-0" v-model="isNotesModalVisible" size="md" :title="modalTitle" >
@@ -143,7 +134,6 @@ import MessageForm from '@views/live-chat/components/NewMessageForm'
 import OptionsDropdown from './OptionsDropdown'
 import SearchInput from '@components/common/search/HorizontalOpenInput'
 import TypingIndicator from './TypingIndicator'
-import VaultSelector from './VaultSelector'
 
 export default {
   name: 'ShowThread',
@@ -156,7 +146,6 @@ export default {
     OptionsDropdown,
     SearchInput,
     TypingIndicator,
-    VaultSelector,
     AddNotes,
   },
 
@@ -228,8 +217,6 @@ export default {
 
     showGallery: false,
 
-    vaultSelectionOpen: false,
-
     isNotesModalVisible: false,
     notes: null,
   }), // data
@@ -240,7 +227,7 @@ export default {
   },
 
   mounted() {
-    console.log(`live-chat/components/ShowThread::mounted() - calling getChatmessages with id ${this.id}`)
+    //console.log(`live-chat/components/ShowThread::mounted() - calling getChatmessages with id ${this.id}`)
     this.getMuteStatus(this.id)
     this.getChatmessages(this.id)
 
@@ -315,7 +302,7 @@ export default {
 
     endVisible(isVisible) {
       //this.$log.debug('endVisible', { isVisible })
-      console.log(`live-chat/components/ShowThread::endVisible()`)
+      //console.log(`live-chat/components/ShowThread::endVisible()`)
       this.isEndVisible = isVisible
       if (isVisible && !this.moreLoading && !this.isLastPage) {
         this.loadNextPage()
@@ -323,7 +310,7 @@ export default {
     },
 
     loadNextPage() {
-      console.log(`live-chat/components/ShowThread::loadNextPage() - calling getChatmessages with no id `)
+      //console.log(`live-chat/components/ShowThread::loadNextPage() - calling getChatmessages with no id `)
       this.currentPage += 1
       this.moreLoading = true
       this.getChatmessages(this.id)
@@ -344,7 +331,7 @@ export default {
         take: this.perPage,
         chatthread_id: chatthreadID,
       }
-      console.log('live-chat/components/ShowThread::getChatmessages() - chatmessages.index', { params })
+      //console.log('live-chat/components/ShowThread::getChatmessages() - chatmessages.index', { params })
       const response = await axios.get( this.$apiRoute('chatmessages.index'), { params } )
 
       // Filter out any messages that we already have
@@ -492,7 +479,7 @@ export default {
 
     id (newValue, oldValue) {
       if ( newValue && (newValue !== oldValue) ) {
-        console.log(`live-chat/components/ShowThread::watch(id) - calling getChatmessages with id ${newValue}`)
+        //console.log(`live-chat/components/ShowThread::watch(id) - calling getChatmessages with id ${newValue}`)
         this.getChatmessages(newValue)
         this.markRead(newValue)
         this.getMuteStatus(newValue)
@@ -526,7 +513,7 @@ export default {
     top: 0;
     left: 0;
     right: 0;
-    background-color: var(--light);
+    background-color: #fff;
     padding: 0.5rem;
     z-index: 5;
   }
@@ -538,7 +525,7 @@ export default {
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: var(--light);
+    background-color: #fff;
     padding: 0.5rem;
     z-index: 5;
   }
@@ -549,10 +536,6 @@ export default {
   overflow-x: hidden;
 }
 
-.vault-selection {
-  height: 100%;
-  width: 100%;
-}
 .gallery {
   height: 100%;
   width: 100%;

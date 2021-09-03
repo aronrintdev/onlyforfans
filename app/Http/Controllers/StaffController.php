@@ -11,7 +11,7 @@ use App\Http\Resources\StaffCollection;
 use App\Http\Resources\UserCollection;
 use App\Models\Permission;
 use App\Apis\Sendgrid\Api as SendgridApi;
-
+use App\Notifications\StaffSettingsChanged;
 
 class StaffController extends Controller
 {
@@ -115,7 +115,7 @@ class StaffController extends Controller
             $staff->active = true;
             $staff->pending = false;
             $staff->user_id = $sessionUser->id;
-            $staff->settings = [];
+            $staff->settings = null;
             $staff->save();
 
             return response()->json([
@@ -179,22 +179,7 @@ class StaffController extends Controller
         $manager->settings = $settings;
         $manager->save();
         
-        // Send email notification
-        $sessionUser = $request->user();
-
-        SendgridApi::send('change-percentage-of-gross-earnings', [
-            'to' => [
-                'email' => $manager->email,
-            ],
-            'dtdata' => [
-                'manager_name' => $manager->first_name.' '.$manager->last_name,
-                'username' => $sessionUser->name,
-                'percent' => $settings['earnings']['value'],
-                'home_url' => url('/'),
-                'referral_url' => url('/referrals'),
-                'privacy_url' => url('/privacy'),
-            ],
-        ]);
+        $manager->user->notify( new StaffSettingsChanged($manager->user, $request->user(), $settings) );
 
         return $manager->settings;
     }

@@ -92,9 +92,11 @@ Vue.filter('niceDateTime', function (value, is24=true) {
     return ''
   }
   if (is24) {
-    return moment(value).format('MMMM Do, YYYY HH:mm:ss')
+    //return moment(value).format('MMM Do, YYYY HH:mm:ss')
+    return moment(value).format('MMM Do, YYYY HH:mm')
   } else {
-    return moment(value).format('MMMM Do, YYYY h:mm:ss a')
+    //return moment(value).format('MMM Do, YYYY h:mm:ss a')
+    return moment(value).format('MMM Do, YYYY h:mm a')
   }
 })
 

@@ -108,6 +108,7 @@ class ChatmessagesTableSeeder extends Seeder
                     $cm->save();
                 });
             } else if ( $isScheduled ) {
+                /* %PSG: remove as this is not correct
                 //$ts = $deliverAt;
                 //$ts = new Carbon( $this->faker->dateTimeBetween($startDate = '-2 weeks', $endDate = '-1 days') );
                 $ts = $now->subDays( $this->faker->numberBetween(1,14) );
@@ -116,8 +117,9 @@ class ChatmessagesTableSeeder extends Seeder
                     $cm->updated_at = $ts;
                     $cm->save();
                 });
+                 */
             } else {
-                $ts = new Carbon( $this->faker->dateTimeBetween($startDate = '-2 years', $endDate = '-1 months') );
+                $ts = new Carbon( $this->faker->dateTimeBetween($startDate = '-3 years', $endDate = '-2 months') );
                 $chatmessages->each( function($cm) use($ts) {
                     $cm->created_at = $ts;
                     $cm->updated_at = $ts;
@@ -125,123 +127,66 @@ class ChatmessagesTableSeeder extends Seeder
                 });
             }
 
-            // Replies to simulate a conversation
-            //$baseTS = $ts->copy();
-            $chatthreads->each( function($ct) use($ts) {
-                $replyCount = $this->faker->numberBetween(1, 18);
-                $_ts = $ts->copy()->addMinutes( $this->faker->numberBetween(1,70) );
-                for ( $i = 0 ; $i < $replyCount ; $i++ ) {
-                    $this->output->writeln("    ~ reply on ".$ct->id.", #$i of $replyCount...");
-                    $senderA = $this->faker->randomElement( $ct->participants->toArray() ); // so it looks like a back-and-forth conversation
-                    $sender = User::findOrFail($senderA['id']);
-                    $rattrs = (object)[
-                        'mcontent'    => $this->faker->realText, // 'string',  // optional first message content
-                        //'price'       => 'numeric',
-                        //'currency'    => 'required_with:price|size:3',
-                        //'attachments' => 'required_with:price|array',
-                    ];
+            if ( !$isScheduled || $isDeliveredByNow ) { // skips if scheduled & not delivered yet
+                // Replies to simulate a conversation
+                //$baseTS = $ts->copy();
+                $chatthreads->each( function($ct) use($ts, $now) {
+                    $replyCount = $this->faker->numberBetween(1, 18);
+                    $_ts = $ts->copy()->addSeconds( $this->faker->numberBetween(1,99) );
+                    for ( $i = 0 ; $i < $replyCount ; $i++ ) {
+                        $this->output->writeln("    ~ reply on ".$ct->id.", #$i of $replyCount...");
+                        $senderA = $this->faker->randomElement( $ct->participants->toArray() ); // so it looks like a back-and-forth conversation
+                        $sender = User::findOrFail($senderA['id']);
+                        $rattrs = (object)[
+                            'mcontent'    => $this->faker->realText, // 'string',  // optional first message content
+                            //'price'       => 'numeric',
+                            //'currency'    => 'required_with:price|size:3',
+                            //'attachments' => 'required_with:price|array',
+                        ];
 
-                    // Priced or not
-                    if ($this->faker->numberBetween(1, 100) <= static::pricedChance) {
-                        $rattrs->price = $this->faker->numberBetween(300, 5000);
-                        $rattrs->currency = 'USD';
-                        $rattrs->attachments = collect(range(1, $this->faker->numberBetween(1, 5)))
-                            ->map(function ($mf) use ($sender) {
-                                return FactoryHelpers::createImage(
-                                    $sender,
-                                    MediafileTypeEnum::VAULT,
-                                $sender->vaults()->first()->getRootFolder()->id,
-                                    $this->doS3Upload
-                                );
-                        })->all();
-                    // Add attachments
-                    } else if ($this->faker->numberBetween(1, 100) <= static::mediaFileChance) {
-                        $rattrs->attachments = collect(range(1, $this->faker->numberBetween(1, 5)))
-                            ->map(function ($mf) use ($sender) {
-                                return FactoryHelpers::createImage(
-                                    $sender,
-                                    MediafileTypeEnum::VAULT,
+                        // Priced or not
+                        if ($this->faker->numberBetween(1, 100) <= static::pricedChance) {
+                            $rattrs->price = $this->faker->numberBetween(300, 5000);
+                            $rattrs->currency = 'USD';
+                            $rattrs->attachments = collect(range(1, $this->faker->numberBetween(1, 5)))
+                                ->map(function ($mf) use ($sender) {
+                                    return FactoryHelpers::createImage(
+                                        $sender,
+                                        MediafileTypeEnum::VAULT,
                                     $sender->vaults()->first()->getRootFolder()->id,
-                                    $this->doS3Upload
-                                );
-                        })->all();
-                    }
-
-                    $cm = $ct->addMessage(
-                        $sender,
-                        $rattrs->mcontent ?? null, // string $mcontent = ''
-                        $rattrs->attachments ?? [], // array $attachments = []
-                        $rattrs->price ?? null, // $price = null
-                        $rattrs->currency ?? null // $currency = null
-                    );
-                    $cm->created_at = $_ts;
-                    $cm->updated_at = $_ts;
-                    $cm->save();
-                    $_ts->addMinutes( $this->faker->numberBetween(1,70) );
-                }
-            });
-
-                /*
-            $threadCount = $this->faker->numberBetween(1, 3); // number of receivers *per* originator (ie threads)
-            $receivers = User::has('timeline')->where('id', '<>', $o->id)->take($threadCount)->get();
-
-            $receivers->each( function($r) use(&$o) {
-                //dump('ts', $ts->toDateTimeString());
-
-                $chatthread = Chatthread::create([
-                    'originator_id' => $o->id,
-                ]);
-
-                $chatthread->participants()->attach($r->id);
-
-                $msgCount = $this->faker->numberBetween(1, 18);
-
-                $senderID = $o->id; // init sender
-                for ( $i = 0 ; $i < $msgCount ; $i++ ) {
-                    $isScheduled = $this->faker->boolean(20);
-                    if ($isScheduled) {
-                        // Pre-schedules messages (some may be marked delivered)
-                        $now = Carbon::now();
-                        $isDeliveredByNow = $this->faker->boolean(50);
-                        if ( $isDeliveredByNow ) {
-                            $deliverAt = $now->subDays( $this->faker->numberBetween(1,5) );
-                            $ts = $deliverAt;
-                            $isDelivered = true;
-                        } else {
-                            $deliverAt = $now->addDays( $this->faker->numberBetween(1,7) );
-                            $ts = $now->subDays( $this->faker->numberBetween(1,7) );
-                            $isDelivered = false;
+                                        $this->doS3Upload
+                                    );
+                            })->all();
+                        // Add attachments
+                        } else if ($this->faker->numberBetween(1, 100) <= static::mediaFileChance) {
+                            $rattrs->attachments = collect(range(1, $this->faker->numberBetween(1, 5)))
+                                ->map(function ($mf) use ($sender) {
+                                    return FactoryHelpers::createImage(
+                                        $sender,
+                                        MediafileTypeEnum::VAULT,
+                                        $sender->vaults()->first()->getRootFolder()->id,
+                                        $this->doS3Upload
+                                    );
+                            })->all();
                         }
-                        //Carbon( $this->faker->dateTimeBetween($startDate = '-2 years', $endDate = '-1 months') );
-                        $m = Chatmessage::create([
-                            'chatthread_id' => $chatthread->id,
-                            'sender_id' => $senderID,
-                            'mcontent' => $this->faker->realText,
-                            'is_delivered' => $isDelivered,
-                            'deliver_at' => $deliverAt,
-                        ]);
-                        $m->created_at = $ts;
-                        $m->updated_at = $ts;
-                        $m->save();
-                    } else {
-                        // 'Instantanious' Messages
-                        $ts = new Carbon( $this->faker->dateTimeBetween($startDate = '-2 years', $endDate = '-1 months') );
-                        $m = Chatmessage::create([
-                            'chatthread_id' => $chatthread->id,
-                            'sender_id' => $senderID,
-                            'mcontent' => $this->faker->realText,
-                            'is_read' => $this->faker->boolean(60),
-                        ]);
-                        $m->created_at = $ts;
-                        $m->updated_at = $ts;
-                        $m->save();
-                    }
-                    $ts->addMinutes( $this->faker->numberBetween(1,70) );
-                    $senderID = $this->faker->randomElement([ $o->id, $r->id ]); // so it looks like a back-and-forth conversation
-                }
 
-            }); // each($r)
-                 */
+                        $cm = $ct->sendMessage(
+                            $sender,
+                            $rattrs->mcontent ?? null, // string $mcontent = ''
+                            $rattrs->attachments ?? [], // array $attachments = []
+                            $rattrs->price ?? null, // $price = null
+                            $rattrs->currency ?? null // $currency = null
+                        );
+                        if ( $_ts->greaterThan($now) ) {
+                            $_ts = $now; // (max): safety code to prevent conversation replies extending into future
+                        }
+                        $cm->created_at = $_ts;
+                        $cm->updated_at = $_ts;
+                        $cm->save();
+                        $_ts->addSeconds( $this->faker->numberBetween(1,99) );
+                    }
+                });
+            }
 
         }); // each($o)
 

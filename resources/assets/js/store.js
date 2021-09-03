@@ -55,6 +55,7 @@ export default new Vuex.Store({
     unread_messages_count: 0,
     unread_notifications_count: 0,
     queue_metadata: {},
+    unread_notifications: [],
   },
 
   mutations: {
@@ -143,6 +144,7 @@ export default new Vuex.Store({
     },
     UPDATE_UNREAD_NOTIFICATIONS_COUNT(state, payload) {
       state.unread_notifications_count = propSelect(payload, 'total_unread_count')
+      state.unread_notifications = propSelect(payload, 'unread_notifications')
     },
   },
 
@@ -328,6 +330,7 @@ export default new Vuex.Store({
     unread_messages_count:   state => state.unread_messages_count,
     unread_notifications_count:   state => state.unread_notifications_count,
     queue_metadata:          state => state.queue_metadata,
+    unread_notifications:    state => state.unread_notifications,
     //children: state => state.vault.children, // Flat list
     //mediafiles: state => state.vault.mediafiles, // Flat list
   },
