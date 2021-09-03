@@ -52,9 +52,9 @@ class ShareablesTableSeeder extends Seeder
         $timelines = Timeline::get();
         $timelinesCount = Timeline::count();
 
-        if ( $this->appEnv !== 'testing' ) {
+        // if ( $this->appEnv !== 'testing' ) {
             $this->output->writeln("  - Shareables seeder: loaded ".$timelines->count()." timelines...");
-        }
+        // }
 
         // Remove a few timelines so we have some without any followers for testing...
         //   ~ [ ] %TODO: timelines w/ followers but not subscribers, & vice-versa
@@ -78,10 +78,10 @@ class ShareablesTableSeeder extends Seeder
             if ( $max < 2 ) {
                 throw new Exception('Requires at least 2 followers per timeline - max:' . $max);
             }
-            if ( $this->appEnv !== 'testing' ) {
-                $this->output->writeln("-- {$iter} of {$timelinesCount} | Timeline: {$timeline->name}");
-                $this->output->writeln("  - Creating $max (non-premium) followers for timeline {$timeline->name}, iter: $iter");
-            }
+            // if ( $this->appEnv !== 'testing' ) {
+                $this->output->writeln("  -- {$iter} of {$timelinesCount} | Timeline: {$timeline->name}");
+                $this->output->writeln("    - Creating $max (non-premium) followers for timeline {$timeline->name}, iter: $iter");
+            // }
 
             $followerPool->random($max)->each( function(User $follower) use(&$timeline) {
                 $ts = $this->faker->dateTimeBetween($startDate = '-5 years', $endDate = 'now');
@@ -105,9 +105,9 @@ class ShareablesTableSeeder extends Seeder
                 $max = $this->faker->numberBetween( 0, $this->getMax('purchased') );
                 $purchaseablePosts = $timeline->posts()->where('type', PostTypeEnum::PRICED)->inRandomOrder($max)->get();
                 $count = $purchaseablePosts->count();
-                if ( $this->appEnv !== 'testing' ) {
-                    $this->output->writeln("  - Purchasing {$count} posts for follower {$follower->name} on timeline {$timeline->name}");
-                }
+                // if ( $this->appEnv !== 'testing' ) {
+                    $this->output->writeln("    - Purchasing {$count} posts for follower {$follower->name} on timeline {$timeline->name}");
+                // }
                 if ( $count > 0 ) {
                     $purchaseablePosts->each( function($post) use(&$follower) {
                         $customAttributes = [ 'notes' => 'ShareablesTableSeeder.purchase_post_as_follower_free_timeline' ];
@@ -133,9 +133,9 @@ class ShareablesTableSeeder extends Seeder
                             } catch (RuntimeException $e) {
                                 //throw $e;
                                 $exceptionClass = class_basename($e);
-                                if ($this->appEnv !== 'testing') {
-                                    $this->output->writeln("Exception while purchasing Post [{$post->getKey()}] | {$exceptionClass} | {$e->getMessage()}");
-                                }
+                                // if ($this->appEnv !== 'testing') {
+                                    $this->output->writeln("      Exception while purchasing Post [{$post->getKey()}] | {$exceptionClass} | {$e->getMessage()}");
+                                // }
                             }
                         }, $this->eventsToDelayOnPurchase);
 
@@ -150,9 +150,9 @@ class ShareablesTableSeeder extends Seeder
             $timeline->refresh();
             $followers = $timeline->followers;
             $max = $this->faker->numberBetween( 0, min($followers->count() - 1, $this->getMax('subscriber')) );
-            if ( $this->appEnv !== 'testing' ) {
-                $this->output->writeln("  - Upgrading $max followers to subscribers for timeline ".$timeline->name.", iter: $iter");
-            }
+            // if ( $this->appEnv !== 'testing' ) {
+                $this->output->writeln("    - Upgrading $max followers to subscribers for timeline ".$timeline->name.", iter: $iter");
+            // }
 
             $followers->random($max)->each( function($follower) use(&$timeline) {
                 // Set fake time to make subscription
@@ -180,9 +180,9 @@ class ShareablesTableSeeder extends Seeder
                     } catch (RuntimeException $e) {
                         //throw $e;
                         $exceptionClass = class_basename($e);
-                        if ($this->appEnv !== 'testing') {
-                            $this->output->writeln("Exception while subscribing to Timeline [{$timeline->getKey()}] | {$exceptionClass} | {$e->getMessage()}");
-                        }
+                        // if ($this->appEnv !== 'testing') {
+                            $this->output->writeln("      Exception while subscribing to Timeline [{$timeline->getKey()}] | {$exceptionClass} | {$e->getMessage()}");
+                        // }
                     }
                 }, $this->eventsToDelayOnPurchase);
 
@@ -195,24 +195,27 @@ class ShareablesTableSeeder extends Seeder
 
 
         // Run update Balance on accounts now.
-        if ($this->appEnv !== 'testing') {
-            $this->output->writeln("-------------------------");
-            $this->output->writeln("Updating Account Balances");
-            $this->output->writeln("-------------------------");
-        }
+        // if ($this->appEnv !== 'testing') {
+            $this->output->writeln("  -----------------------------");
+            $this->output->writeln("  | Updating Account Balances |");
+            $this->output->writeln("  -----------------------------");
+        // }
         $count = Account::where('owner_type', '!=', 'financial_system_owner')->count();
         Account::where('owner_type', '!=', 'financial_system_owner')->get()->each(function($account) use ($count) {
             static $iter = 1;
-            if ($this->appEnv !== 'testing') {
-                $this->output->writeln("({$iter} of {$count}): Updating Balance for {$account->name}");
-            }
+            // if ($this->appEnv !== 'testing') {
+                $this->output->writeln("  ({$iter} of {$count}): Updating Balance for {$account->name}");
+            // }
             $account->settleBalance();
             $iter++;
         });
+        $this->output->writeln("  ------------------------");
+        $this->output->writeln("  | Updating Fee Balances |");
+        $this->output->writeln("  -------------------------");
         Account::where('owner_type', 'financial_system_owner')->each(function($account) {
-            if ($this->appEnv !== 'testing') {
-                $this->output->writeln("Updating Balance for {$account->name}");
-            }
+            // if ($this->appEnv !== 'testing') {
+                $this->output->writeln("  Updating Balance for {$account->name}");
+            // }
             $account->settleBalance();
         });
 

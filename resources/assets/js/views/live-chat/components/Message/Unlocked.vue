@@ -8,7 +8,7 @@
         :class="value.sender_id === session_user.id ? 'flex-row-reverse' : 'flex-row'"
       >
         <div class="mx-1">
-          {{ moment(value.created_at).format('h:mm A') }}
+          {{ moment(value.delivered_at).format('h:mm A') }}
         </div>
         <span
           v-if="value.attachments && value.attachments.length > 0 && value.attachments[0].type === 'tip'"
