@@ -19,7 +19,7 @@
     </section>
 
     <!-- Messages Mobile view -->
-    <!-- FIXME: This is one of the dirtiest 💩 fixes I've done as I don't have another choice -->
+    <!-- FIXME: This is one of the dirtiest fixes I've done as I don't have another choice -->
     <section v-else-if="mobile && isMessages" class="mobile h-100" :class="{ 'focus-main': focusMain }">
       <div class="sidebar px-3 pb-3" key="sidebar">
         <slot name="sidebar"></slot>
