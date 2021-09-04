@@ -395,7 +395,6 @@ export default {
         if (!this.isScheduled) {
           this.whisperMessage()
         }
-        this.$emit('sendMessage', message)
 
         await axios.post( this.$apiRoute('chatthreads.addMessage', this.chatthread_id), params )
 
@@ -423,6 +422,7 @@ export default {
         imageCount:    this.selectedMediafiles.length,
         delivered_at:  this.moment().toISOString(),
       }
+      this.$emit('sendMessage', message)
       // Whisper the message to the channel so that is shows up for other users as fast as possible if they are
       //   currently viewing this thread
       this.$echo.join(this.channelName).whisper('sendMessage', { message })

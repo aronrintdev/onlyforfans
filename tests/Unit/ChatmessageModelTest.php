@@ -82,13 +82,15 @@ class ChatmessageModelTest extends TestCase
 
         // send 1st message
         $msgs[] = $msg = $this->faker->realText;
-        $chatthread->addMessage($originator, $msg);
+        $message = $chatthread->addMessage($originator, $msg);
+        $message->deliver();
         $chatthread->refresh();
         $this->assertEquals(1, $chatthread->chatmessages->count());
 
         // sendMessage 2nd message
         $msgs[] = $msg = $this->faker->realText;
-        $chatthread->addMessage($originator, $msg);
+        $message = $chatthread->addMessage($originator, $msg);
+        $message->deliver();
         $chatthread->refresh();
         $originator->refresh();
         $receiver->refresh();
