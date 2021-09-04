@@ -118,6 +118,11 @@ export default {
     .timestamp {
       text-align: right;
     }
+
+    ::v-deep .swiper-slider .swiper-wrapper {
+      display: flex !important;
+      justify-content: flex-end !important;
+    }
   }
 
   &.other_user {
@@ -135,9 +140,12 @@ export default {
     .timestamp {
       text-align: left;
     }
+
+    ::v-deep .swiper-slider .swiper-wrapper {
+      display: flex !important;
+      justify-content: flex-start !important;
+    }
   }
-
-
 
 } // crate
 </style>

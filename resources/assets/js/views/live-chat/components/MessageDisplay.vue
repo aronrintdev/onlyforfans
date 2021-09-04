@@ -106,18 +106,6 @@ export default {
       } // box
     } // crate
 
-    .crate.session_user {
-        justify-content: flex-end;
-        margin-left: auto;
-        margin-right: 0;
-    }
-
-    .crate.other_user {
-        justify-content: flex-start;
-        margin-left: 0;
-        margin-right: auto;
-    }
-
   }
 
   .msg-grouping-day-divider {
