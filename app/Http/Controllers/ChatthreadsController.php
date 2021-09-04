@@ -293,11 +293,7 @@ class ChatthreadsController extends AppBaseController
             'attachments'    => 'required_with:price|array',   // optional first message attachments
         ]);
 
-        [
-            'chatthreads' => $chatthreads,
-            'chatmessages' => $chatmessages,
-            'chatmessagegroup' => $cmGroup
-        ] = Chatthread::findOrCreateChat(
+        [ 'chatthreads' => $chatthreads, 'chatmessages' => $chatmessages, 'chatmessagegroup' => $cmGroup ] = Chatthread::findOrCreateChat(
             $request->user(),               // User      $sender
             $request->originator_id,        // int       $originator_id
             $request->participants,         // array     $participants (array of user ids)
