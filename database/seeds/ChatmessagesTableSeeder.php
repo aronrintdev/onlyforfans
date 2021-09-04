@@ -170,7 +170,7 @@ class ChatmessagesTableSeeder extends Seeder
                             })->all();
                         }
 
-                        $cm = $ct->sendMessage(
+                        $cm = $ct->addMessage(
                             $sender,
                             $rattrs->mcontent ?? null, // string $mcontent = ''
                             $rattrs->attachments ?? [], // array $attachments = []
