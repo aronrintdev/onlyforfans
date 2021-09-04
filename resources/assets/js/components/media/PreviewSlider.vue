@@ -5,24 +5,20 @@
       <swiper-slide class="slide">
         <div>
           <div v-observe-visibility="onFirstVisible"> </div>
-          <div
-            class="swiper-image-wrapper"
-            v-for="(media, index) in files"
-            :key="index"
-          >
+          <div class="swiper-image-wrapper" v-for="(media, idx) in files" :key="idx" :class="{ 'tag-last':idx==Object.keys(files).length-1}">
             <b-img
               v-if="media.is_image && media.access"
               class="swiper-lazy"
               :src="media.filepath || media.src"
-              @click="openPhotoSwipe(index)"
+              @click="openPhotoSwipe(idx)"
             />
             <b-img
               v-if="media.is_image && !media.access"
               class="swiper-lazy"
               :src="media.blurFilepath"
-              @click="openPhotoSwipe(index)"
+              @click="openPhotoSwipe(idx)"
             />
-            <div v-if="media.is_video" class="swiper-lazy video" @click="openPhotoSwipe(index)">
+            <div v-if="media.is_video" class="swiper-lazy video" @click="openPhotoSwipe(idx)">
               <video>
                 <source :src="media.filepath" :type=" media.mimetype || media.type" />
               </video>
@@ -43,7 +39,7 @@
         <fa-icon icon="chevron-right" />
       </div>
     </transition>
-    <div class="audio" v-for="(audio, index) in audioFiles" :key="index">
+    <div class="audio" v-for="(audio, idx) in audioFiles" :key="idx">
       <vue-plyr>
         <audio controls playsinline>
           <source :src="audio.filepath" type="audio/webm" />
@@ -229,6 +225,7 @@ export default {
     object-fit: contain;
     cursor: pointer;
 
+
     &.video {
       position: relative;
 
@@ -254,6 +251,13 @@ export default {
         transform: translate(-50%, -50%);
         font-size: 34px;
       }
+    }
+  }
+
+  .swiper-image-wrapper.tag-last {
+    //border: red solid 2px;
+    .swiper-lazy {
+      margin-right: 0; // remove right margin on final image for sender so it lines up on the right with any text
     }
   }
 
