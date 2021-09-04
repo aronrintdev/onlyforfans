@@ -183,6 +183,7 @@ class Chatthread extends Model implements UuidId
         if (!isset($ct)) {
             $ct = Chatthread::create([
                 'originator_id' => $originator->id,
+                 'is_tip_required' => 0, // possibly unused, oddly need to set this for it to show up in $ct (?)
             ]);
             $ct->addParticipant($participant->id);
         }
@@ -253,6 +254,7 @@ class Chatthread extends Model implements UuidId
                 if (!isset($ct)) {
                     $ct = Chatthread::create([
                         'originator_id' => $originator->id,
+                        'is_tip_required' => 0, // possibly unused, oddly need to set this for it to show up in $ct (?)
                         //'cattrs' => $cattrs??[],
                     ]);
                     $ct->addParticipant($participantUserId);

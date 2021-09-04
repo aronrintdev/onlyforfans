@@ -344,7 +344,7 @@ class RestChatthreadsTest extends TestCase
         $response->assertStatus(201);
         $content = json_decode($response->content());
         $response->assertJsonStructure([
-            'data' => ['id', 'chatthread_id', 'mcontent', 'sender_id', 'is_delivered', 'deliver_at', 'created_at', 'is_read', 'is_flagged'],
+            'data' => ['id', 'chatthread_id', 'mcontent', 'sender_id', 'is_delivered', 'deliver_at', 'delivered_at', 'is_read', 'is_flagged'],
         ]);
         $chatthread->refresh();
         Event::assertDispatched(MessageSentEvent::class);
@@ -446,7 +446,7 @@ class RestChatthreadsTest extends TestCase
         $thisCT->refresh();
 //dd($content);
         $response->assertJsonStructure([
-            'data' => ['id', 'chatthread_id', 'mcontent', 'sender_id', 'is_delivered', 'deliver_at', 'created_at', 'is_read', 'is_flagged'],
+            'data' => ['id', 'chatthread_id', 'mcontent', 'sender_id', 'is_delivered', 'deliver_at', 'delivered_at', 'is_read', 'is_flagged'],
         ]);
 
         // Check event dispatching
