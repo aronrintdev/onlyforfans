@@ -59,9 +59,14 @@ export default {
 .image-count {
   position: absolute;
   top: 0;
-  left: 0;
   font-size: 100%;
   z-index: 2;
+}
+.other_user .image-count {
+  left: 0;
+}
+.session_user .image-count {
+  right: 0;
 }
 </style>
 
