@@ -10,7 +10,10 @@
 
     <b-row>
       <b-col>
+        <!--
         <section v-if="!is_schedulefeed" class="mt-3 px-2 py-2 d-flex flex-column flex-md-row justify-content-center justify-content-md-between" :class="{ 'feed-ctrl': !is_homefeed }">
+          -->
+        <section v-if="!is_schedulefeed" class="mt-3 px-2 py-2 d-flex flex-column flex-md-row justify-content-center justify-content-md-between" :class="is_homefeed ? 'feed-ctrl-home' : 'feed-ctrl'">
           <b-nav v-if="!is_homefeed" pills>
             <b-nav-item @click="setFeedType('default')" :active="feedType==='default'">All</b-nav-item>
             <b-nav-item @click="setFeedType('photos')" :active="feedType==='photos'">Photos ({{ totalPhotosCount }})</b-nav-item>
@@ -58,11 +61,12 @@
       </b-col>
     </b-row>
 
-    <section class="row">
+    <section class="row feed-list">
       <article
         v-for="(feedItem, index) in listItems"
         :key="feedItem.id + index"
         :class="feedClass"
+        class="feed-list-item"
         v-observe-visibility="index === listItems.length - 1 ? endPostVisible : false"
       >
         <div class="tag-debug">INDEX: {{ index }}</div>
@@ -477,6 +481,13 @@ export default {
     background-color: transparent;
     border: none;
   }
+}
+
+#view-home_timeline .feed-crate .feed-ctrl-home {
+  margin-top: 0 !important;
+}
+#view-home_timeline .feed-crate .feed-list .feed-list-item:first-child {
+  margin-top: 0 !important;
 }
 
 </style>

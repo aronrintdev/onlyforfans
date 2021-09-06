@@ -61,7 +61,7 @@
               class="dropzone"
             >
               <div class="dz-custom-content">
-                <textarea v-model="description" rows="8" class="w-100 p-3"></textarea>
+                <textarea v-model="description" rows="2" class="w-100 p-3"></textarea>
               </div>
               <template v-if="selectedMediafiles && selectedMediafiles.length > 0">
                 <UploadMediaPreview
@@ -755,6 +755,7 @@ export default {
 .create_post-crate .dropzone,
 .create_post-crate .vue-dropzone {
   border: none;
+  min-height: inherit !important;
 }
 
 li.selectable {
@@ -784,7 +785,7 @@ li.selectable[disabled] {
 .create_post-crate textarea {
   resize: none;
   @media (max-width: 576px) {
-    height: 125px;
+    //height: 125px;
   }
 }
 
