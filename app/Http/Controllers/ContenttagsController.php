@@ -9,6 +9,8 @@ use App\Http\Resources\Contenttag as ContenttagResource;
 use App\Models\User;
 use App\Models\Contenttag;
 use App\Enums\ContenttagAccessLevelEnum;
+use App\Http\Resources\MediafileCollection;
+use App\Http\Resources\PostCollection;
 
 class ContenttagsController extends AppBaseController
 {
@@ -48,10 +50,20 @@ class ContenttagsController extends AppBaseController
         return new ContenttagCollection($data);
     }
 
-    public function show(Contenttag $obj)
+    public function show($tagId)
     {
-        $this->authorize('view', $obj);
-        return new ContenttagResource($obj);
+        $this->authorize('view', $tagId);
+        $contenttag = Contenttag::where('id', $tagId)->first();
+
+        $posts = $contenttag->posts()->with(['user', 'mediafiles', 'timeline'])->withCount(['comments', 'likes'])->get();
+        $mediafiles = $contenttag->mediafiles()->with('contenttags')->get();
+
+        return [
+            'id' => $contenttag->id,
+            'name' => $contenttag->ctag,
+            'mediafiles' => $mediafiles,
+            'posts' => new PostCollection($posts),
+        ];
     }
 
 }

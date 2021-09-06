@@ -46,6 +46,7 @@ php artisan scout:import "App\Models\Story"
 php artisan scout:import "App\Models\Mycontact"
 php artisan scout:import "App\Models\Chatthread"
 php artisan scout:import "App\Models\Chatmessage"
+php artisan scout:import "App\Models\Contenttag"
 
 ### Run webpack hot server ###
 npm run hot

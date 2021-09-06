@@ -17,6 +17,7 @@ import vaults from '@views/vaults'
 import search from '@views/search'
 import posts from '@views/posts'
 import payments from '@views/payments'
+import tags from '@views/tags'
 //import livechat from '@views/live-chat/components'
 
 import LivechatDashboard from '@views/live-chat/Dashboard'
@@ -179,6 +180,13 @@ export const routes = [
     name: 'posts.edit',
     path: '/posts/:slug/edit',
     component: posts.Edit,
+    props: true,
+  },
+
+  {
+    name: 'tags.show',
+    path: '/tags/:id',
+    component: tags.Show,
     props: true,
   },
 
