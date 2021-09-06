@@ -11,11 +11,13 @@
             <fa-icon size="lg" :icon="['far', 'comments']" class="text-secondary" />
           </span>
         </li>
+        <!-- hide until implemented
         <li class="mr-3">
           <span @click="share()" class="tag-clickable">
             <fa-icon size="lg" :icon="['far', 'share-square']" class="text-secondary" />
           </span>
         </li>
+        -->
         <li class="mr-3">
           <span @click="renderTip" class="tag-clickable">
             <fa-icon size="lg" icon="dollar-sign" class="text-secondary" />
