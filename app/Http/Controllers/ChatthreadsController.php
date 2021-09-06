@@ -125,11 +125,6 @@ class ChatthreadsController extends AppBaseController
                     });
                 });
                 break;
-            case 'current_online':
-                $query->whereHas('participants', function($q1) use(&$sessionUser) {
-                    $q1->where('users.id', '<>', $sessionUser->id)->where('is_online', 1);
-                });
-                break;
             default:
                 $query->where($key, $v);
             }
@@ -167,6 +162,13 @@ class ChatthreadsController extends AppBaseController
             ->orderBy('unread_tips_count', $orderBy);
             break;
         case 'online':
+            $query
+                ->join('chatthread_user', 'chatthread_user.chatthread_id', '=', 'chatthreads.id')
+                ->select('chatthreads.*')
+                ->join('users', 'chatthread_user.user_id', '=', 'users.id')
+                ->where('users.id', '<>', $sessionUser->id)
+                ->orderBy('users.is_online', $orderBy)
+                ->orderBy('users.last_logged', $orderBy);
             break;
         case 'recent':
         case 'unread-first':
