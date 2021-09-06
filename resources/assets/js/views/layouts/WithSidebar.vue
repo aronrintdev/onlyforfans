@@ -24,7 +24,7 @@
       <div class="sidebar px-3 pb-3" key="sidebar">
         <slot name="sidebar"></slot>
       </div>
-      <div class="main px-3 pb-3" key="main">
+      <div class="main OFF-px-3 pb-3" key="main">
         <slot></slot>
       </div>
     </section>
