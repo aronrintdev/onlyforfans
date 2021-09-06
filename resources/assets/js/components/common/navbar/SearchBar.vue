@@ -71,13 +71,13 @@ import ClickOutside from 'vue-click-outside'
 import Vuex from 'vuex'
 
 import PostDisplay from './search/PostDisplay'
-import StoryDisplay from './search/StoryDisplay'
+import TagDisplay from './search/TagDisplay'
 import TimelineDisplay from './search/TimelineDisplay'
 
 export default {
   components: {
     PostDisplay,
-    StoryDisplay,
+    TagDisplay,
     TimelineDisplay,
   },
 
@@ -103,8 +103,8 @@ export default {
     ...Vuex.mapGetters('search', {
       groups: 'availableGroups',
       timelines: 'timelines',
-      stories: 'stories',
       posts: 'posts',
+      tags: 'tags',
     }),
 
     selectedGroupName() {
@@ -164,11 +164,11 @@ export default {
               name: 'timeline.show',
               params: { slug: this.results.timelines[this.highlighted].slug }
             })
-          } else if (this.groups[this.selectedGroup].name === 'stories') {
-            this.$router.push({
-              name: 'stories.player',
-              params: { slug: this.results.stories[this.highlighted].slug }
-            })
+          } else if (this.groups[this.selectedGroup].name === 'tags') {
+            // this.$router.push({
+            //   name: 'posts.show',
+            //   params: { slug: this.results.tags[this.highlighted].slug }
+            // })
           } else if (this.groups[this.selectedGroup].name === 'posts') {
             this.$router.push({
               name: 'posts.show',
@@ -197,6 +197,9 @@ export default {
       this.loading = true
       this.doSearch()
         .then(() => {
+          if (!this.groups[this.selectedGroup]) {
+            this.selectedGroup = 0;
+          }
           this.loading = false
           this.$forceUpdate()
         })

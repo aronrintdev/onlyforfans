@@ -41,7 +41,7 @@
     </b-card>
 
     <b-card title="Profile Promotion Campaign" class="mt-5">
-      <b-row class="mt-3">
+      <b-row class="mt-3" v-if="!activeCampaign">
         <b-col>
           <p><small class="text-muted">Offer a free trial or a discounted subscription on your profile for a limited number of new or already expired subscribers.</small></p>
           <div class="w-100 d-flex justify-content-end">
@@ -52,10 +52,12 @@
 
       <b-row v-if="activeCampaign">
         <b-col class="mt-3">
-          <h5 v-if="activeCampaign.type === 'trial'">Limited offer - Free trial for {{ activeCampaign.trial_days }} days!</h5>
-          <h5 v-if="activeCampaign.type === 'discount'">Limited offer - {{ activeCampaign.discount_percent }}% off for 31 days!</h5>
+          <h6 v-if="activeCampaign.type === 'trial'">Limited offer - Free trial for {{ activeCampaign.trial_days }} days!</h6>
+          <h6 v-if="activeCampaign.type === 'discount'">Limited offer - {{ activeCampaign.discount_percent }}% off for 31 days!</h6>
           <p><small class="text-muted">For {{ campaignAudience }} • ends {{ campaignExpDate }} • {{ activeCampaign.subscriber_count }} left</small></p>
-          <b-button @click="showStopModal" class="w-25 ml-3" variant="primary">Stop Promotion</b-button>
+          <div class="w-100 d-flex justify-content-end">
+            <b-button @click="showStopModal" class="px-4" variant="primary">Stop Promotion Campaign</b-button>
+          </div>
         </b-col>
       </b-row>
     </b-card>
