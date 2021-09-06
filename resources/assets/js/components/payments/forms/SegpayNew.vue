@@ -394,6 +394,9 @@ export default {
           price: this.price,
           currency: this.currency,
         }).then(results => {
+          if (results.data.id === null) {
+            reject('Session Id is null')
+          }
           this.sessionId = results.data.id
           this.packageId = results.data.packageId
           this.pageId = results.data.pageId
