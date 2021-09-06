@@ -35,11 +35,6 @@ class Contenttag extends Model
         return $this->morphedByMany(Vaultfolder::class, 'contenttaggable');
     }
 
-    public function contenttaggable()
-    {
-        return $this->morphTo();
-    }
-
 
     /* ---------------------------------------------------------------------- */
     /*                               Searchable                               */

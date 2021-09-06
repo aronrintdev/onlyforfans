@@ -199,7 +199,7 @@ export default {
       return `${window.location.origin}/posts/${this.post.slug}/details`;
     },
     isPostOwnedBySessionUser() {
-      return this.session_user.id === this.post.user.id
+      return this.post.user && this.session_user.id === this.post.user.id
     },
     canEditPostAsStaff() {
       const index = this.session_user.companies.findIndex(company => company.id == this.post.timeline.id);
