@@ -50,8 +50,8 @@ class Chatmessage extends JsonResource
                 'videos' => $this->mediafiles->where('is_video', true)->count(),
                 'audios' => $this->mediafiles->where('is_audio', true)->count(),
             ],
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'delivered_at' => $this->delivered_at ?? $this->created_at,
+            // 'updated_at' => $this->updated_at,
         ];
     }
 }

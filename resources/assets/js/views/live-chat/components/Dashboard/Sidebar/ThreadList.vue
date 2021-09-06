@@ -11,7 +11,7 @@
         :participant="participants(thread)"
         :chatthread="thread"
       />
-      <b-list-group-item v-if="noThreads" class="text-center">
+      <b-list-group-item v-if="noThreads && !loading" class="text-center">
         {{ showSearchResults ? $t('no-items-search', { query: searchQuery }) : $t('no-items') }}
       </b-list-group-item>
     </b-list-group>

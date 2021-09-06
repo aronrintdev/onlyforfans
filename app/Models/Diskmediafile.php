@@ -3,19 +3,28 @@ namespace App\Models;
 
 use DB;
 use Auth;
+
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Interfaces\Ownable;
-use App\Interfaces\Guidable;
-use App\Interfaces\Cloneable;
-use App\Models\Traits\UsesUuid;
-use App\Enums\MediafileTypeEnum;
-use App\Models\Traits\SluggableTraits;
-use App\Traits\OwnableFunctions;
+
 use Cviebrock\EloquentSluggable\Sluggable;
 use Intervention\Image\Facades\Image;
+
+use App\Interfaces\Cloneable;
+use App\Interfaces\Guidable;
+use App\Interfaces\Ownable;
+
+use App\Traits\OwnableFunctions;
+
+use App\Models\Traits\SluggableTraits;
+use App\Models\Traits\UsesUuid;
+
+use App\Enums\ImageBlurEnum;
+use App\Enums\MediafileTypeEnum;
 
 //class Diskmediafile extends BaseModel implements Guidable, Ownable, Cloneable
 class Diskmediafile extends BaseModel implements Guidable, Ownable
@@ -199,12 +208,12 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
 
     // %%% --- Other ---
 
-    public function flagCount() {
-        return !empty($this->filepath) ? Storage::disk('s3')->url($this->filepath) : null; // %FIXME?: this doesn't look right
-    }
+    // public function flagCount() {
+    //     return !empty($this->filepath) ? Storage::disk('s3')->url($this->filepath) : null; // %FIXME?: this doesn't look right
+    // }
 
     public function renderUrl() {
-        return !empty($this->filepath) ? Storage::disk('s3')->url($this->filepath) : null;
+        return !empty($this->filepath) ? $this->getCdnUrl() : null;
     }
 
     public function renderUrlBlur() {
@@ -223,6 +232,26 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
         $subfolder = $this->owner_id;
         $path = $subfolder.'/thumb/'.$this->basename.'.jpg';
         return !empty($path) ? Storage::disk('s3')->url($path) : null;
+    }
+
+    /**
+     * Get s3 path from relative storage path
+     */
+    public function getCdnUrl($path = null)
+    {
+        if (!isset($path)) {
+            $path = $this->filepath;
+        }
+
+        if (Config::get('filesystems.useSigned', false)) {
+            return !empty($path)
+                ? Storage::disk('cdn')->temporaryUrl(
+                    $path,
+                    Carbon::now()->addMinutes(Config::get('filesystems.availabilityMinutes'))
+                )
+                : null;
+        }
+        return !empty($path) ? Storage::disk('cdn')->url($path) : null;
     }
 
     // creates diskmediafile and associated mediafile reference
@@ -336,7 +365,7 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
     // set width to number and height to null to scale existing
     public function createThumbnail()
     {
-        $WIDTH = 320;
+        $WIDTH = Config::get('usersettings.image_thumbnail_width');
         $url = Storage::disk('s3')->temporaryUrl( $this->filepath, now()->addMinutes(10) );
         $img = Image::make($url);
         $subFolder = $this->owner_id;
@@ -350,7 +379,7 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
 
     public function createMid()
     {
-        $WIDTH = 1280;
+        $WIDTH = Config::get('usersettings.image_mid_width');
         $url = Storage::disk('s3')->temporaryUrl( $this->filepath, now()->addMinutes(10) );
         $img = Image::make($url);
         $subFolder = $this->owner_id;
@@ -362,15 +391,34 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
         $this->save();
     }
 
+    public static function mapBlurSettingToStrength(string $setting) : int 
+    {
+        switch ($setting) {
+            case 'strong':
+                return 95;
+            case 'light':
+                return 55;
+            case 'off':
+                return 0;
+            case 'medium':
+            default:
+                return 90;
+        }
+    }
+
     public function createBlur()
     {
-        $WIDTH = 320;
-        $BLUR_STRENGTH = 90; // 0 ~ 100 http://image.intervention.io/api/blur
+        $WIDTH = Config::get('usersettings.image_thumbnail_width');
+        $JPEG_QUALITY = Config::get('usersettings.image_jpeg_quality');
+
+        $blurSetting = Config::get('usersettings.image_blur_setting');
+        $BLUR_STRENGTH = Diskmediafile::mapBlurSettingToStrength($blurSetting);
+
         $url = Storage::disk('s3')->temporaryUrl( $this->filepath, now()->addMinutes(10) );
         $img = Image::make($url);
         $subFolder = $this->owner_id;
         $s3Path = "$subFolder/blur/".$this->basename.".jpg";
-        $img->widen($WIDTH)->blur($BLUR_STRENGTH)->encode('jpg', 90);
+        $img->widen($WIDTH)->blur($BLUR_STRENGTH)->encode('jpg', $JPEG_QUALITY);
         $contents = $img->stream();
         Storage::disk('s3')->put($s3Path, $contents);
         $this->has_blur = true;

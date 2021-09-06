@@ -42,7 +42,6 @@ class RestChatmessagesTest extends TestCase
 
         $response->assertStatus(200);
         $content = json_decode($response->content());
-        //dd($content);
 
         $response->assertJsonStructure([
             'data' => [
@@ -54,7 +53,7 @@ class RestChatmessagesTest extends TestCase
                     'is_delivered', 
                     'is_read', 
                     'is_flagged', 
-                    'created_at', 
+                    'delivered_at', 
                 ],
             ],
             'links',

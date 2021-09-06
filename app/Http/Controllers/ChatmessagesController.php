@@ -7,8 +7,11 @@ use Throwable;
 use App\Models\User;
 use App\Models\Mediafile;
 use App\Models\Chatthread;
+use App\Models\Casts\Money;
 use App\Models\Chatmessage;
 use Illuminate\Http\Request;
+use App\Payments\PaymentGateway;
+use App\Models\Financial\Account;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
 use App\Http\Resources\MediafileCollection;
@@ -74,7 +77,7 @@ class ChatmessagesController extends AppBaseController
             }
         }
 
-        $data = $query->latest()->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
+        $data = $query->latestDelivered()->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
         return new ChatmessageCollection($data);
     }
 
@@ -119,6 +122,30 @@ class ChatmessagesController extends AppBaseController
         $data = $query->latest()->paginate($request->input('take', Config::get('collections.size.mid', 20)));
 
         return new MediafileCollection($data);
+    }
+
+    /**
+     * Purchase Message
+     */
+    public function purchase(Request $request, Chatmessage $chatmessage, PaymentGateway $paymentGateway)
+    {
+        $this->authorize('purchase', $chatmessage);
+
+        $request->validate([
+            'account_id' => 'required|uuid',
+            'amount' => 'required|numeric',
+            'currency' => 'required',
+        ]);
+
+        $price = Money::toMoney($request->amount, $request->currency);
+        if ($chatmessage->verifyPrice($price) === false) {
+            abort(400, 'Invalid Price');
+        }
+
+        $account = Account::with('resource')->find($request->account_id);
+        $this->authorize('purchase', $account);
+
+        return $paymentGateway->purchase($account, $chatmessage, $price);
     }
 
 

@@ -51,9 +51,10 @@ class ChatmessageModelTest extends TestCase
     }
 
     /**
-     * @group chatmessage-model
-     * @group regression
-     * @group regression-base
+     *  @group chatmessage-model
+     *  @group regression
+     *  @group regression-base
+     *  @group here0903
      */
     public function test_can_start_chat()
     {
@@ -82,13 +83,15 @@ class ChatmessageModelTest extends TestCase
 
         // send 1st message
         $msgs[] = $msg = $this->faker->realText;
-        $chatthread->sendMessage($originator, $msg);
+        $message = $chatthread->addMessage($originator, $msg);
+        $message->deliver();
         $chatthread->refresh();
         $this->assertEquals(1, $chatthread->chatmessages->count());
 
-        // send 2nd message
+        // sendMessage 2nd message
         $msgs[] = $msg = $this->faker->realText;
-        $chatthread->sendMessage($originator, $msg);
+        $message = $chatthread->addMessage($originator, $msg);
+        $message->deliver();
         $chatthread->refresh();
         $originator->refresh();
         $receiver->refresh();
@@ -126,7 +129,8 @@ class ChatmessageModelTest extends TestCase
         $now = Carbon::now();
         $tomorrow = new Carbon('tomorrow');
         $msgs[] = $msg = $this->faker->realText;
-        $chatthread->scheduleMessage($originator, $msg, $tomorrow->timestamp);
+        $message = $chatthread->addMessage($originator, $msg);
+        $message->schedule($tomorrow->timestamp);
         $chatthread->refresh();
 
         $this->assertEquals(0, $chatthread->chatmessages->count()); // shouldn't be visible

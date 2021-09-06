@@ -99,8 +99,10 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/chatthreads/{chatthread}/markRead', ['as'=>'chatthreads.markRead', 'uses' => 'ChatthreadsController@markRead']);
     Route::get('/chatthreads/{chatthread}/getMuteStatus', ['as'=>'chatthreads.getMuteStatus', 'uses' => 'ChatthreadsController@getMuteStatus']);
     Route::post('/chatthreads/{chatthread}/toggleMute', ['as'=>'chatthreads.toggleMute', 'uses' => 'ChatthreadsController@toggleMute']);
-    Route::post('/chatthreads/{chatthread}/sendMessage', ['as'=>'chatthreads.sendMessage', 'uses' => 'ChatthreadsController@sendMessage']);
-    Route::post('/chatthreads/{chatthread}/scheduleMessage', ['as'=>'chatthreads.scheduleMessage', 'uses' => 'ChatthreadsController@scheduleMessage']);
+
+    Route::post('/chatthreads/{chatthread}/addMessage', 'ChatthreadsController@addMessage')
+        ->name('chatthreads.addMessage');
+
     Route::get('/chatthreads/search', 'ChatthreadsController@search')->name('chatthreads.search');
     Route::resource('chatthreads', 'ChatthreadsController', [
         'only' => [ 'index', 'show', 'store' ],

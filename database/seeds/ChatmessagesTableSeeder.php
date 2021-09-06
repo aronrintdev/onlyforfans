@@ -1,21 +1,26 @@
 <?php
 namespace Database\Seeders;
 
-use Illuminate\Support\Facades\Config;
-use Symfony\Component\Console\Output\ConsoleOutput;
 use DB;
 use Exception;
 use Carbon\Carbon;
-
-use App\Libs\UuidGenerator;
-use App\Libs\FactoryHelpers;
 use App\Models\User;
 use App\Models\Chatthread;
+
+use App\Libs\UuidGenerator;
 use App\Models\Chatmessage;
+use App\Libs\FactoryHelpers;
+use App\Enums\MediafileTypeEnum;
+use Illuminate\Support\Facades\Config;
+use Symfony\Component\Console\Output\ConsoleOutput;
 
 class ChatmessagesTableSeeder extends Seeder
 {
     use SeederTraits;
+
+    protected const pricedChance = 25;
+    protected const mediaFileChance = 50;
+    protected $doS3Upload = false;
 
     public function run()
     {
@@ -35,9 +40,11 @@ class ChatmessagesTableSeeder extends Seeder
         //$senderCount = $this->faker->numberBetween(2, 4); // number of senders
         $originatorCount = 7;
 
-        if ( $this->appEnv !== 'testing' ) {
-            $this->output->writeln("  - Chatmessages seeder: loaded ".$originatorCount." originators...");
-        }
+        // if ( $this->appEnv !== 'testing' ) {
+            $this->output->writeln("  - Chatmessages seeder: loaded " . $originatorCount . " originators...");
+        // }
+
+        $this->doS3Upload = ($this->appEnv !== 'testing');
 
         $originators = User::has('timeline')->take($originatorCount)->get();
 
@@ -75,7 +82,11 @@ class ChatmessagesTableSeeder extends Seeder
 
             $this->output->writeln("    ~ create 'thread' for ".$o->name." : ".json_encode($rattrs)."...");
 
-            ['chatthreads'=>$chatthreads, 'chatmessages'=>$chatmessages, 'chatmessagegroup'=>$cmGroup] = Chatthread::findOrCreateChat(
+            [
+                'chatthreads' => $chatthreads,
+                'chatmessages' => $chatmessages,
+                'chatmessagegroup' => $cmGroup
+            ] = Chatthread::findOrCreateChat(
                 $o,                            // User     $sender
                 $rattrs->originator_id,        // string   $originatorId
                 $rattrs->participants,         // array    $participants (array of user ids)
@@ -116,7 +127,7 @@ class ChatmessagesTableSeeder extends Seeder
                 });
             }
 
-            if ( !$isScheduled || $isDeliveredByNow) ) { // skips if scheduled & not delivered yet
+            if ( !$isScheduled || $isDeliveredByNow ) { // skips if scheduled & not delivered yet
                 // Replies to simulate a conversation
                 //$baseTS = $ts->copy();
                 $chatthreads->each( function($ct) use($ts, $now) {
@@ -132,8 +143,35 @@ class ChatmessagesTableSeeder extends Seeder
                             //'currency'    => 'required_with:price|size:3',
                             //'attachments' => 'required_with:price|array',
                         ];
-                        $cm = $ct->sendMessage(
-                            $sender, 
+
+                        // Priced or not
+                        if ($this->faker->numberBetween(1, 100) <= static::pricedChance) {
+                            $rattrs->price = $this->faker->numberBetween(300, 5000);
+                            $rattrs->currency = 'USD';
+                            $rattrs->attachments = collect(range(1, $this->faker->numberBetween(1, 5)))
+                                ->map(function ($mf) use ($sender) {
+                                    return FactoryHelpers::createImage(
+                                        $sender,
+                                        MediafileTypeEnum::VAULT,
+                                    $sender->vaults()->first()->getRootFolder()->id,
+                                        $this->doS3Upload
+                                    );
+                            })->all();
+                        // Add attachments
+                        } else if ($this->faker->numberBetween(1, 100) <= static::mediaFileChance) {
+                            $rattrs->attachments = collect(range(1, $this->faker->numberBetween(1, 5)))
+                                ->map(function ($mf) use ($sender) {
+                                    return FactoryHelpers::createImage(
+                                        $sender,
+                                        MediafileTypeEnum::VAULT,
+                                        $sender->vaults()->first()->getRootFolder()->id,
+                                        $this->doS3Upload
+                                    );
+                            })->all();
+                        }
+
+                        $cm = $ct->addMessage(
+                            $sender,
                             $rattrs->mcontent ?? null, // string $mcontent = ''
                             $rattrs->attachments ?? [], // array $attachments = []
                             $rattrs->price ?? null, // $price = null

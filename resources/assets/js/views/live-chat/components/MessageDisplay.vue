@@ -61,8 +61,8 @@ export default {
       if (idx === this.items.length - 1) {
         return true
       }
-      const current = moment(this.items[idx].created_at)
-      const next = moment(this.items[idx + 1].created_at,)
+      const current = moment(this.items[idx].delivered_at)
+      const next = moment(this.items[idx + 1].delivered_at)
       return !current.isSame(next, 'date')
     },
   },
@@ -105,18 +105,6 @@ export default {
 
       } // box
     } // crate
-
-    .crate.session_user {
-        justify-content: flex-end;
-        margin-left: auto;
-        margin-right: 0;
-    }
-
-    .crate.other_user {
-        justify-content: flex-start;
-        margin-left: 0;
-        margin-right: auto;
-    }
 
   }
 

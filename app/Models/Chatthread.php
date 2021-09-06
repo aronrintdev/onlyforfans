@@ -73,6 +73,10 @@ class Chatthread extends Model implements UuidId
             return $u->id !== $sessionUser->id;
         })->first();
 
+        if (!isset($otherUser->timeline)) {
+            return null;
+        }
+
         return Notes::where('user_id', $sessionUser->id)
             ->where('notes_id', $otherUser->timeline->id)
             ->first();
@@ -179,6 +183,7 @@ class Chatthread extends Model implements UuidId
         if (!isset($ct)) {
             $ct = Chatthread::create([
                 'originator_id' => $originator->id,
+                 'is_tip_required' => 0, // possibly unused, oddly need to set this for it to show up in $ct (?)
             ]);
             $ct->addParticipant($participant->id);
         }
@@ -188,15 +193,15 @@ class Chatthread extends Model implements UuidId
     // 'thin-controlller-fat-model' refacator of code from chatthreads.store
     //public static function findOrCreateChat($sender, $rattrs)
     public static function findOrCreateChat(
-        User        $sender, 
-        string      $originatorId,
-        array       $participants, // array of user ids
-        string      $mcontent = null,
-        int         $deliverAt = null,
-        array       $attachments = null,
-        int         $price = null,
-        string      $currency = null,
-        array       $cattrs = null
+        User   $sender,
+        string $originatorId,
+        array  $participants, // array of user ids
+        string $mcontent = null,
+        int    $deliverAt = null,
+        array  $attachments = null,
+        int    $price = null,
+        string $currency = null,
+        array  $cattrs = null
     ) {
 
         if ( empty($mcontent) && empty($attachments??null) ) { 
@@ -230,13 +235,13 @@ class Chatthread extends Model implements UuidId
                 ];
                 $cmGroup = Chatmessagegroup::create($cmgroupAttrs);
             }
-    
+
             foreach ($participants as $participantUserId) { // participants is an array of [users] primary keys, and should *not* include originator
                 // Check if chat with participant already exits
                 $ct = $originator->chatthreads()->whereHas('participants', function ($query) use($participantUserId) {
                     $query->where('user_id', $participantUserId);
                 })->first();
-    
+
                 // Add participant to originator mycontacts if they are not already there
                 if ($originator->mycontacts()->where('contact_id', $participantUserId)->doesntExist()) {
                     Mycontact::create([
@@ -244,30 +249,44 @@ class Chatthread extends Model implements UuidId
                         'contact_id' => $participantUserId,
                     ]);
                 }
-    
+
                 // Start new chat thread if one is not found
                 if (!isset($ct)) {
                     $ct = Chatthread::create([
                         'originator_id' => $originator->id,
+                        'is_tip_required' => 0, // possibly unused, oddly need to set this for it to show up in $ct (?)
                         //'cattrs' => $cattrs??[],
                     ]);
                     $ct->addParticipant($participantUserId);
                 }
-    
-                $cm = isset($deliverAt)
-                    ? $ct->scheduleMessage( $sender, $mcontent, $deliverAt ) // send at scheduled date
-                    : $ct->sendMessage( $sender, $mcontent, $attachments, $price, $currency ); // send now
 
-                if ($isMassMessage) {
-                    $cm->chatmessagegroup_id = $cmGroup->id;
-                    $cm->save();
+                $message = $ct->addMessage(
+                    $sender,
+                    $mcontent,
+                    $attachments,
+                    $price,
+                    $currency,
+                    $cattrs
+                );
+
+                if ( isset($deliverAt) ) {
+                    // send at scheduled date
+                    $message->schedule($deliverAt);
+                } else {
+                    // send now
+                    $message->deliver();
                 }
 
-                $ct->refresh();
+                if ($isMassMessage) {
+                    $message->chatmessagegroup_id = $cmGroup->id;
+                    $message->save();
+                }
+
+                $message->refresh();
                 $chatthreads->push($ct);
 
-                $cm->refresh();
-                $chatmessages->push($cm);
+                $message->refresh();
+                $chatmessages->push($message);
 
             } // foreach
 
@@ -275,8 +294,8 @@ class Chatthread extends Model implements UuidId
         //});
 
         return [
-            'chatthreads' => $chatthreads, 
-            'chatmessages' => $chatmessages, 
+            'chatthreads' => $chatthreads,
+            'chatmessages' => $chatmessages,
             'chatmessagegroup' => $cmGroup,
         ];
     }
@@ -287,51 +306,25 @@ class Chatthread extends Model implements UuidId
         return $this;
     }
 
-    // %FIXME %TODO: use transaction (??)
-    public function sendMessage(
-        User        $sender, 
-        string      $mcontent = null,
-        array       $attachments = null,
-        int         $price = null,
-        string      $currency = null,
-        array       $cattrs = null
-    ) : Chatmessage
-    {
-        $cm = $this->chatmessages()->create([
-              'sender_id' => $sender->id,
-              'mcontent'  => $mcontent,
-              'cattrs'    => $cattrs??[],
+    public function addMessage(
+        User   $sender,
+        string $mcontent = null,
+        array  $attachments = null,
+        int    $price = null,
+        string $currency = null,
+        array  $cattrs = null
+    ) {
+        $message = $this->chatmessages()->create([
+            'sender_id' => $sender->id,
+            'mcontent'  => $mcontent,
+            'cattrs'    => $cattrs ?? [],
         ]);
-
-        if ( isset($price) ) {
-            $cm->setPurchaseOnly($price, $currency); // %FIXME: should pull a default currency from config (?)
-        }
-
         // Create mediafile refs for any attachments
-        if ( isset($attachments) && count($attachments) ) {
-            foreach ($attachments??[] as $a) {
-                if ($a['diskmediafile_id']) { // ie [mediafiles].diskmediafile_id (the FK)
-                    Mediafile::find($a['id'])->diskmediafile->createReference(
-                        $cm->getMorphString(), // string   $resourceType
-                        $cm->getKey(),         // int      $resourceID
-                        $a['mfname'],          // string   $mfname
-                        'messages'             // string   $mftype
-                    );
-                }
-            }
+        $message->addAttachments($attachments);
+        if (isset($price)) {
+            $message->setPurchaseOnly($price, $currency); // %FIXME: should pull a default currency from config (?)
         }
-
-        return $cm;
-    }
-
-    public function scheduleMessage(User $sender, string $mcontent, int $deliverAt) : Chatmessage
-    {
-        return $this->chatmessages()->create([
-              'sender_id' => $sender->id,
-              'mcontent' => $mcontent,
-              'is_delivered' => false,
-              'deliver_at' => Carbon::createFromTimestamp($deliverAt),
-        ]);
+        return $message;
     }
 
     #endregion Methods
