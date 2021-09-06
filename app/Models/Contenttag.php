@@ -7,10 +7,11 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
 use App\Models\Traits\UsesUuid;
 use App\Enums\ContenttagAccessLevelEnum;
+use Laravel\Scout\Searchable;
 
 class Contenttag extends Model
 {
-    use UsesUuid;
+    use UsesUuid, Searchable;
 
     protected $guarded = [ 'id', 'created_at', 'updated_at', ];
 
@@ -33,5 +34,61 @@ class Contenttag extends Model
     public function vaultfolders() {
         return $this->morphedByMany(Vaultfolder::class, 'contenttaggable');
     }
+
+    public function contenttaggable()
+    {
+        return $this->morphTo();
+    }
+
+
+    /* ---------------------------------------------------------------------- */
+    /*                               Searchable                               */
+    /* ---------------------------------------------------------------------- */
+    #region Searchable
+
+    /**
+     * Name of the search index associated with this model
+     * @return string
+     */
+    public function searchableAs()
+    {
+        return "contenttags_index";
+    }
+
+    /**
+     * Get value used to index the model
+     * @return mixed
+     */
+    public function getScoutKey()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Get key name used to index the model
+     * @return string
+     */
+    public function getScoutKeyName()
+    {
+        return 'id';
+    }
+
+    /**
+     * What model information gets stored in the search index
+     * @return array
+     */
+    public function toSearchableArray()
+    {
+        // $resources = $this->contenttaggable->get();
+        // foreach( $resources as $resource) {
+            return [
+                'ctag' => $this->ctag,
+                'id' => $this->getKey(),
+            ];
+        // }
+    }
+
+    #endregion Searchable
+    /* ---------------------------------------------------------------------- */
 
 }

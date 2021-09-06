@@ -7,7 +7,7 @@ const route = window.route
 
 const emptyResults = {
   timelines: [],
-  stories: [],
+  tags: [],
   posts: [],
 }
 
@@ -33,10 +33,10 @@ export const search = {
         component: 'TimelineDisplay',
       },
       {
-        name: 'stories',
-        label: 'Stories',
-        icon: 'pen',
-        component: 'StoryDisplay',
+        name: 'tags',
+        label: 'Tags',
+        icon: 'tags',
+        component: 'TagDisplay',
       },
       {
         name: 'posts',
@@ -54,8 +54,8 @@ export const search = {
     timelines(state) {
       return state.results.timelines || []
     },
-    stories(state) {
-      return state.results.stories || []
+    tags(state) {
+      return state.results.tags || []
     },
     posts(state) {
       return state.results.posts || []
