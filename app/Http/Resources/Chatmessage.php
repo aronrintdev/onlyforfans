@@ -5,6 +5,7 @@ use App\Models\Tip;
 use Illuminate\Support\Collection;
 use App\Models\Chatmessage as ChatmessageModel;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Log;
 
 class Chatmessage extends JsonResource
 {
@@ -18,9 +19,14 @@ class Chatmessage extends JsonResource
         $attachments = new Collection();
         if (isset($this->cattrs)) {
             if (isset($this->cattrs['tip_id'])) {
-                $attachments->push(
-                    Tip::find($this->cattrs['tip_id'])->getMessagableArray()
-                );
+                $tip = Tip::find($this->cattrs['tip_id']);
+                if (isset($tip)) {
+                    $attachments->push(
+                        Tip::find($this->cattrs['tip_id'])->getMessagableArray()
+                    );
+                } else {
+                    Log::warning('Tip attached to message could not be found', [ 'tip_id' => $this->cattrs['tip_id'], 'message_id' => $this->id ]);
+                }
             }
         }
 
