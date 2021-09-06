@@ -95,6 +95,18 @@ export default {
       this.selectedMediafile = mediafile
       this.isMediaLightboxModalVisible = true
     },
+  },
+
+  watch: {
+    $route(val) {
+      axios.get(this.$apiRoute('contenttags.show', val.params.id))
+        .then(res => {
+          this.ctag = res.data;
+          this.posts = this.ctag.posts.data || [];
+          this.mediafiles = this.ctag.mediafiles || [];
+          this.vaultfolders = this.ctag.vaultfolders || [];
+        })
+    }
   }
    
 }
