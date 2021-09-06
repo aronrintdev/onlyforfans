@@ -197,6 +197,9 @@ export default {
       this.loading = true
       this.doSearch()
         .then(() => {
+          if (!this.groups[this.selectedGroup]) {
+            this.selectedGroup = 0;
+          }
           this.loading = false
           this.$forceUpdate()
         })

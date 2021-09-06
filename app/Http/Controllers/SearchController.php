@@ -31,6 +31,14 @@ class SearchController extends Controller
             $attributes = $client->index($index)->getSearchableAttributes();
             $attributes = array_diff($attributes, array("id"));
             $client->index($index)->updateSearchableAttributes($attributes);
+            $client->index($index)->updateRankingRules([
+                'words',
+                'proximity',
+                'attribute',
+                'exactness',
+                'asc(created_at)',
+                'desc(id)'
+            ]);
         }
 
         $timelines = Timeline::search($query)->paginate( $request->input('take', 10) );
