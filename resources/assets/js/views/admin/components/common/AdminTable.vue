@@ -37,6 +37,9 @@
           -->
         </span>
       </template>
+
+      <!-- Passes scoped slots down to b-table -->
+      <template v-for="(_, name) in $scopedSlots" :slot="name" slot-scope="slotData"><slot :name="name" v-bind="slotData" /></template>
     </b-table>
 
     <b-pagination
