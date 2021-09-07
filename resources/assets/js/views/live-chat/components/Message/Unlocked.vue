@@ -90,10 +90,11 @@ export default {
     flex-direction: column;
     .content {
       width: auto;
-      background: rgba(218,237,255,.53);
+      //background: rgba(218,237,255,.53);
       border-radius: 5px;
       padding: 9px 12px;
       color: #1a1a1a;
+      background: #eeeeee;
     }
     .timestamp {
       font-size: 11px;
@@ -114,6 +115,10 @@ export default {
 
     .content {
       margin-left: auto;
+      //background: #ebf5ff;
+      //background: #bbdefb;
+      background: #4081e6;
+      color: #fff;
     }
     .timestamp {
       text-align: right;
@@ -136,6 +141,7 @@ export default {
 
     .content {
       margin-right: auto;
+      background: #f1f1f1;
     }
     .timestamp {
       text-align: left;

@@ -67,6 +67,9 @@ export default {
 .message {
     border: none;
     padding: 0.5rem 1.25rem;
+    .crate {
+      width: 80%;
+    }
 }
 
 ::v-deep p {

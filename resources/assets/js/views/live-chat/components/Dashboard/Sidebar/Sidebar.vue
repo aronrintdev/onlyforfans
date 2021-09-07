@@ -6,10 +6,12 @@
       :search="searchQuery"
       :selectFilter="selectedFilter"
       :sortBy="sortBy"
+      :asc="asc"
       @selected="filterSelected"
       @searchInput="value => searchQuery = value"
       @filterInput="value => selectedFilter = value"
       @sortByInput="value => sortBy = value"
+      @setAscending="value => asc = value"
     />
     <MarkAllRead @updateThreadsAllRead="getChatthreads" />
     <ThreadList
@@ -70,14 +72,22 @@ export default {
             this.clearFilters()
           }
         }, {
-          key: 'unread',
-          label: this.$t('filters.labels.unread'),
-          callback: () => this.toggleFilter('is_unread'),
+          key: 'favorites',
+          label: this.$t('filters.labels.favorites'),
+          callback: () => this.toggleFilter('is_favorite'),
+        }, {
+          key: 'freeFollowers',
+          label: this.$t('filters.labels.freeFollowers'),
+          callback: () => this.toggleFilter('is_free_follower'),
         }, {
           key: 'subscribers',
           label: this.$t('filters.labels.subscribers'),
           callback: () => this.toggleFilter('is_subscriber'),
-        }
+        }, {
+          key: 'following',
+          label: this.$t('filters.labels.following'),
+          callback: () => this.toggleFilter('is_following'),
+        }, 
       ]
     },
 
@@ -114,6 +124,7 @@ export default {
     selectedFilter: 'all',
     filters: {},
     sortBy: 'recent',
+    asc: false,
   }),
 
   methods: {
@@ -125,11 +136,8 @@ export default {
     },
 
     toggleFilter(key) {
-      if ( Object.keys(this.filters).includes(key) ) {
-        delete this.filters[key]
-      } else {
-        this.filters[key] = 1
-      }
+      this.filters = {}
+      this.filters[key] = 1
       this.reloadFromFirstPage()
     },
 
@@ -147,6 +155,7 @@ export default {
         take: this.take,
         filters: this.filters,
         sortBy: this.sortBy,
+        asc: this.asc,
       }).then(response => {
         this.renderItems = response.data.data.map(o => (o.id))
       }).catch(error => {
@@ -197,6 +206,12 @@ export default {
         this.availableFilters[index].callback()
       }
     },
+    sortBy() {
+      this.reloadFromFirstPage()
+    },
+    asc() {
+      this.reloadFromFirstPage()
+    },
     state(value) {
       if (value === 'loaded') {
         this.reloadFromFirstPage()
@@ -221,7 +236,10 @@ export default {
     "filters": {
       "labels": {
         "all": "All",
-        "subscribers": "Subscribers",
+        "favorites": "Favorites",
+        "freeFollowers": "Free Followers",
+        "subscribers": "Paid Subscribers",
+        "following": "Who I Follow",
         "unread": "Unread"
       },
     },

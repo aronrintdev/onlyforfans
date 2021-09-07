@@ -12,13 +12,14 @@
       <template v-if="true || mediafile.access">
         <b-row>
           <b-col cols="12" class="d-flex align-items-center justify-content-center">
-            <div class="w-100">
-              <b-img-lazy v-if="mediafile.is_image" 
+            <div class="">
+              <b-img v-if="mediafile.is_image" 
                 fluid
                 class="d-block w-100"
                 :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
+                style="max-height: calc(100vh - 17rem);"
                 :alt="mediafile.mfname">
-              </b-img-lazy>
+              </b-img>
               <MediaSlider v-else-if="!mediafile.is_image" 
                 :mediafiles="[mediafile]" 
                 :session_user="session_user" 

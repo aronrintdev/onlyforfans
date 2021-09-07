@@ -82,8 +82,9 @@ export default {
 
   .list-group-item {
 
-      border: none;
-      padding: 0.5rem 1.25rem;
+    border: none;
+    padding: 0.5rem 0.50rem;
+    //padding: 0.5rem 1.25rem;
 
     .crate {
       display: flex;

@@ -56,7 +56,7 @@
             </router-link>
           </div>
 
-          <div class="avatar-profile d-flex justify-content-between">
+          <div class="avatar-profile d-flex justify-content-between align-items-center">
             <div class="avatar-details">
               <h2 class="avatar-name my-0">
                 <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
@@ -79,7 +79,7 @@
                 </span>
               </li>
               <li v-else>
-                <b-button @click="renderFollow" :disabled="timeline.is_owner" variant="primary" class="w-100 mt-3">
+                <b-button @click="renderFollow" :disabled="timeline.is_owner" variant="primary" class="w-100 OFF-mt-3">
                   <span>Follow</span>
                 </b-button>
               </li>

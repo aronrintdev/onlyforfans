@@ -145,8 +145,8 @@ class ShareablesController extends AppBaseController
         $sessionTimeline = $sessionUser->timeline;
 
         // Find duplicates
-        $default_sharables = ShareableModel::where('access_level', 'default')->pluck('shareable_id')->toArray();
-        $premium_sharables = ShareableModel::where('access_level', 'premium')->pluck('shareable_id')->toArray();
+        $default_sharables = ShareableModel::where('access_level', 'default')->where('sharee_id', $sessionUser->id)->where('shareable_type', 'timelines')->pluck('shareable_id')->toArray();
+        $premium_sharables = ShareableModel::where('access_level', 'premium')->where('sharee_id', $sessionUser->id)->where('shareable_type', 'timelines')->pluck('shareable_id')->toArray();
         $duplicates = array_intersect($default_sharables, $premium_sharables);
         $sharableIds = ShareableModel::where('access_level', 'default')->whereIn('shareable_id', $duplicates)->pluck('id');
 

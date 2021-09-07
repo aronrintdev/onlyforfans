@@ -6,7 +6,7 @@
       :key="button.name"
       :to="button.to"
     >
-      <fa-layers fixed-width class="fa-lg" @click="scrollToTop">
+      <fa-layers fixed-width class="fa-lg" style="font-size: 1.5em;" @click="scrollToTop">
         <fa-icon :icon="button.selected ? [ 'fas', button.icon ] : [ 'far', button.icon ]" class="mx-auto" />
         <fa-layers-text
           v-if="button.alerts"
