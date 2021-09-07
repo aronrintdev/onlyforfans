@@ -184,10 +184,10 @@ export default {
 .content.mobile {
   padding-top: 15px;
   padding-bottom: 68px;
-  min-height: calc(100% - 68px);
 
   &.messages {
     padding-top: 0;
+    min-height: calc(100% - 68px);
   }
 
   &.thread {
