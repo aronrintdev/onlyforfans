@@ -58,7 +58,7 @@
                     :variant="isHashtagPrivate(tag) ? 'danger' : 'secondary'" 
                     size="sm" class="mr-1" 
                   > 
-                    {{ tag }}
+                    {{ tag.endsWith('!') ? tag.slice(0, -1) : tag }}
                   </b-form-tag>
                 </div>
               </template>
@@ -212,7 +212,7 @@ export default {
     },
 
     parseHashtags(searchText) {
-      const regexp = /\B#\w\w+(!)?/g
+      const regexp = /\B#[@\w]\w+(!)?/g
       const htList = searchText.match(regexp) || [];
       return htList.map(s => s.slice(1))
     },

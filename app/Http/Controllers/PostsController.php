@@ -149,7 +149,6 @@ class PostsController extends AppBaseController
                         break;
                 }
                 if ($str[1] == '@') {
-                    var_dump($str);
                     $username = (substr($str,-1)==='!') ? substr($str, 2, -1) : substr($str, 2);
                     $user = User::where('username', $username)->first();
                     if ($user) {
@@ -228,11 +227,12 @@ class PostsController extends AppBaseController
 
         $privateTags = collect();
         $publicTags = collect();
+        $taggedUsers = [];
         if ( $request->has('description') ) { // extract & collect any tags
-            $regex = '/(#\w+!?)/';
+            $regex = '/(#[@\w]\w+!?)/';
             $origStr = Str::of($request->description);
             $allTags = $origStr->matchAll($regex);
-            $allTags->each( function($str) use(&$privateTags, &$publicTags) {
+            $allTags->each( function($str) use(&$privateTags, &$publicTags, &$taggedUsers) {
                 $accessLevel = (substr($str,-1)==='!') ? ContenttagAccessLevelEnum::MGMTGROUP : ContenttagAccessLevelEnum::OPEN;
                 switch ( $accessLevel ) {
                     case ContenttagAccessLevelEnum::MGMTGROUP:
@@ -241,6 +241,13 @@ class PostsController extends AppBaseController
                     case ContenttagAccessLevelEnum::OPEN:
                         $publicTags->push($str);
                         break;
+                }
+                if ($str[1] == '@') {
+                    $username = (substr($str,-1)==='!') ? substr($str, 2, -1) : substr($str, 2);
+                    $user = User::where('username', $username)->first();
+                    if ($user) {
+                        array_push($taggedUsers, $user);
+                    }
                 }
             });
             $post->description = trim($origStr->remove($privateTags->toArray(), false));
@@ -293,6 +300,15 @@ class PostsController extends AppBaseController
         $post->addTag($privateTags, ContenttagAccessLevelEnum::MGMTGROUP); // batch add
 
         $post->refresh();
+
+        if (count($taggedUsers) > 0) {
+            $existingTags = $post->contenttags()->pluck('ctag')->toArray();
+            foreach($taggedUsers as $user) {
+                if (!in_array('@'.$user->username, $existingTags)) {
+                    $user->notify(new UserTagged($post, $sessionUser));
+                }
+            }
+        }
 
         return response()->json([
             'post' => $post,
