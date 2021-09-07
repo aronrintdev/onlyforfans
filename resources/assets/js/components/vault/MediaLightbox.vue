@@ -15,7 +15,7 @@
             <div class="">
               <b-img v-if="mediafile.is_image" 
                 fluid
-                class="d-block w-100"
+                class="d-block"
                 :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
                 :alt="mediafile.mfname">
               </b-img>
