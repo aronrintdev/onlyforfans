@@ -17,7 +17,6 @@
                 fluid
                 class="d-block w-100"
                 :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
-                style="max-height: calc(100vh - 17rem);"
                 :alt="mediafile.mfname">
               </b-img>
               <MediaSlider v-else-if="!mediafile.is_image" 
@@ -203,5 +202,9 @@ ul {
 }
 .user-details ul > li:last-child {
   font-size: 14px;
+}
+
+.tag-media-lightbox .superbox-mediafile img {
+  max-height: calc(100vh - 17rem);
 }
 </style>
