@@ -237,6 +237,7 @@ class Post extends Model
             $q1->whereHas('followers', function($q2) {
                 $q2->where('users.id', request()->user()->id );
             });
+            $q1->orWhere('timelines.user_id', request()->user()->id);
         });
     }
 
