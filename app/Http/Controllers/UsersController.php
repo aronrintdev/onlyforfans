@@ -45,6 +45,11 @@ class UsersController extends AppBaseController
     public function show(Request $request, User $user)
     {
         $this->authorize('view', $user);
+        if ($request->user()->isAdmin()) {
+            $user->load('settings');
+            return [ 'data' => $user ];
+        }
+
         return new UserResource($user);
     }
 

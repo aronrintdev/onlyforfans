@@ -19,6 +19,7 @@ use App\Models\Casts\Money as MoneyCast;
 use App\Helpers\Tippable as TippableHelpers;
 use App\Helpers\Purchasable as PurchasableHelpers;
 use App\Helpers\Subscribable as SubscribableHelpers;
+use Illuminate\Support\Facades\Log;
 
 class SegPayController extends Controller
 {
@@ -275,6 +276,14 @@ class SegPayController extends Controller
         ]);
 
         $segpay = json_decode($response->getBody(), true);
+
+        if (!isset($segpay['id'])) {
+            Log::error('Unable to get Segments session id', [
+                'query' => $query,
+                'responseCode' => $response->getStatusCode,
+                'responseBody' => $response->getBody(),
+            ]);
+        }
 
         return [
             'id' => $segpay['id'],

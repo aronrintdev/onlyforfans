@@ -4,27 +4,30 @@ namespace App\Models;
 use DB;
 use Auth;
 
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
-use Cviebrock\EloquentSluggable\Sluggable;
-use Intervention\Image\Facades\Image;
-
-use App\Interfaces\Cloneable;
-use App\Interfaces\Guidable;
+use Exception;
 use App\Interfaces\Ownable;
+use App\Enums\ImageBlurEnum;
+use App\Interfaces\Guidable;
+use App\Interfaces\Cloneable;
+use Illuminate\Support\Carbon;
+
+use App\Models\Traits\UsesUuid;
+use App\Enums\MediafileTypeEnum;
 
 use App\Traits\OwnableFunctions;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+
+use Intervention\Image\Facades\Image;
 
 use App\Models\Traits\SluggableTraits;
-use App\Models\Traits\UsesUuid;
+use Illuminate\Support\Facades\Config;
 
-use App\Enums\ImageBlurEnum;
-use App\Enums\MediafileTypeEnum;
+use Illuminate\Support\Facades\Storage;
+use Cviebrock\EloquentSluggable\Sluggable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Dreamonkey\CloudFrontUrlSigner\Facades\CloudFrontUrlSigner;
 
 //class Diskmediafile extends BaseModel implements Guidable, Ownable, Cloneable
 class Diskmediafile extends BaseModel implements Guidable, Ownable
@@ -242,16 +245,28 @@ class Diskmediafile extends BaseModel implements Guidable, Ownable
         if (!isset($path)) {
             $path = $this->filepath;
         }
+        if (empty($path)) {
+            return null;
+        }
 
-        if (Config::get('filesystems.useSigned', false)) {
-            return !empty($path)
-                ? Storage::disk('cdn')->temporaryUrl(
+        try {
+            if (Config::get('filesystems.useSigned', false)) {
+                if (Config::get('filesystems.useSignedCloudfront', false)) {
+                    return CloudFrontUrlSigner::sign(
+                        Storage::disk('cdn')->url($path),
+                        Carbon::now()->addMinutes(Config::get('filesystems.availabilityMinutes'))
+                    );
+                }
+                return Storage::disk('cdn')->temporaryUrl(
                     $path,
                     Carbon::now()->addMinutes(Config::get('filesystems.availabilityMinutes'))
-                )
-                : null;
+                );
+            }
+            return Storage::disk('cdn')->url($path);
+        } catch (Exception $e) {
+            Log::error("Issue generating mediafile url", [ 'exception' => $e]);
+            return null;
         }
-        return !empty($path) ? Storage::disk('cdn')->url($path) : null;
     }
 
     // creates diskmediafile and associated mediafile reference
