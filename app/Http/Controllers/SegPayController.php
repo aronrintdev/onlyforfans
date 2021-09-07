@@ -280,7 +280,7 @@ class SegPayController extends Controller
         if (!isset($segpay['id'])) {
             Log::error('Unable to get Segments session id', [
                 'query' => $query,
-                'responseCode' => $response->getStatusCode,
+                'responseCode' => $response->getStatusCode(),
                 'responseBody' => $response->getBody(),
             ]);
         }
