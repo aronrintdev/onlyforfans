@@ -75,7 +75,7 @@
               </b-card-text>
             </b-tab>
 
-            <b-tab data-filter="staff">
+            <b-tab data-filter="staff" v-if="session_user.is_verified">
               <template #title> <fa-icon fixed-width icon="sitemap" /><span> Staff</span></template>
               <b-card-text>
                 <NotifyList filter="staff" :session_user="session_user" />

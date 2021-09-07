@@ -212,7 +212,7 @@ export default {
     },
 
     parseHashtags(searchText) {
-      const regexp = /\B#[@\w]\w+(!)?/g
+      const regexp = /\B#[@\w][\w-.]+(!)?/g
       const htList = searchText.match(regexp) || [];
       return htList.map(s => s.slice(1))
     },

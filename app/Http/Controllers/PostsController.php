@@ -135,7 +135,7 @@ class PostsController extends AppBaseController
         $taggedUsers = [];
         if ( $request->has('description') ) { // extract & collect any tags
             //$regex = '/\B#\w\w+(!)?/';
-            $regex = '/(#[@\w]\w+!?)/';
+            $regex = '/(#[@\w][\w\-.]+!?)/';
             $origStr = Str::of($request->description);
             $allTags = $origStr->matchAll($regex);
             $allTags->each( function($str) use(&$privateTags, &$publicTags, &$taggedUsers) {
@@ -229,7 +229,7 @@ class PostsController extends AppBaseController
         $publicTags = collect();
         $taggedUsers = [];
         if ( $request->has('description') ) { // extract & collect any tags
-            $regex = '/(#[@\w]\w+!?)/';
+            $regex = '/(#[@\w][\w\-.]+!?)/';
             $origStr = Str::of($request->description);
             $allTags = $origStr->matchAll($regex);
             $allTags->each( function($str) use(&$privateTags, &$publicTags, &$taggedUsers) {
@@ -293,14 +293,6 @@ class PostsController extends AppBaseController
 
         $post->save();
 
-        // Since we are updating tags as a batch, to effect a 'delete' we first need to remove all attached tags, and then add
-        //   whatever is sent via the post, which is a complete set that includes any pre-existing tags that haven't been removed
-        $post->contenttags()->detach();
-        $post->addTag($publicTags, ContenttagAccessLevelEnum::OPEN); // batch add
-        $post->addTag($privateTags, ContenttagAccessLevelEnum::MGMTGROUP); // batch add
-
-        $post->refresh();
-
         if (count($taggedUsers) > 0) {
             $existingTags = $post->contenttags()->pluck('ctag')->toArray();
             foreach($taggedUsers as $user) {
@@ -309,6 +301,14 @@ class PostsController extends AppBaseController
                 }
             }
         }
+
+        // Since we are updating tags as a batch, to effect a 'delete' we first need to remove all attached tags, and then add
+        //   whatever is sent via the post, which is a complete set that includes any pre-existing tags that haven't been removed
+        $post->contenttags()->detach();
+        $post->addTag($publicTags, ContenttagAccessLevelEnum::OPEN); // batch add
+        $post->addTag($privateTags, ContenttagAccessLevelEnum::MGMTGROUP); // batch add
+
+        $post->refresh();
 
         return response()->json([
             'post' => $post,
