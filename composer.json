@@ -17,6 +17,7 @@
         "cmgmyr/messenger": "^2.21",
         "cviebrock/eloquent-sluggable": "~8.0",
         "doctrine/dbal": "^3.0",
+        "dreamonkey/laravel-cloudfront-url-signer": "^3.2",
         "fideloper/proxy": "^4.0",
         "fzaninotto/faker": "^1.4",
         "goldspecdigital/laravel-eloquent-uuid": "^8.0",

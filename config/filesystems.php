@@ -97,6 +97,7 @@ return [
     ],
 
     'useSigned' => env('AWS_USE_SIGNED', false),
+    'useSignedCloudfront' => env('AWS_USE_SIGNED_CLOUDFRONT', false),
     /**
      * How long the temp signed urls will be available for
      */

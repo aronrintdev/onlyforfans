@@ -72,6 +72,8 @@ storage/app/public
 storage/logs
 storage/debugbar
 
+storage/*.pem
+
 # Meilisearch
 meilisearch
 data.ms/
