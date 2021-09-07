@@ -109,7 +109,7 @@
 
             <b-row>
 
-              <b-col cols="12" md="8" class="post-create-footer-ctrl d-flex OFF-justify-content-between">
+              <b-col cols="12" md="8" class="post-create-footer-ctrl d-flex">
                 <ul class="list-inline d-flex mb-0 w-100 justify-content-between justify-content-sm-start align-items-center">
 
                   <li v-b-tooltip.hover="'Add Photo'" id="clickme_to-select" class="selectable select-pic">
