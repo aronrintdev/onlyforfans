@@ -5,7 +5,7 @@
       :fields="fields"
       :tblFilters="userFilters"
       indexRouteName="users.index"
-      @table-event=handleTableEvent
+      @table-event="handleTableEvent"
       :encodedQueryFilters="encodedQueryFilters"
     >
       <template #cell(email_verified_at)="data">
@@ -34,6 +34,20 @@
             <th>GUID</th>
             <td>{{this.modalSelection.id}}</td>
           </tr>
+          <tr v-for="item in this.filteredModalSelection" :key="item.key" >
+            <th>{{ item.key }}</th>
+            <td>{{ item.value }}</td>
+          </tr>
+          <tr><th><div class="h3 mb-0">Settings</div></th></tr>
+          <tr v-for="value, key in this.modalSelection.settings" :key="`settings-${key}`" >
+            <th>{{ key }}</th>
+            <td>{{ value }}</td>
+          </tr>
+          <tr><th span="2"><div class="h4 mb-0">Settings Custom Attributes</div></th></tr>
+          <tr v-for="value, key in this.modalSelection.settings.cattrs" :key="`settings-cattrs-${key}`" >
+            <th>{{ key }}</th>
+            <td>{{ value }}</td>
+          </tr>
         </table>
       </section>
       <template #modal-footer>
@@ -60,6 +74,10 @@ export default {
   props: {},
 
   computed: {
+    filteredModalSelection() {
+      const modalSelection = typeof this.modalSelection === 'object' ? _.map(this.modalSelection, (value, key) => ({ value, key })) : []
+      return _.filter(modalSelection || {}, v => (typeof v.value !== 'object'))
+    },
   },
 
   data: () => ({
