@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="crate-story_bar mx-0 mb-3">
+  <div v-if="!isLoading" class="crate-story_bar mx-0 pb-1">
     <section class="d-flex OFF-flex-wrap justify-content-start w-100 position-relative">
 
       <!-- Add to story icon form -->
@@ -374,6 +374,13 @@ body .crate-story_bar {
     height: 42px !important;
   }
 
+  .box-story img {
+    margin: 1px;
+    width: 40px;
+    height: 40px;
+  }
+
+  // story avatar baseline default
   .avatar-container::before {
     content: "";
     position: absolute;
@@ -383,7 +390,9 @@ body .crate-story_bar {
     bottom: 0;
     border-radius: 100%;
     padding: 2px;
-    background: linear-gradient(45deg,pink,blue);
+    //background: linear-gradient(45deg,pink,blue);
+    background: #fff;
+    border: solid 2px #ee3d96;
     -webkit-mask:
       linear-gradient(#fff 0 0) content-box,
       linear-gradient(#fff 0 0);
@@ -391,17 +400,21 @@ body .crate-story_bar {
     mask-composite: exclude;
   }
 
-  .box-story img {
-    margin: 1px;
-    width: 40px;
-    height: 40px;
-  }
+  // story avatar all viewed
   .avatar-container.all-viewed::before {
     background: #D3D3D3;
+    border: none;
   }
+
+  // my story populated (non-empty)
   .avatar-container.my-story-avatar::before {
-    background: cyan;
+    //background: cyan;
+    //background: linear-gradient(90deg, #ee3d96, #52adf2);
+    background: #fff;
+    border: solid 2px #ee3d96;
   }
+
+  // my story empty (no stories)
   .avatar-container.my-story-avatar-no-story::before {
     background: none;
   }

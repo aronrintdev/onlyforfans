@@ -3,7 +3,7 @@
 
     <!-- %FILE: resources/assets/js/components/timelines/CreatePost.vue -->
     <section class="row">
-      <div class="col">
+      <div class="col superbox-form">
 
         <b-card header-tag="header" footer-tag="footer">
           <template #header>
@@ -110,7 +110,7 @@
             <b-row>
 
               <b-col cols="12" md="8" class="post-create-footer-ctrl d-flex">
-                <ul class="list-inline d-flex mb-0 OFF-border-right pt-1">
+                <ul class="list-inline d-flex mb-0 w-100 justify-content-between justify-content-sm-start align-items-center">
 
                   <li v-b-tooltip.hover="'Add Photo'" id="clickme_to-select" class="selectable select-pic">
                     <fa-icon :icon="selectedIcon==='pic' ? ['fas', 'image'] : ['far', 'image']" size="lg" :class="selectedIcon==='pic' ? 'text-primary' : 'text-secondary'" />
@@ -123,24 +123,14 @@
                     <fa-icon :icon="selectedIcon==='audio' ? ['fas', 'microphone'] : ['far', 'microphone']" size="lg" :class="selectedIcon==='audio' ? 'text-primary' : 'text-secondary'" />
                   </li>
                   <li v-b-tooltip.hover="'Add Photo From My Media'" @click="renderVaultSelector()" class="selectable">
-                    <fa-icon :icon="selectedIcon==='vault' ? ['fas', 'archive'] : ['far', 'archive']" size="lg" :class="selectedIcon==='vault' ? 'text-primary' : 'text-secondary'" />
+                    <fa-icon :icon="selectedIcon==='vault' ? ['fas', 'photo-video'] : ['far', 'photo-video']" size="lg" :class="selectedIcon==='vault' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                </ul>
-                <ul class="list-inline d-flex mb-0 pt-1">
-                  <!--
-                  <li class="selectable select-location"><span><LocationPinIcon /></span> </li>
-                  <li class="selectable select-emoji"><span><EmojiIcon /></span></li>
-                  <li class="selectable select-timer"><span><TimerIcon /></span></li>
-                  <li class="selectable select-calendar" @click="showSchedulePicker()"><span><CalendarIcon /></span></li>
-                  -->
                   <li v-b-tooltip.hover="'Set Expiration Date'" class="selectable select-expire-date" :disabled="expirationPeriod" @click="showExpirationPicker()">
                     <fa-icon :icon="showedModal === 'expiration' ? ['fas', 'hourglass-half'] : ['far', 'hourglass-half']" size="lg" :class="showedModal === 'expiration' ? 'text-primary' : 'text-secondary'" />
                   </li>
                   <li v-b-tooltip.hover="'Schedule Publish Date'" class="selectable select-calendar" :disabled="scheduled_at" @click="showSchedulePicker()">
                     <fa-icon :icon="showedModal === 'schedule' ? ['fas', 'calendar-alt'] : ['far', 'calendar-alt']" size="lg" :class="showedModal === 'schedule' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                </ul>
-                <ul class="list-inline d-flex mb-0 pt-1">
                   <li @click="showTagForm()" class="selectable show-tagform" v-b-tooltip.hover="'Add Tags'">
                     <fa-icon :icon="isTagFormVisible ? ['fas', 'hashtag'] : ['far', 'hashtag']" :class="isHashtagIconSelected ? 'text-primary' : 'text-secondary'" size="lg" />
                   </li>
@@ -150,9 +140,10 @@
                   </li>
                 </ul>
               </b-col>
-              <b-col cols="12" md="4" class="pr-0">
+
+              <b-col cols="12" md="4" class="px-0">
                 <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
-                  <li class="mx-0">
+                  <li class="px-0 mx-0">
                     <button @click="onHide && onHide()" v-if="data" class="btn btn-submit btn-secondary">
                       Cancel
                     </button>
