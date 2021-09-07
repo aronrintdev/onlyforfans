@@ -14,6 +14,7 @@ use App\Models\Post;
 use App\Models\Timeline;
 use App\Models\Tip;
 use App\Models\Casts\Money as CastsMoney;
+use App\Models\User;
 
 use App\Enums\ContenttagAccessLevelEnum;
 use App\Enums\PostTypeEnum;
@@ -25,6 +26,7 @@ use App\Http\Resources\PostCollection;
 use App\Http\Resources\Post as PostResource;
 
 use App\Payments\PaymentGateway;
+use App\Notifications\UserTagged;
 
 class PostsController extends AppBaseController
 {
@@ -130,12 +132,13 @@ class PostsController extends AppBaseController
 
         $privateTags = collect();
         $publicTags = collect();
+        $taggedUsers = [];
         if ( $request->has('description') ) { // extract & collect any tags
             //$regex = '/\B#\w\w+(!)?/';
-            $regex = '/(#\w+!?)/';
+            $regex = '/(#[@\w]\w+!?)/';
             $origStr = Str::of($request->description);
             $allTags = $origStr->matchAll($regex);
-            $allTags->each( function($str) use(&$privateTags, &$publicTags) {
+            $allTags->each( function($str) use(&$privateTags, &$publicTags, &$taggedUsers) {
                 $accessLevel = (substr($str,-1)==='!') ? ContenttagAccessLevelEnum::MGMTGROUP : ContenttagAccessLevelEnum::OPEN;
                 switch ( $accessLevel ) {
                     case ContenttagAccessLevelEnum::MGMTGROUP:
@@ -144,6 +147,14 @@ class PostsController extends AppBaseController
                     case ContenttagAccessLevelEnum::OPEN:
                         $publicTags->push($str);
                         break;
+                }
+                if ($str[1] == '@') {
+                    var_dump($str);
+                    $username = (substr($str,-1)==='!') ? substr($str, 2, -1) : substr($str, 2);
+                    $user = User::where('username', $username)->first();
+                    if ($user) {
+                        array_push($taggedUsers, $user);
+                    }
                 }
             });
             $attrs['description'] = trim($origStr->remove($privateTags->toArray(), false)); // keep public, remove private tags
@@ -180,6 +191,12 @@ class PostsController extends AppBaseController
         $post->addTag($privateTags, ContenttagAccessLevelEnum::MGMTGROUP); // batch add
 
         $post->refresh();
+
+        if (count($taggedUsers) > 0) {
+            foreach($taggedUsers as $user) {
+                $user->notify(new UserTagged($post, $sessionUser));
+            }
+        }
 
         return response()->json([
             'post' => $post,
