@@ -25,21 +25,18 @@ class SearchController extends Controller
         $params = $request->all();
         $query = $params['query'] ?? $params['q'];
 
-        $client = new Client(env('MEILISEARCH_HOST'), env('MEILISEARCH_KEY'));
-        $indexes =['timelines_index', 'posts_index', 'contenttags_index'];
-        foreach($indexes as $index) {
-            $attributes = $client->index($index)->getSearchableAttributes();
-            $attributes = array_diff($attributes, array("id"));
-            $client->index($index)->updateSearchableAttributes($attributes);
-            $client->index($index)->updateRankingRules([
-                'words',
-                'proximity',
-                'attribute',
-                'exactness',
-                'asc(created_at)',
-                'desc(id)'
-            ]);
-        }
+        $client = new Client(env('MEILISEARCH_HOST', 'http://localhost:7700'), env('MEILISEARCH_KEY', null));
+        $client->index('posts_index')->updateSearchableAttributes([
+            'description'
+        ]);
+        $client->index('timelines_index')->updateSearchableAttributes([
+            'name',
+            'slug',
+            'username'
+        ]);
+        $client->index('contenttags_index')->updateSearchableAttributes([
+            'ctag'
+        ]);
 
         $timelines = Timeline::search($query)->paginate( $request->input('take', 10) );
         $posts     = Post::search($query)->paginate( $request->input('take', 10) );
