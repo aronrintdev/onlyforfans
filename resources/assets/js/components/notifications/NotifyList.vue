@@ -62,6 +62,13 @@
             </template>
             <template v-else>changed your staff settings</template>
           </template>
+          <template v-if="n.type==='App\\Notifications\\UserTagged'">
+            tagged you in a
+            <template v-if="n.data.resource_slug">
+              <router-link :to="{ name: 'posts.show', params: { slug: n.data.resource_slug } }">post</router-link>
+            </template>
+            <template v-else>post</template>
+          </template>
         </p>
         <small>{{ moment(n.created_at).format('MMM DD, YYYY') }}</small>
         <hr class="mt-2 mb-3" />
@@ -121,6 +128,8 @@ export default {
           return 'MessageReceived'
         case 'staff':
           return 'StaffSettingsChanged'
+        case 'tagged':
+          return 'UserTagged'
         case 'none':
         default:
           return null
@@ -144,6 +153,8 @@ export default {
           return 'Messages'
         case 'staff':
           return 'Staff'
+        case 'tagged':
+          return 'Tagged'
         case 'none':
         default:
           return 'All'
