@@ -72,11 +72,7 @@
                 />
               </template>
             </vue-dropzone>
-            <AudioRecorder
-              v-if="showAudioRec"
-              @close="showAudioRec=false; selectedIcon=null"
-              @complete="audioRecordFinished"
-            />
+            <AudioRecorder v-if="showAudioRec" @close="showAudioRec=false; selectedIcon=null" @complete="audioRecordFinished" />
 
             <b-progress class="progress-widget" v-if="isBusy" :value="uploadProgress" max="100" animated />
           </div>
@@ -88,15 +84,7 @@
                 <b-form-tags v-model="hashtags" no-outer-focus class="">
                   <template v-slot="{ tags, inputAttrs, inputHandlers, tagVariant, addTag, removeTag }">
                     <div class="d-inline-block">
-                      <b-form-tag v-for="tag in tags" 
-                        @remove="removeTag(tag)" 
-                        :key="tag" 
-                        :title="tag" 
-                        :variant="isHashtagPrivate(tag) ? 'danger' : 'secondary'" 
-                        size="sm" class="mr-1" 
-                      > 
-                        {{ tag }}
-                      </b-form-tag>
+                      <b-form-tag v-for="tag in tags" @remove="removeTag(tag)" :key="tag" :title="tag" :variant="isHashtagPrivate(tag)?'danger':'secondary'" size="sm" class="mr-1" >{{ tag }}</b-form-tag>
                     </div>
                   </template>
                 </b-form-tags>
@@ -200,6 +188,7 @@ export default {
     timeline: null,
     data: null,
     onHide: { type: Function },
+    // %FIXME @niko - The 'onHide' code is for hiding the create post form in the vault page. If you remember, I added the Cancel button to the form on vault page when the user tries to add a vault image to be used in a new post. That's only visible in Vault page so onHide is not always available, that's why I added validity check: onHide && onHide() meaning, call this function only if it's defined, but I think it's wrong code, now that I think about it. I'll push a quick fix 
   },
 
   computed: {
@@ -314,7 +303,7 @@ export default {
       this.$refs.myVueDropzone.removeAllFiles()
       this.description = ''
       this.newPostId = null
-      this.selectedIcon = 'pic'
+      this.selectedIcon = null // 'pic'
       this.isHashtagIconSelected = false
       this.ptype = 'free'
       this.price = 0
@@ -367,7 +356,6 @@ export default {
         this.isBusy = false
         return
       }
-      this.$log.debug('savePost', { response })
       const json = response.data
 
       // (2) upload & attach the mediafiles (in dropzone queue)
@@ -380,10 +368,8 @@ export default {
 
         if (queued.length) {
           this.uploadingFilesCount = queued.length
-          console.log('CreatePost::savePost() - process queue', { queued, })
           this.$refs.myVueDropzone.processQueue() // this will call createCompleted() via callback
         }  else {
-          console.log('CreatePost::savePost() - nothing queued')
           this.createCompleted()
         }
 
@@ -523,6 +509,7 @@ export default {
 
     async createCompleted() {
       if (this.uploadFailedFilesCount > 0 && this.uploadingFilesCount === this.uploadFailedFilesCount) {
+        // upload failed, delete the post and clean-up
         this.$root.$bvToast.toast('Uploading files failed.', {
           title: 'Warning!',
           variant: 'danger',
