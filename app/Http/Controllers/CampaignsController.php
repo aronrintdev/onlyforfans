@@ -66,6 +66,10 @@ class CampaignsController extends AppBaseController
             'message' => 'nullable|string',
         ]);
 
+        if ( !$request->has_expired && !$request->has_new ) {
+            abort(422); // at least 1 of 3 options must be set
+        }
+
         // $this->authorize('create', Campaign::class);
 
         $sessionUser = $request->user();
