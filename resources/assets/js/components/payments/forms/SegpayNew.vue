@@ -261,8 +261,8 @@ export default {
 
     completePayment(type, itemId) {
       var data = {
-        // sessionId: this.sessionId,
-        // packageId: parseInt(this.packageId),
+        sessionId: this.sessionId,
+        packageId: parseInt(this.packageId),
         customer: {
           ...this.form.customer,
           email: this.session_user.email,
@@ -360,6 +360,8 @@ export default {
         data,
         value => { this.$log.debug('segpay.sdk.initializePayment callback', { value }) }
       )
+
+      this.getSessionId()
     },
 
     init() {
