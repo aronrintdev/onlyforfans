@@ -321,6 +321,25 @@ class ChatthreadsController extends AppBaseController
         return new ChatthreadResource($chatthread);
     }
 
+    // Finds and returns an existing thread, or creates new one, between 2 users; does *not* send message
+    // %FIXME: should return 201 if created, 200 if existing
+    public function findOrCreateDirect(Request $request)
+    {
+        $request->validate([
+            'originator_id'  => 'required|uuid|exists:users,id',
+            'participant_id' => 'required|uuid|exists:users,id',
+        ]);
+
+        $originator = User::find($request->originator_id);
+        $participant = User::find($request->participant_id);
+
+        $ct = Chatthread::findOrCreateDirectChat($originator, $participant);
+
+        return response()->json([
+            'chatthread' => $ct,
+        ], 201);
+    }
+
     // %HERE
     // %NOTE: May create more than a single chatthread
     /**
