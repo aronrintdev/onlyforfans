@@ -1,25 +1,28 @@
 <?php
 namespace App\Models;
 
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Exception;
 use App\Interfaces\Ownable;
 use App\Interfaces\Guidable;
-//use App\Interfaces\Cloneable;
-use App\Models\Traits\UsesUuid;
-use App\Enums\MediafileTypeEnum;
-use App\Http\Resources\Mediafile as ResourcesMediafile;
 use App\Interfaces\Messagable;
-use App\Interfaces\Contenttaggable;
-use App\Models\Traits\SluggableTraits;
-use App\Traits\OwnableFunctions;
-use App\Models\Traits\ContenttaggableTraits;
-use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Config;
+use App\Models\Traits\UsesUuid;
+//use App\Interfaces\Cloneable;
+use App\Enums\MediafileTypeEnum;
+use App\Traits\OwnableFunctions;
+use Illuminate\Support\Collection;
+use App\Interfaces\Contenttaggable;
+use Illuminate\Support\Facades\Log;
 use Intervention\Image\Facades\Image;
+use App\Models\Traits\SluggableTraits;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Storage;
+use Cviebrock\EloquentSluggable\Sluggable;
+use App\Models\Traits\ContenttaggableTraits;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Http\Resources\Mediafile as ResourcesMediafile;
+use Dreamonkey\CloudFrontUrlSigner\Facades\CloudFrontUrlSigner;
 
 class Mediafile extends BaseModel implements Guidable, Ownable, Messagable, Contenttaggable
 {
@@ -165,16 +168,28 @@ class Mediafile extends BaseModel implements Guidable, Ownable, Messagable, Cont
         if (!isset($path)) {
             $path = $this->diskmediafile->filepath;
         }
-
-        if (Config::get('filesystems.useSigned', false)) {
-            return !empty($path)
-                ? Storage::disk('cdn')->temporaryUrl(
+        if (empty($path)) {
+            return null;
+        }
+        try {
+            if (Config::get('filesystems.useSigned', false)) {
+                if (Config::get('filesystems.useSignedCloudfront', false)) {
+                    return CloudFrontUrlSigner::sign(
+                        Storage::disk('cdn')->url($path),
+                        Carbon::now()->addMinutes(Config::get('filesystems.availabilityMinutes'))
+                    );
+                }
+                return Storage::disk('cdn')->temporaryUrl(
                     $path,
                     Carbon::now()->addMinutes(Config::get('filesystems.availabilityMinutes'))
-                )
-                : null;
+                );
+            }
+            return Storage::disk('cdn')->url($path);
+        } catch (Exception $e) {
+            Log::error("Issue generating mediafile url", [ 'exception' => $e]);
+            return null;
         }
-        return !empty($path) ? Storage::disk('cdn')->url($path) : null;
+
     }
 
     //--------------------------------------------

@@ -84,6 +84,9 @@ class Chatthread extends Model implements UuidId
 
     public function getTotalSpentAttribute($value) {
         $sessionUser = Auth::user();
+        if ( empty($sessionUser) ) {
+            return;
+        }
         $sentMessages = $this->chatmessages()->where('sender_id', $sessionUser->id);
 
         return intval($sentMessages->sum('price'));
@@ -178,7 +181,7 @@ class Chatthread extends Model implements UuidId
      * @param User $participant
      * @return Chatthread
      */
-    public static function findOrCreateDirectChat(User $originator, User $participant)
+    public static function findOrCreateDirectChat(User $originator, User $participant) : ?Chatthread
     {
         $cts = $originator->chatthreads()->whereHas('participants', function ($query) use ($participant) {
             $query->where('user_id', $participant->id);
@@ -197,11 +200,12 @@ class Chatthread extends Model implements UuidId
         return $ct;
     }
 
-    // 'thin-controlller-fat-model' refacator of code from chatthreads.store
-    //public static function findOrCreateChat($sender, $rattrs)
+    // Finds an existing chatthread between the sender (originator) and receiver(s), otherwise creates one
+    //   ~ 'thin-controlller-fat-model' refacator of code from chatthreads.store
+    //   ~ %FIXME: addMessage should be done in caller not here
     public static function findOrCreateChat(
         User   $sender,
-        string $originatorId,
+        string $originatorId, // %FIXME: may not be the same as sender if thread already exists(??)
         array  $participants, // array of user ids
         string $mcontent = null,
         int    $deliverAt = null,

@@ -183,8 +183,8 @@ export default {
 <style lang="scss" scoped>
 .content.mobile {
   padding-top: 15px;
-  padding-bottom: 68px;
-  min-height: calc(100% - 68px);
+  padding-bottom: 64px;
+  min-height: calc(100% - 64px);
 
   &.messages {
     padding-top: 0;

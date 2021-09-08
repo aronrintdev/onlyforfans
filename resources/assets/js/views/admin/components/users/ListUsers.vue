@@ -1,13 +1,25 @@
 <template>
   <div>
 
-    <AdminTable 
-      :fields="fields" 
-      :tblFilters="userFilters" 
-      indexRouteName="users.index" 
-      @table-event=handleTableEvent 
+    <AdminTable
+      :fields="fields"
+      :tblFilters="userFilters"
+      indexRouteName="users.index"
+      @table-event="handleTableEvent"
       :encodedQueryFilters="encodedQueryFilters"
-    />
+    >
+      <template #cell(email_verified_at)="data">
+        <span>
+          <BoolBadgeDisplay :value="!!data.value" />
+          <span v-if="data.value" class="ml-2"> @ {{ data.value | niceDate }}</span>
+        </span>
+      </template>
+      <template #cell(is_verified)="data">
+        <span>
+          <BoolBadgeDisplay :value="!!data.value" />
+        </span>
+      </template>
+    </AdminTable>
 
     <!-- Ellipsis Modal -->
     <b-modal v-model="isEllipsisModalVisible" id="modal-ellipsis" size="xl" title="User Details" body-class="">
@@ -21,6 +33,20 @@
           <tr>
             <th>GUID</th>
             <td>{{this.modalSelection.id}}</td>
+          </tr>
+          <tr v-for="item in this.filteredModalSelection" :key="item.key" >
+            <th>{{ item.key }}</th>
+            <td>{{ item.value }}</td>
+          </tr>
+          <tr><th><div class="h3 mb-0">Settings</div></th></tr>
+          <tr v-for="value, key in this.modalSelection.settings" :key="`settings-${key}`" >
+            <th>{{ key }}</th>
+            <td>{{ value }}</td>
+          </tr>
+          <tr><th span="2"><div class="h4 mb-0">Settings Custom Attributes</div></th></tr>
+          <tr v-for="value, key in this.modalSelection.settings.cattrs" :key="`settings-cattrs-${key}`" >
+            <th>{{ key }}</th>
+            <td>{{ value }}</td>
           </tr>
         </table>
       </section>
@@ -40,6 +66,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import AdminTable from '@views/admin/components/common/AdminTable'
+import BoolBadgeDisplay from '@views/admin/components/common/BoolBadgeDisplay'
 
 export default {
   name: 'ListUsers',
@@ -47,6 +74,10 @@ export default {
   props: {},
 
   computed: {
+    filteredModalSelection() {
+      const modalSelection = typeof this.modalSelection === 'object' ? _.map(this.modalSelection, (value, key) => ({ value, key })) : []
+      return _.filter(modalSelection || {}, v => (typeof v.value !== 'object'))
+    },
   },
 
   data: () => ({
@@ -56,15 +87,19 @@ export default {
       { key: 'username', label: 'Username', sortable: true, },
       { key: 'firstname', label: 'First', sortable: true, },
       { key: 'lastname', label: 'Last', sortable: true, },
-      { key: 'email_verified_at', label: 'Email Verified?', sortable: true, formatter: (v, k, i) => {
-        if ( v === null ) {
-          return 'N'
-        } else {
-          return 'Y @ '+Vue.options.filters.niceDate(v, true) 
-        }
-      }},
-      { key: 'is_verified', label: 'ID Verified?', sortable: true, formatter: (v, k, i) => Vue.options.filters.niceBool(v) },
-      { key: 'timeline', label: 'Timeline Slug', sortable: true, formatter: (v, k, i) => v.slug },
+      { key: 'email_verified_at', label: 'Email Verified?', sortable: true,
+        // formatter: (v, k, i) => {
+        //   if ( v === null ) {
+        //     return 'N'
+        //   } else {
+        //     return 'Y @ '+Vue.options.filters.niceDate(v, true)
+        //   }
+        // }
+      },
+      { key: 'is_verified', label: 'ID Verified?', sortable: true,
+        // formatter: (v, k, i) => Vue.options.filters.niceBool(v)
+      },
+      { key: 'timeline', label: 'Timeline Slug', sortable: true, formatter: (v, k, i) => v ? v.slug : '' },
       { key: 'last_logged', label: 'Last Login', sortable: true, formatter: (v, k, i) => Vue.options.filters.niceDate(v, true) },
       { key: 'created_at', label: 'Joined', sortable: true, formatter: (v, k, i) => Vue.options.filters.niceDate(v, true) },
       { key: 'ctrls', label: '', sortable: false, },
@@ -171,6 +206,7 @@ export default {
 
   components: {
     AdminTable,
+    BoolBadgeDisplay,
   },
 }
 </script>

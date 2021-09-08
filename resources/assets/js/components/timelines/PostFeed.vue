@@ -401,38 +401,48 @@ export default {
       this.reloadFromFirstPage();
     },
 
+    // newVal is a post object
     unshifted_timeline_post (newVal, oldVal) {
-      //this.$log.debug('PostFeed - watch:unshifted_timeline_post', { newVal, oldVal })
-      if (this.feedType !== 'schedule') {
-        if (!newVal.schedule_datetime) {
-          if (!this.isLastPage && this.renderedItems.length >= 5) {
-            this.renderedItems.pop();
-          }
+      console.log('PostFeed - watch:unshifted_timeline_post', { newVal, oldVal })
+
+      if ( (this.feedType !== 'schedule') && newVal.schedule_datetime ) {
+        return // do nothing (??)
+      }
+
+      // update total media counts
+      newVal.mediafiles.forEach(mf => {
+        if (mf.is_image) {
+          this.totalPhotosCount += 1
+        } else if (mf.is_video) {
+          this.totalVideosCount += 1
+        }
+      })
+
+      switch (this.feedType) {
+        case 'photos':
           newVal.mediafiles.forEach(mf => {
-            if (this.feedType === 'photos' && mf.is_image) {
+            if (mf.is_image) {
               this.renderedItems.unshift(mf);
-              this.totalPhotosCount += 1;
-            } else if (this.feedType === 'videos' && mf.is_video) {
-              this.renderedItems.unshift(mf);
-              this.totalVideosCount += 1;
-            } else if (this.feedType === 'default') {
-              if (mf.is_image) {
-                this.totalPhotosCount += 1;
-              }
-              if (mf.is_video) {
-                this.totalVideosCount += 1;
-              }
-              this.renderedItems.unshift(newVal);
             }
           })
-        }
-      } else {
-        if (newVal.schedule_datetime) {
-          if (!this.isLastPage && this.renderedItems.length >= 5) {
-            this.renderedItems.pop();
+          break
+        case 'videos':
+          newVal.mediafiles.forEach(mf => {
+            if (mf.is_video) {
+              this.renderedItems.unshift(mf);
+            }
+          })
+          break
+        case 'schedule':
+          if (newVal.schedule_datetime) {
+            if (!this.isLastPage && this.renderedItems.length >= 5) {
+              this.renderedItems.pop();
+            }
+            this.renderedItems.unshift(newVal);
           }
-          this.renderedItems.unshift(newVal);
-        }
+          break
+        default: // feedType === 'default'
+           this.renderedItems.unshift(newVal);
       }
     },
 
