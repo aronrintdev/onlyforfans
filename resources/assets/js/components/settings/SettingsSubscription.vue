@@ -54,7 +54,7 @@
         <b-col class="mt-3">
           <h6 v-if="activeCampaign.type === 'trial'">Limited offer - Free trial for {{ activeCampaign.trial_days }} days!</h6>
           <h6 v-if="activeCampaign.type === 'discount'">Limited offer - {{ activeCampaign.discount_percent }}% off for 31 days!</h6>
-          <p><small class="text-muted">For {{ campaignAudience }} • ends {{ campaignExpDate }} • {{ activeCampaign.subscriber_count }} left</small></p>
+          <p><small class="text-muted">{{ campaignBlurb }}</small></p>
           <div class="w-100 d-flex justify-content-end">
             <b-button @click="showStopModal" class="px-4" variant="primary">Stop Promotion Campaign</b-button>
           </div>
@@ -90,37 +90,30 @@ export default {
       return !this.session_user || !this.user_settings
     },
 
-    campaignAudience() {
-      if (this.activeCampaign) {
-        const { has_new: hasNew, has_expired: hasExpired } = this.activeCampaign
-
-        if (hasNew && hasExpired) {
-          return 'new & expired subscribers'
-        }
-
-        if (hasNew) {
-          return 'new subscribers'
-        }
-
-        if (hasExpired) {
-          return 'expired subscribers'
-        }
+    campaignBlurb() {
+      if ( !this.activeCampaign ) {
+        return null
       }
-
-      return null
+      const { created_at, offer_days, targeted_customer_group } = this.activeCampaign
+      let str = 'For '
+      switch ( targeted_customer_group ) {
+        case 'new':
+          str += 'new'
+          break
+        case 'expired':
+          str += 'expired'
+          break
+        case 'new-and-expired':
+          str += 'new & expired'
+          break
+      }
+      str += ' subscribers'
+      str += ` \u2022  ends ${moment(created_at).add(offer_days, 'days').format('MMM D')}`
+      str += ` \u2022  ${this.activeCampaign.subscriber_count} left`
+      return str
     },
 
-    campaignExpDate() {
-      if (this.activeCampaign) {
-        const { created_at: createdAt, offer_days: offerDays } = this.activeCampaign
-        const startDate = moment(createdAt)
-        const expDate = startDate.add(offerDays, 'days')
-        return expDate.format('MMM D')
-      }
-
-      return null
-    }
-  },
+  }, // computed
 
   data: () => ({
     isSubmitting: {
