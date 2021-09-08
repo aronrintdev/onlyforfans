@@ -84,6 +84,9 @@ class Chatthread extends Model implements UuidId
 
     public function getTotalSpentAttribute($value) {
         $sessionUser = Auth::user();
+        if ( empty($sessionUser) ) {
+            return;
+        }
         $sentMessages = $this->chatmessages()->where('sender_id', $sessionUser->id);
 
         return intval($sentMessages->sum('price'));
