@@ -3,21 +3,23 @@ namespace Tests\Feature;
 
 use DB;
 use Carbon\Carbon;
-use Tests\TestCase;
-//use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\User;
-use App\Models\Chatthread;
-use App\Models\Chatmessage;
-use App\Events\MessageSentEvent;
-
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
-
 use Illuminate\Support\Facades\Config;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
-use Database\Seeders\TestDatabaseSeeder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\WithFaker;
+
+use Tests\TestCase;
+
+use Database\Seeders\TestDatabaseSeeder;
+
+use App\Events\MessageSentEvent;
+use App\Models\Chatmessage;
+use App\Models\Chatthread;
+use App\Models\Timeline;
+use App\Models\User;
+
 
 class RestChatthreadsTest extends TestCase
 {
@@ -288,6 +290,68 @@ class RestChatthreadsTest extends TestCase
                 0 => [ 'id', 'originator_id', 'is_tip_required', 'created_at' ],
             ],
         ]);
+    }
+
+    /**
+     *  @group chatthreads
+     *  @group regression
+     *  @group regression-base
+     */
+    public function test_should_not_allow_chatthread_create_if_not_following_recipient()
+    {
+        $timeline = Timeline::has('followers','>=',1)->firstOrFail();
+        $creator = $timeline->user;
+        $nonfans = User::whereDoesntHave('followedtimelines', function($q1) use(&$timeline) {
+            $q1->where('timelines.id', $timeline->id);
+        })->where('id', '<>', $creator->id)->take(1)->get();
+        $this->assertGreaterThan(0, $nonfans->count());
+        //$fan = $timeline->followers[0];
+
+        $payload = [
+            'originator_id' => $creator->id,
+            'participants' => $nonfans->pluck('id')->toArray(),
+            'mcontent' => $this->faker->realText,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
+        $response->assertStatus(422);
+        //$content = json_decode($response->content());
+    }
+
+    /**
+     *  @group chatthreads
+     *  @group regression
+     *  @group regression-base
+     *  @group here0906
+     */
+    public function test_can_create_direct_chat()
+    {
+        // (1) test the 'create new thread' case
+        $creator = User::has('timeline.followers','>=',1)->doesntHave('chatthreads')->firstOrFail();
+        $timeline = $creator->timeline;
+        $fan = $timeline->followers[0];
+
+        $this->assertEquals(0, $creator->chatthreads->count());
+
+        $payload = [
+            'originator_id' => $fan->id,
+            'participant_id' => $creator->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON( 'POST', route('chatthreads.findOrCreateDirect', $payload) );
+        $response->assertStatus(201);
+
+        $creator->refresh();
+        $this->assertEquals(1, $creator->chatthreads->count());
+        $content = json_decode($response->content());
+
+        // (2) test the 'get existing' case
+        $payload = [
+            'originator_id' => $fan->id,
+            'participant_id' => $creator->id,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON( 'POST', route('chatthreads.findOrCreateDirect', $payload) );
+        $response->assertStatus(201);
+        $creator->refresh();
+        $this->assertEquals(1, $creator->chatthreads->count());
     }
 
     /**
