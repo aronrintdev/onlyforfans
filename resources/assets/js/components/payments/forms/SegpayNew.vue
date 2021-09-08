@@ -204,6 +204,7 @@ export default {
     sessionId: '',
     packageId: '',
     expirationDateTime: '',
+    whitesite: '',
 
     mode: 'manual', // manual | segments
 
@@ -311,6 +312,9 @@ export default {
       var data = {
         sessionId: this.sessionId,
         packageId: parseInt(this.packageId),
+        userData: {
+          whitesite: '',
+        },
         segments: {
           shared: {
             remoteStylesheetUrls: [
@@ -401,6 +405,7 @@ export default {
           this.packageId = results.data.packageId
           this.pageId = results.data.pageId
           this.expirationDateTime = results.data.expirationDateTime
+          this.whitesite = results.data.whitesite
           resolve()
         }).catch(error => reject(error))
       })

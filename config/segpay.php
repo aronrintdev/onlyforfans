@@ -39,6 +39,20 @@ return [
         'password' => env('SEGPAY_WEBHOOK_PASSWORD', ''),
     ],
 
+    /** Segpay Website API config */
+    'websites' => [
+        'endpoint' => env('SEGPAY_WEBSITES_ENDPOINT', 'https://srs.segpay.com/MerchantServices/merchant-urls'),
+        'testMode' => env('SEGPAY_WEBSITES_TEST_MODE', env('APP_DEBUG', false)),
+        'useSlug'  => env('SEGPAY_WEBSITES_USE_SLUG', false),
+
+        'baseUrl'        => env('SEGPAY_WEBSITES_BASE_URL', 'allfans.com'),
+        'baseApprovedId' => env('SEGPAY_WEBSITES_BASE_APPROVED_ID', 32898),
+        'supportEmail'   => env('SEGPAY_WEBSITES_SUPPORT_EMAIL', 'support@allfans.com'),
+        'techEmail'      => env('SEGPAY_WEBSITES_TECH_EMAIL'), // Leave null unless needed
+        'faqLink'        => env('SEGPAY_WEBSITES_FAQ_LINK'),   // Leave null unless needed
+        'helpLink'       => env('SEGPAY_WEBSITES_HELP_LINK'),  // Leave null unless needed
+    ],
+
     /**
      * The Dynamic description to attach to a transaction
      */
