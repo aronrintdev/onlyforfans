@@ -94,16 +94,14 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/chatthreads/{chatthread}/gallery', 'ChatmessagesController@gallery')->name('chatthreads.gallery');
 
     // -- chatthreads --
-    Route::get('/chatthreads/totalUnreadCount', ['as'=>'chatthreads.totalUnreadCount', 'uses' => 'ChatthreadsController@getTotalUnreadCount']);
-    Route::post('/chatthreads/markAllRead', ['as'=>'chatthreads.markAllRead', 'uses' => 'ChatthreadsController@markAllRead']);
-    Route::post('/chatthreads/{chatthread}/markRead', ['as'=>'chatthreads.markRead', 'uses' => 'ChatthreadsController@markRead']);
-    Route::get('/chatthreads/{chatthread}/getMuteStatus', ['as'=>'chatthreads.getMuteStatus', 'uses' => 'ChatthreadsController@getMuteStatus']);
-    Route::post('/chatthreads/{chatthread}/toggleMute', ['as'=>'chatthreads.toggleMute', 'uses' => 'ChatthreadsController@toggleMute']);
-
-    Route::post('/chatthreads/{chatthread}/addMessage', 'ChatthreadsController@addMessage')
-        ->name('chatthreads.addMessage');
-
-    Route::get('/chatthreads/search', 'ChatthreadsController@search')->name('chatthreads.search');
+    Route::get( '/chatthreads/totalUnreadCount',             ['as'=>'chatthreads.totalUnreadCount',      'uses' => 'ChatthreadsController@getTotalUnreadCount']);
+    Route::get( '/chatthreads/search',                       ['as'=>'chatthreads.search',                'uses' => 'ChatthreadsController@search']);
+    Route::get( '/chatthreads/{chatthread}/getMuteStatus',   ['as'=>'chatthreads.getMuteStatus',         'uses' => 'ChatthreadsController@getMuteStatus']);
+    Route::post('/chatthreads/markAllRead',                  ['as'=>'chatthreads.markAllRead',           'uses' => 'ChatthreadsController@markAllRead']);
+    Route::post('/chatthreads/{chatthread}/markRead',        ['as'=>'chatthreads.markRead',              'uses' => 'ChatthreadsController@markRead']);
+    Route::post('/chatthreads/{chatthread}/toggleMute',      ['as'=>'chatthreads.toggleMute',            'uses' => 'ChatthreadsController@toggleMute']);
+    Route::post('/chatthreads/{chatthread}/addMessage',      ['as'=>'chatthreads.addMessage',            'uses' => 'ChatthreadsController@addMessage']);
+    Route::post('/chatthreads/findOrCreateDirect',           ['as'=>'chatthreads.findOrCreateDirect',    'uses' => 'ChatthreadsController@findOrCreateDirect']);
     Route::resource('chatthreads', 'ChatthreadsController', [
         'only' => [ 'index', 'show', 'store' ],
     ]);

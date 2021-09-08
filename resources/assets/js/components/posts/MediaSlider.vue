@@ -104,7 +104,6 @@ export default {
       return this.$refs.mySwiper && this.$refs.mySwiper.$swiper
     },
     swiperOptions() {
-      console.log("this.imageIndex", this.imageIndex)
       return {
         lazy: true,
         slidesPerView: 'auto',
