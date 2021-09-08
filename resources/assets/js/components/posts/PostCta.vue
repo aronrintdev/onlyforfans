@@ -1,16 +1,16 @@
 <template>
   <div>
     <template v-if="$options.filters.isSubscriberOnly(post)">
-      <article :style="backgroundImg" class="locked-content d-flex justify-content-center align-items-center">
-        <div class="d-flex flex-column align-items-center">
+      <article :style="backgroundImg" class="locked-content d-flex justify-content-center align-items-center h-100">
+        <div class="d-flex flex-column align-items-center justify-content-center h-100">
           <fa-icon icon="lock" class="text-light" size="5x" />
           <b-button @click="renderSubscribe" class="mt-3" variant="primary">Subscribe</b-button>
         </div>
       </article>
     </template>
     <template v-else>
-      <article :style="backgroundImg" class="locked-content d-flex position-relative justify-content-center align-items-center">
-        <div class="d-flex flex-column align-items-center">
+      <article :style="backgroundImg" class="locked-content d-flex position-relative justify-content-center align-items-center h-100">
+        <div class="d-flex flex-column align-items-center justify-content-center h-100">
           <fa-icon icon="lock" class="text-light" size="5x" />
           <!--
           <b-button @click="renderPurchasePost" class="mt-3" variant="primary">Unlock Post for {{ post.price_display || (post.price | niceCurrency) }}</b-button>
