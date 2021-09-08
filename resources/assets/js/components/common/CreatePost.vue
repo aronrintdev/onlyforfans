@@ -84,7 +84,15 @@
                 <b-form-tags v-model="hashtags" no-outer-focus class="">
                   <template v-slot="{ tags, inputAttrs, inputHandlers, tagVariant, addTag, removeTag }">
                     <div class="d-inline-block">
-                      <b-form-tag v-for="tag in tags" @remove="removeTag(tag)" :key="tag" :title="tag" :variant="isHashtagPrivate(tag)?'danger':'secondary'" size="sm" class="mr-1" >{{ tag }}</b-form-tag>
+                      <b-form-tag v-for="tag in tags" 
+                        @remove="removeTag(tag)" 
+                        :key="tag" 
+                        :title="tag" 
+                        :variant="isHashtagPrivate(tag) ? 'danger' : 'secondary'" 
+                        size="sm" class="mr-1" 
+                      > 
+                        {{ tag.endsWith('!') ? tag.slice(0, -1) : tag }}
+                      </b-form-tag>
                     </div>
                   </template>
                 </b-form-tags>
@@ -244,7 +252,7 @@ export default {
     },
 
     isSaveButtonDisabled() {
-      const descriptionWithoutAdminTags = this.description.replace(/\B#\w\w+!/g,'').trim()
+      const descriptionWithoutAdminTags = this.description.replace(/\B#[@\w][\w-.]+(!)?/g,'').trim()
       return this.isBusy || (!descriptionWithoutAdminTags && ( this.selectedMediafiles && this.selectedMediafiles.length===0 ))
     },
 
@@ -314,7 +322,7 @@ export default {
 
     parseHashtags(searchText) {
       //const regexp = /\B\#\w\w+\b/g
-      const regexp = /\B#\w\w+(!)?/g
+      const regexp = /\B#[@\w][\w-.]+(!)?/g
       const htList = searchText.match(regexp) || [];
       return htList.map(s => s.slice(1))
       // "#baz! #foo! #cat #bar!".match(/\B#\w\w+!\B/g) => [ "#baz!", "#foo!", "#bar!" ]

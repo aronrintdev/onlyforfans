@@ -14,6 +14,7 @@ use App\Models\Post;
 use App\Models\Timeline;
 use App\Models\Tip;
 use App\Models\Casts\Money as CastsMoney;
+use App\Models\User;
 
 use App\Enums\ContenttagAccessLevelEnum;
 use App\Enums\PostTypeEnum;
@@ -25,6 +26,7 @@ use App\Http\Resources\PostCollection;
 use App\Http\Resources\Post as PostResource;
 
 use App\Payments\PaymentGateway;
+use App\Notifications\UserTagged;
 
 class PostsController extends AppBaseController
 {
@@ -130,12 +132,13 @@ class PostsController extends AppBaseController
 
         $privateTags = collect();
         $publicTags = collect();
+        $taggedUsers = [];
         if ( $request->has('description') ) { // extract & collect any tags
             //$regex = '/\B#\w\w+(!)?/';
-            $regex = '/(#\w+!?)/';
+            $regex = '/(#[@\w][\w\-.]+!?)/';
             $origStr = Str::of($request->description);
             $allTags = $origStr->matchAll($regex);
-            $allTags->each( function($str) use(&$privateTags, &$publicTags) {
+            $allTags->each( function($str) use(&$privateTags, &$publicTags, &$taggedUsers) {
                 $accessLevel = (substr($str,-1)==='!') ? ContenttagAccessLevelEnum::MGMTGROUP : ContenttagAccessLevelEnum::OPEN;
                 switch ( $accessLevel ) {
                     case ContenttagAccessLevelEnum::MGMTGROUP:
@@ -144,6 +147,13 @@ class PostsController extends AppBaseController
                     case ContenttagAccessLevelEnum::OPEN:
                         $publicTags->push($str);
                         break;
+                }
+                if ($str[1] == '@') {
+                    $username = (substr($str,-1)==='!') ? substr($str, 2, -1) : substr($str, 2);
+                    $user = User::where('username', $username)->first();
+                    if ($user) {
+                        array_push($taggedUsers, $user);
+                    }
                 }
             });
             $attrs['description'] = trim($origStr->remove($privateTags->toArray(), false)); // keep public, remove private tags
@@ -181,6 +191,12 @@ class PostsController extends AppBaseController
 
         $post->refresh();
 
+        if (count($taggedUsers) > 0) {
+            foreach($taggedUsers as $user) {
+                $user->notify(new UserTagged($post, $sessionUser));
+            }
+        }
+
         return response()->json([
             'post' => $post,
         ], 201);
@@ -211,11 +227,12 @@ class PostsController extends AppBaseController
 
         $privateTags = collect();
         $publicTags = collect();
+        $taggedUsers = [];
         if ( $request->has('description') ) { // extract & collect any tags
-            $regex = '/(#\w+!?)/';
+            $regex = '/(#[@\w][\w\-.]+!?)/';
             $origStr = Str::of($request->description);
             $allTags = $origStr->matchAll($regex);
-            $allTags->each( function($str) use(&$privateTags, &$publicTags) {
+            $allTags->each( function($str) use(&$privateTags, &$publicTags, &$taggedUsers) {
                 $accessLevel = (substr($str,-1)==='!') ? ContenttagAccessLevelEnum::MGMTGROUP : ContenttagAccessLevelEnum::OPEN;
                 switch ( $accessLevel ) {
                     case ContenttagAccessLevelEnum::MGMTGROUP:
@@ -224,6 +241,13 @@ class PostsController extends AppBaseController
                     case ContenttagAccessLevelEnum::OPEN:
                         $publicTags->push($str);
                         break;
+                }
+                if ($str[1] == '@') {
+                    $username = (substr($str,-1)==='!') ? substr($str, 2, -1) : substr($str, 2);
+                    $user = User::where('username', $username)->first();
+                    if ($user) {
+                        array_push($taggedUsers, $user);
+                    }
                 }
             });
             $post->description = trim($origStr->remove($privateTags->toArray(), false));
@@ -268,6 +292,15 @@ class PostsController extends AppBaseController
         }
 
         $post->save();
+
+        if (count($taggedUsers) > 0) {
+            $existingTags = $post->contenttags()->pluck('ctag')->toArray();
+            foreach($taggedUsers as $user) {
+                if (!in_array('@'.$user->username, $existingTags)) {
+                    $user->notify(new UserTagged($post, $sessionUser));
+                }
+            }
+        }
 
         // Since we are updating tags as a batch, to effect a 'delete' we first need to remove all attached tags, and then add
         //   whatever is sent via the post, which is a complete set that includes any pre-existing tags that haven't been removed
