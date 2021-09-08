@@ -18,7 +18,7 @@
               <span>Follow for Free</span>
             </b-button>
           </li>
-          <li v-if="timeline.is_following"><b-button :disabled="timeline.is_owner" @click="renderMessage" variant="primary" class="w-100 mt-3">Message</b-button></li>
+          <li v-if="timeline.is_following"><b-button :disabled="timeline.is_owner" @click="redirectToMessages" variant="primary" class="w-100 mt-3">Message</b-button></li>
           <li>
             <b-button @click="renderTip" :disabled="timeline.is_owner" variant="primary" class="w-100 mt-3">
               <span>Send Tip</span>
@@ -47,7 +47,7 @@
 import Vuex from 'vuex';
 import { eventBus } from '@/eventBus'
 
-/** https://github.com/adapttive/vue-markdown/ */
+// https://github.com/adapttive/vue-markdown
 import VueMarkdown from '@adapttive/vue-markdown'
 
 export default {
@@ -75,8 +75,8 @@ export default {
   created() { },
 
   methods: { 
+
     renderFollow() {
-      //this.$log.debug('FollowCtrl.renderFollow() - emit');
       eventBus.$emit('open-modal', {
         key: 'render-follow',
         data: {
@@ -84,8 +84,8 @@ export default {
         }
       })
     },
+
     renderSubscribe() {
-      //this.$log.debug('FollowCtrl.renderSubscribe() - emit');
       eventBus.$emit('open-modal', {
         key: 'render-subscribe',
         data: {
@@ -93,6 +93,7 @@ export default {
         }
       })
     },
+
     renderTip() {
       eventBus.$emit('open-modal', {
         key: 'render-tip',
@@ -102,13 +103,19 @@ export default {
         },
       })
     },
-    renderMessage() {
-      this.$router.push({
-        name: 'chatthreads.dashboard',
-      })
+
+    async redirectToMessages() {
+      const payload = {
+        originator_id: this.session_user.id,
+        participant_id: this.timeline.user.id,
+      }
+      const response = await axios.post( this.$apiRoute('chatthreads.findOrCreateDirect'), payload)
+      if (response.data.chatthread) {
+        this.$router.push({ name: 'chatthreads.show', params: { id: response.data.chatthread.id }})
+      }
     },
+
     renderSubscribe() {
-      //this.$log.debug('FollowCtrl.renderSubscribe() - emit');
       eventBus.$emit('open-modal', {
         key: 'render-subscribe',
         data: {
