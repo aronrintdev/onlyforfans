@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Notifications\PasswordReset as PasswordResetNotification;
 use App\Models\Financial\Traits\HasFinancialAccounts as HasFinancialAccountsTrait;
+use App\Enums\CampaignTypeEnum;
 
 /**
  * @property string      $id                 `uuid` | `unique`
@@ -577,23 +578,40 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
     {
         $timeline = $this->timeline;
         $weblinks = json_decode($this->settings->weblinks, true);
-        $cattrs = $this->settings->cattrs;
+        $settingsCattrs = $this->settings->cattrs;
         if ( !$timeline ) {
             return [];
         }
+
+        $isSubDiscounted =  $this->campaign && $this->campaign->active && ($this->campaign->type===CampaignTypeEnum::DISCOUNT);
+        $discountPercent = $isSubDiscounted ? $this->campaign->discount_percent : 0;
+
+        $display_prices_in_cents = [];
+        if ( array_key_exists('subscriptions', $settingsCattrs) ) {
+            $subAttrs = $settingsCattrs['subscriptions'];
+            $subAttrs['price_per_1_months'] = ($subAttrs['price_per_1_months'] ?? 0) * 100;  // convert to cents
+
+            $display_prices_in_cents['subscribe_1_month'] = $subAttrs['price_per_1_months'];
+            $display_prices_in_cents['subscribe_1_month_discounted'] = $isSubDiscounted 
+                ? applyDiscount($subAttrs['price_per_1_months'], $discountPercent) 
+                : $subAttrs['price_per_1_months'];
+        }
+
         return [
-            'post_count'       => $timeline->posts->count(),
-            'like_count'       => $timeline->user->likedposts->count(),
-            'follower_count'   => $timeline->followers->count(),
-            'following_count'  => $timeline->user->followedtimelines->count(),
-            'subscribed_count' => 0, // %TODO $sessionUser->timeline->subscribed->count()
-            'earnings'         => '', // TODO: Hook up to earnings controller
-            'website'          => array_key_exists('website', $weblinks??[]) ? $weblinks['website'] : '', // %TODO
-            'instagram'        => array_key_exists('instagram', $weblinks??[]) ? $weblinks['instagram'] : '', // %TODO
-            'city'             => (isset($this->settings)) ? $this->settings->city : null,
-            'country'          => (isset($this->settings)) ? $this->settings->country : null,
-            'subscriptions'    => $cattrs['subscriptions'],
-            'campaign'         => $this->campaign ?? null,
+            'post_count'              => $timeline->posts->count(),
+            'like_count'              => $timeline->user->likedposts->count(),
+            'follower_count'          => $timeline->followers->count(),
+            'following_count'         => $timeline->user->followedtimelines->count(),
+            'subscribed_count'        => 0, // %TODO $sessionUser->timeline->subscribed->count()
+            'earnings'                => '', // TODO: Hook up to earnings controller
+            'website'                 => array_key_exists('website', $weblinks??[]) ? $weblinks['website'] : '', // %TODO
+            'instagram'               => array_key_exists('instagram', $weblinks??[]) ? $weblinks['instagram'] : '', // %TODO
+            'city'                    => (isset($this->settings)) ? $this->settings->city : null,
+            'country'                 => (isset($this->settings)) ? $this->settings->country : null,
+            'subscriptions'           => $settingsCattrs['subscriptions'] ?? null,
+            'display_prices_in_cents' => $display_prices_in_cents,
+            'is_sub_discounted'       => $isSubDiscounted,
+            'campaign'                => $this->campaign ?? null,
         ];
     }
 
