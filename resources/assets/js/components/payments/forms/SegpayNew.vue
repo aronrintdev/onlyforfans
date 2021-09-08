@@ -360,6 +360,8 @@ export default {
         data,
         value => { this.$log.debug('segpay.sdk.initializePayment callback', { value }) }
       )
+
+      this.getSessionId()
     },
 
     init() {
