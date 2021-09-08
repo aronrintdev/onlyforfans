@@ -1,5 +1,5 @@
 <template>
-  <article class="chatthread-list position-relative flex-grow-1">
+  <article class="chatthread-list position-relative flex-grow-1" :class="{ 'mobile': mobile }">
     <b-list-group>
       <Thread
         v-for="thread in threads"
@@ -62,7 +62,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapState([ 'session_user' ]),
+    ...Vuex.mapState([ 'session_user', 'mobile' ]),
 
     activeThreadId() {
       return this.$route.params.id
@@ -117,6 +117,9 @@ export default {
 .chatthread-list {
   height: calc(100vh - 340px);
   overflow: auto;
+  &.mobile {
+    margin: 0 -1rem;
+  }
   .list-group-item {
     border-radius: inherit;
     border: none;
