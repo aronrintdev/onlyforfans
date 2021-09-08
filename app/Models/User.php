@@ -333,7 +333,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
 
     public function campaign()
     {
-        return $this->hasOne(Campaign::class);
+        return $this->hasOne(Campaign::class, 'creator_id');
     }
 
     public function staffMembers()
@@ -593,6 +593,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
             'city'             => (isset($this->settings)) ? $this->settings->city : null,
             'country'          => (isset($this->settings)) ? $this->settings->country : null,
             'subscriptions'    => $cattrs['subscriptions'],
+            'campaign'         => $this->campaign ?? null,
         ];
     }
 
