@@ -51,15 +51,16 @@ body {
   font-family: 'Roboto', sans-serif;
 }
 
+// Important is required to remove a tag underlining unfortunately
+a:hover {
+  text-decoration: none !important;
+}
+
 body .btn {
     font-size: 14px;
     text-transform: capitalize;
     outline: none !important;
     border-radius: 25px;
-}
-
-body .small-text {
-    font-size: 13px !important;
 }
 
 body .tag-clickable {

@@ -3,7 +3,10 @@
 
     <b-card-header>
       <section class="user-avatar">
-        <router-link :to="timelineUrl"><b-img-lazy :src="post.user.avatar.filepath" :alt="post.user.name" :title="post.user.name"></b-img-lazy></router-link>
+        <router-link :to="timelineUrl">
+          <b-img-lazy :src="post.user.avatar.filepath" :alt="post.user.name" :title="post.user.name" />
+          <OnlineStatus :user="post.user" size="md" :textInvisible="false" />
+        </router-link>
       </section>
       <section class="user-details">
         <div>
@@ -36,10 +39,12 @@
 
 <script>
 import PurchaseForm from '@components/payments/PurchaseForm'
+import OnlineStatus from '@components/common/OnlineStatus'
 
 export default {
 
   components: {
+    OnlineStatus,
     PurchaseForm,
   },
 
@@ -103,16 +108,50 @@ footer.card-footer {
   background-color: #fff;
 }
 
+body .user-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
 body .user-avatar {
+  position: relative;
   width: 40px;
   height: 40px;
   float: left;
   margin-right: 10px;
 }
-body .user-avatar img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
+
+body .user-avatar .onlineStatus {
+  position: absolute;
+  top: 20px;
+  left: 25px;
+}
+body .user-details ul {
+  padding-left: 50px;
+  margin-bottom: 0;
+}
+body .user-details ul > li {
+  color: #859ab5;
+  font-size: 16px;
+  font-weight: 400;
+}
+body .user-details ul > li .username {
+  text-transform: capitalize;
+}
+
+body .user-details ul > li .post-time {
+  color: #4a5568;
+  font-size: 12px;
+  letter-spacing: 0px;
+  margin-right: 3px;
+}
+body .user-details ul > li:last-child {
+  font-size: 14px;
+}
+body .user-details ul > li {
+  color: #859ab5;
+  font-size: 16px;
+  font-weight: 400;
 }
 
 body .user-details .tag-username {

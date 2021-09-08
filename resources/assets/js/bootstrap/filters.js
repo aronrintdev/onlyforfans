@@ -52,6 +52,13 @@ Vue.filter('niceBool', function (v) {
   }
 })
 
+Vue.filter('niceNumber', function (v) {
+  if (typeof v === 'number') {
+    return new Intl.NumberFormat().format(v)
+  }
+  return v
+})
+
 Vue.filter('enumPostType', function (k) {
   switch (k) {
     case 'free':

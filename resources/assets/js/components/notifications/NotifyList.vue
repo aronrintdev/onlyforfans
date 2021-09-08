@@ -1,7 +1,7 @@
 <template>
   <div v-if="!isLoading">
 
-    <h4 class="card-title"><span class="tag-title">{{ title }}</span> ({{ totalRows }})</h4>
+    <h4 class="card-title"><span class="tag-title">{{ title }}</span> ({{ totalRows | niceNumber }})</h4>
 
     <ul class="list-unstyled">
       <b-media v-for="n in notifications" :key="n.id" tag="li" class="mb-0">

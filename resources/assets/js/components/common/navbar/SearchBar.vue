@@ -10,7 +10,7 @@
         ref="input"
         :value="query"
         @input="updateQuery"
-        placeholder="Search for creators"
+        :placeholder="$t('placeholder')"
         @focus="focus = true"
         @blur="focus = false"
         @keydown="onKeydown"
@@ -385,6 +385,7 @@ $border: 1px var(--gray) solid;
   "en": {
     "Search Results": "Search Results",
     "No Results": "No Results",
+    "placeholder": "Search for users, tags, and posts"
   }
 }
 </i18n>
