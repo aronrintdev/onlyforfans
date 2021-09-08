@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\App;
 use App\Models\Financial\SegpayCall;
 use Illuminate\Support\Facades\Config;
 use App\Enums\Financial\AccountTypeEnum;
+use App\Models\Financial\Exceptions\AlreadyProcessingException;
 use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
 use App\Models\Financial\Exceptions\InvalidFinancialSystemException;
 
@@ -41,7 +42,14 @@ class SegpayPaymentGateway implements PaymentGatewayContract
             return $this->fakePurchase($account, $item, $price);
         }
 
-        $segpayCall = SegpayCall::confirmPurchase($account, $price, $item);
+        try {
+            $segpayCall = SegpayCall::confirmPurchase($account, $price, $item);
+        } catch (AlreadyProcessingException $e) {
+            return [
+                'success' => false,
+                'message' => 'Already Processing Payment',
+            ];
+        }
 
         return [
             'success' => isset($segpayCall->failed_at) ? false : true,
@@ -64,7 +72,14 @@ class SegpayPaymentGateway implements PaymentGatewayContract
             return $this->fakeTip($account, $tip, $price);
         }
 
-        $segpayCall = SegpayCall::confirmTip($account, $price, $tip);
+        try {
+            $segpayCall = SegpayCall::confirmTip($account, $price, $tip);
+        } catch (AlreadyProcessingException $e) {
+            return [
+                'success' => false,
+                'message' => 'Already Processing Payment',
+            ];
+        }
 
         return [
             'success' => isset($segpayCall->failed_at) ? false : true,
@@ -93,7 +108,14 @@ class SegpayPaymentGateway implements PaymentGatewayContract
         ]);
 
         // Send Segpay One click call
-        $segpayCall = SegpayCall::confirmSubscription($account, $price, $subscription);
+        try {
+            $segpayCall = SegpayCall::confirmSubscription($account, $price, $subscription);
+        } catch (AlreadyProcessingException $e) {
+            return [
+                'success' => false,
+                'message' => 'Already Processing Payment',
+            ];
+        }
 
         return [
             'success' => isset($segpayCall->failed_at) ? false : true,
