@@ -9,8 +9,6 @@ class Notification extends JsonResource
 {
     public function toArray($request)
     {
-        $sessionUser = $request->user();
-
         if (array_key_exists('actor', $this->data)) {
             $data = $this->data['actor'];
         } else if (array_key_exists('sender', $this->data)) {
@@ -19,7 +17,7 @@ class Notification extends JsonResource
             $data = $this->data['requester'];
         }
         $user = User::where('username', $data['username'])->first();
-        $user->slug = $user->timeline->slug;
+        $user->slug = $user ? $user->timeline->slug : '';
 
         return [
             'id' => $this->id,
@@ -29,7 +27,7 @@ class Notification extends JsonResource
             'is_read' => !is_null($this->read_at),
             'type' => $this->type,
             'data' => $this->data,
-            'user' => $user,
+            'user' => $user ? $user : collect(),
             'created_at' => $this->created_at,
         ];
     }
