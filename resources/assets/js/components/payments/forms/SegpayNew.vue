@@ -279,6 +279,10 @@ export default {
           card_is_default: this.form.card_is_default ? '1' : '0',
         },
       }
+      if (this.whitesite) {
+        data.userData.whitesite = this.whitesite
+      }
+
       if (this.mode === 'manual') {
         data = { ...data,
           card: {
@@ -312,9 +316,6 @@ export default {
       var data = {
         sessionId: this.sessionId,
         packageId: parseInt(this.packageId),
-        userData: {
-          whitesite: '',
-        },
         segments: {
           shared: {
             remoteStylesheetUrls: [
