@@ -35,16 +35,29 @@
               <!-- <p><small class="text-muted">For {{ campaignAudience }} • ends {{ campaignExpDate }} • left {{ userCampaign.subscriber_count }}</small></p> -->
             </b-col>
           </b-row>
-          <b-button v-if="subscribe_only" @click="doSubscribe" :disabled="isInProcess" variant="primary" class="w-100 mb-3">
+
+          <b-button v-if="subscribe_only" @click="doSubscribe" :disabled="isInProcess" variant="primary" class="w-100">
             <b-spinner small v-if="isInProcess" class="mr-2"></b-spinner>
-            Subscribe for {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} per month now
+            <template v-if="timeline.userstats.is_sub_discounted">
+              Subscribe for {{ timeline.userstats.display_prices_in_cents.subscribe_1_month_discounted | niceCurrency }} now
+            </template>
+            <template v-else>
+              Subscribe for {{ timeline.userstats.display_prices_in_cents.subscribe_1_month | niceCurrency }} per month now
+            </template>
           </b-button>
-          <b-button v-if="!subscribe_only" @click="doFollow" :disabled="isInProcess" variant="primary" class="w-100 mb-3">
+          <p v-if="timeline.userstats.is_sub_discounted" class="text-muted text-center m-0"><small>
+            Discount applied: Subscribe for {{ timeline.userstats.display_prices_in_cents.subscribe_1_month_discounted | niceCurrency}}. 
+            Renews at {{  timeline.userstats.display_prices_in_cents.subscribe_1_month | niceCurrency  }}
+          </small></p>
+
+          <b-button v-if="!subscribe_only" @click="doFollow" :disabled="isInProcess" variant="primary" class="w-100 mt-3">
             <b-spinner small v-if="isInProcess" class="mr-2"></b-spinner>
             Follow Now
           </b-button>
+
         </div>
       </b-card-body>
+
       <b-card-body v-if="step === 'payment'" key="payment">
         <PaymentsDisabled class="mx-4 mt-4 mb-2" v-if="paymentsDisabled" />
         <PurchaseForm

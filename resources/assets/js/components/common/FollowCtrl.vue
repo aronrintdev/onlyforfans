@@ -3,28 +3,35 @@
     <b-card tag="article" class="OFF-mb-2">
       <b-card-text>
         <ul class="list-unstyled">
-          <li v-if="timeline.userstats.subscriptions && timeline.userstats.subscriptions.price_per_1_months">
-            <b-button
-              @click="renderSubscribe"
-              :disabled="timeline.is_owner"
-              variant="primary"
-              class="w-100"
-            >
-              <span>Subscribe - {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} per month</span>
-            </b-button>
+          <li v-if="timeline.is_owner" class="mb-3">
+            <template v-if="activeCampaign">
+              <b-button :to="{ name: 'settings.subscription' }" variant="primary" class="w-100">Manage Promotion</b-button>
+            </template>
+            <template v-else>
+              <b-button :to="{ name: 'settings.subscription' }" variant="primary" class="w-100">Add a Promotion</b-button>
+            </template>
           </li>
-          <li v-if="!timeline.is_following && timeline.is_follow_for_free">
-            <b-button @click="renderFollow" :disabled="timeline.is_owner" variant="primary" class="w-100 mt-3">
-              <span>Follow for Free</span>
+          <li v-if="timeline.userstats.subscriptions && timeline.userstats.subscriptions.price_per_1_months" class="mb-3">
+            <b-button @click="renderSubscribe" :disabled="timeline.is_owner" variant="primary" class="w-100" >
+              Subscribe - {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} per month
             </b-button>
+            <div v-if="activeCampaign" class="mt-1">
+              <h6 v-if="activeCampaign.type==='trial'" class="m-0 text-center">Limited offer - Free trial for {{ activeCampaign.trial_days }} days!</h6>
+              <h6 v-if="activeCampaign.type==='discount'" class="m-0 text-center">Limited offer - {{ activeCampaign.discount_percent }}% off for 31 days!</h6>
+              <p class="m-0 text-center"><small class="text-muted">{{ campaignBlurb }}</small></p>
+            </div>
           </li>
-          <li v-if="timeline.is_following"><b-button :disabled="timeline.is_owner" @click="redirectToMessages" variant="primary" class="w-100 mt-3">Message</b-button></li>
-          <li>
-            <b-button @click="renderTip" :disabled="timeline.is_owner" variant="primary" class="w-100 mt-3">
-              <span>Send Tip</span>
-            </b-button>
+          <li v-if="!timeline.is_following && timeline.is_follow_for_free" class="mb-3">
+            <b-button @click="renderFollow" :disabled="timeline.is_owner" variant="primary" class="w-100">Follow for Free</b-button>
+          </li>
+          <li v-if="timeline.is_following" class="mb-3">
+            <b-button :disabled="timeline.is_owner" @click="redirectToMessages" variant="primary" class="w-100">Message</b-button>
+          </li>
+          <li class="mb-3">
+            <b-button @click="renderTip" :disabled="timeline.is_owner" variant="primary" class="w-100">Send Tip</b-button>
           </li>
         </ul>
+
         <div class="mt-3" v-if="timeline.about" :class="{ 'normal-view': !isFullVisiable }">
           <VueMarkdown :html="false" :source="timeline.about || ''" />
         </div>
@@ -44,6 +51,7 @@
 </template>
 
 <script>
+import moment from 'moment'
 import Vuex from 'vuex';
 import { eventBus } from '@/eventBus'
 
@@ -65,6 +73,33 @@ export default {
     isOverLength() {
       if (this.timeline && this.timeline.about.length > 95) return true
       return false
+    },
+    
+    activeCampaign() {
+      return this.timeline?.userstats?.campaign || null
+    },
+
+    campaignBlurb() {
+      if ( !this.activeCampaign ) {
+        return null
+      }
+      const { created_at, offer_days, targeted_customer_group } = this.activeCampaign
+      let str = 'For '
+      switch ( targeted_customer_group ) {
+        case 'new':
+          str += 'new'
+          break
+        case 'expired':
+          str += 'expired'
+          break
+        case 'new-and-expired':
+          str += 'new & expired'
+          break
+      }
+      str += ' subscribers'
+      str += ` \u2022  ends ${moment(created_at).add(offer_days, 'days').format('MMM D')}`
+      str += ` \u2022  ${this.activeCampaign.subscriber_count} left`
+      return str
     },
   },
 

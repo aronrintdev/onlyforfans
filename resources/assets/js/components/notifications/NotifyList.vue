@@ -6,17 +6,23 @@
     <ul class="list-unstyled">
       <b-media v-for="n in notifications" :key="n.id" tag="li" class="mb-0">
         <template #aside>
-          <router-link :to="{ name: 'timeline.show', params: { slug: n.user.slug } }">
+          <router-link v-if="n.user.slug" :to="{ name: 'timeline.show', params: { slug: n.user.slug } }">
             <b-img-lazy width="48" height="48" rounded="circle" :src="n.user.avatar.filepath" :alt="n.user.slug" :title="n.user.name" />
           </router-link>
+          <b-img-lazy v-else width="48" height="48" rounded="circle" :src="n.user.avatar.filepath" :alt="n.user.slug" :title="n.user.name" />
         </template>
         <h6 class="mt-0 mb-1">
-          <router-link :to="{ name: 'timeline.show', params: { slug: n.user.slug } }">
-            <span>{{n.user.name}}</span>
-          </router-link>&nbsp;
-          <router-link :to="{ name: 'timeline.show', params: { slug: n.user.slug } }">
-            <small class="text-muted">@{{ n.user.slug }}</small>
-          </router-link>
+          <template v-if="n.user.slug">
+            <router-link :to="{ name: 'timeline.show', params: { slug: n.user.slug } }">
+              <span>{{n.user.name}}</span>
+            </router-link>&nbsp;
+            <router-link :to="{ name: 'timeline.show', params: { slug: n.user.slug } }">
+              <small class="text-muted">@{{ n.user.slug }}</small>
+            </router-link>
+          </template>
+          <template v-else>
+            <span>{{n.user.name}}</span>&nbsp;<small class="text-muted">@{{ n.user.username }}</small>
+          </template>
         </h6>
         <p class="mb-0 notify-message">
           <template v-if="n.type==='App\\Notifications\\TimelineFollowed'">followed you</template>

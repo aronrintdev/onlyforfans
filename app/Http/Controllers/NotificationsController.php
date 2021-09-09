@@ -52,6 +52,12 @@ class NotificationsController extends AppBaseController
             $query->where('type', 'App\\Notifications\\'.$request->type);
         }
 
+        // Check if notification has valid actors or sender or requesters
+        $users = User::pluck('username')->toArray();
+        $query->where(function ($q) use (&$users) {
+            $q->whereIn('data->actor->username', $users)->orWhereIn('data->sender->username', $users)->orWhereIn('data->requester->username', $users);
+        });
+
         // Mark all my notifications as 'read' if I access this route as sesson user
         $sessionUser->unreadNotifications()->update(['read_at' => now()]);
 

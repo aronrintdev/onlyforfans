@@ -17,7 +17,9 @@ class Notification extends JsonResource
             $data = $this->data['requester'];
         }
         $user = User::where('username', $data['username'])->first();
-        $user->slug = $user ? $user->timeline->slug : '';
+        if ($user) {
+            $user->slug = $user->timeline->slug;
+        }
 
         return [
             'id' => $this->id,
@@ -27,7 +29,7 @@ class Notification extends JsonResource
             'is_read' => !is_null($this->read_at),
             'type' => $this->type,
             'data' => $this->data,
-            'user' => $user ? $user : collect(),
+            'user' => $user,
             'created_at' => $this->created_at,
         ];
     }
