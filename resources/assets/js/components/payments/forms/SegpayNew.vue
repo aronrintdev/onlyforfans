@@ -292,14 +292,16 @@ export default {
           },
         }
       }
-      window.segpay.sdk.completePayment(data, (result) => {
+      window.segpay.sdk.completePayment(data, result => {
         this.$log.debug('completePayment', { result })
+        // Temp
+        console.log('completePayment', {result})
         switch (result.status) {
           case 'GeneralErrors':
-            this.$log.debug('GeneralErrors', { result })
+            this.$log.warning('GeneralErrors', { result })
           break;
           case 'ValidationErrors':
-            this.$log.debug('ValidationErrors', { result })
+            this.$log.warning('ValidationErrors', { result })
           break;
           case 'Success':
             this.$emit('Success', result.purchases)
