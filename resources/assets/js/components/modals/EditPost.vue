@@ -40,7 +40,7 @@
           />
           <hr />
         </div>
-        <div class="text-left text-editor" contenteditable v-html="descriptionForEditor" @input="editorChanged"></div>
+        <div class="text-left text-editor" contenteditable v-html="descriptionForEditor" @input="editorChanged" @click="editorClicked"></div>
 
       </div>
 
@@ -226,7 +226,7 @@ export default {
       const regexp = /\B@[\w\-.]+/g
       const htList = text.match(regexp) || [];
       htList.forEach(item => {
-        text = text.replace(item, `</span><strong>${item}</strong><span>`);
+        text = text.replace(item, `</span><a href="/${item.slice(1)}" target="_blank">${item}</a><span>`);
       })
       return text;
     },
@@ -251,6 +251,13 @@ export default {
         s.removeAllRanges();
         s.addRange(r);
       })
+    },
+
+    editorClicked(e) {
+      const url = e.target.href;
+      if (url) {
+        window.open(url, '_blank');
+      }
     },
   },
 
@@ -299,6 +306,13 @@ textarea,
   padding: 1rem;
   margin: -1rem -1rem -1rem auto;
   line-height: 1em;
+}
+
+.text-editor {
+  a {
+    font-weight: bold;
+    cursor: pointer;
+  }
 }
 </style>
 <i18n lang="json5" scoped>

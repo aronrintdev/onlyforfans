@@ -215,7 +215,7 @@ export default {
       const regexp = /\B@[\w\-.]+/g
       const htList = text.match(regexp) || [];
       htList.forEach(item => {
-        text = text.replace(item, `</span><strong>${item}</strong><span>`);
+        text = text.replace(item, `</span><a href="/${item.slice(1)}" target="_blank"><strong>${item}</strong></a><span>`);
       })
       return text;
     }

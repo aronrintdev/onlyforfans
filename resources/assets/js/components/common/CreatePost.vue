@@ -61,7 +61,7 @@
               class="dropzone"
             >
               <div class="dz-custom-content">
-                <div class="text-left text-editor" contenteditable v-html="descriptionForEditor" @input="editorChanged"></div>
+                <div class="text-left text-editor" contenteditable v-html="descriptionForEditor" @input="editorChanged" @click="editorClicked"></div>
               </div>
               <template v-if="selectedMediafiles && selectedMediafiles.length > 0">
                 <UploadMediaPreview
@@ -645,7 +645,7 @@ export default {
       const regexp = /\B@[\w\-.]+/g
       const htList = text.match(regexp) || [];
       htList.forEach(item => {
-        text = text.replace(item, `</span><strong>${item}</strong><span>`);
+        text = text.replace(item, `</span><a href="/${item.slice(1)}" target="_blank">${item}</a><span>`);
 
       })
       this.descriptionForEditor = text;
@@ -667,6 +667,13 @@ export default {
         s.addRange(r);
       })
     },
+
+    editorClicked(e) {
+      const url = e.target.href;
+      if (url) {
+        window.open(url, '_blank');
+      }
+    }
   },
 
   mounted() {
@@ -850,6 +857,11 @@ li.selectable[disabled] {
     color: #383838;
     min-height: 70px;
     padding: 1em;
+
+    a {
+      font-weight: bold;
+      cursor: pointer;
+    }
   }
 </style>
 
