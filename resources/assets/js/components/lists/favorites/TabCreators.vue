@@ -14,7 +14,7 @@
       <b-row class="mt-3">
         <b-col lg="4" v-for="(f,idx) in favorites" :key="f.id" > 
           <WidgetTimeline :timeline="f.favoritable" :access_level="() => 'todo'" :created_at="f.created_at">
-            <b-button variant="primary">Message</b-button>
+            <b-button @click="redirectToMessages(f)" variant="primary">Message</b-button>
             <b-button @click="renderTip(f.favoritable, 'timelines')" variant="primary">Tip</b-button>
           </WidgetTimeline>
         </b-col>
@@ -47,11 +47,12 @@ export default {
 
   props: {
     setTabInfo: { type: Function },
+    session_user: null,
   },
 
   computed: {
     isLoading() {
-      return !this.favorites || !this.meta
+      return !this.favorites || !this.meta || !this.session_user
     },
 
     totalRows() {
@@ -89,7 +90,21 @@ export default {
       this.getPagedData()
     },
 
-  },
+    async redirectToMessages(f) {
+      if ( f.favoritable_type !== 'timelines' || !f.favoritable) {
+        return // %TODO show an error?
+      }
+      const payload = {
+        originator_id: this.session_user.id,
+        participant_id: f.favoritable.user.id,
+      }
+      const response = await axios.post( this.$apiRoute('chatthreads.findOrCreateDirect'), payload)
+      if (response.data.chatthread) {
+        this.$router.push({ name: 'chatthreads.show', params: { id: response.data.chatthread.id }})
+      }
+    },
+
+  }, // methods
 
   created() {
     this.getPagedData()
