@@ -5,6 +5,7 @@
       <section class="user-avatar">
         <router-link :to="tippedTimelineUrl">
           <b-img-lazy :src="avatarImage" :alt="tippedTimeline.name" :title="tippedTimeline.name" />
+          <OnlineStatus :user="payload.user" size="md" :textInvisible="false" />
         </router-link>
       </section>
       <section class="user-details">
@@ -73,6 +74,7 @@ import { eventBus } from '@/eventBus'
 import PriceSelector from '@components/common/PriceSelector';
 import PurchaseForm from '@components/payments/PurchaseForm'
 import PaymentsDisabled from '@components/payments/PaymentsDisabled'
+import OnlineStatus from '@components/common/OnlineStatus'
 
 // Tip timeline on another user's timeline page / feed
 // Tip post on another user's timeline page / feed
@@ -81,6 +83,7 @@ export default {
   name: 'SendTip',
 
   components: {
+    OnlineStatus,
     PriceSelector,
     PaymentsDisabled,
     PurchaseForm,
@@ -178,19 +181,52 @@ header.card-header,
 footer.card-footer {
   background-color: #fff;
 }
-
-
-body .user-avatar {
-  width: 40px;
-  height: 40px;
-  float: left;
-  margin-right: 10px;
-}
 body .user-avatar img {
   width: 100%;
   height: 100%;
   border-radius: 50%;
 }
+body .user-avatar {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  float: left;
+  margin-right: 10px;
+}
+
+body .user-avatar .onlineStatus {
+  position: absolute;
+  top: 20px;
+  left: 25px;
+}
+body .user-details ul {
+  padding-left: 50px;
+  margin-bottom: 0;
+}
+body .user-details ul > li {
+  color: #859ab5;
+  font-size: 16px;
+  font-weight: 400;
+}
+body .user-details ul > li .username {
+  text-transform: capitalize;
+}
+
+body .user-details ul > li .post-time {
+  color: #4a5568;
+  font-size: 12px;
+  letter-spacing: 0px;
+  margin-right: 3px;
+}
+body .user-details ul > li:last-child {
+  font-size: 14px;
+}
+body .user-details ul > li {
+  color: #859ab5;
+  font-size: 16px;
+  font-weight: 400;
+}
+
 .tip-modal-text {
   border: solid 1px #dfdfdf;
 }

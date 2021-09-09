@@ -61,9 +61,10 @@
               @vdropzone-total-upload-progress="onDropzoneTotalUploadProgress"
               :useCustomSlot="true"
             >
-              <div class="dropzone-custom-content">
-                <fa-icon :icon="['fas', 'upload']" size="lg" />
-                <span>Drop files here to upload, or click to browse.</span>
+              <div class="dropzone-custom-content d-flex flex-column align-items-center justify-content-center">
+                <fa-icon :icon="['fas', 'upload']" size="2x" class="mb-3" />
+                <div>Drag and drop files here</div>
+                <div>or click to browse.</div>
               </div>
             </vue-dropzone>
             <b-progress v-if="fileUploading" :value="uploadProgress" max="100" animated />
@@ -105,7 +106,7 @@
                 </div>
 
                 <div class="mr-5 mb-2 mb-md-0" v-if="isAllSelected"><b-button @click="clearSelected()" variant="light" class="vault-btn">Clear Selection</b-button></div>
-                <div class="mr-5 mb-2 mb-md-0" v-else><b-button @click="selectAll()" variant="secondary" class="vault-btn">Select All</b-button></div>
+                <div class="mr-5 mb-2 mb-md-0" v-else><b-button @click="selectAll()" variant="light" class="vault-btn border">Select All</b-button></div>
               </div>
 
               <div class="ml-3 text-right record-btns">

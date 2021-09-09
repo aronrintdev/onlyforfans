@@ -72,3 +72,10 @@ if (!function_exists('getModels')) {
     }
 }
 
+if (!function_exists('applyDiscount')) {
+    function applyDiscount(int $origAmountInCents, int $discountPercent) : int
+    {
+        $discountInCents = $origAmountInCents * ($discountPercent/100);
+        return $origAmountInCents - $discountInCents;
+    }
+}

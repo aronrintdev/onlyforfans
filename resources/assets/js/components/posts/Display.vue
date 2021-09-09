@@ -16,7 +16,7 @@
             <fa-icon :icon="['far', 'hourglass-half']" class="text-secondary ml-1 mr-2" />
           </div>
           <div class="post-ctrl">
-            <b-dropdown right text="" class="post-header-menu" variant="outline-dark">
+            <b-dropdown right text="" class="post-header-menu" toggle-class="text-secondary" variant="link">
               <b-dropdown-item v-if="isPostOwnedBySessionUser || canEditPostAsStaff" @click="showEditPost">
                 <fa-icon icon="edit" fixed-width class="mr-2" />
                 Edit

@@ -204,6 +204,7 @@ export default {
     sessionId: '',
     packageId: '',
     expirationDateTime: '',
+    whitesite: '',
 
     mode: 'manual', // manual | segments
 
@@ -278,6 +279,10 @@ export default {
           card_is_default: this.form.card_is_default ? '1' : '0',
         },
       }
+      if (this.whitesite) {
+        data.userData.whitesite = this.whitesite
+      }
+
       if (this.mode === 'manual') {
         data = { ...data,
           card: {
@@ -355,6 +360,8 @@ export default {
         data,
         value => { this.$log.debug('segpay.sdk.initializePayment callback', { value }) }
       )
+
+      this.getSessionId()
     },
 
     init() {
@@ -401,6 +408,7 @@ export default {
           this.packageId = results.data.packageId
           this.pageId = results.data.pageId
           this.expirationDateTime = results.data.expirationDateTime
+          this.whitesite = results.data.whitesite
           resolve()
         }).catch(error => reject(error))
       })

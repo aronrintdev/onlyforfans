@@ -40,6 +40,7 @@ class Kernel extends ConsoleKernel
 
         \App\Console\Commands\Dev\TruncateData::class,
         \App\Console\Commands\Dev\PopulateChargebacks::class,
+        \App\Console\Commands\Dev\SegpayWebsiteCreate::class,
 
         // Financial Commands
         \App\Console\Commands\Financial\CreateTransactionSummaries::class,
