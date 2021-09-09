@@ -4,20 +4,22 @@ namespace App\Models\Financial;
 
 use Money\Money;
 use Carbon\Carbon;
+use App\Models\Tip;
 use GuzzleHttp\Client;
 use App\Models\Webhook;
+use App\Interfaces\Tippable;
 use App\Models\Subscription;
 use InvalidArgumentException;
 use App\Enums\PaymentTypeEnum;
+use App\Models\Traits\UsesUuid;
 use App\Interfaces\Purchaseable;
-use App\Interfaces\Tippable;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use App\Models\Casts\Money as MoneyCast;
-use App\Models\Tip;
-use App\Models\Traits\UsesUuid;
 use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Support\Facades\Log;
+use App\Models\Financial\Exceptions\AlreadyProcessingException;
+use App\Models\Timeline;
 
 class SegpayCall extends Model
 {
@@ -78,7 +80,7 @@ class SegpayCall extends Model
     {
         // Verify not already processing this subscription
         if (static::where('resource_id', $purchasable->getKey())->processing()->count() > 0) {
-            return false;
+            throw new AlreadyProcessingException();
         }
 
         $segpayCall = static::create([
@@ -115,7 +117,7 @@ class SegpayCall extends Model
     {
         // Verify not already processing this subscription
         if (static::where('resource_id', $tip->getKey())->processing()->count() > 0) {
-            return false;
+            throw new AlreadyProcessingException();
         }
 
         $segpayCall = static::create([
@@ -152,7 +154,7 @@ class SegpayCall extends Model
     {
         // Verify not already processing this subscription
         if (static::where('resource_id', $subscription->getKey())->processing()->count() > 0) {
-            return false;
+            throw new AlreadyProcessingException();
         }
 
         $segpayCall = static::create([
@@ -169,7 +171,11 @@ class SegpayCall extends Model
         $packageId = Config::get('segpay.dynamicPackageId');
         $pricePointId = Config::get('segpay.dynamicPricePointId');
 
-        $segpayCall->query_items = [
+        if ($subscription->subscribable instanceof Timeline) {
+            $whitesite = SegpayWebsite::urlFor($subscription->subscribable);
+        }
+
+        $query_items = [
             'eticketid' => "{$packageId}:{$pricePointId}",
             'amount' => MoneyCast::formatMoneyDecimal($price),
             'dynamicdesc' => urlencode(Config::get('segpay.description.subscription')),
@@ -182,6 +188,12 @@ class SegpayCall extends Model
             'user_id' => Auth::user()->getKey(),
             'reference_id' => $segpayCall->getKey(),
         ];
+
+        if (isset($whitesite)) {
+            $query_items['whitesite'] = $whitesite;
+        }
+
+        $segpayCall->query_items = $query_items;
         $segpayCall->save();
 
         return $segpayCall->send();
@@ -194,7 +206,7 @@ class SegpayCall extends Model
      * @throws GuzzleException
      * @throws InvalidArgumentException
      */
-    public function send()
+    public function send(): SegpayCall
     {
         $this->sent_at = Carbon::now();
         $this->save();

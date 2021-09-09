@@ -24,12 +24,22 @@ export default {
     },
     source: {
       type: Object,
-    }
+    },
+    play: Boolean,
   },
   data() {
     return {
       player: null,
     };
+  },
+  watch: {
+    play(val) {
+      if (this.$refs.videoPlayer && this.$refs.videoPlayer.paused) {
+        this.$refs.videoPlayer.play();
+      } else {
+        this.$refs.videoPlayer.pause();
+      }
+    }
   },
   mounted() {
     const self = this;

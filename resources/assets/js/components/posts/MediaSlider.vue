@@ -1,7 +1,7 @@
 <template>
   <div class="media-slider">
     <div class="single" v-if="!hasMultipleImages" v-touch:tap="tapHandler">
-      <VideoPlayer :source="mediafiles[0]" v-if="mediafiles[0].is_video"></VideoPlayer>
+      <VideoPlayer ref="video_player" :play="playVideo" :source="mediafiles[0]" v-if="mediafiles[0].is_video"></VideoPlayer>
       <div class="wrap">
         <b-img-lazy
           v-if="mediafiles[0].is_image"
@@ -31,7 +31,7 @@
     <div class="multiple position-relative" v-if="hasMultipleImages">
       <swiper ref="mySwiper" class="media-slider-swiper" :options="swiperOptions">
         <swiper-slide class="slide" v-for="(mf, index) in visualMediafiles" :key="mf.id">
-          <VideoPlayer :source="mf" v-if="mf.is_video"></VideoPlayer>
+          <VideoPlayer ref="video_player" :play="playVideo" :source="mf" v-if="mf.is_video"></VideoPlayer>
           <div class="wrap">
             <b-img
               v-if="mf.is_image"
@@ -127,6 +127,7 @@ export default {
 
   data: () => ({
     tapCount: 0,
+    playVideo: false,
   }),
 
   methods: {
@@ -135,6 +136,7 @@ export default {
       setTimeout(() => {
         if (this.tapCount == 1) {
           const imagefiles = this.mediafiles.filter(file => file.is_image)
+          const videofiles = this.mediafiles.filter(file => file.is_video)
           if (imagefiles.length > 0) {
             const index = $(params.target).data('index') || 0;
             const items = imagefiles.map(file => ({ src: file.filepath }))
@@ -148,11 +150,14 @@ export default {
               },
             });
           }
+          if (videofiles.length > 0) {
+            this.playVideo = !this.playVideo;
+          }
         } else if (this.tapCount == 2) {
           this.$emit('doubleTap');
         }
         this.tapCount = 0;
-      }, 500);
+      }, 200);
     },
     preventEvent() {
       this.tapCount = 0;
@@ -259,6 +264,12 @@ $media-height: calc(100vh - 300px);
         transform: scale(1.1);
         height: 100%;
       }
+    }
+  }
+
+  .video-js {
+    .vjs-tech {
+      pointer-events: none;
     }
   }
 }

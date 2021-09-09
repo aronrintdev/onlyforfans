@@ -7,7 +7,7 @@
         :to="linkChatthread(thread.id)"
         :active="isActiveThread(thread.id)"
         :data-ct_id="thread.id"
-        class="px-2"
+        class="pr-2 pl-0"
         :participant="participants(thread)"
         :chatthread="thread"
       />
@@ -118,7 +118,7 @@ export default {
   height: calc(100vh - 340px);
   overflow: auto;
   &.mobile {
-    margin: 0 -1rem;
+    margin-right: -1rem;
   }
   .list-group-item {
     border-radius: inherit;

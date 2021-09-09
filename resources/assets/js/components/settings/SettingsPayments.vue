@@ -1,9 +1,9 @@
 <template>
   <b-card :title="mobile ? null : $t('PaymentMethods')">
-    {{ $t('Save Payment Methods') }}
+    {{ $t('noItemsTitle') }}
     <b-row class="align-items-stretch">
       <b-col v-if="savedPaymentMethods.length === 0">
-        {{ $t('You have no save payment methods.') }}
+        {{ $t('noItems') }}
       </b-col>
       <b-col lg="6" v-else>
         <b-list-group class="my-2">
@@ -170,8 +170,8 @@ export default {
     "DeleteMessage": "Are you sure you want to remove this payment method? This action can not be undone.",
     "DeleteButton": "Yes, Delete",
 
-    "Save Payment Methods": "Save Payment Methods:",
-    "You have no save payment methods.": "You have no save payment methods."
+    "noItemsTitle": "Saved Payment Methods:",
+    "noItems": "You have no saved payment methods."
   }
 }
 </i18n>

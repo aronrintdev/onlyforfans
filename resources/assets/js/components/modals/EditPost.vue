@@ -40,7 +40,7 @@
           />
           <hr />
         </div>
-        <textarea v-model="description" rows="8" class="w-100"></textarea>
+        <div class="text-left text-editor" contenteditable v-html="descriptionForEditor" @input="editorChanged"></div>
 
       </div>
 
@@ -164,6 +164,7 @@ export default {
     moment,
     schedule_datetime: null,
     isTagFormVisible: true,
+    descriptionForEditor: '',
   }),
 
   methods: {
@@ -221,6 +222,36 @@ export default {
       return s.endsWith('!')
     },
 
+    detectUsername(text) {
+      const regexp = /\B@[\w\-.]+/g
+      const htList = text.match(regexp) || [];
+      htList.forEach(item => {
+        text = text.replace(item, `</span><strong>${item}</strong><span>`);
+      })
+      return text;
+    },
+
+    editorChanged(e) {
+      let text = `<span>${e.target.textContent}</span>`;
+      this.descriptionForEditor = this.detectUsername(text);
+      this.description = e.target.textContent;
+      this.$nextTick(() => {
+        const p = e.target,
+            s = window.getSelection(),
+            r = document.createRange();
+        let ele = p.childElementCount > 0 ? p.lastChild : p;
+        if (p.lastChild.textContent == '') {
+          r.setStart(ele, 0);
+          r.setEnd(ele, 0);
+        } else {
+          r.setStart(ele, 1);
+          r.setEnd(ele, 1);
+        }
+  
+        s.removeAllRanges();
+        s.addRange(r);
+      })
+    },
   },
 
   created() {
@@ -233,8 +264,10 @@ export default {
       const str = this.post.contenttags_mgmt.map( ct => `#${ct}!`).join(' ')
       // embed private tags at end of post for editing (public tags are already in post body as saved in DB)
       this.description = this.post.description + ' ' + this.post.contenttags_mgmt.map( ct => `#${ct}!`).join(' ')
+      this.descriptionForEditor = this.detectUsername(this.description);
     } else {
       this.description = this.post.description
+      this.descriptionForEditor = this.detectUsername(this.description);
     }
   },
 

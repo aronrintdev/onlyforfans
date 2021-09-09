@@ -9,6 +9,9 @@
         :type="type"
         :extra="extra"
         @processing="$emit('processing')"
+        @stopProcessing="$emit('stopProcessing')"
+        @success="results => $emit('success', results)"
+        @error="results => $emit('error', results)"
       />
     </keep-alive>
   </div>

@@ -19,6 +19,7 @@ class User extends JsonResource
             'email_verified_at' => $this->email_verified_at,
             'last_logged' => $this->last_logged,
             'verified_status' => $this->verified_status,
+            //'campaign' => $this->campaign,
             'created_at' => $this->created_at,
             'timeline' => $this->timeline,
         ];

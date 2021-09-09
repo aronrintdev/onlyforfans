@@ -61,7 +61,7 @@
               class="dropzone"
             >
               <div class="dz-custom-content">
-                <textarea v-model="description" rows="2" class="w-100 p-3"></textarea>
+                <div class="text-left text-editor" contenteditable v-html="descriptionForEditor" @input="editorChanged"></div>
               </div>
               <template v-if="selectedMediafiles && selectedMediafiles.length > 0">
                 <UploadMediaPreview
@@ -252,7 +252,7 @@ export default {
     },
 
     isSaveButtonDisabled() {
-      const descriptionWithoutAdminTags = this.description.replace(/\B#[@\w][\w-.]+(!)?/g,'').trim()
+      const descriptionWithoutAdminTags = this.description.replace(/\B#[\w\-.]+(!)?/g,'').trim()
       return this.isBusy || (!descriptionWithoutAdminTags && ( this.selectedMediafiles && this.selectedMediafiles.length===0 ))
     },
 
@@ -263,6 +263,7 @@ export default {
     moment,
     newPostId: null,
     description: '',
+    descriptionForEditor: '',
     selectedIcon: null, // 'pic',
     isHashtagIconSelected: false,
     showedModal: null,
@@ -318,11 +319,12 @@ export default {
       this.priceForPaidSubscribers = 0
       this.scheduled_at = null
       this.expirationPeriod = null
+      this.descriptionForEditor = ''
     },
 
     parseHashtags(searchText) {
       //const regexp = /\B\#\w\w+\b/g
-      const regexp = /\B#[@\w][\w-.]+(!)?/g
+      const regexp = /\B#[\w-.]+(!)?/g
       const htList = searchText.match(regexp) || [];
       return htList.map(s => s.slice(1))
       // "#baz! #foo! #cat #bar!".match(/\B#\w\w+!\B/g) => [ "#baz!", "#foo!", "#bar!" ]
@@ -636,7 +638,35 @@ export default {
       } else {
         this.postType = 'free'
       }
-    }
+    },
+
+    editorChanged(e) {
+      let text = `<span>${e.target.textContent}</span>`;
+      const regexp = /\B@[\w\-.]+/g
+      const htList = text.match(regexp) || [];
+      htList.forEach(item => {
+        text = text.replace(item, `</span><strong>${item}</strong><span>`);
+
+      })
+      this.descriptionForEditor = text;
+      this.description = e.target.textContent;
+      this.$nextTick(() => {
+        const p = e.target,
+            s = window.getSelection(),
+            r = document.createRange();
+        let ele = p.childElementCount > 0 ? p.lastChild : p;
+        if (p.lastChild.textContent == '') {
+          r.setStart(ele, 0);
+          r.setEnd(ele, 0);
+        } else {
+          r.setStart(ele, 1);
+          r.setEnd(ele, 1);
+        }
+  
+        s.removeAllRanges();
+        s.addRange(r);
+      })
+    },
   },
 
   mounted() {
@@ -813,6 +843,14 @@ li.selectable[disabled] {
 .progress-widget {
   margin: 0.5rem 1rem !important;
 }
+</style>
+
+<style lang="scss">
+  .text-editor {
+    color: #383838;
+    min-height: 70px;
+    padding: 1em;
+  }
 </style>
 
 <i18n lang="json5" scoped>

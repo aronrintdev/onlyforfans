@@ -16,7 +16,7 @@
             <fa-icon :icon="['far', 'hourglass-half']" class="text-secondary ml-1 mr-2" />
           </div>
           <div class="post-ctrl">
-            <b-dropdown right text="" class="post-header-menu" variant="outline-dark">
+            <b-dropdown right text="" class="post-header-menu" toggle-class="text-secondary" variant="link">
               <b-dropdown-item v-if="isPostOwnedBySessionUser || canEditPostAsStaff" @click="showEditPost">
                 <fa-icon icon="edit" fixed-width class="mr-2" />
                 Edit
@@ -76,7 +76,7 @@
         <template v-if="post.access">
           <div v-if="post.description" v-touch:tap="tapHandler" :class="{ 'tag-has-mediafiles': hasMediafiles }" class="py-3 text-wrap">
             <b-card-text class="px-3 mb-0 tag-post_desc">
-              <VueMarkdown :html="false" :source="post.description || ''" />
+              <VueMarkdown :html="true" :source="parsedDescription" />
             </b-card-text>
           </div>
           <article v-if="hasMediafiles">
@@ -208,6 +208,16 @@ export default {
     canDeletePostAsStaff() {
       const index = this.session_user.companies.findIndex(company => company.id == this.post.timeline.id);
       return index > -1 && this.session_user.companies[index].permissions && this.session_user.companies[index].permissions.findIndex(permission => permission.name   == 'Post.delete') > -1
+    },
+    parsedDescription() {
+      let text = this.post && this.post.description;
+      text = `<span>${text}</span>`;
+      const regexp = /\B@[\w\-.]+/g
+      const htList = text.match(regexp) || [];
+      htList.forEach(item => {
+        text = text.replace(item, `</span><strong>${item}</strong><span>`);
+      })
+      return text;
     }
   },
 

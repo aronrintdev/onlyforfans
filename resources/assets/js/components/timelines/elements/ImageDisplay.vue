@@ -1,10 +1,10 @@
 <template>
-  <div v-if="!isLoading" class="mediafile-crate" v-bind:data-mediafile_guid="mediafile.id">
+  <div v-if="!isLoading" class="mediafile-crate h-100" v-bind:data-mediafile_guid="mediafile.id">
     <b-card
       header-tag="header"
       footer-tag="footer"
       tag="article"
-      class="superbox-mediafile"
+      class="superbox-mediafile h-100"
       header-class="d-flex justify-content-between"
       no-body
     >
@@ -27,7 +27,7 @@
         </div> 
       </template>
       <template v-else-if="mediafile.resource_type==='posts'">
-        <PostCta :post="mediafile.resource" :session_user="session_user" :primary_mediafile="mediafile" />
+        <PostCta :post="mediafile.resource" :session_user="session_user" :primary_mediafile="mediafile" class="h-100" />
       </template>
 
       <!-- <template footer>

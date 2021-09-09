@@ -13,13 +13,15 @@ use App\Enums\PaymentTypeEnum;
 use App\Interfaces\Purchaseable;
 use App\Interfaces\Subscribable;
 use App\Models\Financial\Account;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
+use App\Models\Financial\SegpayWebsite;
 use App\Models\Casts\Money as MoneyCast;
 use App\Helpers\Tippable as TippableHelpers;
 use App\Helpers\Purchasable as PurchasableHelpers;
 use App\Helpers\Subscribable as SubscribableHelpers;
-use Illuminate\Support\Facades\Log;
+use App\Models\Timeline;
 
 class SegPayController extends Controller
 {
@@ -194,6 +196,11 @@ class SegPayController extends Controller
 
         $url = "{$baseUrl}?x-eticketId={$xEticketid}&amount={$price}&dynamictrans={$priceEncode}&dynamicdesc={$description}&DynamicPricingID={$dynamicPricingId}&OCToken={$token}&user_id={$userId}&item_type=subscription&item_id={$item->id}";
 
+        if ($item instanceof Timeline) {
+            $whitesite = urlencode(SegpayWebsite::urlFor($item));
+            $url .= "&whitesite={$whitesite}";
+        }
+
         return $url;
     }
 
@@ -268,6 +275,9 @@ class SegPayController extends Controller
                 'dynamicRecurringDurationInDays' => 30,
             ]);
             $packageId = Config::get('segpay.dynamicPackageId');
+            if ($item instanceof Timeline) {
+                $whitesite = SegpayWebsite::urlFor($item);
+            }
         }
 
         $client = new Client();
@@ -290,6 +300,7 @@ class SegPayController extends Controller
             'pageId' => $segpay['pageId'],
             'expirationDateTime' => $segpay['expirationDateTime'],
             'packageId' => $packageId,
+            'whitesite' => $whitesite ?? 'allfans.com',
         ];
     }
 

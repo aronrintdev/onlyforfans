@@ -204,6 +204,7 @@ export default {
     sessionId: '',
     packageId: '',
     expirationDateTime: '',
+    whitesite: '',
 
     mode: 'manual', // manual | segments
 
@@ -266,10 +267,10 @@ export default {
           ...this.form.customer,
           email: this.session_user.email,
         },
-        billing: {
-          pricePointId: null,
-          currencyCode: this.currency,
-        },
+        // billing: {
+        //   pricePointId: null,
+        //   currencyCode: this.currency,
+        // },
         userData: {
           item_type: type || this.type,
           item_id: itemId || this.value.id,
@@ -278,6 +279,10 @@ export default {
           card_is_default: this.form.card_is_default ? '1' : '0',
         },
       }
+      if (this.whitesite) {
+        data.userData.whitesite = this.whitesite
+      }
+
       if (this.mode === 'manual') {
         data = { ...data,
           card: {
@@ -287,17 +292,23 @@ export default {
           },
         }
       }
-      window.segpay.sdk.completePayment(data, (result) => {
+      window.segpay.sdk.completePayment(data, result => {
         this.$log.debug('completePayment', { result })
+        // Temp
+        console.log('completePayment', {result})
         switch (result.status) {
           case 'GeneralErrors':
-            this.$log.debug('GeneralErrors', { result })
+            this.$log.warn('GeneralErrors', { result })
+            this.$emit('stopProcessing')
+            this.$emit('errors')
           break;
           case 'ValidationErrors':
-            this.$log.debug('ValidationErrors', { result })
+            this.$log.warn('ValidationErrors', { result })
+            this.$emit('stopProcessing')
+            this.$emit('errors')
           break;
           case 'Success':
-            this.$emit('Success', result.purchases)
+            this.$emit('success', result.purchases)
           break;
         }
       })
@@ -355,6 +366,8 @@ export default {
         data,
         value => { this.$log.debug('segpay.sdk.initializePayment callback', { value }) }
       )
+
+      this.getSessionId()
     },
 
     init() {
@@ -401,6 +414,7 @@ export default {
           this.packageId = results.data.packageId
           this.pageId = results.data.pageId
           this.expirationDateTime = results.data.expirationDateTime
+          this.whitesite = results.data.whitesite
           resolve()
         }).catch(error => reject(error))
       })
