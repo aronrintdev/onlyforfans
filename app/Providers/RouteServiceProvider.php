@@ -90,7 +90,7 @@ class RouteServiceProvider extends ServiceProvider
         ], function () {
             Route::post('receive', 'WebhooksController@receive')->name('webhook.receive');
             // SegPay //
-            Route::post('receive/segpay', 'WebhooksController@receiveSegpay')->name('webhook.receive.segpay');
+            Route::match(['GET', 'POST'], 'receive/segpay', 'WebhooksController@receiveSegpay')->name('webhook.receive.segpay');
         });
     }
 }
