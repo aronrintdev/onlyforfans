@@ -1,12 +1,14 @@
 <template>
   <div class="media-slider">
     <div class="single" v-if="!hasMultipleImages" v-touch:tap="tapHandler">
-      <VideoPlayer :source="mediafiles[0]" v-if="mediafiles[0].is_video"></VideoPlayer>
-      <b-img-lazy
-        v-if="mediafiles[0].is_image"
-        class="d-block photoswipe-thumbnail"
-        :src="use_mid && mediafiles[0].has_mid ? mediafiles[0].midFilepath : mediafiles[0].filepath"
-      />
+      <VideoPlayer ref="video_player" :play="playVideo" :source="mediafiles[0]" v-if="mediafiles[0].is_video"></VideoPlayer>
+      <div class="wrap">
+        <b-img-lazy
+          v-if="mediafiles[0].is_image"
+          class="d-block photoswipe-thumbnail"
+          :src="use_mid && mediafiles[0].has_mid ? mediafiles[0].midFilepath : mediafiles[0].filepath"
+        />
+      </div>
       <div class="background-preview">
         <b-img-lazy
           v-if="mediafiles[0].is_image"
@@ -29,13 +31,15 @@
     <div class="multiple position-relative" v-if="hasMultipleImages">
       <swiper ref="mySwiper" class="media-slider-swiper" :options="swiperOptions">
         <swiper-slide class="slide" v-for="(mf, index) in visualMediafiles" :key="mf.id">
-          <VideoPlayer :source="mf" v-if="mf.is_video"></VideoPlayer>
-          <b-img
-            v-if="mf.is_image"
-            :data-index="index"
-            class="d-block swiper-lazy photoswipe-thumbnail"
-            :src="use_mid && mf.has_mid ? mf.midFilepath : mf.filepath"
-          />
+          <VideoPlayer ref="video_player" :play="playVideo" :source="mf" v-if="mf.is_video"></VideoPlayer>
+          <div class="wrap">
+            <b-img
+              v-if="mf.is_image"
+              :data-index="index"
+              class="d-block swiper-lazy photoswipe-thumbnail"
+              :src="use_mid && mf.has_mid ? mf.midFilepath : mf.filepath"
+            />
+          </div>
           <div class="background-preview" v-if="mf.is_image">
             <b-img
               class="swiper-lazy d-block"
@@ -123,6 +127,7 @@ export default {
 
   data: () => ({
     tapCount: 0,
+    playVideo: false,
   }),
 
   methods: {
@@ -131,6 +136,7 @@ export default {
       setTimeout(() => {
         if (this.tapCount == 1) {
           const imagefiles = this.mediafiles.filter(file => file.is_image)
+          const videofiles = this.mediafiles.filter(file => file.is_video)
           if (imagefiles.length > 0) {
             const index = $(params.target).data('index') || 0;
             const items = imagefiles.map(file => ({ src: file.filepath }))
@@ -144,11 +150,14 @@ export default {
               },
             });
           }
+          if (videofiles.length > 0) {
+            this.playVideo = !this.playVideo;
+          }
         } else if (this.tapCount == 2) {
           this.$emit('doubleTap');
         }
         this.tapCount = 0;
-      }, 500);
+      }, 200);
     },
     preventEvent() {
       this.tapCount = 0;
@@ -199,7 +208,7 @@ $media-height: calc(100vh - 300px);
 
 <style lang="scss">
 .media-slider {
-  .single {
+  .single, .slide {
     position: relative;
 
     .wrap {
@@ -207,6 +216,17 @@ $media-height: calc(100vh - 300px);
       position: relative;
       z-index: 1;
       max-width: 100vw;
+
+      .photoswipe-thumbnail {
+        height: 100%;
+        width: auto;
+        margin: auto;
+        max-width: 100%;
+        -o-object-fit: contain;
+        object-fit: contain;
+        position: relative;
+        z-index: 2;
+      }
 
       .video-js.vjs-fluid {
         width: 100%;
@@ -244,6 +264,12 @@ $media-height: calc(100vh - 300px);
         transform: scale(1.1);
         height: 100%;
       }
+    }
+  }
+
+  .video-js {
+    .vjs-tech {
+      pointer-events: none;
     }
   }
 }
