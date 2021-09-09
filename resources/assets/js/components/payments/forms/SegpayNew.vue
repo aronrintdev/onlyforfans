@@ -304,16 +304,22 @@ export default {
             this.$emit('stopProcessing')
             this.$emit('errors')
             this.handleValidationErrors(result.validationErrors)
-          break;
+          break
           case 'ValidationErrors':
             this.$log.warn('ValidationErrors', { result })
             this.$emit('stopProcessing')
             this.$emit('errors')
             this.handleValidationErrors(result.validationErrors)
-          break;
+          break
+          case 'DataWarnings':
+            this.$log.warn('DataWarnings', { result })
+            this.$emit('stopProcessing')
+            this.$emit('errors')
+            this.handleValidationErrors(result.validationErrors)
+            break
           case 'Success':
             this.$emit('success', result.purchases)
-          break;
+          break
         }
       })
     },
