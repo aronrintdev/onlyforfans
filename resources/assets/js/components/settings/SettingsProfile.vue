@@ -49,12 +49,7 @@
                   <b-form-select id="gender" v-model="formProfile.gender" :options="options.genders"></b-form-select>
                 </b-form-group>
               </b-col>
-              <b-col md="6" class="d-none d-md-block">
-                <b-form-group id="group-birthdate" label="Birthdate" label-for="birthdate">
-                  <b-form-datepicker id="birthdate" v-model="formProfile.birthdate"></b-form-datepicker>
-                </b-form-group>
-              </b-col>
-              <b-col sm="12" class="d-block d-md-none">
+              <b-col sm="12" md="6" class="d-block">
                 <b-form-group id="group-birthdate" label="Birthdate" label-for="birthdate">
                   <input type="date" class="form-control" id="birthdate" v-model="formProfile.birthdate">
                 </b-form-group>
