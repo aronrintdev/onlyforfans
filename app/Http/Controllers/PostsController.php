@@ -132,7 +132,7 @@ class PostsController extends AppBaseController
 
         $privateTags = collect();
         $publicTags = collect();
-        $taggedUsers = [];
+        // $taggedUsers = [];
         if ( $request->has('description') ) { // extract & collect any tags
             //$regex = '/\B#\w\w+(!)?/';
             $regex = '/(#[@\w][\w\-.]+!?)/';
@@ -148,13 +148,13 @@ class PostsController extends AppBaseController
                         $publicTags->push($str);
                         break;
                 }
-                if ($str[1] == '@') {
-                    $username = (substr($str,-1)==='!') ? substr($str, 2, -1) : substr($str, 2);
-                    $user = User::where('username', $username)->first();
-                    if ($user) {
-                        array_push($taggedUsers, $user);
-                    }
-                }
+                // if ($str[1] == '@') {
+                //     $username = (substr($str,-1)==='!') ? substr($str, 2, -1) : substr($str, 2);
+                //     $user = User::where('username', $username)->first();
+                //     if ($user) {
+                //         array_push($taggedUsers, $user);
+                //     }
+                // }
             });
             $attrs['description'] = trim($origStr->remove($privateTags->toArray(), false)); // keep public, remove private tags
         }
@@ -191,9 +191,15 @@ class PostsController extends AppBaseController
 
         $post->refresh();
 
-        if (count($taggedUsers) > 0) {
-            foreach($taggedUsers as $user) {
-                $user->notify(new UserTagged($post, $sessionUser));
+        $regex = '/(@[\w\-.]+)/';
+        $origStr = Str::of($request->description);
+        $allUsers = $origStr->matchAll($regex);
+        if (count($allUsers) > 0) {
+            foreach($allUsers as $username) {
+                $user = User::where('username', substr($username, 1))->first();
+                if ($user) {
+                    $user->notify(new UserTagged($post, $sessionUser));
+                }
             }
         }
 
@@ -227,7 +233,7 @@ class PostsController extends AppBaseController
 
         $privateTags = collect();
         $publicTags = collect();
-        $taggedUsers = [];
+        // $taggedUsers = [];
         if ( $request->has('description') ) { // extract & collect any tags
             $regex = '/(#[@\w][\w\-.]+!?)/';
             $origStr = Str::of($request->description);
@@ -242,13 +248,13 @@ class PostsController extends AppBaseController
                         $publicTags->push($str);
                         break;
                 }
-                if ($str[1] == '@') {
-                    $username = (substr($str,-1)==='!') ? substr($str, 2, -1) : substr($str, 2);
-                    $user = User::where('username', $username)->first();
-                    if ($user) {
-                        array_push($taggedUsers, $user);
-                    }
-                }
+                // if ($str[1] == '@') {
+                //     $username = (substr($str,-1)==='!') ? substr($str, 2, -1) : substr($str, 2);
+                //     $user = User::where('username', $username)->first();
+                //     if ($user) {
+                //         array_push($taggedUsers, $user);
+                //     }
+                // }
             });
             $post->description = trim($origStr->remove($privateTags->toArray(), false));
         }
@@ -293,10 +299,13 @@ class PostsController extends AppBaseController
 
         $post->save();
 
-        if (count($taggedUsers) > 0) {
-            $existingTags = $post->contenttags()->pluck('ctag')->toArray();
-            foreach($taggedUsers as $user) {
-                if (!in_array('@'.$user->username, $existingTags)) {
+        $regex = '/(@[\w\-.]+)/';
+        $origStr = Str::of($request->description);
+        $allUsers = $origStr->matchAll($regex);
+        if (count($allUsers) > 0) {
+            foreach($allUsers as $username) {
+                $user = User::where('username', substr($username, 1))->first();
+                if ($user) {
                     $user->notify(new UserTagged($post, $sessionUser));
                 }
             }
