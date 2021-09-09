@@ -132,7 +132,6 @@ class PostsController extends AppBaseController
 
         $privateTags = collect();
         $publicTags = collect();
-        // $taggedUsers = [];
         if ( $request->has('description') ) { // extract & collect any tags
             //$regex = '/\B#\w\w+(!)?/';
             $regex = '/(#[@\w][\w\-.]+!?)/';
@@ -148,13 +147,6 @@ class PostsController extends AppBaseController
                         $publicTags->push($str);
                         break;
                 }
-                // if ($str[1] == '@') {
-                //     $username = (substr($str,-1)==='!') ? substr($str, 2, -1) : substr($str, 2);
-                //     $user = User::where('username', $username)->first();
-                //     if ($user) {
-                //         array_push($taggedUsers, $user);
-                //     }
-                // }
             });
             $attrs['description'] = trim($origStr->remove($privateTags->toArray(), false)); // keep public, remove private tags
         }
@@ -233,7 +225,6 @@ class PostsController extends AppBaseController
 
         $privateTags = collect();
         $publicTags = collect();
-        // $taggedUsers = [];
         if ( $request->has('description') ) { // extract & collect any tags
             $regex = '/(#[@\w][\w\-.]+!?)/';
             $origStr = Str::of($request->description);
@@ -248,13 +239,6 @@ class PostsController extends AppBaseController
                         $publicTags->push($str);
                         break;
                 }
-                // if ($str[1] == '@') {
-                //     $username = (substr($str,-1)==='!') ? substr($str, 2, -1) : substr($str, 2);
-                //     $user = User::where('username', $username)->first();
-                //     if ($user) {
-                //         array_push($taggedUsers, $user);
-                //     }
-                // }
             });
             $post->description = trim($origStr->remove($privateTags->toArray(), false));
         }
