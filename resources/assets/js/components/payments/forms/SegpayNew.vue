@@ -303,16 +303,23 @@ export default {
             this.$log.warn('GeneralErrors', { result })
             this.$emit('stopProcessing')
             this.$emit('errors')
-          break;
+            this.handleValidationErrors(result.validationErrors)
+          break
           case 'ValidationErrors':
             this.$log.warn('ValidationErrors', { result })
             this.$emit('stopProcessing')
             this.$emit('errors')
-            this.handleValidationErrors(result)
-          break;
+            this.handleValidationErrors(result.validationErrors)
+          break
+          case 'DataWarnings':
+            this.$log.warn('DataWarnings', { result })
+            this.$emit('stopProcessing')
+            this.$emit('errors')
+            this.handleValidationErrors(result.validationErrors)
+            break
           case 'Success':
             this.$emit('success', result.purchases)
-          break;
+          break
         }
       })
     },
@@ -449,8 +456,10 @@ export default {
       })
     },
 
-    handleValidationErrors(result) {
-      for(var error of result.validationErrors) {
+    handleValidationErrors(errors) {
+      for(var error of errors) {
+        console.log('error Code: ', error.code)
+        console.log('error Message: ', error.message)
         // This information is from the documentation Segpay provided
         switch (error.code) {
           case 210000: // Customer Address Missing

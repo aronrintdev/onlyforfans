@@ -46,7 +46,7 @@ export default {
   "en": {
     "header": "Thank You For Registering",
     "returnToLogin": "Return to Login",
-    "message": "Thank you for registering your account. Please visit you email and use the email verification link to verify your email before logging in for the first time."
+    "message": "Thank you for registering your account. Please visit your email and use the verification link to verify your email before logging in for the first time."
   },
 }
 </i18n>
