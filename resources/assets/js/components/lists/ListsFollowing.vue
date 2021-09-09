@@ -24,7 +24,7 @@
               Add to favorites
             </b-card-text>
 
-            <b-button class="mb-1" variant="primary">Message</b-button>
+            <b-button @click="redirectToMessages(s)" class="mb-1" variant="primary">Message</b-button>
             <b-button class="mb-1" @click="renderTip(s.shareable, 'timelines')" variant="primary">Tip</b-button>
             <b-button class="mb-1" v-if="s.access_level==='default' && s.shareable.userstats.subscriptions.price_per_1_months" @click="renderSubscribeModal(s.shareable)" variant="primary">Subscribe</b-button>
             <b-button class="mb-1" @click="showUnfollowConfirmation=true;timeline=s.shareable" variant="primary">
@@ -240,6 +240,20 @@ export default {
           timeline,
         }
       })
+    },
+
+    async redirectToMessages(s) {
+      if ( s.shareable_type !== 'timelines' || !s.shareable) {
+        return // %TODO show an error?
+      }
+      const payload = {
+        originator_id: this.session_user.id,
+        participant_id: s.shareable.user_id,
+      }
+      const response = await axios.post( this.$apiRoute('chatthreads.findOrCreateDirect'), payload)
+      if (response.data.chatthread) {
+        this.$router.push({ name: 'chatthreads.show', params: { id: response.data.chatthread.id }})
+      }
     },
 
   },

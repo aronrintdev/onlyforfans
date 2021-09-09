@@ -26,7 +26,7 @@
               <p v-if="!subscribe_only"><fa-icon :icon="['fas', 'check']" /> Get access to purchase content</p>
               <p v-else><fa-icon :icon="['fas', 'check']" /> Get access to premium content</p>
               <p v-if="!subscribe_only"><fa-icon :icon="['fas', 'check']" /> Upgrade to full access anytime</p>
-              <p v-if="subscribe_only"><fa-icon :icon="['fas', 'check']" /> Full access for {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} monthly</p>
+              <!-- <p v-if="subscribe_only"><fa-icon :icon="['fas', 'check']" /> Full access for {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} monthly</p> -->
               <p><fa-icon :icon="['fas', 'check']" /> Quick and easy cancellation</p>
               <p><fa-icon :icon="['fas', 'check']" /> Safe and secure transaction</p>
               <p><fa-icon :icon="['fas', 'check']" /> Ability to Message with {{ timeline.name }}</p>
