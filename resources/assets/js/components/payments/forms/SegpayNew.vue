@@ -267,10 +267,10 @@ export default {
           ...this.form.customer,
           email: this.session_user.email,
         },
-        billing: {
-          pricePointId: null,
-          currencyCode: this.currency,
-        },
+        // billing: {
+        //   pricePointId: null,
+        //   currencyCode: this.currency,
+        // },
         userData: {
           item_type: type || this.type,
           item_id: itemId || this.value.id,
@@ -298,13 +298,17 @@ export default {
         console.log('completePayment', {result})
         switch (result.status) {
           case 'GeneralErrors':
-            this.$log.warning('GeneralErrors', { result })
+            this.$log.warn('GeneralErrors', { result })
+            this.$emit('stopProcessing')
+            this.$emit('errors')
           break;
           case 'ValidationErrors':
-            this.$log.warning('ValidationErrors', { result })
+            this.$log.warn('ValidationErrors', { result })
+            this.$emit('stopProcessing')
+            this.$emit('errors')
           break;
           case 'Success':
-            this.$emit('Success', result.purchases)
+            this.$emit('success', result.purchases)
           break;
         }
       })
