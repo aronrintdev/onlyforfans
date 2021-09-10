@@ -859,7 +859,6 @@ li.selectable[disabled] {
     padding: 1em;
 
     a {
-      font-weight: bold;
       cursor: pointer;
     }
   }

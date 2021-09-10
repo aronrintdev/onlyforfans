@@ -310,7 +310,6 @@ textarea,
 
 .text-editor {
   a {
-    font-weight: bold;
     cursor: pointer;
   }
 }
