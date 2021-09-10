@@ -59,7 +59,12 @@
             <b-row>
               <b-col sm="12" md="6">
                 <b-form-group id="group-weblinks_amazon" label="Amazon URL" label-for="weblinks_amazon">
-                  <b-form-input id="weblinks_amazon" v-model="formProfile.weblinks.amazon" placeholder="https://www.amazon.com" ></b-form-input>
+                  <b-input-group>
+                    <template #prepend>
+                      <b-input-group-text >https://amazon.com/gp/profile/</b-input-group-text>
+                    </template>
+                    <b-form-input id="weblinks_amazon" v-model="formProfile.weblinks.amazon" placeholder="username" ></b-form-input>
+                  </b-input-group>
                 </b-form-group>
               </b-col>
               <b-col sm="12" md="6">
@@ -72,12 +77,22 @@
             <b-row>
               <b-col sm="12" md="6">
                 <b-form-group id="group-weblinks_instagram" label="Instagram URL" label-for="weblinks_instagram">
-                  <b-form-input id="weblinks_instagram" v-model="formProfile.weblinks.instagram" placeholder="https://www.instagram.com" ></b-form-input>
+                  <b-input-group>
+                    <template #prepend>
+                      <b-input-group-text >https://instagram.com/</b-input-group-text>
+                    </template>
+                    <b-form-input id="weblinks_instagram" v-model="formProfile.weblinks.instagram" placeholder="username" ></b-form-input>
+                  </b-input-group>
                 </b-form-group>
               </b-col>
               <b-col sm="12" md="6">
                 <b-form-group id="group-weblinks_twitter" label="Twitter URL" label-for="weblinks_twitter">
-                  <b-form-input id="weblinks_twitter" v-model="formProfile.weblinks.twitter" placeholder="https://www.twitter.com" ></b-form-input>
+                  <b-input-group>
+                    <template #prepend>
+                      <b-input-group-text >https://twitter.com/</b-input-group-text>
+                    </template>
+                    <b-form-input id="weblinks_twitter" v-model="formProfile.weblinks.twitter" placeholder="username" ></b-form-input>
+                  </b-input-group>
                 </b-form-group>
               </b-col>
             </b-row>
@@ -227,6 +242,7 @@ export default {
         amazon: null,
         website: null,
         instagram: null,
+        twitter: null,
       },
       body_type: '',
       chest: '',
@@ -363,6 +379,7 @@ export default {
     this.formProfile.weblinks.amazon = this.user_settings.weblinks && JSON.parse(this.user_settings.weblinks)['amazon']
     this.formProfile.weblinks.website = this.user_settings.weblinks && JSON.parse(this.user_settings.weblinks)['website']
     this.formProfile.weblinks.instagram = this.user_settings.weblinks && JSON.parse(this.user_settings.weblinks)['instagram']
+    this.formProfile.weblinks.twitter = this.user_settings.weblinks && JSON.parse(this.user_settings.weblinks)['twitter']
   },
 
   methods: {
@@ -427,7 +444,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 textarea#about {
   border: 1px solid #ced4da;
 }
@@ -439,6 +456,28 @@ textarea#about {
 
 .demographics_visible {
   cursor: pointer;
+}
+
+@media (max-width: 576px) {
+  .input-group {
+    &-prepend {
+      width: 100%;
+      margin-right: 0;
+      margin-bottom: -1px;
+
+      .input-group-text {
+        width: 100%;
+        border-top-left-radius: 0.25rem;
+        border-top-right-radius: 0.25rem;
+        border-bottom-left-radius: 0;
+      }
+    }
+    .form-control {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+      border-bottom-left-radius: 0.25rem;
+    }
+  }
 }
 </style>
 

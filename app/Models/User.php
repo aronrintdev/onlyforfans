@@ -606,6 +606,8 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
             'earnings'                => '', // TODO: Hook up to earnings controller
             'website'                 => array_key_exists('website', $weblinks??[]) ? $weblinks['website'] : '', // %TODO
             'instagram'               => array_key_exists('instagram', $weblinks??[]) ? $weblinks['instagram'] : '', // %TODO
+            'twitter'                 => array_key_exists('twitter', $weblinks??[]) ? $weblinks['twitter'] : '',
+            'amazon'                  => array_key_exists('amazon', $weblinks??[]) ? $weblinks['amazon'] : '',
             'city'                    => (isset($this->settings)) ? $this->settings->city : null,
             'country'                 => (isset($this->settings)) ? $this->settings->country : null,
             'subscriptions'           => $settingsCattrs['subscriptions'] ?? null,
