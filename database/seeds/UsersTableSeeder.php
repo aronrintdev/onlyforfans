@@ -26,8 +26,6 @@ class UsersTableSeeder extends Seeder
 
         if ( $this->appEnv !== 'testing' ) { // if tests have pre-existing admins we'll need to make sure a random user chose is *not* an admin
 
-            $this->output->writeln("  - Creating admin users...");
-
             // +++ Create admin users +++
             $manualUsers = [
                 [
@@ -117,7 +115,7 @@ class UsersTableSeeder extends Seeder
                 if ($user) {
                     $user->delete();
                 }
-                $user = FactoryHelpers::createUser($u);
+                $user = FactoryHelpers::createUser($u); // admin user created manually
                 $user->assignRole('super-admin');
                 $user->assignRole('admin');
                 unset($user);
@@ -164,10 +162,10 @@ class UsersTableSeeder extends Seeder
             $timeline->avatar_id = $avatar->id ?? null;
             $timeline->cover_id = $cover->id ?? null;
             $timeline->is_follow_for_free = $isFollowForFree;
-            $timeline->price = $isFollowForFree ? 0 : $this->faker->numberBetween(300, 4000);
-            $timeline->save();
-            $isFollowForFree = !$isFollowForFree; // toggle so we get at least one of each
+            $timeline->price = $isFollowForFree ? 0.00 : $this->faker->randomFloat(2, 1, 300);
+            $timeline->save(); // update the timeline
 
+            $isFollowForFree = !$isFollowForFree; // toggle so we get at least one of each
             $iter++;
         });
 

@@ -35,16 +35,11 @@ class UserFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function (User $user) {
-            Timeline::factory()->create([
-                'user_id' => $user->id,
-                'name' => ucwords(Str::of($user->username)->replaceFirst('.', ' ')),
-            ]);
-            /* %TODO: see https://trello.com/c/LzTUmPCp
-            FinancialAccount::factory()->create([
-                'user_id' => $user->id,
-                'name' => ucwords(Str::of($user->username)->replaceFirst('.', ' ')),
-            ]);
-             */
+            // %TODO: see https://trello.com/c/LzTUmPCp
+            //FinancialAccount::factory()->create([
+            //    'user_id' => $user->id,
+            //    'name' => ucwords(Str::of($user->username)->replaceFirst('.', ' ')),
+            //]);
         });
     }
 

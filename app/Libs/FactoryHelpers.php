@@ -21,22 +21,32 @@ class FactoryHelpers {
     {
         $faker = Faker::create();
 
-        $user = User::create([
+        $userAttrs = [
             'username' => $attrs['username'],
             'email' => $attrs['email'],
             'password' => array_key_exists('password', $attrs) ? $attrs['password'] : bcrypt('foo-123'), // secret
             'email_verified' => 1,
-        ]);
+        ];
+        $user = User::create($userAttrs);
+        $user->refresh();
+        if ( empty($user) ) {
+            throw new Exception('Could not create user with attributes '.json_encode($userAttrs));
+        }
+        if ( empty($user->vaults) ) {
+            throw new Exception('User created without vaults: '.json_encode([
+                'username' => $user->username,
+                'user_id' => $user->id,
+            ]));
+        }
+        if ( empty($user->timeline) ) {
+            throw new Exception('User created without timeline: '.json_encode([
+                'username' => $user->username,
+                'user_id' => $user->id,
+            ]));
+        }
         //dump('Updating user: '.$attrs['email']);
 
-        $isFollowForFree  = $attrs['is_follow_for_free'];
-        $timeline = Timeline::create([
-            'user_id'  => $user->id,
-            'name'     => $attrs['name'],
-            'about'    => $faker->text,
-            'is_follow_for_free' => $isFollowForFree,
-            'price' => $isFollowForFree ? 0.00 : $faker->randomFloat(2, 1, 300),
-        ]);
+        $timeline = $user->timeline;
 
         if ( Config::get('app.env') !== 'testing' ) {
             $avatar = self::createImage($user, MediafileTypeEnum::AVATAR, null, true);
