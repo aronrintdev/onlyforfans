@@ -143,6 +143,8 @@ class RegisterController extends Controller
             'referral_code'     => $referral_code
         ]);
 
+        $user->timeline()->update(['name' => $request->name]);
+
         if (Setting::get('birthday') == 'on' && $request->birthday != '') {
             $user->settings()->update([ 'birthday' => date('Y-m-d', strtotime($request->birthday)) ]);
         }
