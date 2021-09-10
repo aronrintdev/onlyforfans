@@ -197,7 +197,6 @@ class UsersController extends AppBaseController
                 'privacy', 
                 'subscriptions', 
                 'watermark', 
-                'weblinks', 
             ];
             $attrs = $request->except($cattrsFields);
 

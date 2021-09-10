@@ -37,7 +37,7 @@
         </div>
         <div v-if="!isFullVisiable && isOverLength" class="toggle-read-more text-primary text-right mr-3 mt-1" @click="isFullVisiable = !isFullVisiable">Read more</div>
         <ul class="list-unstyled mt-3" v-if="timeline.userstats.website || timeline.userstats.instagram">
-          <li v-if="timeline.userstats.website">Website: <a :href="timeline.userstats.website" class="tag-website" target="_blank">{{ timeline.userstats.website }}</a></li>
+          <li v-if="timeline.userstats.website">Website: <a :href="websiteLink" class="tag-website" target="_blank">{{ timeline.userstats.website }}</a></li>
           <li v-if="timeline.userstats.instagram">Instagram: <a :href="timeline.userstats.instagram" class="tag-instagram" target="_blank">{{ timeline.userstats.instagram }}</a></li>
         </ul>
         <ul class="list-unstyled list-details mt-3" v-if="timeline.userstats.city || timeline.userstats.country">
@@ -101,6 +101,14 @@ export default {
       str += ` \u2022  ${this.activeCampaign.subscriber_count} left`
       return str
     },
+    
+    websiteLink() {
+      const url = this.timeline.userstats.website
+      if (/(http(s?)):\/\//i.test(url)) {
+        return url
+      }
+      return `//${url}`
+    }
   },
 
   data: () => ({
