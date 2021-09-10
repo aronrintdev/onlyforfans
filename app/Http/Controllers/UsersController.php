@@ -153,7 +153,7 @@ class UsersController extends AppBaseController
             'gender' => 'in:male,female,other|nullable',
             'birthdate' => 'date|nullable',
             'weblinks' => 'array|nullable',
-            'weblinks.*' => 'url|nullable',
+            'weblinks.*' => 'string|nullable',
             'weblinks.website' => 'domain|nullable',
             'body_type' => 'string|nullable',
             'chest' => 'string|nullable',

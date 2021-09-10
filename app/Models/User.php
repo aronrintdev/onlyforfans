@@ -334,7 +334,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
 
     public function campaign()
     {
-        return $this->hasOne(Campaign::class, 'creator_id');
+        return $this->hasOne(Campaign::class, 'creator_id')->where('active', true);
     }
 
     public function staffMembers()
@@ -606,11 +606,14 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
             'earnings'                => '', // TODO: Hook up to earnings controller
             'website'                 => array_key_exists('website', $weblinks??[]) ? $weblinks['website'] : '', // %TODO
             'instagram'               => array_key_exists('instagram', $weblinks??[]) ? $weblinks['instagram'] : '', // %TODO
+            'twitter'                 => array_key_exists('twitter', $weblinks??[]) ? $weblinks['twitter'] : '',
+            'amazon'                  => array_key_exists('amazon', $weblinks??[]) ? $weblinks['amazon'] : '',
             'city'                    => (isset($this->settings)) ? $this->settings->city : null,
             'country'                 => (isset($this->settings)) ? $this->settings->country : null,
             'subscriptions'           => $settingsCattrs['subscriptions'] ?? null,
             'display_prices_in_cents' => $display_prices_in_cents,
             'is_sub_discounted'       => $isSubDiscounted,
+            //'campaign'                => $this->campaign && $this->campaign->active ? $this->campaign : null,
             'campaign'                => $this->campaign ?? null,
         ];
     }

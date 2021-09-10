@@ -12,18 +12,27 @@
             </template>
           </li>
           <li v-if="timeline.userstats.subscriptions && timeline.userstats.subscriptions.price_per_1_months" class="mb-3">
-            <b-button v-if="!timeline.is_subscribed" @click="renderSubscribe" :disabled="timeline.is_owner" variant="primary" class="w-100" >
-              Subscribe - {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} per month
-            </b-button>
-            <!-- TODO: Take user to the subscription details page -->
-            <b-button v-else :disabled="timeline.is_subscribed" variant="primary" class="w-100" >
+            <b-button v-if="timeline.is_subscribed" :disabled="timeline.is_subscribed" variant="primary" class="w-100" >
               Subscribed
             </b-button>
-            <div v-if="activeCampaign" class="mt-1">
-              <h6 v-if="activeCampaign.type==='trial'" class="m-0 text-center">Limited offer - Free trial for {{ activeCampaign.trial_days }} days!</h6>
-              <h6 v-if="activeCampaign.type==='discount'" class="m-0 text-center">Limited offer - {{ activeCampaign.discount_percent }}% off for 31 days!</h6>
-              <p class="m-0 text-center"><small class="text-muted">{{ campaignBlurb }}</small></p>
-            </div>
+            <template v-else>
+              <b-button @click="renderSubscribe" :disabled="timeline.is_owner" variant="primary" class="w-100" >
+                Subscribe - {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} per month
+              </b-button>
+              <section v-if="activeCampaign" class="box-campaign-blurb mt-1">
+                <h6 v-if="activeCampaign.type==='trial'" class="m-0 text-center">Limited offer - Free trial for {{ activeCampaign.trial_days }} days!</h6>
+                <h6 v-if="activeCampaign.type==='discount'" class="m-0 text-center">Limited offer - {{ activeCampaign.discount_percent }}% off for {{ activeCampaign.offer_days }} days!</h6>
+                <p class="m-0 text-center"><small class="text-muted">{{ campaignBlurb }}</small></p>
+                <article v-if="activeCampaign.message" class="tag-message d-flex align-items-center">
+                  <div class="user-avatar">
+                    <b-img rounded="circle" :src="timeline.avatar.filepath" :title="timeline.name" />
+                  </div>
+                  <div class="text-wrap py-2 w-100">
+                    <p class="mb-0">{{ activeCampaign.message }}</p>
+                  </div>
+                </article>
+              </section>
+            </template>
           </li>
           <li v-if="!timeline.is_following && timeline.is_follow_for_free" class="mb-3">
             <b-button @click="renderFollow" :disabled="timeline.is_owner" variant="primary" class="w-100">Follow for Free</b-button>
@@ -40,9 +49,11 @@
           <VueMarkdown :html="false" :source="timeline.about || ''" />
         </div>
         <div v-if="!isFullVisiable && isOverLength" class="toggle-read-more text-primary text-right mr-3 mt-1" @click="isFullVisiable = !isFullVisiable">Read more</div>
-        <ul class="list-unstyled mt-3" v-if="timeline.userstats.website || timeline.userstats.instagram">
+        <ul class="social-links list-unstyled mt-3" v-if="timeline.userstats.website || timeline.userstats.instagram">
           <li v-if="timeline.userstats.website">Website: <a :href="websiteLink" class="tag-website" target="_blank">{{ timeline.userstats.website }}</a></li>
-          <li v-if="timeline.userstats.instagram">Instagram: <a :href="timeline.userstats.instagram" class="tag-instagram" target="_blank">{{ timeline.userstats.instagram }}</a></li>
+          <li v-if="timeline.userstats.instagram">Instagram: <a :href="socialLink('instagram')" class="tag-website tag-instagram" target="_blank">{{ `@${timeline.userstats.instagram}` }}</a></li>
+          <li v-if="timeline.userstats.twitter">Twitter: <a :href="socialLink('twitter')" class="tag-website tag-twitter" target="_blank">{{ `@${timeline.userstats.twitter}` }}</a></li>
+          <li v-if="timeline.userstats.amazon">Amazon: <a :href="socialLink('amazon')" class="tag-website tag-amazon" target="_blank">My Wish List</a></li>
         </ul>
         <ul class="list-unstyled list-details mt-3" v-if="timeline.userstats.city || timeline.userstats.country">
           <li v-if="timeline.userstats.city"><span><fa-icon icon="map-pin" class="map-pin-icon" /> {{ timeline.userstats.city }}</span></li>
@@ -112,7 +123,8 @@ export default {
         return url
       }
       return `//${url}`
-    }
+    },
+
   },
 
   data: () => ({
@@ -169,6 +181,22 @@ export default {
           timeline: this.timeline,
         }
       })
+    },
+
+    socialLink(type) {
+      let prefix = '';
+      switch (type) {
+        case 'instagram':
+          prefix = 'https://instagram.com/';
+          break;
+        case 'twitter':
+          prefix = 'https://twitter.com/';
+          break;
+        case 'amazon':
+          prefix = 'https://amazon.com/gp/profile/';
+          break;
+      }
+      return prefix + this.timeline.userstats[type];
     }
   },
 
@@ -184,6 +212,36 @@ body #modal-send_tip .modal-body {
   padding: 0;
 }
 
+.box-campaign-blurb {
+
+  .tag-message {
+    position: relative;
+    margin-top: 0.3rem;
+    padding: 0.2rem 0.3rem;
+
+    .text-wrap {
+      border-radius: 0.5rem;
+      background: #f1f1f1;
+      margin-left: 5px;
+      p { 
+        margin-left: 40px;
+      }
+    }
+
+    .user-avatar {
+      position: absolute;
+      top: -5px;
+      left: 0;
+    }
+
+    .user-avatar img {
+      object-fit: cover;
+      width: 40px;
+      height: 40px;
+    }
+  }
+}
+
 .normal-view {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -195,14 +253,26 @@ body #modal-send_tip .modal-body {
   }
 }
 
+.social-links li {
+  display: flex;
+  align-items: center;
+}
+
 li a.tag-website {
   margin-left: 20px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  flex: 1;
 }
 
 li a.tag-instagram {
-  margin-left: 5px;
+  margin-left: 7px;
 }
 
+li a.tag-twitter {
+  margin-left: 30px;
+}
 
 .toggle-read-more {
   cursor: pointer;
