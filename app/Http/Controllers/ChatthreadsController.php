@@ -330,6 +330,10 @@ class ChatthreadsController extends AppBaseController
             'participant_id' => 'required|uuid|exists:users,id',
         ]);
 
+        if ( $request->originator_id === $request->participant_id ) {
+            abort(422, 'Originator and participant must differ');
+        }
+
         $originator = User::find($request->originator_id);
         $participant = User::find($request->participant_id);
 

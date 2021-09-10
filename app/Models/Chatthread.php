@@ -183,14 +183,14 @@ class Chatthread extends Model implements UuidId
      */
     public static function findOrCreateDirectChat(User $originator, User $participant) : ?Chatthread
     {
-        $cts = $originator->chatthreads()->whereHas('participants', function ($query) use ($participant) {
+        $cts = $originator->chatthreads()->whereHas('participants', function ($query) use (&$participant) {
             $query->where('user_id', $participant->id);
         })->withCount('participants')->get();
 
         // Where is only these 2 participants
         $ct = $cts->where('participants_count', 2)->first();
 
-        if (!isset($ct)) {
+        if (!isset($ct) && $originator->isNot($participant)) {
             $ct = Chatthread::create([
                 'originator_id' => $originator->id,
                  'is_tip_required' => 0, // possibly unused, oddly need to set this for it to show up in $ct (?)

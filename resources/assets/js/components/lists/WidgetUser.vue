@@ -51,7 +51,7 @@
         Add to favorites
       </b-card-text>
 
-      <b-button class="mb-1" variant="primary">Message</b-button>
+      <b-button @click="redirectToMessages()" class="mb-1" variant="primary">Message</b-button>
       <b-button class="mb-1" disabled variant="primary">Discount</b-button>
       <b-button class="mb-1" disabled variant="primary">Restrict</b-button>
       <b-button class="mb-1" variant="primary" @click="showNotesModal">{{ notesButtonCaption }}</b-button>
@@ -181,7 +181,19 @@ export default {
         this.isFavoritedByMe = true
       }
     },
-  },
+
+    async redirectToMessages() {
+      const payload = {
+        originator_id: this.session_user.id,
+        participant_id: this.user.id,
+      }
+      const response = await axios.post( this.$apiRoute('chatthreads.findOrCreateDirect'), payload)
+      if (response.data.chatthread) {
+        this.$router.push({ name: 'chatthreads.show', params: { id: response.data.chatthread.id }})
+      }
+    },
+
+  }, // methods
 
   mounted() {
     this.isFavoritedByMe = this.is_favorited;
