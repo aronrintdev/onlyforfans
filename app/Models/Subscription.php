@@ -82,6 +82,7 @@ class Subscription extends Model implements Ownable
 
     protected $casts = [
         'price' => CastsMoney::class,
+        'custom_attributes' => 'array',
     ];
 
     //--------------------------------------------

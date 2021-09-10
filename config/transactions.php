@@ -75,10 +75,10 @@ return [
                     'take' => env('TRANSACTIONS_SEGPAY_PLATFORM_FEE_PERCENTAGE', 30),
                     'min' => env('TRANSACTIONS_SEGPAY_MIN_PLATFORM_FEE', 5),
                 ],
-                'tax' => [
-                    'take' => env('TRANSACTIONS_SEGPAY_TAX_PERCENTAGE', 5),
-                    'min' => env('TRANSACTIONS_SEGPAY_MIN_TAX', 0),
-                ],
+                // 'tax' => [
+                //     'take' => env('TRANSACTIONS_SEGPAY_TAX_PERCENTAGE', 5),
+                //     'min' => env('TRANSACTIONS_SEGPAY_MIN_TAX', 0),
+                // ],
             ],
 
             /**
