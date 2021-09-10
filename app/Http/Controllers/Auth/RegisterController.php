@@ -204,40 +204,6 @@ class RegisterController extends Controller
         }
     }
 
-    protected function registerUserFromSocialAccount($request)
-    {
-
-        //Create user record
-        $user = User::create([
-            'email'             => $request['email'],
-            'password'          => bcrypt($request['password']),
-            'verification_code' => str_random(30),
-            'remember_token'    => str_random(10),
-            'username'          => $request['username'],
-            'email_verified'    => 1,
-        ]);
-
-        if (Setting::get('birthday') == 'on' && $request['birthday'] != '') {
-            $user->settings()->update([ 'birthday' => date('Y-m-d', strtotime($request['birthday'])) ]);
-        }
-
-        if ($request['gender'] != '') {
-            $user->settings()->update([ 'gender' => $request['gender'] ]);
-        }
-
-        if (Setting::get('city') == 'on' && $request['city'] != '') {
-            $user->settings()->update([ 'city' => $request['city'] ]);
-        }
-
-        // Create timeline record for the user
-        $user->timeline()->create([
-            'name' => $request['name'],
-            'about' => '',
-        ]);
-
-        return $user;
-    }
-
     /**
      * Resend the verification notification
      * @param Request $request
@@ -355,7 +321,7 @@ class RegisterController extends Controller
         } else {
             return redirect('/')->with(['message' => trans('messages.user_login_failed'), 'status' => 'success']);
         }
-    }
+    } // facebook()
 
     public function googleRedirect(Request $request)
     {
@@ -424,7 +390,7 @@ class RegisterController extends Controller
         } else {
             return redirect($user->username)->with(['message' => trans('messages.user_login_failed'), 'status' => 'success']);
         }
-    }
+    } // google()
 
     public function twitterRedirect()
     {
@@ -492,7 +458,7 @@ class RegisterController extends Controller
         } else {
             return redirect('login')->withInput()->withErrors(['message' => trans('messages.user_login_failed'), 'status' => 'error']);
         }
-    }
+    } // twitter()
 
     /**
      * Checks and uses token if beta program check is required
@@ -519,6 +485,34 @@ class RegisterController extends Controller
             }
         }
     }
+
+    protected function registerUserFromSocialAccount($request)
+    {
+        // Create user record (also creates timeline in boot observer)
+        $user = User::create([
+            'email'             => $request['email'],
+            'password'          => bcrypt($request['password']),
+            'verification_code' => str_random(30),
+            'remember_token'    => str_random(10),
+            'username'          => $request['username'],
+            'email_verified'    => 1,
+        ]);
+
+        if (Setting::get('birthday') == 'on' && $request['birthday'] != '') {
+            $user->settings()->update([ 'birthday' => date('Y-m-d', strtotime($request['birthday'])) ]);
+        }
+
+        if ($request['gender'] != '') {
+            $user->settings()->update([ 'gender' => $request['gender'] ]);
+        }
+
+        if (Setting::get('city') == 'on' && $request['city'] != '') {
+            $user->settings()->update([ 'city' => $request['city'] ]);
+        }
+
+        return $user;
+    }
+
 
 
 }
