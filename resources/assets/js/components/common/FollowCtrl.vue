@@ -40,9 +40,11 @@
           <VueMarkdown :html="false" :source="timeline.about || ''" />
         </div>
         <div v-if="!isFullVisiable && isOverLength" class="toggle-read-more text-primary text-right mr-3 mt-1" @click="isFullVisiable = !isFullVisiable">Read more</div>
-        <ul class="list-unstyled mt-3" v-if="timeline.userstats.website || timeline.userstats.instagram">
+        <ul class="social-links list-unstyled mt-3" v-if="timeline.userstats.website || timeline.userstats.instagram">
           <li v-if="timeline.userstats.website">Website: <a :href="websiteLink" class="tag-website" target="_blank">{{ timeline.userstats.website }}</a></li>
-          <li v-if="timeline.userstats.instagram">Instagram: <a :href="timeline.userstats.instagram" class="tag-instagram" target="_blank">{{ timeline.userstats.instagram }}</a></li>
+          <li v-if="timeline.userstats.instagram">Instagram: <a :href="socialLink('instagram')" class="tag-website tag-instagram" target="_blank">{{ `@${timeline.userstats.instagram}` }}</a></li>
+          <li v-if="timeline.userstats.twitter">Twitter: <a :href="socialLink('twitter')" class="tag-website tag-twitter" target="_blank">{{ `@${timeline.userstats.twitter}` }}</a></li>
+          <li v-if="timeline.userstats.amazon">Amazon: <a :href="socialLink('amazon')" class="tag-website tag-amazon" target="_blank">My Wish List</a></li>
         </ul>
         <ul class="list-unstyled list-details mt-3" v-if="timeline.userstats.city || timeline.userstats.country">
           <li v-if="timeline.userstats.city"><span><fa-icon icon="map-pin" class="map-pin-icon" /> {{ timeline.userstats.city }}</span></li>
@@ -112,7 +114,8 @@ export default {
         return url
       }
       return `//${url}`
-    }
+    },
+
   },
 
   data: () => ({
@@ -169,6 +172,22 @@ export default {
           timeline: this.timeline,
         }
       })
+    },
+
+    socialLink(type) {
+      let prefix = '';
+      switch (type) {
+        case 'instagram':
+          prefix = 'https://instagram.com/';
+          break;
+        case 'twitter':
+          prefix = 'https://twitter.com/';
+          break;
+        case 'amazon':
+          prefix = 'https://amazon.com/gp/profile/';
+          break;
+      }
+      return prefix + this.timeline.userstats[type];
     }
   },
 
@@ -195,14 +214,26 @@ body #modal-send_tip .modal-body {
   }
 }
 
+.social-links li {
+  display: flex;
+  align-items: center;
+}
+
 li a.tag-website {
   margin-left: 20px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  flex: 1;
 }
 
 li a.tag-instagram {
-  margin-left: 5px;
+  margin-left: 7px;
 }
 
+li a.tag-twitter {
+  margin-left: 30px;
+}
 
 .toggle-read-more {
   cursor: pointer;
