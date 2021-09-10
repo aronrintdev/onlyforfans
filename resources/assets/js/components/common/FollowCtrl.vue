@@ -12,18 +12,25 @@
             </template>
           </li>
           <li v-if="timeline.userstats.subscriptions && timeline.userstats.subscriptions.price_per_1_months" class="mb-3">
-            <b-button v-if="!timeline.is_subscribed" @click="renderSubscribe" :disabled="timeline.is_owner" variant="primary" class="w-100" >
-              Subscribe - {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} per month
-            </b-button>
-            <!-- TODO: Take user to the subscription details page -->
-            <b-button v-else :disabled="timeline.is_subscribed" variant="primary" class="w-100" >
+            <b-button v-if="timeline.is_subscribed" :disabled="timeline.is_subscribed" variant="primary" class="w-100" >
               Subscribed
             </b-button>
-            <div v-if="activeCampaign" class="mt-1">
-              <h6 v-if="activeCampaign.type==='trial'" class="m-0 text-center">Limited offer - Free trial for {{ activeCampaign.trial_days }} days!</h6>
-              <h6 v-if="activeCampaign.type==='discount'" class="m-0 text-center">Limited offer - {{ activeCampaign.discount_percent }}% off for 31 days!</h6>
-              <p class="m-0 text-center"><small class="text-muted">{{ campaignBlurb }}</small></p>
-            </div>
+            <template v-else>
+              <b-button @click="renderSubscribe" :disabled="timeline.is_owner" variant="primary" class="w-100" >
+                Subscribe - {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} per month
+              </b-button>
+              <section v-if="activeCampaign" class="box-campaign-blurb mt-1">
+                <h6 v-if="activeCampaign.type==='trial'" class="m-0 text-center">Limited offer - Free trial for {{ activeCampaign.trial_days }} days!</h6>
+                <h6 v-if="activeCampaign.type==='discount'" class="m-0 text-center">Limited offer - {{ activeCampaign.discount_percent }}% off for 31 days!</h6>
+                <p class="m-0 text-center"><small class="text-muted">{{ campaignBlurb }}</small></p>
+                <article v-if="activeCampaign.message" class="d-flex">
+                  <div class="user-avatar mr-2">
+                    <b-img rounded="circle" :src="timeline.avatar.filepath" :title="timeline.name" />
+                  </div>
+                  <p class="m-0">{{ activeCampaign.message }}</p>
+                </article>
+              </section>
+            </template>
           </li>
           <li v-if="!timeline.is_following && timeline.is_follow_for_free" class="mb-3">
             <b-button @click="renderFollow" :disabled="timeline.is_owner" variant="primary" class="w-100">Follow for Free</b-button>
@@ -182,6 +189,16 @@ export default {
 
 body #modal-send_tip .modal-body {
   padding: 0;
+}
+
+.box-campaign-blurb .user-avatar {
+//width: 40px;
+//height: 40px;
+}
+.box-campaign-blurb .user-avatar img {
+  object-fit: cover;
+  width: 40px;
+  height: 40px;
 }
 
 .normal-view {
