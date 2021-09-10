@@ -135,6 +135,7 @@ class TruncateData extends Command
             'webhooks',
             'websockets_statistics_entries',
             'verifyrequests',
+            'tips',
             'staff',
             'referrals',
             'notes',
@@ -169,6 +170,7 @@ class TruncateData extends Command
             'likeables',
             'comments',
 
+            'mediafilesharelogs',
             'diskmediafiles',
             'mediafiles',
 
@@ -185,6 +187,7 @@ class TruncateData extends Command
 
             'posts',
             'timelines',
+            'campaigns',
             'users',
 
             'username_rules',
