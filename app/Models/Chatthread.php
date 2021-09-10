@@ -190,7 +190,7 @@ class Chatthread extends Model implements UuidId
         // Where is only these 2 participants
         $ct = $cts->where('participants_count', 2)->first();
 
-        if (!isset($ct)) {
+        if (!isset($ct) && $originator->isNot($participant)) {
             $ct = Chatthread::create([
                 'originator_id' => $originator->id,
                  'is_tip_required' => 0, // possibly unused, oddly need to set this for it to show up in $ct (?)
