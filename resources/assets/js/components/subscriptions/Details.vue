@@ -14,6 +14,7 @@
 
         <div class="controls">
           <b-card
+            v-if="false"
             :title="$t('payment.title')"
             class="my-3"
           >
@@ -36,10 +37,10 @@
           <div v-if="subscription.canceled" class="text-danger" v-text="$t('cancel.isCanceled')" />
         </div>
 
-        <div class="h3" v-text="$t('transactions.title')" />
-        <hr />
+        <!-- <div class="h3" v-text="$t('transactions.title')" /> -->
+        <!-- <hr /> -->
         <!-- Transaction Table Here -->
-        <div class="text-center">WIP</div>
+        <!-- <div class="text-center">WIP</div> -->
 
         <b-modal
           v-model="cancelConfirmation"

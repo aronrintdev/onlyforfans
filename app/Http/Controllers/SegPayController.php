@@ -144,6 +144,7 @@ class SegPayController extends Controller
             'currency' => 'required',
             'method' => 'required|uuid',
         ]);
+        Log::debug('SegPayController->generateOneClickSubscriptionPageUrl', [ 'request' => $request->all() ]);
 
         $item = SubscribableHelpers::getSubscribableItem($request->item);
         if (!isset($item)) {
@@ -160,8 +161,10 @@ class SegPayController extends Controller
             abort('400', 'Bad account');
         }
 
-        $price = $item->formatMoneyDecimal($item->price);
+        $price = $item->formatMoneyDecimal($price);
         $period = 30;
+
+        Log::debug('SegPayController->generateOneClickSubscriptionPageUrl', ['$price' => $price]);
 
         $client = new Client();
         $response = $client->request('GET', Config::get('segpay.dynamicTransUrl'), [

@@ -12,8 +12,12 @@
             </template>
           </li>
           <li v-if="timeline.userstats.subscriptions && timeline.userstats.subscriptions.price_per_1_months" class="mb-3">
-            <b-button @click="renderSubscribe" :disabled="timeline.is_owner" variant="primary" class="w-100" >
+            <b-button v-if="!timeline.is_subscribed" @click="renderSubscribe" :disabled="timeline.is_owner" variant="primary" class="w-100" >
               Subscribe - {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} per month
+            </b-button>
+            <!-- TODO: Take user to the subscription details page -->
+            <b-button v-else :disabled="timeline.is_subscribed" variant="primary" class="w-100" >
+              Subscribed
             </b-button>
             <div v-if="activeCampaign" class="mt-1">
               <h6 v-if="activeCampaign.type==='trial'" class="m-0 text-center">Limited offer - Free trial for {{ activeCampaign.trial_days }} days!</h6>
