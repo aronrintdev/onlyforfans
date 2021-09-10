@@ -370,23 +370,56 @@ export default {
 
     async submitProfile(e) {
       this.isSubmitting.formProfile = true
-      const response = await axios.patch(`/users/${this.session_user.id}/settings`, this.formProfile)
+      axios.patch(`/users/${this.session_user.id}/settings`, this.formProfile)
+        .then(() => {
+          // re-load user settings
+          this.getUserSettings({ userId: this.session_user.id })
+          this.getMe()
+          this.isSubmitting.formProfile = false
+          this.$root.$bvToast.toast('Profile settings have been updated successfully!', {
+            toaster: 'b-toaster-top-center',
+            title: 'Success',
+            variant: 'success',
+          })
+        })
+        .catch(error => {
+          this.isSubmitting.formProfile = false
+          this.onErrorHandler(error)
+        })
 
-      // re-load user settings
-      this.getUserSettings({ userId: this.session_user.id })
-      this.getMe()
-
-      this.$root.$bvToast.toast('Profile settings have been updated successfully!', {
-        toaster: 'b-toaster-top-center',
-        title: 'Success',
-        variant: 'success',
-      })
-      this.isSubmitting.formProfile = false
     },
 
     onReset(e) {
       e.preventDefault()
     },
+
+    onErrorHandler(error) {
+      let message;
+      if (error.response) {
+        const types = Object.keys(error.response.data.errors);
+        for(const type of types) {
+          switch(type) {
+            case 'weblinks.website':
+              message = 'Website URL is invalid'
+              break;
+            default:
+              message = error.response.data.message;
+          }
+          this.$root.$bvToast.toast(message, {
+            toaster: 'b-toaster-top-center',
+            title: 'Failed',
+            variant: 'danger',
+          })
+        }
+      } else {
+        message = error.message;
+        this.$root.$bvToast.toast(message, {
+          toaster: 'b-toaster-top-center',
+          title: 'Failed',
+          variant: 'danger',
+        })
+      }
+    }
   },
 
   components: {
