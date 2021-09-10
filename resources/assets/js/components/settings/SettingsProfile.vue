@@ -63,7 +63,7 @@
                     <template #prepend>
                       <b-input-group-text >https://amazon.com/gp/profile/</b-input-group-text>
                     </template>
-                    <b-form-input id="weblinks_amazon" v-model="formProfile.weblinks.amazon" placeholder="username" ></b-form-input>
+                    <b-form-input id="weblinks_amazon" v-model="formProfile.weblinks.amazon" @change="v => socialLinkChanged('amazon', v)" placeholder="username" ></b-form-input>
                   </b-input-group>
                 </b-form-group>
               </b-col>
@@ -81,7 +81,7 @@
                     <template #prepend>
                       <b-input-group-text >https://instagram.com/</b-input-group-text>
                     </template>
-                    <b-form-input id="weblinks_instagram" v-model="formProfile.weblinks.instagram" placeholder="username" ></b-form-input>
+                    <b-form-input id="weblinks_instagram" v-model="formProfile.weblinks.instagram" @change="v => socialLinkChanged('instagram', v)" placeholder="username" ></b-form-input>
                   </b-input-group>
                 </b-form-group>
               </b-col>
@@ -91,7 +91,7 @@
                     <template #prepend>
                       <b-input-group-text >https://twitter.com/</b-input-group-text>
                     </template>
-                    <b-form-input id="weblinks_twitter" v-model="formProfile.weblinks.twitter" placeholder="username" ></b-form-input>
+                    <b-form-input id="weblinks_twitter" v-model="formProfile.weblinks.twitter" @change="v => socialLinkChanged('twitter', v)" placeholder="username" ></b-form-input>
                   </b-input-group>
                 </b-form-group>
               </b-col>
@@ -435,6 +435,26 @@ export default {
           title: 'Failed',
           variant: 'danger',
         })
+      }
+    },
+
+    socialLinkChanged(type, val) {
+      const parts = val.split('/')
+      let lastPart = parts.pop()
+      if (!lastPart) {
+        lastPart = parts.pop()
+      }
+      switch (type) {
+        case 'instagram':
+          this.formProfile.weblinks.instagram = lastPart;
+          break;
+        case 'twitter':
+          this.formProfile.weblinks.twitter = lastPart;
+          break;
+        case 'amazon':
+          this.formProfile.weblinks.amazon = lastPart;
+          break;
+        default:
       }
     }
   },
