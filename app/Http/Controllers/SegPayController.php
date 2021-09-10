@@ -161,7 +161,7 @@ class SegPayController extends Controller
             abort('400', 'Bad account');
         }
 
-        $price = $item->formatMoneyDecimal($item->price);
+        $price = $item->formatMoneyDecimal($price);
         $period = 30;
 
         Log::debug('SegPayController->generateOneClickSubscriptionPageUrl', ['$price' => $price]);
