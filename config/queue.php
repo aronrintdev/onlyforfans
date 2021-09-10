@@ -64,8 +64,8 @@ return [
          */
         'sqs' => [
             'driver' => 'sqs',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'key' => env('AWS_SQS_ACCESS_KEY_ID', env('AWS_ACCESS_KEY_ID')),
+            'secret' => env('AWS_SQS_SECRET_ACCESS_KEY', env('AWS_SECRET_ACCESS_KEY')),
             'prefix' => env('QUEUE_SQS_PATH'),
             'queue' => env('QUEUE_PREFIX', '') . 'default',
             'region' => env('QUEUE_SQS_REGION', env('AWS_DEFAULT_REGION', 'us-east-1')),
@@ -76,7 +76,8 @@ return [
          */
         'high' => [
             'driver' => env('QUEUE_HIGH_DRIVER', 'database'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'key' => env('AWS_SQS_ACCESS_KEY_ID', env('AWS_ACCESS_KEY_ID')),
+            'secret' => env('AWS_SQS_SECRET_ACCESS_KEY', env('AWS_SECRET_ACCESS_KEY')),
             'prefix' => env('QUEUE_SQS_PATH'),
             'queue' => env('QUEUE_PREFIX', '') . 'high',
             'region' => env('QUEUE_SQS_REGION', env('AWS_DEFAULT_REGION', 'us-east-1')),
@@ -90,7 +91,8 @@ return [
          */
         'low' => [
             'driver' => env('QUEUE_LOW_DRIVER', 'database'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'key' => env('AWS_SQS_ACCESS_KEY_ID', env('AWS_ACCESS_KEY_ID')),
+            'secret' => env('AWS_SQS_SECRET_ACCESS_KEY', env('AWS_SECRET_ACCESS_KEY')),
             'prefix' => env('QUEUE_SQS_PATH'),
             'queue' => env('QUEUE_PREFIX', '') . 'high',
             'region' => env('QUEUE_SQS_REGION', env('AWS_DEFAULT_REGION', 'us-east-1')),
@@ -104,8 +106,8 @@ return [
          */
         'financial-transactions' => [
             'driver' => env('QUEUE_FINANCIAL_TRANSACTIONS_DRIVER', 'database'),
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'key' => env('AWS_SQS_ACCESS_KEY_ID', env('AWS_ACCESS_KEY_ID')),
+            'secret' => env('AWS_SQS_SECRET_ACCESS_KEY', env('AWS_SECRET_ACCESS_KEY')),
             'prefix' => env('QUEUE_SQS_PATH'),
             'queue' => env('QUEUE_PREFIX', '') . 'financial-transactions',
             'region' => env('QUEUE_SQS_REGION', env('AWS_DEFAULT_REGION', 'us-east-1')),
@@ -123,8 +125,8 @@ return [
          */
         'financial-summaries' => [
             'driver' => env('QUEUE_FINANCIAL_SUMMARIES_DRIVER', 'database'),
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'key' => env('AWS_SQS_ACCESS_KEY_ID', env('AWS_ACCESS_KEY_ID')),
+            'secret' => env('AWS_SQS_SECRET_ACCESS_KEY', env('AWS_SECRET_ACCESS_KEY')),
             'prefix' => env('QUEUE_SQS_PATH'),
             'queue' => env('QUEUE_PREFIX', '') . 'financial-summaries',
             'region' => env('QUEUE_SQS_REGION', env('AWS_DEFAULT_REGION', 'us-east-1')),
