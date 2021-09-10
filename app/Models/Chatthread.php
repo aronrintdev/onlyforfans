@@ -183,7 +183,7 @@ class Chatthread extends Model implements UuidId
      */
     public static function findOrCreateDirectChat(User $originator, User $participant) : ?Chatthread
     {
-        $cts = $originator->chatthreads()->whereHas('participants', function ($query) use ($participant) {
+        $cts = $originator->chatthreads()->whereHas('participants', function ($query) use (&$participant) {
             $query->where('user_id', $participant->id);
         })->withCount('participants')->get();
 
