@@ -1,5 +1,5 @@
 <template>
-  <div class="container p-0">
+  <div class="edit-post container p-0">
 
     <b-card header-tag="header" footer-tag="footer" class="position-relative">
 
@@ -308,7 +308,13 @@ textarea,
   line-height: 1em;
 }
 
-.text-editor {
+.edit-post .text-editor {
+  padding: 1em; 
+  background: #fff;
+  color: #383838;
+  min-height: 70px;
+  margin: -1em;
+
   a {
     cursor: pointer;
   }
