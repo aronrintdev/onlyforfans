@@ -17,8 +17,14 @@ class Campaign extends Model implements UuidId, Ownable
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
 
+    protected $attributes = [
+        'active' => true,
+    ];
+
     // ================= Accessors/Mutators | Casts ==================
 
+    // has_new really means "for new subscribers"
+    // has_expired really means "for expired subscribers"
     public function getTargetedCustomerGroupAttribute($value)
     {
         if ( $this->has_new && $this->has_expired ) {
@@ -30,6 +36,11 @@ class Campaign extends Model implements UuidId, Ownable
         } else {
             return null; // invalid state (?)
         }
+    }
+
+    public function getIsSubscriberCountUnlimitedAttribute($value)
+    {
+        return ( empty($this->subscriber_count) || ($this->subscriber_count === -1) );
     }
 
     // ================= Relationships ==================
@@ -46,6 +57,13 @@ class Campaign extends Model implements UuidId, Ownable
 
     public function getOwner(): ?Collection {
         return new Collection([ $this->getPrimaryOwner() ]);
+    }
+
+    // De-active all existing active campaigns for the user
+    public static function deactivateAll($user) {
+        Campaign::where('creator_id', $user->id)
+            ->where('active', true)
+            ->update(['active' => false]);
     }
 
 }
