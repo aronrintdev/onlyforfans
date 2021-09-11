@@ -18,8 +18,8 @@ class CreateCampaignsTable extends Migration
             $table->foreign('creator_id')->references('id')->on('users');
 
             $table->enum('type', ['discount', 'trial']);
-            $table->boolean('has_new')->nullable();
-            $table->boolean('has_expired')->nullable();
+            $table->boolean('has_new')->nullable()->comment('Campaign target includes new subscribers');
+            $table->boolean('has_expired')->nullable()->comment('Campaign target includes expired/past subscribers');
             $table->integer('subscriber_count')->comment('-1 means No Limit');
             $table->unsignedInteger('offer_days');
             $table->unsignedInteger('discount_percent')->nullable();
