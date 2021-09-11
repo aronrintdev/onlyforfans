@@ -148,5 +148,14 @@ class ChatmessagesController extends AppBaseController
         return $paymentGateway->purchase($account, $chatmessage, $price);
     }
 
+    public function destroy(Chatmessage $chatmessage)
+    {
+        if ($chatmessage->is_read) {
+            return response()->json(['error' => 'read already.'], 401);
+        } else {
+            $chatmessage->delete();
+            return response()->json(200);
+        }
+    }
 
 }

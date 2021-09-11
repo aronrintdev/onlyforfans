@@ -63,4 +63,13 @@ class Chatmessagegroup extends Model
         return $this->belongsTo(User::class, 'sender_id');
     }
 
+    public function scopeIsQueue($query) {
+        return $query->withCount('chatmessages')
+            ->addSelect(['read_count' => Chatmessage::selectRaw('COUNT(*)')
+                ->whereColumn('chatmessagegroup_id', 'chatmessagegroups.id')
+                ->where('is_read', 1)
+            ])
+            ->havingRaw('read_count <> chatmessages_count');
+    }
+
 }
