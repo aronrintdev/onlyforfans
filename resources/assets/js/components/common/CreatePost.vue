@@ -134,6 +134,11 @@
                   <li @click="togglePostPrice()" class="selectable select-pic" v-b-tooltip.hover="'Set Post Unlock Price'">
                     <fa-icon :icon="postType === 'price' ? ['fas', 'tag'] : ['far', 'tag']" size="lg" :class="postType === 'price' ? 'text-primary' : 'text-secondary'" />
                   </li>
+                      
+                  <li @click="isEmojiBoxVisible=!isEmojiBoxVisible" class="selectable select-emoji" v-b-tooltip.hover="'Add Emoji Icon'">
+                    <fa-icon :icon="isEmojiBoxVisible ? ['fas', 'smile'] : ['far', 'smile']" :class="isEmojiBoxVisible ? 'text-primary' : 'text-secondary'" size="lg" />
+                    <VEmojiPicker v-if="isEmojiBoxVisible" @select="selectEmoji" />
+                  </li>
                 </ul>
               </b-col>
 
@@ -173,6 +178,7 @@ import Vuex from 'vuex'
 import moment from 'moment'
 import { isAndroid, isIOS, osVersion } from 'mobile-device-detect'
 import heic2any from 'heic2any'
+import { VEmojiPicker } from 'v-emoji-picker'
 
 import { eventBus } from '@/eventBus'
 import vue2Dropzone from 'vue2-dropzone'
@@ -292,6 +298,7 @@ export default {
     uploadProgress: 0,
     uploadFailedFilesCount: 0,
     uploadingFilesCount: 0,
+    isEmojiBoxVisible: false,
   }), // data
 
   methods: {
@@ -673,6 +680,11 @@ export default {
       if (url) {
         window.open(url, '_blank');
       }
+    },
+
+    selectEmoji(emoji) {
+      console.log(emoji)
+      this.isEmojiBoxVisible = false;
     }
   },
 
@@ -760,6 +772,7 @@ export default {
     UploadMediaPreview,
     VideoRecorder,
     AudioRecorder,
+    VEmojiPicker,
   },
 
 }
@@ -850,6 +863,10 @@ li.selectable[disabled] {
 .progress-widget {
   margin: 0.5rem 1rem !important;
 }
+
+.select-emoji {
+  position: relative;;
+}
 </style>
 
 <style lang="scss">
@@ -857,10 +874,17 @@ li.selectable[disabled] {
     color: #383838;
     min-height: 70px;
     padding: 1em;
+    background: #fff;
 
     a {
       cursor: pointer;
     }
+  }
+  #EmojiPicker {
+    position: absolute;
+    z-index: 1000;
+    top: 120%;
+    left: 0;
   }
 </style>
 
