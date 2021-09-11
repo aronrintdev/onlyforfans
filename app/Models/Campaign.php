@@ -17,6 +17,11 @@ class Campaign extends Model implements UuidId, Ownable
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
 
+    protected $appends = [
+        'targeted_customer_group',
+        'is_subscriber_count_unlimited',
+    ];
+
     protected $attributes = [
         'active' => true,
     ];
