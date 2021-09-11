@@ -113,7 +113,11 @@ export default {
       }
       str += ' subscribers'
       str += ` \u2022  ends ${moment(created_at).add(offer_days, 'days').format('MMM D')}`
-      str += ` \u2022  ${this.activeCampaign.subscriber_count} left`
+      if (this.activeCampaign.is_subscriber_count_unlimited) {
+        str += ` \u2022 unlimited`
+      } else {
+        str += ` \u2022 ${this.activeCampaign.subscriber_count} left`
+      }
       return str
     },
     
