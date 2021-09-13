@@ -18,7 +18,7 @@
     </b-btn>
     <b-btn variant="success" class="text-nowrap" @click="$emit('addTip')">
       <fa-icon icon="dollar-sign" fixed-width />
-      <span class="mr-2">{{ $t('addTip') }}</span>
+      <span class="mr-2">{{ hasTip ? $t('editTip') : $t('addTip') }}</span>
     </b-btn>
     <div class="ml-auto d-flex align-items-end" :class="{'float-right': mobile}">
       <div class="d-flex flex-column">
@@ -51,6 +51,7 @@ export default {
 
   props: {
     selected: { type: Array, default: () => ([]) },
+    hasTip: { type: Boolean, default: false },
   },
 
   computed: {
@@ -156,6 +157,7 @@ export default {
       "sendWithTip": "Include a tip with your message",
     },
     "addTip": "Add Tip",
+    "editTip": "Edit Tip"
   }
 }
 </i18n>

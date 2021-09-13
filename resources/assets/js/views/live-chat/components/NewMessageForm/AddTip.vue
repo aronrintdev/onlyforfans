@@ -60,7 +60,6 @@ export default {
 
   methods: {
     addTip() {
-      console.log(this.$refs['input'].$refs['input'].validate())
       if (this.$refs['input'].$refs['input'].validate() === true) {
         // false === 'invalid' null === 'valid'
         if (this.isValid !== false) {

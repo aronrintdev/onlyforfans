@@ -4,8 +4,11 @@
       :label="label || $t('label')"
       :state="valid"
       :invalid-feedback="validationMessage"
+      :label-cols="horizontal ? 'auto' : null"
     >
-      <b-input-group :prepend="currencySymbol">
+      <b-input-group
+        :prepend="currencySymbol"
+      >
         <b-form-input
           ref="price-input"
           :class="{ 'limit-width': limitWidth }"
@@ -67,6 +70,7 @@ export default {
     label:      { type: String },
     autofocus:  { type: Boolean, default: false },
     limitWidth: { type: Boolean, default: true },
+    horizontal: { type: Boolean, default: true },
   },
 
   computed: {

@@ -1,12 +1,16 @@
 <template>
-  <div class="h2">
-    <b-badge variant="success" class="d-flex">
-      Tip: {{ value | niceCurrency }}
-      <div class="cursor-pointer ml-3">
-        <fa-icon icon="times" fixed-width @click="$emit('clear')" />
-      </div>
-    </b-badge>
-  </div>
+  <b-alert show variant="success" class="tag d-flex flex-nowrap justify-content-start align-items-center">
+    <fa-icon icon="envelope-open-dollar" fixed-width size="lg" class="mx-2" />
+    <span class="mr-1">
+      {{ $t('prepend') }}
+    </span>
+    <strong @click="$emit('open')" class="cursor-pointer">
+      {{ value | niceCurrency }}
+    </strong>
+    <b-btn variant="link" class="p-0 ml-2" @click="$emit('clear')">
+      <fa-icon icon="times" size="lg" fixed-width />
+    </b-btn>
+  </b-alert>
 </template>
 
 <script>
@@ -36,10 +40,17 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.tag {
+  min-height: 2.25rem;
+  padding: var(--spacer-1, 0.25rem);
+}
+</style>
 
 <i18n lang="json5" scoped>
 {
-  "en": {}
+  "en": {
+    "prepend": "Tip:"
+  }
 }
 </i18n>
