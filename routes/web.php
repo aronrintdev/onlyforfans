@@ -245,6 +245,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::put('/timelines/{timeline}/subscribe', ['as'=>'timelines.subscribe', 'uses' => 'TimelinesController@subscribe']);
 
     Route::put('/timelines/{timeline}/unsubscribe', ['as' => 'timelines.unsubscribe', 'uses' => 'TimelinesController@unsubscribe']);
+    Route::patch('/timelines/{timeline}/set-subscription-price', ['as' => 'timelines.setSubscriptionPrice', 'uses' => 'TimelinesController@setSubscriptionPrice']);
     Route::resource('timelines', 'TimelinesController', [
         'only' => ['index', 'show'],
     ]);

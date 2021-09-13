@@ -478,4 +478,19 @@ class TimelinesController extends AppBaseController
         $data = $query->paginate( $request->input('take', 18) );
         return new PostCollection($data);
     }
+
+    public function setSubscriptionPrice(Request $request, Timeline $timeline)
+    {
+        $this->authorize('update', $timeline);
+        $request->validate([
+            'amount_in_cents' => 'required|numeric',
+        ]);
+        $userSettings = $request->user()->settings;
+        $group = 'subscriptions';
+        $result = $userSettings->setValues('subscriptions', [
+            'price_per_1_months' => $request->amount_in_cents,
+        ]);
+        $timeline->refresh();
+        return new TimelineResource($timeline);
+    }
 }
