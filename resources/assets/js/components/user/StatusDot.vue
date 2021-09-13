@@ -20,8 +20,12 @@ export default {
 
   computed: {
     sizing() {
+      const baseSize = 1
       switch(this.size) {
-        case 'sm': default: return '1rem';
+        case 'xs': return `${ baseSize * 0.75 }rem`
+        case 'sm': default: return `${ baseSize * 1 }rem`
+        case 'md':  return `${ baseSize * 1.5 }rem`
+        case 'lg': return `${ baseSize * 3   }rem`
       }
     }
   },

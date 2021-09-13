@@ -22,6 +22,10 @@
         @complete="audioRecordFinished"
       />
 
+      <div class="d-flex flex-wrap align-items-start">
+        <TipDisplay v-if="showTip" :value="tip" @clear="clearTip" class="w-auto" />
+      </div>
+
       <VueDropzone
         ref="myVueDropzone"
         id="dropzone"
@@ -77,6 +81,7 @@
         @recordAudio="recordAudio"
         @recordVideo="recordVideo"
         @setPrice="setPrice"
+        @addTip="addTip"
         @submit="sendMessage($event)"
       />
     </div>
@@ -97,6 +102,7 @@
         @close="scheduleMessageOpen = false"
       />
     </b-modal>
+    <AddTip :receiver="participant" v-model="addTipOpen" @submit="tipAdded" />
   </section>
 </template>
 
@@ -112,6 +118,8 @@ import ScheduleDateTime from '@components/modals/ScheduleDateTime'
 import UploadMediaPreview from '@components/posts/UploadMediaPreview'
 import VideoRecorder from '@components/videoRecorder';
 import AudioRecorder from '@components/audioRecorder';
+import AddTip from './AddTip'
+import TipDisplay from './TipDisplay'
 
 import SetPrice from './SetPrice.vue'
 import Footer from './Footer'
@@ -126,11 +134,13 @@ export default {
   name: 'NewMessageForm',
 
   components: {
+    AddTip,
     AudioRecorder,
     Footer,
     ScheduleDateTime,
     SetPrice,
     UploadMediaPreview,
+    TipDisplay,
     VideoRecorder,
     VueDropzone,
   },
@@ -138,6 +148,7 @@ export default {
   props: {
     session_user: null,
     chatthread_id: null,
+    thread: { type: Object, default: () => ({}) },
   },
 
   computed: {
@@ -146,9 +157,18 @@ export default {
       'selectedMediafiles',
       'uploadsVaultFolder',
     ]),
+    ...Vuex.mapState('messaging', [ 'threads' ]),
 
     channelName() {
       return `chatthreads.${this.chatthread_id}`
+    },
+
+    participant() {
+      if (!this.thread) {
+        return null
+      }
+      // Find first participant that is not the session user
+      return _.find(this.thread.participants, participant => participant.id !== this.session_user.id)
     },
 
     deliverAtTimestamp() {
@@ -207,7 +227,11 @@ export default {
       }
 
       return selected
-    }
+    },
+
+    showTip() {
+      return !(_.isEmpty(this.tip) || this.tip.amount === 0)
+    },
 
   }, // computed
 
@@ -228,6 +252,9 @@ export default {
 
     isSetPriceFormActive: false,
 
+    addTipOpen: false,
+    tip: {},
+
     // If client is sending message
     sending: false,
     uploadProgress: 0,
@@ -245,6 +272,18 @@ export default {
     ...Vuex.mapActions('vault', [
       'getUploadsVaultFolder',
     ]),
+
+    addTip() {
+      this.addTipOpen = true
+    },
+
+    tipAdded(value) {
+      this.tip = value
+    },
+
+    clearTip() {
+      this.tip = {}
+    },
 
     changeMediafiles(data) {
       this.UPDATE_SELECTED_MEDIAFILES([...data])

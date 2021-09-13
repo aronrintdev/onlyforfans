@@ -99,6 +99,7 @@
       v-if="!showGallery"
       :session_user="session_user"
       :chatthread_id="id"
+      :thread="thread"
       class="message-form"
       :class="{ mobile: mobile }"
       @sendMessage="addTempMessage"
