@@ -8,4 +8,6 @@ return [
         'unit'     => 'day',
         'interval' => 30,
     ],
+
+    'minPriceInCents' => 300, // subscription including discount can't drop below $3.00 US
 ];
