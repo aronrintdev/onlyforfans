@@ -84,9 +84,11 @@ Route::group(['middleware' => ['auth']], function () {
     // -- chatmessages --
     Route::get('/chatmessages/search', 'ChatmessagesController@search')->name('chatmessages.search');
     Route::apiResource('chatmessages', 'ChatmessagesController', [
-        'only' => [ 'index', ],
+        'only' => [ 'index', 'destroy' ],
     ]);
 
+    Route::get('/chatmessagegroups/queue', 'ChatmessagegroupsController@queue')->name('chatmessagegroups.queue');
+    Route::get('/chatmessagegroups/{chatmessagegroup}/unsend', 'ChatmessagegroupsController@unsend')->name('chatmessagegroups.unsend');
     Route::apiResource('chatmessagegroups', 'ChatmessagegroupsController', [
         'only' => [ 'index', ],
     ]);
@@ -154,7 +156,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::put('/notes/{notes}', ['as' => 'notes.update', 'uses' => 'NotesController@update']);
     Route::delete('/notes/{notes}', ['as' => 'notes.destroy', 'uses' => 'NotesController@destroy']);
     Route::resource('notes', 'NotesController', [
-        'only' => ['store' ],
+        'only' => ['store'],
     ]);
 
     // -- mediafiles: likeable | shareable | commentable (?) | tippable | purchaseable --

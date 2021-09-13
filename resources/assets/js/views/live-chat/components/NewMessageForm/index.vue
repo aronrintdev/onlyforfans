@@ -5,7 +5,7 @@
       <div>
         <fa-icon :icon="['fas', 'calendar-alt']" class="fa-lg" fixed-width />
         <span> Scheduled for </span>
-        <strong>{{ moment(deliverAtTimestamp).local().format('MMM DD, h:mm a') }}</strong>
+        <strong>{{ moment(newMessageForm.deliver_at).local().format('MMM DD, h:mm a') }}</strong>
       </div>
       <b-button variant="link" @click="clearScheduled">
         <fa-icon :icon="['fas', 'times']" class="clickable fa-lg" fixed-width />
@@ -418,7 +418,7 @@ export default {
       }
 
       if (this.isScheduled) {
-        params.is_scheduled = this.this.deliverAtTimestamp
+        params.is_scheduled = this.deliverAtTimestamp
       }
 
       if (this.chatthread_id === 'new') {
@@ -431,11 +431,10 @@ export default {
         this.$emit('create-chatthread', params)
 
       } else {
+        const res = await axios.post( this.$apiRoute('chatthreads.addMessage', this.chatthread_id), params )
         if (!this.isScheduled) {
-          this.whisperMessage()
+          this.whisperMessage(res.data.data)
         }
-
-        await axios.post( this.$apiRoute('chatthreads.addMessage', this.chatthread_id), params )
 
         if (this.isScheduled) {
           // Message was scheduled toast notification
@@ -451,20 +450,11 @@ export default {
 
     }, // finalizeMessageSend()
 
-    whisperMessage() {
-      // send an immediate message (on an existing thread)
-      const message = {
-        chatthread_id: this.chatthread_id,
-        mcontent:      this.newMessageForm.mcontent,
-        sender_id:     this.session_user.id,
-        is_delivered:  true,
-        imageCount:    this.selectedMediafiles.length,
-        delivered_at:  this.moment().toISOString(),
-      }
-      this.$emit('sendMessage', message)
+    whisperMessage(newMessage) {
+      this.$emit('sendMessage', newMessage)
       // Whisper the message to the channel so that is shows up for other users as fast as possible if they are
       //   currently viewing this thread
-      this.$echo.join(this.channelName).whisper('sendMessage', { message })
+      this.$echo.join(this.channelName).whisper('sendMessage', { message: newMessage })
     },
 
     async sendMessage() {
@@ -501,7 +491,7 @@ export default {
     },
 
     clearForm() {
-      this.newMessageForm.mcontent = null
+      this.newMessageForm.mcontent = ''
       this.clearPrice()
       this.CLEAR_SELECTED_MEDIAFILES()
       this.$refs.myVueDropzone.removeAllFiles()
@@ -686,7 +676,7 @@ textarea.form-control {
 {
   "en": {
     "clearFiles": "Clear Images",
-    "pricedValidation": "Priced messages must contain media, please provide for this message.",
+    "pricedValidation": "Messages with a set unlock price must contain media (photo or video). Please attach and resend.",
     "scheduled": {
       "title": "Scheduled",
       "message": "Messages has successfully been schedule to send at {time}."

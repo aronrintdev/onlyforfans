@@ -151,7 +151,7 @@ export default {
 {
   "en": {
     "errorTitle": "An Error Has Occurred",
-    "validationTitle": "Validation Error",
+    "validationTitle": "An Error Has Occurred",
     "warningTitle": "Warning"
   }
 }

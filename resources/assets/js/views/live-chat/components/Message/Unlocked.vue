@@ -3,6 +3,9 @@
     <article class="box">
       <Attachments :attachments="value.attachments" />
       <VueMarkdown :html="false" v-if="value.mcontent" class="content" :source="value.mcontent || ''" />
+      <div v-if="isSentMessage && isEnableUnsend" v-b-tooltip.hover.bottom :title="$t('unsend')" class="bg-info unsend-button" @click="$emit('onUnsend')">
+        <fa-icon icon="redo" size="xs" class="text-white" />
+      </div>
       <div
         class="timestamp d-flex align-items-center"
         :class="value.sender_id === session_user.id ? 'flex-row-reverse' : 'flex-row'"
@@ -65,6 +68,17 @@ export default {
     shown() {
       return this.value.mcontent || this.value.attachments.length > 0
     },
+
+    isSentMessage() {
+      return this.value.sender_id === this.session_user.id
+    },
+
+    isEnableUnsend() {
+      const currentTime = moment.utc().format("YYYY-MM-DD HH:mm:ss");
+      const diff = this.moment(currentTime).diff(this.moment(this.value.delivered_at), 'minutes')
+      return diff < 3 && !this.value.is_read ? true : false
+    }
+
   },
 
   data: () => ({
@@ -88,6 +102,14 @@ export default {
     max-width: 100%;
     display: flex;
     flex-direction: column;
+    .unsend-button {
+      position: absolute;
+      padding: 1px 6px;
+      border-radius: 100%;
+      right: 10px;
+      bottom: 20px;
+      cursor: pointer;
+    }
     .content {
       width: auto;
       //background: rgba(218,237,255,.53);
@@ -160,7 +182,8 @@ export default {
 {
   "en": {
     "seen": "Seen",
-    "tipTimestampTooltip": "This message contains financial transaction information"
+    "tipTimestampTooltip": "This message contains financial transaction information",
+    "unsend": "Unsend",
   }
 }
 </i18n>

@@ -184,6 +184,10 @@ export default {
     },
 
     doSomething() {},
+
+    async getQueue() {
+      const response = await axios.get(route('chatmessagegroups.queue'))
+    },
   },
 
   watch: {
@@ -224,6 +228,8 @@ export default {
       this.reloadFromFirstPage()
     }
     this.doSearch = _.debounce(this._doSearch, this.searchDebounceDuration);
+
+    this.getQueue()
   },
 }
 </script>
