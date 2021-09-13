@@ -45,7 +45,7 @@
               Subscribe for {{ timeline.userstats.display_prices_in_cents.subscribe_1_month | niceCurrency }} per month now
             </template>
           </b-button>
-          <p v-if="timeline.userstats.is_sub_discounted" class="text-muted text-center m-0"><small>
+          <p v-if="subscribe_only && timeline.userstats.is_sub_discounted" class="text-muted text-center m-0"><small>
             Discount applied: Subscribe for {{ timeline.userstats.display_prices_in_cents.subscribe_1_month_discounted | niceCurrency}}. 
             Renews at {{  timeline.userstats.display_prices_in_cents.subscribe_1_month | niceCurrency  }}
           </small></p>
