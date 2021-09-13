@@ -53,6 +53,10 @@
               <span v-if="data.item.attachment_counts.audios_count" class="ml-2"><fa-icon :icon="['far', 'microphone']" class="fa-sm" fixed-width /> {{ data.item.attachment_counts.audios_count }}</span>
             </div>
           </template>
+
+          <template #cell(unsend_action)="data">
+            <span v-if="data.item.sent_count !== data.item.read_count" class="text-info clickable" @click="showConfirmModal(data.item.id)">Unsend</span>
+          </template>
         </b-table>
         
         <section v-if="!mobile" class="crate-pagination d-flex align-items-center my-3">
@@ -76,6 +80,7 @@
               <b-list-group-item class="d-flex"><div class="text-muted tag-label">Sent</div> <div class="ml-auto">{{ cmg.sent_count }}</div></b-list-group-item>
               <b-list-group-item class="d-flex"><div class="text-muted tag-label">Viewed</div> <div class="ml-auto">{{ cmg.read_count }}</div></b-list-group-item>
               <b-list-group-item class="d-flex"><div class="text-muted tag-label">Purchased</div> <div class="ml-auto">{{ cmg.purchased_count }}</div></b-list-group-item>
+              <b-list-group-item class="d-flex"><div class="text-muted tag-label">Unsend</div> <div v-if="cmg.sent_count !== cmg.read_count" class="ml-auto clickable text-info" @click="showConfirmModal(cmg.id)">Unsend</div></b-list-group-item>
             </b-list-group>
           </b-card>
 
@@ -97,6 +102,14 @@
       </b-card>
 
     </section>
+
+    <b-modal id="confirm-undsend" v-model="isConfirmModalVisible" :title="$t('unsend.title')" :centered="mobile">
+      <div v-text="$t('unsend.description')" />
+      <template #modal-footer>
+        <b-button variant="primary" @click="onUnsendClicked">Confirm</b-button>
+        <b-button @click="hideConfirmModal">Cancel</b-button>
+      </template>
+    </b-modal>
 
   </div>
 </template>
@@ -130,6 +143,7 @@ export default {
         { key: 'sent_count', label: 'Sent', },
         { key: 'read_count', label: 'Viewed (Read?)', },
         { key: 'purchased_count', label: 'Purchased', },
+        { key: 'unsend_action', label: 'Unsend' },
       ]
     },
 
@@ -152,6 +166,8 @@ export default {
       qsearch: null, // search query string
     },
 
+    selectedId: null,
+    isConfirmModalVisible: false,
   }), // data
 
   methods: {
@@ -217,6 +233,24 @@ export default {
     onBackClicked() {
       this.$router.push({name: 'chatthreads.dashboard'})
     },
+
+    onUnsendClicked() {
+      this.isConfirmModalVisible = false
+      axios.get(route('chatmessagegroups.unsend', { id: this.selectedId })).then(() => {
+        const index = this.chatmessagegroups.findIndex(cm => cm.id === this.selectedId)
+        this.chatmessagegroups[index].sent_count = this.chatmessagegroups[index].read_count
+        this.$forceUpdate()
+      })
+    },
+
+    showConfirmModal(id) {
+      this.selectedId = id
+      this.isConfirmModalVisible = true
+    },
+
+    hideConfirmModal() {
+      this.isConfirmModalVisible = false
+    }
 
   },
 
@@ -296,6 +330,10 @@ export default {
         "view": "View Item",
         "purchaser": "Purchaser"
       }
+    },
+    "unsend": {
+      "title": "Unsend this message",
+      "description": "Unsend this message for everyone who has not purchased it yet"
     }
   }
 }

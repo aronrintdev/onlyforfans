@@ -5,6 +5,7 @@
       :key="item.id"
       :value="item"
       :isDateBreak="isDateBreak(idx)"
+      @unsend="unsend"
       v-observe-visibility="idx === items.length - 1 ? endVisible : false"
     />
     <b-list-group-item class="load-more" v-observe-visibility="endVisible"> </b-list-group-item>
@@ -65,6 +66,12 @@ export default {
       const next = moment(this.items[idx + 1].delivered_at)
       return !current.isSame(next, 'date')
     },
+
+    unsend(data) {
+      const index = this.items.findIndex(t => t.id === data.id)
+      this.items.splice(index, 1)
+      this.$forceUpdate()
+    }
   },
 
   watch: {},

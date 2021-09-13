@@ -73,4 +73,26 @@ class ChatmessagegroupsController extends AppBaseController
         return new ChatmessagegroupCollection($data);
     }
 
+    public function queue(Request $request) {
+        $query = Chatmessagegroup::query(); // Init query
+
+        // Check permissions | Restrict
+        $query->where('sender_id', $request->user()->id);
+
+        $query->isQueue();
+
+        $data = $query->latest()->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
+        return new ChatmessagegroupCollection($data);
+    }
+
+    public function unsend(Request $request, Chatmessagegroup $chatmessagegroup) {
+        $chatmessages = $chatmessagegroup->chatmessages;
+        foreach($chatmessages as $chatmessage) {
+            if (!$chatmessage->is_read) {
+                $chatmessage->delete();
+            }
+        }
+        return response()->json(200);
+    }
+
 }
