@@ -10,11 +10,18 @@
 
     </b-list-group-item>
 
-    <b-modal id="confirm-undsend" v-model="isConfirmModalVisible" :title="$t('unsend.title')" :centered="mobile">
-      <div v-text="modalDescription" />
+    <b-modal id="confirm-unsend" v-model="isConfirmModalVisible" :title="$t('unsend.title')" :centered="mobile">
+      <div v-text="$t('unsend.description')" />
       <template #modal-footer>
-        <b-button v-if="isConfirmModal" variant="primary" @click="onUnsendClicked">Confirm</b-button>
+        <b-button variant="primary" @click="onUnsendClicked">Confirm</b-button>
         <b-button @click="hideConfirmModal">Cancel</b-button>
+      </template>
+    </b-modal>
+
+    <b-modal id="unable-unsend" v-model="isUnableModalVisible" :title="$t('unsend.title')" :centered="mobile">
+      <div v-text="$t('unsend.unableDescription')" />
+      <template #modal-footer>
+        <b-button @click="hideUnableModal">Cancel</b-button>
       </template>
     </b-modal>
   </div>
@@ -55,19 +62,12 @@ export default {
       return this.value.mcontent || ( Array.isArray(this.value.attachments) && this.value.attachments.length > 0 )
     },
 
-    modalDescription() {
-      if (this.isConfirmModal) {
-        return this.$t('unsend.description')
-      } else {
-        return this.$t('unsend.unableDescription')
-      }
-    }
   },
 
   data: () => ({
     moment: moment,
-    isConfirmModal: true,
     isConfirmModalVisible: false,
+    isUnableModalVisible: false,
   }),
 
   methods: {
@@ -76,8 +76,7 @@ export default {
       return _.indexOf(this.value.purchased_by, u => u.id === this.session_user.id) > -1
     },
 
-    showConfirmModal(isConfirmModal) {
-      this.isConfirmModal = isConfirmModal
+    showConfirmModal() {
       this.isConfirmModalVisible = true
     },
 
@@ -85,11 +84,17 @@ export default {
       this.isConfirmModalVisible = false
     },
 
+    hideUnableModal() {
+      this.isUnableModalVisible = false
+    },
+
     onUnsendClicked() {
       this.isConfirmModalVisible = false
       axios.delete(route('chatmessages.destroy', { id: this.value.id }))
         .then(() => this.$emit('unsend', { id: this.value.id }))
-        .catch(err => this.showConfirmModal(false))
+        .catch(err => {
+          this.isUnableModalVisible = true
+        })
     },
   },
 
