@@ -54,7 +54,8 @@
         <b-col class="mt-3">
           <h6 v-if="activeCampaign.type === 'trial'">Limited offer - Free trial for {{ activeCampaign.trial_days }} days!</h6>
           <h6 v-if="activeCampaign.type === 'discount'">Limited offer - {{ activeCampaign.discount_percent }}% off for 31 days!</h6>
-          <p><small class="text-muted">{{ campaignBlurb }}</small></p>
+          <p><small class="text-muted">{{ activeCampaign | renderCampaignBlurb }}</small></p>
+
           <div class="w-100 d-flex justify-content-end">
             <b-button @click="showStopModal" class="px-4" variant="primary">Stop Promotion Campaign</b-button>
           </div>
@@ -88,33 +89,6 @@ export default {
   computed: {
     isLoading() {
       return !this.session_user || !this.user_settings
-    },
-
-    campaignBlurb() {
-      if ( !this.activeCampaign ) {
-        return null
-      }
-      const { created_at, offer_days, targeted_customer_group } = this.activeCampaign
-      let str = 'For '
-      switch ( targeted_customer_group ) {
-        case 'new':
-          str += 'new'
-          break
-        case 'expired':
-          str += 'expired'
-          break
-        case 'new-and-expired':
-          str += 'new & expired'
-          break
-      }
-      str += ' subscribers'
-      str += ` \u2022  ends ${moment(created_at).add(offer_days, 'days').format('MMM D')}`
-      if (this.activeCampaign.is_subscriber_count_unlimited) {
-        str += ` \u2022 unlimited`
-      } else {
-        str += ` \u2022 ${this.activeCampaign.subscriber_count} left`
-      }
-      return str
     },
 
   }, // computed
@@ -201,6 +175,7 @@ export default {
     startCampaign() {
       eventBus.$emit('open-modal', {
         key: 'modal-promotion-campaign',
+        data: { timeline: this.timeline },
       })
     },
 
@@ -237,6 +212,6 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 </style>
 
