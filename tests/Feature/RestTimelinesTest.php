@@ -12,6 +12,7 @@ use App\Models\Mediafile;
 use App\Events\ItemTipped;
 use App\Enums\PostTypeEnum;
 use App\Models\Diskmediafile;
+use App\Models\UserSetting;
 use App\Enums\PaymentTypeEnum;
 use App\Events\ItemSubscribed;
 use Illuminate\Support\Carbon;
@@ -856,6 +857,30 @@ class RestTimelinesTest extends TestCase
         $this->assertFalse( $fan->subscribedtimelines->contains( $content->timeline->id ) );
 
         $this->travelBack();
+    }
+
+    /**
+     *  @group timelines
+     *  @group regression
+     *  @group regression-base
+     *  @group erik
+     */
+    public function test_can_set_subscription_price()
+    {
+        $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // includes subscribers
+        $creator = $timeline->user;
+
+        $payload = [
+            'amount_in_cents' => $this->faker->numberBetween(1, 20) * 500, // in cents
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('timelines.setSubscriptionPrice', ['timeline' => $timeline->id]), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+
+        $userSettings = UserSetting::where('user_id', $creator->id)->firstOrFail();
+        $this->assertArrayHasKey('subscriptions', $userSettings->cattrs);
+        $this->assertArrayHasKey('price_per_1_months', $userSettings->cattrs['subscriptions']);
+        $this->assertEquals($payload['amount_in_cents'], $userSettings->cattrs['subscriptions']['price_per_1_months']);
     }
 
     // ------------------------------
