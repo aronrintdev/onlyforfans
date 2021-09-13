@@ -61,7 +61,14 @@
               class="dropzone"
             >
               <div class="dz-custom-content">
-                <div class="text-left text-editor" contenteditable v-html="descriptionForEditor" @input="editorChanged" @click="editorClicked"></div>
+                <div
+                  class="text-left text-editor"
+                  contenteditable
+                  v-html="descriptionForEditor"
+                  @keydown="editorChanged"
+                  @input="onInput"
+                  @click="editorClicked"
+                ></div>
               </div>
               <template v-if="selectedMediafiles && selectedMediafiles.length > 0">
                 <UploadMediaPreview
@@ -135,7 +142,7 @@
                     <fa-icon :icon="postType === 'price' ? ['fas', 'tag'] : ['far', 'tag']" size="lg" :class="postType === 'price' ? 'text-primary' : 'text-secondary'" />
                   </li>
                       
-                  <li @click="isEmojiBoxVisible=!isEmojiBoxVisible" class="selectable select-emoji" v-b-tooltip.hover="'Add Emoji Icon'">
+                  <li @click="isEmojiBoxVisible=true" v-custom-click-outside="closeEmojiBox" class="selectable select-emoji" v-b-tooltip.hover="'Add Emoji Icon'">
                     <fa-icon :icon="isEmojiBoxVisible ? ['fas', 'smile'] : ['far', 'smile']" :class="isEmojiBoxVisible ? 'text-primary' : 'text-secondary'" size="lg" />
                     <VEmojiPicker v-if="isEmojiBoxVisible" @select="selectEmoji" />
                   </li>
@@ -299,6 +306,7 @@ export default {
     uploadFailedFilesCount: 0,
     uploadingFilesCount: 0,
     isEmojiBoxVisible: false,
+    usernameList: [],
   }), // data
 
   methods: {
@@ -647,43 +655,95 @@ export default {
       }
     },
 
-    editorChanged(e) {
-      let text = `<span>${e.target.textContent}</span>`;
-      const regexp = /\B@[\w\-.]+/g
-      const htList = text.match(regexp) || [];
-      htList.forEach(item => {
-        text = text.replace(item, `</span><a href="/${item.slice(1)}" target="_blank">${item}</a><span>`);
-
-      })
-      this.descriptionForEditor = text;
-      this.description = e.target.textContent;
-      this.$nextTick(() => {
-        const p = e.target,
-            s = window.getSelection(),
-            r = document.createRange();
-        let ele = p.childElementCount > 0 ? p.lastChild : p;
-        if (p.lastChild.textContent == '') {
-          r.setStart(ele, 0);
-          r.setEnd(ele, 0);
-        } else {
-          r.setStart(ele, 1);
-          r.setEnd(ele, 1);
+    getCaretCharacterOffsetWithin(element) {
+        var caretOffset = 0;
+        var doc = element.ownerDocument || element.document;
+        var win = doc.defaultView || doc.parentWindow;
+        var sel;
+        if (typeof win.getSelection != "undefined") {
+            sel = win.getSelection();
+            if (sel.rangeCount > 0) {
+                var range = win.getSelection().getRangeAt(0);
+                var preCaretRange = range.cloneRange();
+                preCaretRange.selectNodeContents(element);
+                preCaretRange.setEnd(range.endContainer, range.endOffset);
+                caretOffset = preCaretRange.toString().length;
+            }
+        } else if ( (sel = doc.selection) && sel.type != "Control") {
+            var textRange = sel.createRange();
+            var preCaretTextRange = doc.body.createTextRange();
+            preCaretTextRange.moveToElementText(element);
+            preCaretTextRange.setEndPoint("EndToEnd", textRange);
+            caretOffset = preCaretTextRange.text.length;
         }
-  
-        s.removeAllRanges();
-        s.addRange(r);
-      })
+        return caretOffset;
+    },
+
+
+    editorChanged(e) {
+      if (e.keyCode == 50) {
+        e.preventDefault();
+        let content = e.target.innerHTML;
+        content += `<a>@`;
+        this.descriptionForEditor = content;
+        this.$nextTick(() => {
+          const p = e.target,
+              s = window.getSelection(),
+              r = document.createRange();
+          let ele = p.childElementCount > 0 ? p.lastChild : p;
+          if (p.lastChild.textContent == '') {
+            r.setStart(ele, 0);
+            r.setEnd(ele, 0);
+          } else {
+            r.setStart(ele, 1);
+            r.setEnd(ele, 1);
+          }
+    
+          s.removeAllRanges();
+          s.addRange(r);
+        })
+      } else if (e.keyCode == 32) {
+        let content = e.target.innerHTML;
+        if (content.slice(-4) == '</a>') {
+          e.preventDefault();
+          this.descriptionForEditor = content + '<span>&nbsp;';
+          this.$nextTick(() => {
+            const p = e.target,
+                s = window.getSelection(),
+                r = document.createRange();
+            let ele = p.childElementCount > 0 ? p.lastChild : p;
+            if (p.lastChild.textContent == '') {
+              r.setStart(ele, 0);
+              r.setEnd(ele, 0);
+            } else {
+              r.setStart(ele, 1);
+              r.setEnd(ele, 1);
+            }
+      
+            s.removeAllRanges();
+            s.addRange(r);
+          })
+        }
+      }
+    },
+
+    onInput(e) {
+      this.description = e.target.innerHTML
     },
 
     editorClicked(e) {
-      const url = e.target.href;
+      const url = e.target.textContent.slice(1)
       if (url) {
-        window.open(url, '_blank');
+        window.location.href = url;
       }
     },
 
     selectEmoji(emoji) {
-      console.log(emoji)
+      this.description += `<span class="emoji">${emoji.data}</span>`
+      this.descriptionForEditor = this.description
+    },
+
+    closeEmojiBox() {
       this.isEmojiBoxVisible = false;
     }
   },
@@ -878,8 +938,14 @@ li.selectable[disabled] {
 
     a {
       cursor: pointer;
+      color: var(--primary) !important;
+    }
+
+    .emoji {
+      letter-spacing: 0.3em;
     }
   }
+
   #EmojiPicker {
     position: absolute;
     z-index: 1000;
