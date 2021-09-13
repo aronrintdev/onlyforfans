@@ -43,7 +43,7 @@
         <!-- Preview Blurb -->
         <template v-if="campaignType==='discount'">
           <div>
-              <h6 class="m-0 text-center">Limited offer - {{ campaignPreview.discount_percent }}% off for {{ campaignPreview.offer_days }} days!</h6>
+              <h6 class="m-0 text-center text-sm-left">Limited offer - {{ campaignPreview.discount_percent }}% off for {{ campaignPreview.offer_days }} days!</h6>
               {{ campaignPreview | renderCampaignBlurb }}
           </div>
           <section v-if="campaignPreview" class="box-campaign-blurb mt-1">
