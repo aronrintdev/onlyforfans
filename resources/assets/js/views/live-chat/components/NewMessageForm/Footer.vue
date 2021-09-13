@@ -1,32 +1,26 @@
 <template>
-  <div class="toolbar align-items-center pb-sm-5" :class="{'d-flex': !mobile}">
-    <div class="tool-items d-flex flex-shrink-1 mr-3">
-      <b-btn
-        v-for="item in buttons"
-        :key="item.key"
-        variant="link"
-        :disabled="item.disabled"
-        :class="item.class"
-        v-b-tooltip.hover.bottom="{boundary: 'viewport', title: item.tooltip}"
-        @click="item.onClick"
-      >
-        <fa-icon
-          :icon="item.icon"
-          :size="iconSize"
-          fixed-width
-          :class="item.selected ? 'text-primary' : 'text-secondary'"
-        />
-      </b-btn>
-    </div>
+  <div class="toolbar d-flex flex-wrap align-items-center pb-sm-5" :class="{'d-flex': !mobile}">
+    <b-btn
+      v-for="item in buttons"
+      :key="item.key"
+      variant="link"
+      :disabled="item.disabled"
+      :class="item.class"
+      v-b-tooltip.hover.bottom="{boundary: 'viewport', title: item.tooltip}"
+      @click="item.onClick"
+    >
+      <fa-icon
+        :icon="item.icon"
+        :size="iconSize"
+        fixed-width
+        :class="item.selected ? 'text-primary' : 'text-secondary'"
+      />
+    </b-btn>
+    <b-btn variant="success" class="text-nowrap" @click="$emit('addTip')">
+      <fa-icon icon="dollar-sign" fixed-width />
+      <span class="mr-2">{{ hasTip ? $t('editTip') : $t('addTip') }}</span>
+    </b-btn>
     <div class="ml-auto d-flex align-items-end" :class="{'float-right': mobile}">
-      <b-btn
-        variant="success"
-        class="mr-3 text-nowrap"
-        v-b-tooltip.hover="mobile ? null :$t('tooltips.sendWithTip')"
-      >
-        <fa-icon icon="dollar-sign" class="mr-2" />
-        <span>{{ $t('sendWithTip') }}</span>
-      </b-btn>
       <div class="d-flex flex-column">
         <b-btn
           variant="primary"
@@ -57,6 +51,7 @@ export default {
 
   props: {
     selected: { type: Array, default: () => ([]) },
+    hasTip: { type: Boolean, default: false },
   },
 
   computed: {
@@ -142,9 +137,9 @@ export default {
 <style lang="scss" scoped>
 .toolbar {
   align-items: end;
-  .tool-items {
-    overflow-x: auto;
-  }
+  // .tool-items {
+  //   overflow-x: auto;
+  // }
 }
 </style>
 
@@ -161,7 +156,8 @@ export default {
       "setPrice": "Set Message Unlock Price",
       "sendWithTip": "Include a tip with your message",
     },
-    "sendWithTip": "Send with Tip",
+    "addTip": "Add Tip",
+    "editTip": "Edit Tip"
   }
 }
 </i18n>

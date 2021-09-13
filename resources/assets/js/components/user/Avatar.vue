@@ -41,11 +41,12 @@ export default {
 
   computed: {
     s() {
+      const baseSize = 3
       switch (this.size) {
-        case 'xs': return '2rem'
-        case 'sm': return '3rem'
-        case 'md': return '6rem'
-        case 'lg': return '9rem'
+        case 'xs': return `${ baseSize * 0.75 }rem`
+        case 'sm': return `${ baseSize * 1    }rem`
+        case 'md': return `${ baseSize * 1.5  }rem`
+        case 'lg': return `${ baseSize * 3    }rem`
       }
     },
   },

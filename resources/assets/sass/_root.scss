@@ -1,0 +1,18 @@
+/**
+ * resources/assets/sass/_root.scss
+ * This file is meant for putting css variables on the :root element
+ *   similar to ~bootstrap/scss/_root
+ */
+
+:root {
+  --spacer: #{$spacer};
+
+  @each $key, $value in $spacers {
+    --spacer-#{$key}: #{$value};
+  }
+
+  @each $color, $value in $grays {
+    --gray-#{$color}: #{$value};
+  }
+}
+

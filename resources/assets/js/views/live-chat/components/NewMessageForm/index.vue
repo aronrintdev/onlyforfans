@@ -1,18 +1,12 @@
 <template>
   <section v-if="!isLoading" class="conversation-footer d-flex flex-column">
 
-    <div v-if="isScheduled" class="scheduled-message-head d-flex justify-content-start align-items-center">
-      <div>
-        <fa-icon :icon="['fas', 'calendar-alt']" class="fa-lg" fixed-width />
-        <span> Scheduled for </span>
-        <strong>{{ moment(newMessageForm.deliver_at).local().format('MMM DD, h:mm a') }}</strong>
-      </div>
-      <b-button variant="link" @click="clearScheduled">
-        <fa-icon :icon="['fas', 'times']" class="clickable fa-lg" fixed-width />
-      </b-button>
-    </div>
-
     <div class="store-chatmessage mt-auto">
+      <div class="d-flex flex-wrap align-items-start">
+        <ScheduledAtDisplay v-if="isScheduled" :value="newMessageForm.deliver_at" class="w-auto mr-2" @clear="clearScheduled" />
+        <TipDisplay v-if="hasTip" :value="tip" class="w-auto mr-2" @open="addTip" @clear="clearTip" />
+      </div>
+
       <SetPrice v-if="isSetPriceFormActive" v-model="newMessageForm.price" class="mt-3" />
 
       <AudioRecorder
@@ -72,11 +66,13 @@
       <!-- Bottom Toolbar -->
       <Footer
         :selected="selectedOptions"
+        :hasTip="hasTip"
         @vaultSelect="renderVaultSelector"
         @openScheduleMessage="openScheduleMessageModal"
         @recordAudio="recordAudio"
         @recordVideo="recordVideo"
         @setPrice="setPrice"
+        @addTip="addTip"
         @submit="sendMessage($event)"
       />
     </div>
@@ -97,6 +93,7 @@
         @close="scheduleMessageOpen = false"
       />
     </b-modal>
+    <AddTip :receiver="participant" v-model="addTipOpen" @submit="tipAdded" />
   </section>
 </template>
 
@@ -110,8 +107,11 @@ import VueDropzone from 'vue2-dropzone'
 
 import ScheduleDateTime from '@components/modals/ScheduleDateTime'
 import UploadMediaPreview from '@components/posts/UploadMediaPreview'
-import VideoRecorder from '@components/videoRecorder';
-import AudioRecorder from '@components/audioRecorder';
+import VideoRecorder from '@components/videoRecorder'
+import AudioRecorder from '@components/audioRecorder'
+import AddTip from './AddTip'
+import TipDisplay from './TipDisplay'
+import ScheduledAtDisplay from './ScheduledAtDisplay'
 
 import SetPrice from './SetPrice.vue'
 import Footer from './Footer'
@@ -126,10 +126,13 @@ export default {
   name: 'NewMessageForm',
 
   components: {
+    AddTip,
     AudioRecorder,
     Footer,
+    ScheduledAtDisplay,
     ScheduleDateTime,
     SetPrice,
+    TipDisplay,
     UploadMediaPreview,
     VideoRecorder,
     VueDropzone,
@@ -138,6 +141,7 @@ export default {
   props: {
     session_user: null,
     chatthread_id: null,
+    thread: { type: Object, default: () => ({}) },
   },
 
   computed: {
@@ -146,9 +150,18 @@ export default {
       'selectedMediafiles',
       'uploadsVaultFolder',
     ]),
+    ...Vuex.mapState('messaging', [ 'threads' ]),
 
     channelName() {
       return `chatthreads.${this.chatthread_id}`
+    },
+
+    participant() {
+      if (!this.thread) {
+        return null
+      }
+      // Find first participant that is not the session user
+      return _.find(this.thread.participants, participant => participant.id !== this.session_user.id)
     },
 
     deliverAtTimestamp() {
@@ -207,7 +220,11 @@ export default {
       }
 
       return selected
-    }
+    },
+
+    hasTip() {
+      return !(_.isEmpty(this.tip) || this.tip.amount === 0)
+    },
 
   }, // computed
 
@@ -228,6 +245,9 @@ export default {
 
     isSetPriceFormActive: false,
 
+    addTipOpen: false,
+    tip: {},
+
     // If client is sending message
     sending: false,
     uploadProgress: 0,
@@ -245,6 +265,18 @@ export default {
     ...Vuex.mapActions('vault', [
       'getUploadsVaultFolder',
     ]),
+
+    addTip() {
+      this.addTipOpen = true
+    },
+
+    tipAdded(value) {
+      this.tip = value
+    },
+
+    clearTip() {
+      this.tip = {}
+    },
 
     changeMediafiles(data) {
       this.UPDATE_SELECTED_MEDIAFILES([...data])
