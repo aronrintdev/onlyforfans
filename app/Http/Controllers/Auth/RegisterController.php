@@ -143,6 +143,8 @@ class RegisterController extends Controller
             'referral_code'     => $referral_code
         ]);
 
+        $user->timeline()->update(['name' => $request->name]);
+
         if (Setting::get('birthday') == 'on' && $request->birthday != '') {
             $user->settings()->update([ 'birthday' => date('Y-m-d', strtotime($request->birthday)) ]);
         }
@@ -474,8 +476,9 @@ class RegisterController extends Controller
 
         if (Config::get('auth.beta.active')) {
             if (Token::useToken($request->token, $user, Config::get('auth.beta.tokenName'))) {
-                $user->timeline->cattrs = ['beta_program' => true];
-                $user->timeline->save();
+                // Removing as we don't need to know this anymore
+                // $user->timeline->cattrs = ['beta_program' => true];
+                // $user->timeline->save();
             } else {
                 // Failed useToken remove user timeline and record
                 $user->settings->delete();

@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Notifications\Messages\MailMessage;
 
 class VerifyEmail extends Notification
@@ -38,6 +39,11 @@ class VerifyEmail extends Notification
 
     public function toSendgrid($notifiable)
     {
+        Log::debug('VerifyEmail toSendgrid', [
+            'notifiable' => $notifiable,
+            'actor->name' => $this->actor->name,
+            'url' => $this->url,
+        ]);
         return [
             'template_id' => 'verify-email',
             'to' => [
