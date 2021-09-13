@@ -13,7 +13,10 @@
         <b-row>
           <b-col>
             <label for="offer-limit">Offer limit</label>
+            <!--
             <b-form-select id="offer-limit" class="" v-model="offerLimit" :options="offerLimitOptions" required />
+            -->
+            <b-form-input v-model="offerLimit" :formatter="validateData" type="text" placeholder="Leave blank for no limit"></b-form-input>
           </b-col>
           <b-col>
             <label for="offer-limit">Offer expiration</label>
@@ -64,28 +67,8 @@ export default {
     trialDays: 7,
     message: '',
 
-    offerLimitOptions: [
-      { text: 'No limits', value: -1 },
-      { text: '1 subscriber', value: 1 },
-      { text: '2 subscribers', value: 2 },
-      { text: '3 subscribers', value: 3 },
-      { text: '4 subscribers', value: 4 },
-      { text: '5 subscribers', value: 5 },
-      { text: '6 subscribers', value: 6 },
-      { text: '7 subscribers', value: 7 },
-      { text: '8 subscribers', value: 8 },
-      { text: '9 subscribers', value: 9 },
-      { text: '10 subscribers', value: 10 },
-      { text: '20 subscribers', value: 20 },
-      { text: '30 subscribers', value: 30 },
-      { text: '40 subscribers', value: 40 },
-      { text: '50 subscribers', value: 50 },
-      { text: '60 subscribers', value: 60 },
-      { text: '70 subscribers', value: 70 },
-      { text: '80 subscribers', value: 80 },
-      { text: '90 subscribers', value: 90 },
-      { text: '100 subscribers', value: 100 },
-    ],
+    //offerLimitOptions: [ { text: 'No limits', value: -1 }, ],
+
     offerDaysOptions: [
       { text: 'No expiration', value: 0 },
       { text: '1 day', value: 1 },
@@ -139,7 +122,7 @@ export default {
     onSubmit(e) {
       e.preventDefault()
 
-      const formData = {
+      const payload = {
         type: this.campaignType,
         has_new: this.hasNewSubscribers,
         has_expired: this.hasExpiredSubscribers,
@@ -150,11 +133,21 @@ export default {
         message: this.message,
       }
 
-      this.axios.post(this.$apiRoute('campaigns.store'), formData).then(response => {
+      this.axios.post(this.$apiRoute('campaigns.store'), payload).then(response => {
         eventBus.$emit('campaign-updated', response.data.data)
         this.hideModal()
       })
     },
+
+    validateData(value) { // leave blank for no limit
+      let numV = parseInt(value, 10);
+      if(numV < 0) {
+        numV = 0;
+      } else if (Number.isNaN(numV)) {
+        numV = null;
+      }
+      return numV
+    }
   },
 }
 </script>
