@@ -59,7 +59,7 @@ class CampaignsController extends AppBaseController
         }
         // $this->authorize('create', Campaign::class);
 
-        Campaign::deactivateAll($request->user());
+        Campaign::deactivateAll($request->user()); // %TODO: move to boot observer?
 
         $attrs = $request->only([ 'type', 'has_new', 'has_expired', 'offer_days', 'discount_percent', 'trial_days' ]);
         $attrs['creator_id'] = $request->user()->id;
