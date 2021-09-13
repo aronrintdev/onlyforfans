@@ -356,4 +356,14 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         return ( !$activeCount );
     }
 
+    public function setSubscriptionPrice(int $priceInCents)
+    {
+        $userSettings = $this->user->settings;
+        $daysWindow = Config::get('stories.window_days');
+        $activeCount = Story::where('timeline_id', $this->id)
+            ->where('created_at','>=',Carbon::now()->subDays($daysWindow))
+            ->count();
+        return ( !$activeCount );
+    }
+
 }
