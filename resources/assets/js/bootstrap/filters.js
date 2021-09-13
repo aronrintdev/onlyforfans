@@ -131,3 +131,27 @@ Vue.filter('niceFilesize', function (value) {
     return value
   }
 })
+
+Vue.filter('renderCampaignBlurb', function (campaign) {
+  const { created_at, offer_days, targeted_customer_group } = campaign
+  let str = 'For '
+  switch ( targeted_customer_group ) {
+    case 'new':
+      str += 'new'
+      break
+    case 'expired':
+      str += 'expired'
+      break
+    case 'new-and-expired':
+      str += 'new & expired'
+      break
+  }
+  str += ' subscribers'
+  str += ` \u2022  ends ${moment(created_at).add(offer_days, 'days').format('MMM D')}`
+  if (campaign.is_subscriber_count_unlimited) {
+    str += ` \u2022 unlimited`
+  } else {
+    str += ` \u2022 ${campaign.subscriber_count} left`
+  }
+  return str
+})

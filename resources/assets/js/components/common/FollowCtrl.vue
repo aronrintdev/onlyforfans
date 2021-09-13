@@ -22,7 +22,7 @@
               <section v-if="activeCampaign" class="box-campaign-blurb mt-1">
                 <h6 v-if="activeCampaign.type==='trial'" class="m-0 text-center">Limited offer - Free trial for {{ activeCampaign.trial_days }} days!</h6>
                 <h6 v-if="activeCampaign.type==='discount'" class="m-0 text-center">Limited offer - {{ activeCampaign.discount_percent }}% off for {{ activeCampaign.offer_days }} days!</h6>
-                <p class="m-0 text-center"><small class="text-muted">{{ campaignBlurb }}</small></p>
+                <p class="m-0 text-center"><small class="text-muted">{{ activeCampaign | renderCampaignBlurb }}</small></p>
                 <article v-if="activeCampaign.message" class="tag-message d-flex align-items-center">
                   <div class="user-avatar">
                     <b-img rounded="circle" :src="timeline.avatar.filepath" :title="timeline.name" />
@@ -94,33 +94,6 @@ export default {
       return this.timeline?.userstats?.campaign || null
     },
 
-    campaignBlurb() {
-      if ( !this.activeCampaign ) {
-        return null
-      }
-      const { created_at, offer_days, targeted_customer_group } = this.activeCampaign
-      let str = 'For '
-      switch ( targeted_customer_group ) {
-        case 'new':
-          str += 'new'
-          break
-        case 'expired':
-          str += 'expired'
-          break
-        case 'new-and-expired':
-          str += 'new & expired'
-          break
-      }
-      str += ' subscribers'
-      str += ` \u2022  ends ${moment(created_at).add(offer_days, 'days').format('MMM D')}`
-      if (this.activeCampaign.is_subscriber_count_unlimited) {
-        str += ` \u2022 unlimited`
-      } else {
-        str += ` \u2022 ${this.activeCampaign.subscriber_count} left`
-      }
-      return str
-    },
-    
     websiteLink() {
       const url = this.timeline.userstats.website
       if (/(http(s?)):\/\//i.test(url)) {
