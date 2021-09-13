@@ -5,7 +5,7 @@
       <div>
         <fa-icon :icon="['fas', 'calendar-alt']" class="fa-lg" fixed-width />
         <span> Scheduled for </span>
-        <strong>{{ moment(deliverAtTimestamp).local().format('MMM DD, h:mm a') }}</strong>
+        <strong>{{ moment(newMessageForm.deliver_at).local().format('MMM DD, h:mm a') }}</strong>
       </div>
       <b-button variant="link" @click="clearScheduled">
         <fa-icon :icon="['fas', 'times']" class="clickable fa-lg" fixed-width />
@@ -379,7 +379,7 @@ export default {
       }
 
       if (this.isScheduled) {
-        params.is_scheduled = this.this.deliverAtTimestamp
+        params.is_scheduled = this.deliverAtTimestamp
       }
 
       if (this.chatthread_id === 'new') {
@@ -452,7 +452,7 @@ export default {
     },
 
     clearForm() {
-      this.newMessageForm.mcontent = null
+      this.newMessageForm.mcontent = ''
       this.clearPrice()
       this.CLEAR_SELECTED_MEDIAFILES()
       this.$refs.myVueDropzone.removeAllFiles()
@@ -637,7 +637,7 @@ textarea.form-control {
 {
   "en": {
     "clearFiles": "Clear Images",
-    "pricedValidation": "Priced messages must contain media, please provide for this message.",
+    "pricedValidation": "Messages with a set unlock price must contain media (photo or video). Please attach and resend.",
     "scheduled": {
       "title": "Scheduled",
       "message": "Messages has successfully been schedule to send at {time}."
