@@ -182,7 +182,7 @@
       @hide="closeModal('modal-promotion-campaign')"
       :centered="mobile"
     >
-      <PromotionCampaign ref="promotionCampaign" />
+      <PromotionCampaign ref="promotionCampaign" :timeline="selectedTimeline" />
     </b-modal>
   </div>
 </template>
@@ -329,6 +329,7 @@ export default {
             this.$bvModal.show('expiration-period')
             break
           case 'modal-promotion-campaign':
+            this.selectedTimeline = data.timeline
             this.$bvModal.show('modal-promotion-campaign')
             break
         }
@@ -599,11 +600,9 @@ export default {
   @media (max-width: 576px) {
     height: 100%;
 
-    .modal-header {
-      .close {
-        padding-left: 15px;
-        padding-right: 15px;
-      }
+    .modal-header .close {
+      padding-left: 15px;
+      padding-right: 15px;
     }
 
     .modal-dialog {

@@ -84,9 +84,11 @@ Route::group(['middleware' => ['auth']], function () {
     // -- chatmessages --
     Route::get('/chatmessages/search', 'ChatmessagesController@search')->name('chatmessages.search');
     Route::apiResource('chatmessages', 'ChatmessagesController', [
-        'only' => [ 'index', ],
+        'only' => [ 'index', 'destroy' ],
     ]);
 
+    Route::get('/chatmessagegroups/queue', 'ChatmessagegroupsController@queue')->name('chatmessagegroups.queue');
+    Route::get('/chatmessagegroups/{chatmessagegroup}/unsend', 'ChatmessagegroupsController@unsend')->name('chatmessagegroups.unsend');
     Route::apiResource('chatmessagegroups', 'ChatmessagegroupsController', [
         'only' => [ 'index', ],
     ]);
@@ -154,7 +156,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::put('/notes/{notes}', ['as' => 'notes.update', 'uses' => 'NotesController@update']);
     Route::delete('/notes/{notes}', ['as' => 'notes.destroy', 'uses' => 'NotesController@destroy']);
     Route::resource('notes', 'NotesController', [
-        'only' => ['store' ],
+        'only' => ['store'],
     ]);
 
     // -- mediafiles: likeable | shareable | commentable (?) | tippable | purchaseable --
@@ -196,7 +198,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     /* ------------------------------ Campaigns ------------------------------ */
     Route::get('/campaigns/active', ['as'=>'campaigns.active', 'uses' => 'CampaignsController@active']);
-    Route::get('/campaigns/{creator}', ['as'=>'campaigns.showActive', 'uses' => 'CampaignsController@showActive']);
+    Route::get('/campaigns/{user}', ['as'=>'campaigns.showActive', 'uses' => 'CampaignsController@showActive']);
     Route::post('/campaigns/stop', ['as'=>'campaigns.stop', 'uses' => 'CampaignsController@stop']);
     Route::resource('campaigns', 'CampaignsController', [ 'only' => [ 'store' ] ]);
 
@@ -243,6 +245,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::put('/timelines/{timeline}/subscribe', ['as'=>'timelines.subscribe', 'uses' => 'TimelinesController@subscribe']);
 
     Route::put('/timelines/{timeline}/unsubscribe', ['as' => 'timelines.unsubscribe', 'uses' => 'TimelinesController@unsubscribe']);
+    Route::patch('/timelines/{timeline}/set-subscription-price', ['as' => 'timelines.setSubscriptionPrice', 'uses' => 'TimelinesController@setSubscriptionPrice']);
     Route::resource('timelines', 'TimelinesController', [
         'only' => ['index', 'show'],
     ]);

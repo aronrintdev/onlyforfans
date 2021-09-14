@@ -4,8 +4,11 @@
       :label="label || $t('label')"
       :state="valid"
       :invalid-feedback="validationMessage"
+      :label-cols="horizontal ? 'auto' : null"
     >
-      <b-input-group :prepend="currencySymbol">
+      <b-input-group
+        :prepend="currencySymbol"
+      >
         <b-form-input
           ref="price-input"
           :class="{ 'limit-width': limitWidth }"
@@ -13,6 +16,8 @@
           v-mask="currencyMask"
           :state="valid"
           inputmode="numeric"
+          :placeholder="placeholder"
+          :autofocus="autofocus"
           @focus="onFocus"
           @blur="onBlur"
           @wheel.prevent="onMousewheel"
@@ -36,6 +41,7 @@
 
 <script>
 /**
+ * resources/assets/js/components/common/PriceSelector.vue
  * PriceSelector
  */
 import _ from 'lodash'
@@ -54,7 +60,8 @@ export default {
     /** v-model: price as integer */
     value:      { type: Number },
     min:        { type: Number, default: 300 },
-    max:        { type: Number, default: 5000 },
+    max:        { type: Number, default: 10000 },
+    default:    { type: Number, default: 300 },
     showSlider: { type: Boolean, default: false },
     interval:   { type: Number, default: 100 },
     minorMark:  { type: Number, default: 500 },
@@ -63,6 +70,7 @@ export default {
     label:      { type: String },
     autofocus:  { type: Boolean, default: false },
     limitWidth: { type: Boolean, default: true },
+    horizontal: { type: Boolean, default: true },
   },
 
   computed: {
@@ -96,6 +104,9 @@ export default {
     numberFormatter() {
       return new Intl.NumberFormat(navigator.languages, { style: 'decimal', minimumFractionDigits: this.currencyDigits })
     },
+    placeholder() {
+      return this.formatNumber(this.default)
+    },
   },
 
   data: () => ({
@@ -108,25 +119,25 @@ export default {
   methods: {
     validate(soft = false,) {
       if (soft && this.valid === null) {
-        return
+        return true
       }
       const value = this.price !== ''
         ? typeof this.price === 'string'
           ? Math.round(this.$parseNumber(this.price) * this.currencyModifier)
           : Math.round(this.price * this.currencyModifier)
-        : 0
+        : this.default
       if ( value < this.min ) {
         this.valid = false
         this.validationMessage = this.$t('minError', { label: this.label || $t('label'), price: this.formatCurrency(this.min)})
-        return
+        return false
       }
       if (value > this.max) {
         this.valid = false
         this.validationMessage = this.$t('maxError', { label: this.label || $t('label'), price: this.formatCurrency(this.max) })
-        return
+        return false
       }
       this.valid = null
-      return
+      return true
     },
     onInput(value) {
       this.validate(true)
@@ -148,6 +159,9 @@ export default {
       }
     },
     onBlur(e) {
+      if (this.price === '') {
+        this.price = this.formatNumber(this.default)
+      }
       this.focus = false
       this.price = this.numberFormatter.format(this.price)
       this.validate()
@@ -191,6 +205,9 @@ export default {
       if (!this.focus) {
         this.price = this.formatNumber(value)
       }
+    },
+    valid(value) {
+      this.$emit('isValid', value)
     }
   },
 
@@ -200,11 +217,12 @@ export default {
     } else {
       this.price = this.formatNumber(this.value)
     }
-    if (this.autofocus) {
-      setTimeout(() => {
-        this.$refs['price-input'].focus()
-      }, 500);
-    }
+    // Not Needed use vue bootstrap b-form-input autofocus property
+    // if (this.autofocus) {
+    //   setTimeout(() => {
+    //     this.$refs['price-input'].focus()
+    //   }, 500);
+    // }
   }
 
 }
@@ -213,6 +231,10 @@ export default {
 <style lang="scss" scoped>
 .limit-width {
   max-width: 7rem;
+}
+::placeholder {
+  color: var(--gray-500);
+  opacity: 1; /* Firefox */
 }
 </style>
 

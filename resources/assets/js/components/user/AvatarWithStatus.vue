@@ -16,6 +16,7 @@
               class="online-dot"
               v-b-tooltip:hover
               :title="slotProps.message"
+              :size="size"
             />
           </template>
         </Avatar>

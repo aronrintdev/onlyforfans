@@ -20,8 +20,12 @@ export default {
 
   computed: {
     sizing() {
+      const baseSize = 1
       switch(this.size) {
-        case 'sm': default: return '1rem';
+        case 'xs': return `${ baseSize * 0.75 }rem`
+        case 'sm': default: return `${ baseSize * 1 }rem`
+        case 'md':  return `${ baseSize * 1.5 }rem`
+        case 'lg': return `${ baseSize * 3   }rem`
       }
     }
   },
@@ -57,7 +61,7 @@ $spacer: 1rem;
   }
 }
 .bg-muted {
-  background-color: var(--gray, #6c757d) !important;
+  background-color: #d8d8d8 !important;
 }
 </style>
 

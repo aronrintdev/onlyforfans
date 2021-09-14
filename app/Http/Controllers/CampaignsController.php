@@ -1,8 +1,10 @@
 <?php
 namespace App\Http\Controllers;
 
+use Exception;
 use Log;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 
 use App\Enums\CampaignTypeEnum;
 use App\Http\Resources\Campaign as CampaignResource;
@@ -17,7 +19,7 @@ class CampaignsController extends AppBaseController
     {
         $campaign = Campaign::where('creator_id', $request->user()->id)->where('active', true)->first();
         if (!$campaign) {
-            abort(404, 'Could not find an active campaign for the user');
+            return response()->json(null, 200);
         }
         return new CampaignResource($campaign);
     }
@@ -27,7 +29,7 @@ class CampaignsController extends AppBaseController
     {
         $campaign = Campaign::where('creator_id', $user->id)->where('active', true)->first();
         if (!$campaign) {
-            abort(404, 'Could not find an active campaign for the user');
+            return response()->json(null, 200);
         }
         return new CampaignResource($campaign);
     }
@@ -55,10 +57,9 @@ class CampaignsController extends AppBaseController
         if ( !$request->has_expired && !$request->has_new ) {
             abort(422); // at least 1 of 3 options must be set
         }
-
         // $this->authorize('create', Campaign::class);
 
-        Campaign::deactivateAll($request->user());
+        Campaign::deactivateAll($request->user()); // %TODO: move to boot observer?
 
         $attrs = $request->only([ 'type', 'has_new', 'has_expired', 'offer_days', 'discount_percent', 'trial_days' ]);
         $attrs['creator_id'] = $request->user()->id;
@@ -66,6 +67,19 @@ class CampaignsController extends AppBaseController
         if ( $request->has('message') ) {
             $attrs['message'] = $request->message;
         }
+
+        // Check that discount keeps monthly price above 300 cents ($3.00) %FIXME: unhardcode
+        $userStats = $request->user()->getStats(); // call to get subscription price & other info
+        if ( empty($userStats['subscriptions']) ) {
+            throw new Exception('Subscription price is required before creating a promotion');
+        }
+        $subMonthlyPrice = $userStats['display_prices_in_cents']['subscribe_1_month'] ?? 0;
+        $minPriceInCents = Config::get('subscriptions.minPriceInCents', 300);
+        $discounted = applyDiscount($subMonthlyPrice, $attrs['discount_percent']);
+        if ( $discounted < $minPriceInCents ) {
+            abort(422, 'Discounted price must be '.nice_currency($discounted).' or higher');
+        }
+
         $campaign = Campaign::create($attrs);
         return new CampaignResource($campaign);
     }

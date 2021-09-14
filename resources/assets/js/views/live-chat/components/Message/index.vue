@@ -1,13 +1,30 @@
 <template>
-  <b-list-group-item class="message" :class="{ mobile }" v-if="shown">
-    <section v-if="isDateBreak" class="grouping-day-divider">
-      <span>{{ moment(value.delivered_at).format('MMM DD, YYYY') }}</span>
-    </section>
+  <div>
+    <b-list-group-item class="message" :class="{ mobile }" v-if="shown">
+      <section v-if="isDateBreak" class="grouping-day-divider">
+        <span>{{ moment(value.delivered_at).format('MMM DD, YYYY') }}</span>
+      </section>
 
-    <Unlocked v-if="!value.purchase_only || value.is_sender || havePurchased()" :value="value" />
-    <Locked v-else :value="value" />
+      <Unlocked v-if="!value.purchase_only || value.is_sender || havePurchased()" :value="value" @onUnsend="showConfirmModal(true)" />
+      <Locked v-else :value="value" @onUnsend="showConfirmModal" />
 
-  </b-list-group-item>
+    </b-list-group-item>
+
+    <b-modal id="confirm-unsend" v-model="isConfirmModalVisible" :title="$t('unsend.title')" :centered="mobile">
+      <div v-text="$t('unsend.description')" />
+      <template #modal-footer>
+        <b-button variant="primary" @click="onUnsendClicked">Confirm</b-button>
+        <b-button @click="hideConfirmModal">Cancel</b-button>
+      </template>
+    </b-modal>
+
+    <b-modal id="unable-unsend" v-model="isUnableModalVisible" :title="$t('unsend.title')" :centered="mobile">
+      <div v-text="$t('unsend.unableDescription')" />
+      <template #modal-footer>
+        <b-button @click="hideUnableModal">Cancel</b-button>
+      </template>
+    </b-modal>
+  </div>
 </template>
 
 <script>
@@ -44,17 +61,41 @@ export default {
     shown() {
       return this.value.mcontent || ( Array.isArray(this.value.attachments) && this.value.attachments.length > 0 )
     },
+
   },
 
   data: () => ({
     moment: moment,
+    isConfirmModalVisible: false,
+    isUnableModalVisible: false,
   }),
 
   methods: {
     // If session_user has purchased this message
     havePurchased() {
       return _.indexOf(this.value.purchased_by, u => u.id === this.session_user.id) > -1
-    }
+    },
+
+    showConfirmModal() {
+      this.isConfirmModalVisible = true
+    },
+
+    hideConfirmModal() {
+      this.isConfirmModalVisible = false
+    },
+
+    hideUnableModal() {
+      this.isUnableModalVisible = false
+    },
+
+    onUnsendClicked() {
+      this.isConfirmModalVisible = false
+      axios.delete(route('chatmessages.destroy', { id: this.value.id }))
+        .then(() => this.$emit('unsend', { id: this.value.id }))
+        .catch(err => {
+          this.isUnableModalVisible = true
+        })
+    },
   },
 
   watch: {},
@@ -102,7 +143,12 @@ export default {
 {
   "en": {
     "seen": "Seen",
-    "tipTimestampTooltip": "This message contains financial transaction information"
+    "tipTimestampTooltip": "This message contains financial transaction information",
+    "unsend": {
+      "title": "Unsend this message",
+      "description": "Are you sure you want to unsend this message?",
+      "unableDescription": "Can't delete this message",
+    }
   }
 }
 </i18n>

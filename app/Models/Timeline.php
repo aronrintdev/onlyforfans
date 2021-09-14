@@ -356,4 +356,8 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         return ( !$activeCount );
     }
 
+    //public function setSubscriptionPrice(int $priceInCents)
+    //{
+    //}
+
 }

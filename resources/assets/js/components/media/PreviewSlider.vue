@@ -8,15 +8,19 @@
           <div class="swiper-image-wrapper" v-for="(media, idx) in files" :key="idx" :class="{ 'tag-last':idx==Object.keys(files).length-1}">
             <b-img
               v-if="media.is_image && media.access"
+              v-show="loaded"
               class="swiper-lazy"
               :src="media.filepath || media.src"
               @click="openPhotoSwipe(idx)"
+              @load="onload"
             />
             <b-img
               v-if="media.is_image && !media.access"
+              v-show="loaded"
               class="swiper-lazy"
               :src="media.blurFilepath"
               @click="openPhotoSwipe(idx)"
+              @load="onload"
             />
             <div v-if="media.is_video" class="swiper-lazy video" @click="openPhotoSwipe(idx)">
               <video>
@@ -25,6 +29,7 @@
               <fa-icon :icon="['far', 'play-circle']" class="text-white icon-play" />
             </div>
           </div>
+          <b-spinner v-show="!loaded" variant="secondary" class="m-3" />
           <div v-observe-visibility="onLastVisible"> </div>
         </div>
       </swiper-slide>
@@ -94,6 +99,7 @@ export default {
     applyBtnEnabled: false,
     firstVisible: true,
     lastVisible: false,
+    loaded: false,
   }),
 
   computed: {
@@ -187,6 +193,10 @@ export default {
           bgOpacity: 0.75
         },
       })
+    },
+
+    onload() {
+      this.loaded = true
     },
 
   },
