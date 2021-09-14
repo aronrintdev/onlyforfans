@@ -384,7 +384,6 @@ class RestVaultTest extends TestCase
      *  @group vault
      *  @group regression
      *  @group regression-base
-     *  @group here0713
      */
     public function test_can_delete_my_non_root_vault_folder()
     {

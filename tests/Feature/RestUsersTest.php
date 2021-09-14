@@ -201,7 +201,6 @@ class RestUsersTest extends TestCase
      *  @group NO-users
      *  @group NO-regression
      *  @group NO-regression-base
-     *  @group here0715
      */
     public function test_should_send_verify_request_for_user()
     {

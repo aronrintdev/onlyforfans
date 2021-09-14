@@ -145,7 +145,6 @@ class ChatmessageModelTest extends TestCase
      * @group mycontacts
      * @group regression
      * @group regression-base
-     * @group here0607
      */
     public function test_should_get_mycontacts()
     {
