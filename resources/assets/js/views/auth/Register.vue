@@ -4,7 +4,7 @@
       <div class="login-card p-5">
         <!-- SignUp Form -->
         <b-form @submit.prevent="signup">
-          <Branding type="text" size="3x" class="mb-3 register-logo" />
+          <Branding type="text" size="3x" class="signin-logo" />
           <div class="h1 mb-3 text-center text-md-left" v-text="$t('signUpLink')" />
           <div class="signup-form">
             <div v-if="$route.query.beta">
@@ -246,20 +246,12 @@ export default {
   &.google { background-color: #dd4b39; }
   &.twitter { background-color: #55ACEE; }
 }
-.register-logo {
-  display: none;
-  @media (max-width: 576px) {
-    display: block;
-    width: 154px;
-    margin: 0 auto 25px;
+
+@media (max-width: 576px) {
+  .h1 {
+    font-size: 2rem;
   }
 }
-
-  @media (max-width: 576px) {
-    .h1 {
-      font-size: 2rem;
-    }
-  }
 </style>
 
 <i18n lang="json5">

@@ -5,7 +5,7 @@
         <b-form @submit.prevent="login">
           <!-- Login Form -->
           <div class="login-form">
-            <Branding type="text" size="3x" class="mb-3 signin-logo" />
+            <Branding type="text" size="3x" class="signin-logo" />
             <div class="h1 mb-3 text-center text-md-left" v-text="$t('signInHeader')"></div>
             <div v-if="verrors && verrors.message">
               <b-alert variant="danger" v-text="verrors.message" show />
@@ -183,18 +183,21 @@ export default {
   &.google { background-color: #dd4b39; }
   &.twitter { background-color: #55ACEE; }
 }
-.signin-logo {
-  display: none;
-  @media (max-width: 576px) {
-    display: block;
-    width: 154px;
-    margin: 0 auto 25px;
-  }
-}
 
 @media (max-width: 576px) {
   .h1 {
     font-size: 2rem;
+  }
+}
+</style>
+
+<style lang="scss">
+.signin-logo {
+  display: none;
+  @media (max-width: 576px) {
+    display: block;
+    width: 220px;
+    margin: 0 auto 40px;
   }
 }
 </style>
