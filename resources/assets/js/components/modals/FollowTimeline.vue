@@ -30,9 +30,6 @@
               <p><fa-icon :icon="['fas', 'check']" /> Quick and easy cancellation</p>
               <p><fa-icon :icon="['fas', 'check']" /> Safe and secure transaction</p>
               <p><fa-icon :icon="['fas', 'check']" /> Ability to Message with {{ timeline.name }}</p>
-              <!-- <h5 v-if="userCampaign.type === 'trial'">Limited offer - Free trial for {{ userCampaign.trial_days }} days!</h5>
-              <h5 v-if="userCampaign.type === 'discount'">Limited offer - {{ userCampaign.discount_percent }} % off for 31 days!</h5> -->
-              <!-- <p><small class="text-muted">For {{ campaignAudience }} • ends {{ campaignExpDate }} • left {{ userCampaign.subscriber_count }}</small></p> -->
             </b-col>
           </b-row>
 
@@ -100,41 +97,9 @@ export default {
     timelineUrl() {
       return `/${this.timeline.slug}`
     },
-
-    campaignAudience() {
-      if (this.userCampaign) {
-        const { has_new: hasNew, has_expired: hasExpired } = this.userCampaign
-
-        if (hasNew && hasExpired) {
-          return 'new & expired subscribers'
-        }
-
-        if (hasNew) {
-          return 'new subscribers'
-        }
-
-        if (hasExpired) {
-          return 'expired subscribers'
-        }
-      }
-
-      return null
-    },
-
-    campaignExpDate() {
-      if (this.userCampaign) {
-        const { created_at: createdAt, offer_days: offerDays } = this.userCampaign
-        const startDate = moment(createdAt)
-        const expDate = startDate.add(offerDays, 'days')
-        return expDate.format('MMM D')
-      }
-
-      return null
-    }
   },
 
   created() {
-    this.getUserCampaign()
     try {
       if ( window.paymentsDisabled || paymentsDisabled ) {
         this.paymentsDisabled = true
@@ -144,6 +109,9 @@ export default {
 
   mounted() {
     console.log({timeline: this.timeline})
+    if (true || this.subscribe_only) {
+      this.getUserCampaign() // if none exists will return null
+    }
   },
 
   data: () => ({
@@ -159,7 +127,7 @@ export default {
     async doFollow(e) {
       this.isInProcess = true
       e.preventDefault()
-      const response = await this.axios.put( route('timelines.follow', this.timeline.id), {
+      const response = await this.axios.put( this.$apiRoute('timelines.follow', this.timeline.id), {
         sharee_id: this.session_user.id,
         notes: '',
       })
@@ -183,14 +151,13 @@ export default {
 
       if (!this.paymentsDisabled) {
         this.isInProcess = true
-        const response = await this.axios.put( route('timelines.subscribe', this.timeline.id), {
+        const response = await this.axios.put( this.$apiRoute('timelines.subscribe', this.timeline.id), {
           account_id: this.session_user.id,
           amount: this.timeline.userstats.subscriptions.price_per_1_months * 100,
           currency: this.timeline.currency,
         })
         this.$bvModal.hide('modal-follow')
         this.isInProcess = false
-
 
         // Needs to be moved
 
@@ -208,7 +175,7 @@ export default {
     },
 
     async getUserCampaign() {
-      const response = await this.axios.get(route('campaigns.showActive', this.timeline.user.id))
+      const response = await this.axios.get( this.$apiRoute('campaigns.showActive', this.timeline.user.id) )
       this.userCampaign = response.data.data
     },
 
