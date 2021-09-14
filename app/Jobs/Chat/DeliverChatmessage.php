@@ -1,23 +1,16 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Chat;
 
+use App\Models\Chatmessage;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
-use App\Models\Financial\Account;
-use App\Models\Financial\Transaction;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use App\Models\Financial\TransactionSummary;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
-use App\Enums\Financial\TransactionSummaryTypeEnum;
-use App\Enums\Financial\TransactionTypeEnum;
-use App\Models\Chatmessage;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 
 class DeliverChatmessage implements ShouldQueue, ShouldBeUnique
 {
@@ -51,7 +44,7 @@ class DeliverChatmessage implements ShouldQueue, ShouldBeUnique
      */
     public function __construct(Chatmessage $chatmessage)
     {
-        $this->chatmessage = $chatmessage;
+        $this->chatmessage = $chatmessage->withoutRelations();
     }
 
     /**

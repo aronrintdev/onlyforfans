@@ -1,18 +1,14 @@
 <?php
 
-namespace App\Jobs;
+namespace App\Jobs\Chat;
 
-use Carbon\Carbon;
+use App\Models\Chatmessage;
+use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
-use App\Models\Financial\Account;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use App\Enums\Financial\TransactionSummaryTypeEnum as SummaryType;
-use Illuminate\Bus\Batchable;
-use Illuminate\Support\Facades\Log;
 
 class StartDeliverMessagesBatch implements ShouldQueue
 {
@@ -44,12 +40,11 @@ class StartDeliverMessagesBatch implements ShouldQueue
         }
 
         // Start creating job batches
-        // $query->cursor()->each(function ($chatmessage) {
-        //     $this->batch()->add(
-
-        //     );
-        // } );
-
-
+        $query = Chatmessage::notDelivered()->scheduleReady();
+        $query->cursor()->each(function ($chatmessage) {
+            $this->batch()->add(
+                DeliverChatmessage::dispatch($chatmessage)
+            );
+        });
     }
 }
