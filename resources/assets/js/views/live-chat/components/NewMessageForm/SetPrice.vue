@@ -1,6 +1,6 @@
 <template>
   <b-alert show variant="primary" class="tag d-flex justify-content-start align-items-center">
-    <fa-icon :icon="['fas', 'dollar-sign']" size="lg" class="mx-2" fixed-width />
+    <fa-icon :icon="['fas', 'tag']" size="lg" class="mx-2" fixed-width />
     <PriceSelector :label="$t('label')" :value="value" autofocus @input="v => $emit('input', v)" noBottomMargin />
 
     <b-btn variant="link" class="p-0 ml-2" @click="$emit('clear')">
