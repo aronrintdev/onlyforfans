@@ -5,6 +5,7 @@
       :state="valid"
       :invalid-feedback="validationMessage"
       :label-cols="horizontal ? 'auto' : null"
+      :class="{ 'mb-0': noBottomMargin }"
     >
       <b-input-group
         :prepend="currencySymbol"
@@ -21,6 +22,7 @@
           @focus="onFocus"
           @blur="onBlur"
           @wheel.prevent="onMousewheel"
+          @keypress.enter="doBlur"
         />
         <slot name="append"></slot>
       </b-input-group>
@@ -71,6 +73,7 @@ export default {
     autofocus:  { type: Boolean, default: false },
     limitWidth: { type: Boolean, default: true },
     horizontal: { type: Boolean, default: true },
+    noBottomMargin: { type: Boolean, default: false },
   },
 
   computed: {
@@ -183,6 +186,10 @@ export default {
       }
       value = _.clamp(value, this.min, this.max)
       this.onSliderChange(value)
+    },
+
+    doBlur() {
+      this.$refs['price-input'].blur()
     },
 
     parse(value) {
