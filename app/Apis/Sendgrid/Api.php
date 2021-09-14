@@ -102,6 +102,9 @@ class Api
             'new-tip-received'                                         => 'd-d2220b0b64a442958aad5bdf99dd58e3', 
             'new-comment-received'                                     => 'd-8bc8911ea1424d8591e0ba05f92476f1', 
             'change-percentage-of-gross-earnings'                      => 'd-455641d888d94f228c6d95a9f36f3e8b',
+
+            'campaign-expired'                                         => 'd-7123f1bdbd3a4b7ea49cf6dad9808afd',
+            'new-promotion-campaign-started'                           => 'd-b5afdeceab8e45dca4f06f15fde89500',
         ];
     }
 

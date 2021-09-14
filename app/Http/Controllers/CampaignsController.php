@@ -19,7 +19,7 @@ class CampaignsController extends AppBaseController
     {
         $campaign = Campaign::where('creator_id', $request->user()->id)->where('active', true)->first();
         if (!$campaign) {
-            return response()->json([], 200);
+            return response()->json(null, 200);
         }
         return new CampaignResource($campaign);
     }
@@ -29,7 +29,7 @@ class CampaignsController extends AppBaseController
     {
         $campaign = Campaign::where('creator_id', $user->id)->where('active', true)->first();
         if (!$campaign) {
-            abort(404, 'Could not find an active campaign for the user');
+            return response()->json(null, 200);
         }
         return new CampaignResource($campaign);
     }
@@ -59,7 +59,7 @@ class CampaignsController extends AppBaseController
         }
         // $this->authorize('create', Campaign::class);
 
-        Campaign::deactivateAll($request->user());
+        Campaign::deactivateAll($request->user()); // %TODO: move to boot observer?
 
         $attrs = $request->only([ 'type', 'has_new', 'has_expired', 'offer_days', 'discount_percent', 'trial_days' ]);
         $attrs['creator_id'] = $request->user()->id;

@@ -108,6 +108,7 @@ class UserSetting extends Model
             ],
         ],
         'subscriptions' => [ // group
+            'price_per_1_months' => null,
         ], 
         'localization' => [ // group
         ], 
@@ -123,6 +124,24 @@ class UserSetting extends Model
         'watermark' => [ // group
         ], 
     ];
+
+    public function setValues(string $group, array $payload) {
+        //dump($payload);
+        $cattrs = $this->cattrs; // 'pop'
+
+        // apply any set payload from input
+        switch ($group) {
+        case 'subscriptions': // 1-level deep
+            foreach ($payload as $k => $v) {
+                if ( array_key_exists( $k, self::$template[$group]) ) {
+                    $cattrs[$group][$k] = $v;
+                }
+            }
+            break;
+        } // switch
+        $this->cattrs = $cattrs; // 'push'
+        $this->save();
+    }
 
     public function enable(string $group, array $payload) {
         //dump($payload);
