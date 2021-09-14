@@ -18,7 +18,7 @@
                     <b-form-input id="slug" v-model="formProfile.slug" disabled></b-form-input>
                   </div>
                 </b-form-group>
-                <small class="text-secondary">* Changing the profile URL is disabled during the beta testing phase.</small>
+                <small class="text-secondary">* Changing the profile URL is currently disabled.</small>
               </b-col>
             </b-row>
 
