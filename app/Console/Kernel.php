@@ -10,7 +10,7 @@ use App\Jobs\StartTransactionSummaryCreation;
 
 use App\Jobs\Financial\StartUpdatePendingBalances;
 use App\Enums\Financial\TransactionSummaryTypeEnum;
-use App\Jobs\StartDeliverMessagesBatch;
+use App\Jobs\Chat\StartDeliverMessagesBatch;
 use App\Models\Chatmessage;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
