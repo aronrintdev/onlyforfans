@@ -354,6 +354,7 @@ export default {
       this.formErr = null // clear errors
       this.isBusy = true
       console.log('CreatePost::savePost()')
+      this.descriptionForEditor = this.description
       // (1) create the post
       let response = null
       const payload = {
@@ -732,15 +733,31 @@ export default {
     },
 
     editorClicked(e) {
-      const url = e.target.textContent.slice(1)
-      if (url) {
+      if (e.target.tagName == 'A') {
+        const url = e.target.textContent.slice(1)
         window.location.href = url;
       }
     },
 
     selectEmoji(emoji) {
-      this.description += `<span class="emoji">${emoji.data}</span>`
+      this.description += `<span class="emoji">${emoji.data}</span><span>&nbsp;`
       this.descriptionForEditor = this.description
+      this.$nextTick(() => {
+        const p = document.querySelector('.text-editor'),
+            s = window.getSelection(),
+            r = document.createRange();
+        let ele = p.childElementCount > 0 ? p.lastChild : p;
+        if (!p.lastChild.textContent) {
+          r.setStart(ele, 0);
+          r.setEnd(ele, 0);
+        } else {
+          r.setStart(ele, 1);
+          r.setEnd(ele, 1);
+        }
+  
+        s.removeAllRanges();
+        s.addRange(r);
+      })
     },
 
     closeEmojiBox() {
@@ -936,13 +953,30 @@ li.selectable[disabled] {
     padding: 1em;
     background: #fff;
 
+    &:focus {
+      background: #fff;
+    }
+
     a {
       cursor: pointer;
       color: var(--primary) !important;
     }
 
+    p {
+      margin-bottom: 0;
+    }
+
     .emoji {
-      letter-spacing: 0.3em;
+      // letter-spacing: 0.3em;
+    }
+  }
+
+  .tag-post_desc {
+    p {
+      margin-bottom: 0;
+    }
+    .emoji {
+      // letter-spacing: 0.3em;
     }
   }
 
