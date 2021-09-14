@@ -173,6 +173,9 @@ export default {
   .border-class {
     border: none;
   }
+  .sidebar {
+    width: 20rem;
+  }
 }
 
 @media (max-width: 576px) {
