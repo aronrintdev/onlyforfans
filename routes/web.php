@@ -198,7 +198,7 @@ Route::group(['middleware' => ['auth']], function () {
 
     /* ------------------------------ Campaigns ------------------------------ */
     Route::get('/campaigns/active', ['as'=>'campaigns.active', 'uses' => 'CampaignsController@active']);
-    Route::get('/campaigns/{creator}', ['as'=>'campaigns.showActive', 'uses' => 'CampaignsController@showActive']);
+    Route::get('/campaigns/{user}', ['as'=>'campaigns.showActive', 'uses' => 'CampaignsController@showActive']);
     Route::post('/campaigns/stop', ['as'=>'campaigns.stop', 'uses' => 'CampaignsController@stop']);
     Route::resource('campaigns', 'CampaignsController', [ 'only' => [ 'store' ] ]);
 
