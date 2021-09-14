@@ -22,7 +22,7 @@
         </Avatar>
       </template>
       <div v-if="!imageOnly">
-        <div class="h5 mb-0">
+        <div class="h5 mb-0" :class="noLink ? 'no-clickable' : 'clickable'" @click="handleClickUsername">
           {{ user.username }}
           <div v-if="user.is_verified" class="d-inline" v-b-tooltip:hover :title="$t('tooltip.verified')">
             <fa-icon icon="check-circle" fixed-width class="text-success" />
@@ -84,6 +84,9 @@ export default {
         case 'doNotDisturb': return 'danger'
         case 'offline': default: return 'muted'
       }
+    },
+    handleClickUsername() {
+      this.$router.push({ name: 'timeline.show', params: { slug: this.user.timeline ? this.user.timeline.slug : this.user.slug } })
     }
   },
 
@@ -104,6 +107,12 @@ $spacer: 1rem;
   .media-aside {
     margin-right: 0 !important;
   }
+}
+.clickable {
+  cursor: pointer;
+}
+.no-clickable {
+  pointer-events: none;
 }
 </style>
 
