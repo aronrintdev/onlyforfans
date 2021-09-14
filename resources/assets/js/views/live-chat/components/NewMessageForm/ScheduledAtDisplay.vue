@@ -3,7 +3,9 @@
     <div>
       <fa-icon :icon="['fas', 'calendar-alt']" size="lg" class="mx-2" fixed-width />
       <span >{{ $t('message') }}</span>
-      <strong>{{ moment(value).local().format('MMM DD, h:mm a') }}</strong>
+      <strong class="cursor-pointer" @click="$emit('open')">
+        {{ moment(value).local().format('MMM DD, h:mm a') }}
+      </strong>
     </div>
     <b-btn variant="link" class="p-0 ml-2" @click="$emit('clear')">
       <fa-icon :icon="['fas', 'times']" class="icon cursor-pointer fa-lg" fixed-width />
@@ -44,6 +46,7 @@ export default {
 .tag {
   min-height: 2.25rem;
   padding: var(--spacer-1, 0.25rem);
+  margin: 0;
 }
 </style>
 

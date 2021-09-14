@@ -44,6 +44,7 @@ export default {
 .tag {
   min-height: 2.25rem;
   padding: var(--spacer-1, 0.25rem);
+  margin: 0;
 }
 </style>
 
