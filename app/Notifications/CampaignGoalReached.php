@@ -72,5 +72,3 @@ class CampaignGoalReached extends Notification
         ];
     }
 }
-
-

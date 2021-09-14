@@ -61,7 +61,7 @@ $spacer: 1rem;
   }
 }
 .bg-muted {
-  background-color: var(--gray, #6c757d) !important;
+  background-color: #d8d8d8 !important;
 }
 </style>
 
