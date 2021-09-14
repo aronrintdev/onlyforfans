@@ -21,7 +21,6 @@ class StoryModelTest extends TestCase
 {
     /**
      * @group OFF-story-model
-     * @group OFF-here0713
      */
     public function test_storyqueue_exists_for_owner()
     {
