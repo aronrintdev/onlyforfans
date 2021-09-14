@@ -9,8 +9,8 @@
             <div class="h5 mb-0" v-text="$t('title')" />
           </div>
           <div class="post_create-ctrl d-flex align-items-center flex-grow-1">
-            <b-form-select id="post-type" class="w-auto ml-auto" v-model="type" :options="ptypes" required />
-            <button type="button" @click="discard" aria-label="Close" class="close ml-3">×</button>
+            <!-- <b-form-select id="post-type" class="w-auto ml-auto" v-model="type" :options="ptypes" required /> -->
+            <button type="button" @click="discard" aria-label="Close" class="close ml-auto">×</button>
           </div>
         </section>
       </template>
@@ -161,11 +161,11 @@ export default {
     price: 0,
     priceForPaidSubscribers: 0,
     currency: 'USD',
-    ptypes: [
-      { text: 'Free', value: 'free' },
-      { text: 'By Purchase', value: 'price' },
-      { text: 'Subscriber-Only', value: 'paid' },
-    ],
+    // ptypes: [
+    //   { text: 'Free', value: 'free' },
+    //   { text: 'By Purchase', value: 'price' },
+    //   { text: 'Subscriber-Only', value: 'paid' },
+    // ],
     postSchedule: {},
     moment,
     schedule_datetime: null,
@@ -375,6 +375,8 @@ textarea,
   color: #383838;
   min-height: 70px;
   margin: -1em;
+  max-height: calc(100vh - 250px);
+  overflow: auto;
 
   a {
     cursor: pointer;
