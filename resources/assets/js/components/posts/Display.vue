@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="post-crate" v-bind:data-post_guid="post.id">
+  <div v-if="!isLoading" class="post-crate" :id="post.id" v-bind:data-post_guid="post.id">
     <b-card
       header-tag="header"
       footer-tag="footer"
@@ -75,9 +75,11 @@
       <div class="post-crate-content">
         <template v-if="post.access">
           <div v-if="post.description" v-touch:tap="tapHandler" :class="{ 'tag-has-mediafiles': hasMediafiles }" class="py-3 text-wrap">
-            <b-card-text class="px-3 mb-0 tag-post_desc">
-              <VueMarkdown :html="true" :source="parsedDescription" />
+            <b-card-text class="px-3 mb-0 tag-post_desc" :class="isCollapsed == 'expanded' ? 'full' : ''">
+              <VueMarkdown :html="true" :source="parsedDescription" ref="markdownContent" @rendered="isCollapse" />
             </b-card-text>
+            <b-btn class="collapse-btn" @click="changeCollapsable" variant="link" v-if="isCollapsed == 'collapsed'">{{ 'Read more' }}</b-btn>
+            <b-btn class="collapse-btn" @click="changeCollapsable" variant="link" v-if="isCollapsed == 'expanded'">{{ 'Collapse' }}</b-btn>
           </div>
           <article v-if="hasMediafiles">
             <MediaSlider :post="post" :key="post.id" :mediafiles="post.mediafiles" :imageIndex="imageIndex" :session_user="session_user" :use_mid="use_mid" @doubleTap="tapHandler" />
@@ -160,6 +162,8 @@ import MediaSlider from './MediaSlider'
 /** https://github.com/adapttive/vue-markdown/ */
 import VueMarkdown from '@adapttive/vue-markdown'
 
+const MAX_LINES = 3;
+
 export default {
   components: {
     PostHeader,
@@ -228,6 +232,7 @@ export default {
     startLikeUnlikeAnime: false,
     likeCount: 0,
     tapped: 0,
+    isCollapsed: null,
   }),
 
   mounted() {
@@ -328,6 +333,22 @@ export default {
         await this.toggleLike();
         this.startLikeUnlikeAnime = true
       }
+    }, 
+
+    isCollapse() {
+      this.$nextTick(() => {
+        if ($(`#${this.post.id} .tag-post_desc`)[0] && $(`#${this.post.id} .tag-post_desc`)[0].scrollHeight > 24 * MAX_LINES) { // MAX_LINES = 3
+          if ($(`#${this.post.id} .tag-post_desc`)[0].clientHeight < $(`#${this.post.id} .tag-post_desc`)[0].scrollHeight) {
+            this.isCollapsed = 'collapsed';
+          } else {
+            this.isCollapsed = 'expanded';
+          }
+        }
+      })
+    },
+
+    changeCollapsable() {
+      this.isCollapsed = this.isCollapsed == 'expanded' ? 'collapsed' : 'expanded';
     }
   },
 
@@ -345,11 +366,15 @@ ul {
   color: #383838;
   white-space: no-wrap;
   overflow: hidden;
-  max-height: 18rem;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 5;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+
+  &.full {
+    text-overflow: unset;
+    -webkit-line-clamp: unset;
+  }
 }
 
 .user-avatar {
@@ -452,6 +477,14 @@ ul {
 
 .post-header-tooltip {
   margin-right: -0.8em !important;
+}
+
+.tag-post_desc + .collapse-btn {
+  margin: 0 16px;
+  padding: 0;
+  font-size: 15px;
+  outline: none;
+  box-shadow: none;
 }
 
 </style>

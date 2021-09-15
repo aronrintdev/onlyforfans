@@ -1,5 +1,5 @@
 <template>
-  <div class="container p-0">
+  <div class="edit-post container p-0">
 
     <b-card header-tag="header" footer-tag="footer" class="position-relative">
 
@@ -9,8 +9,8 @@
             <div class="h5 mb-0" v-text="$t('title')" />
           </div>
           <div class="post_create-ctrl d-flex align-items-center flex-grow-1">
-            <b-form-select id="post-type" class="w-auto ml-auto" v-model="type" :options="ptypes" required />
-            <button type="button" @click="discard" aria-label="Close" class="close ml-3">×</button>
+            <!-- <b-form-select id="post-type" class="w-auto ml-auto" v-model="type" :options="ptypes" required /> -->
+            <button type="button" @click="discard" aria-label="Close" class="close ml-auto">×</button>
           </div>
         </section>
       </template>
@@ -40,7 +40,7 @@
           />
           <hr />
         </div>
-        <div class="text-left text-editor" contenteditable v-html="descriptionForEditor" @input="editorChanged" @click="editorClicked"></div>
+        <div class="text-left text-editor" contenteditable v-html="descriptionForEditor" @keydown="editorChanged" @input="onInput" @click="editorClicked"></div>
 
       </div>
 
@@ -75,6 +75,10 @@
               <li class="selectable select-calendar" v-if="post && post.schedule_datetime" @click="showSchedulePicker()">
                 <fa-icon size="lg" :icon="['far', 'calendar-check']" class="text-secondary" />
               </li>
+              <li @click="isEmojiBoxVisible=true" v-custom-click-outside="closeEmojiBox" class="selectable select-emoji" v-b-tooltip.hover="'Add Emoji Icon'">
+                <fa-icon :icon="isEmojiBoxVisible ? ['fas', 'smile'] : ['far', 'smile']" :class="isEmojiBoxVisible ? 'text-primary' : 'text-secondary'" size="lg" />
+                <VEmojiPicker v-if="isEmojiBoxVisible" @select="selectEmoji" />
+              </li>
             </ul>
           </b-col>
           <b-col cols="8" md="8" class="d-flex justify-content-end">
@@ -104,6 +108,7 @@ import { eventBus } from '@/eventBus'
 import PriceSelector from '@components/common/PriceSelector'
 import LoadingOverlay from '@components/common/LoadingOverlay'
 import CalendarIcon from '@components/common/icons/CalendarIcon.vue'
+import { VEmojiPicker } from 'v-emoji-picker'
 
 export default {
 
@@ -113,6 +118,7 @@ export default {
     LoadingOverlay,
     PriceSelector,
     CalendarIcon,
+    VEmojiPicker,
   },
 
   props: {
@@ -155,16 +161,17 @@ export default {
     price: 0,
     priceForPaidSubscribers: 0,
     currency: 'USD',
-    ptypes: [
-      { text: 'Free', value: 'free' },
-      { text: 'By Purchase', value: 'price' },
-      { text: 'Subscriber-Only', value: 'paid' },
-    ],
+    // ptypes: [
+    //   { text: 'Free', value: 'free' },
+    //   { text: 'By Purchase', value: 'price' },
+    //   { text: 'Subscriber-Only', value: 'paid' },
+    // ],
     postSchedule: {},
     moment,
     schedule_datetime: null,
     isTagFormVisible: true,
     descriptionForEditor: '',
+    isEmojiBoxVisible: false,
   }),
 
   methods: {
@@ -232,15 +239,72 @@ export default {
     },
 
     editorChanged(e) {
-      let text = `<span>${e.target.textContent}</span>`;
-      this.descriptionForEditor = this.detectUsername(text);
-      this.description = e.target.textContent;
+      if (e.keyCode == 50) {
+        e.preventDefault();
+        let content = e.target.innerHTML;
+        content += `<a>@`;
+        this.descriptionForEditor = content;
+        this.$nextTick(() => {
+          const p = e.target,
+              s = window.getSelection(),
+              r = document.createRange();
+          let ele = p.childElementCount > 0 ? p.lastChild : p;
+          if (p.lastChild.textContent == '') {
+            r.setStart(ele, 0);
+            r.setEnd(ele, 0);
+          } else {
+            r.setStart(ele, 1);
+            r.setEnd(ele, 1);
+          }
+    
+          s.removeAllRanges();
+          s.addRange(r);
+        })
+      } else if (e.keyCode == 32) {
+        let content = e.target.innerHTML;
+        if (content.slice(-4) == '</a>') {
+          e.preventDefault();
+          this.descriptionForEditor = content + '<span>&nbsp;';
+          this.$nextTick(() => {
+            const p = e.target,
+                s = window.getSelection(),
+                r = document.createRange();
+            let ele = p.childElementCount > 0 ? p.lastChild : p;
+            if (p.lastChild.textContent == '') {
+              r.setStart(ele, 0);
+              r.setEnd(ele, 0);
+            } else {
+              r.setStart(ele, 1);
+              r.setEnd(ele, 1);
+            }
+      
+            s.removeAllRanges();
+            s.addRange(r);
+          })
+        }
+      }
+    },
+
+    onInput(e) {
+      this.description = e.target.innerHTML
+    },
+
+    editorClicked(e) {
+      if (e.target.tagName == 'A') {
+        const url = e.target.textContent.slice(1)
+        window.location.href = url;
+      }
+    },
+
+    selectEmoji(emoji) {
+      this.description += `<span class="emoji">${emoji.data}</span><span>&nbsp;`
+      this.descriptionForEditor = this.description
       this.$nextTick(() => {
-        const p = e.target,
+        const p = document.querySelector('.text-editor'),
             s = window.getSelection(),
             r = document.createRange();
         let ele = p.childElementCount > 0 ? p.lastChild : p;
-        if (p.lastChild.textContent == '') {
+        if (!p.lastChild.textContent) {
           r.setStart(ele, 0);
           r.setEnd(ele, 0);
         } else {
@@ -253,12 +317,9 @@ export default {
       })
     },
 
-    editorClicked(e) {
-      const url = e.target.href;
-      if (url) {
-        window.open(url, '_blank');
-      }
-    },
+    closeEmojiBox() {
+      this.isEmojiBoxVisible = false;
+    }
   },
 
   created() {
@@ -308,9 +369,23 @@ textarea,
   line-height: 1em;
 }
 
-.text-editor {
+.edit-post .text-editor {
+  padding: 1em; 
+  background: #fff;
+  color: #383838;
+  min-height: 70px;
+  margin: -1em;
+  max-height: calc(100vh - 250px);
+  overflow: auto;
+
   a {
     cursor: pointer;
+  }
+}
+.list-inline {
+  li {
+    display: flex;
+    align-items: center;
   }
 }
 </style>

@@ -3,7 +3,7 @@
 
     <b-row class="pt-2">
       <b-col>
-        <h2 class="my-1">My Media</h2>
+        <h4 class="my-2">My Media</h4>
         <hr class="my-0"/>
       </b-col>
     </b-row>
@@ -124,7 +124,7 @@
 
         <!-- +++ List/Grid Display of Files & Folders +++ -->
         <b-overlay :show="fileUploading" spinner-variant="primary" rounded="sm">
-          <b-row :no-gutters="true">
+          <b-row class="files-list" :no-gutters="true">
 
             <!-- Files -->
             <b-col cols="4" md="3" v-for="(mf) in mediafiles" :key="mf.id" role="button" class="OFF-mb-3">
@@ -140,19 +140,23 @@
 
             <!-- Vaultfolders -->
             <b-col v-for="(vf) in children" :key="vf.id" cols="4" md="3" class="OFF-mb-2">
-              <div v-if="vf.is_pending_approval" class="tag-folder img-box tag-shared tag-pending-approval">
-                <b-img-lazy fluid @click="renderApproveSharedModal(vf)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img-lazy>
-                <div class="icon-pending-approval" style="font-size: 3rem;">
-                  <fa-icon :icon="['fas', 'share-alt']" class="text-primary" />
+              <div v-if="vf.is_pending_approval" class="tag-folder tag-shared tag-pending-approval">
+                <div class="img-box">
+                  <b-img-lazy fluid @click="renderApproveSharedModal(vf)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img-lazy>
+                  <div class="icon-pending-approval" style="font-size: 3rem;">
+                    <fa-icon :icon="['fas', 'share-alt']" class="text-primary" />
+                  </div>
                 </div>
               </div>
-              <div v-else class="tag-folder img-box">
-                <b-img fluid @click="doNav(vf.id)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
-                <div class="file-count">
-                  <b-badge variant="warning" class="p-1" :class="{ 'tag-mobile': mobile }">{{ vf.mediafiles.length + vf.vfchildren.length }}</b-badge>
-                </div>
-                <div @click="renderDeleteFolderForm(vf)" class="clickme_to-delete" role="button">
-                  <fa-icon :icon="['fas', 'trash']" class="text-danger" />
+              <div v-else class="tag-folder">
+                <div class="img-box">
+                  <b-img fluid @click="doNav(vf.id)" src="/images/icons/folder-icon.png" class="folder d-block mx-auto" role="button" :alt="`Folder ${vf.slug}`"></b-img>
+                  <div class="file-count">
+                    <b-badge variant="warning" class="p-1" :class="{ 'tag-mobile': mobile }">{{ vf.mediafiles.length + vf.vfchildren.length }}</b-badge>
+                  </div>
+                  <div @click="renderDeleteFolderForm(vf)" class="clickme_to-delete" role="button">
+                    <fa-icon :icon="['fas', 'trash']" class="text-danger" />
+                  </div>
                 </div>
               </div>
               <p class="text-center truncate m-0 tag-folder-title" :class="{ 'tag-mobile' : mobile} ">{{ vf.name }}</p>
@@ -1020,8 +1024,8 @@ body {
     }
     .tag-folder .file-count {
       position: absolute;
-      top: 5px;
-      left: 5px;
+      top: 15px;
+      left: 15px;
 
       .badge {
         color: #fff;
@@ -1034,8 +1038,8 @@ body {
     }
     .tag-folder .clickme_to-delete {
       position: absolute;
-      top: 5px;
-      right: 5px;
+      top: 15px;
+      right: 15px;
     }
     .tag-folder .icon-pending-approval {
       position: absolute;
@@ -1076,28 +1080,59 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
    }
+  .tag-file, .tag-folder {
+    margin: 8px;
+  }
   .tag-file .truncate {
     width: 200px;
   }
   .tag-folder .truncate {
     width: 200px;
   }
-}
 
-.new-folder-icon {
-  position: absolute; 
-  top: -6px;
-  right: 15px;
-  padding: 4px 6px;
-}
-
-@media (max-width: 576px) {
-  .vault-btn {
-    font-size: 12px;
+  .files-list.row {
+    margin: -8px;
+    margin-bottom: 50px;
   }
 
-  .record-btns {
-    margin-top: -2.5rem !important;
+  .new-folder-icon {
+    position: absolute; 
+    top: -6px;
+    right: 15px;
+    padding: 4px 6px;
+  }
+
+  @media (max-width: 576px) {
+    .vault-btn {
+      font-size: 12px;
+    }
+
+    .record-btns {
+      margin-top: -2.5rem !important;
+    }
+
+    .tag-file, .tag-folder {
+      margin: 3px;
+    }
+    .files-list.row {
+      margin: -3px;
+      margin-bottom: 20px;
+    }
+
+    .vault-container {
+      .tag-folder .file-count {
+        top: 7px;
+        left: 8px;
+
+        .badge.tag-mobile {
+          font-size: 0.8rem;
+        }
+      }
+      .tag-folder .clickme_to-delete {
+        top: 8px;
+        right: 8px;
+      }
+    }
   }
 }
 

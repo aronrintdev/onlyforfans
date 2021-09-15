@@ -362,8 +362,12 @@ header.masthead .profile-ctrl.dropdown button {
     }
   }
 
-  .avatar-details {
-    margin-left: 56px;
+  .avatar-profile {
+    overflow: hidden;
+
+    .avatar-details {
+      margin-left: 56px;
+    }
   }
 }
 </style>
