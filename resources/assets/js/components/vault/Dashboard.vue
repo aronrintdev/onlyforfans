@@ -1102,9 +1102,3 @@ body {
 }
 
 </style>
-
-<style>
-#send-files-modal .modal-dialog {
-  width: 248px;
-}
-</style>
