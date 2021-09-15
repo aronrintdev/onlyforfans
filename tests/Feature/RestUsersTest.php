@@ -98,7 +98,6 @@ class RestUsersTest extends TestCase
      *  @group users
      *  @group regression
      *  @group regression-base
-     *  @group here0915
      */
     public function test_user_can_register()
     {
