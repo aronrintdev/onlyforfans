@@ -60,7 +60,7 @@
                   <hr />
 
                   <b-form-group id="group-email-interaction">
-                    <h5>User Interaction</h5>
+                    <h5>User Interactions</h5>
                     <div>
                       <b-form-checkbox v-model="thisForm.by_email.timelines.new_follower">When I receive a new follower</b-form-checkbox>
                     </div>
