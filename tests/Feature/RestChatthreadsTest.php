@@ -321,7 +321,6 @@ class RestChatthreadsTest extends TestCase
      *  @group chatthreads
      *  @group regression
      *  @group regression-base
-     *  @group here0906
      */
     public function test_can_create_direct_chat()
     {

@@ -65,7 +65,6 @@ class SendgridApiTest extends TestCase
     /**
      * @group sendgrid-api-unit
      * @group NO-regression
-     * @group OFF-here0719
      */
     public function test_should_send_email_direct_via_sendgrid_wrapper_api_tip_received()
     {
@@ -388,7 +387,6 @@ class SendgridApiTest extends TestCase
      * @group sendgrid-api-unit
      * @group lib-notification-unit
      * @group NO-regression
-     * @group here-0722
      */
     public function test_should_notify_id_verification_rejected()
     {

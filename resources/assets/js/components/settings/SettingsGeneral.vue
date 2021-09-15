@@ -14,7 +14,7 @@
             </b-row>
             <b-row>
               <b-col>
-                <small class="text-secondary">* Changing the username or email is disabled during the beta testing phase.</small>
+                <small class="text-secondary">* Changing the username or email is currently disabled.</small>
               </b-col>
             </b-row>
           </fieldset>

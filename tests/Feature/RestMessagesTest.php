@@ -24,7 +24,6 @@ class RestMessagesTest extends TestCase
     /**
      *  @group messages
      *  @group DEPRECATED-regression
-     *  @group OFF-here0519
      */
     public function test_can_fetch_contacts()
     {
@@ -65,7 +64,6 @@ class RestMessagesTest extends TestCase
     /**
      *  @group messages
      *  @group DEPRECATED-regression
-     *  @group OFF-here0519
      */
     public function test_can_fetch_messages_from_single_contact()
     {
