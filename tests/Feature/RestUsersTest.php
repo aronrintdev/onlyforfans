@@ -167,14 +167,18 @@ class RestUsersTest extends TestCase
                             ],
                             'income' => [
                                 'new_tip',
-                                'new_subscription',
+                                'new_subscription', // aka 'new subscriber'
+                                'new_paid_post_purchase', // new purchase on on of my paid posts
                             ],
                             'messages' => [
-                                'new_message',
+                                'new_message', // new direct message received
                             ],
                             'posts' => [
                                 'new_comment',
                                 'new_like',
+                            ],
+                            'timelines' => [
+                                'new_follower',
                             ],
                             'referrals' => [
                                 'new_referral',
@@ -184,6 +188,9 @@ class RestUsersTest extends TestCase
                             ],
                             'subscriptions' => [
                                 'new_payment',
+                            ],
+                            'usertags' => [
+                                'new_tag', // ex, when another user tags me in a post, etc
                             ],
                         ],
 
@@ -209,19 +216,37 @@ class RestUsersTest extends TestCase
         $content = json_decode($response->content());
         //dd($content, $payload);
 
-        // Check that certain notifications are enabled by default at user registration
+        // --- Check that certain notifications are enabled by default at user registration ---
+
+        // global
         $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->global->enabled));
         $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->global->enabled));
 
+        // income
         $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->income->new_tip));
         $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->income->new_tip));
         $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->income->new_subscription));
         $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->income->new_subscription));
+        $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->income->new_paid_post_purchase));
+        $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->income->new_paid_post_purchase));
 
+        // posts
         $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->posts->new_comment));
         $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->posts->new_comment));
         $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->posts->new_like));
         $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->posts->new_like));
+
+        // timelines
+        $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->timelines->new_follower));
+        $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->timelines->new_follower));
+
+        // messages
+        $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->messages->new_message));
+        $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->messages->new_message));
+
+        // user tags
+        $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->usertags->new_tag));
+        $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->usertags->new_tag));
     }
 
     /**
