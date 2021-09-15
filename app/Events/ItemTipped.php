@@ -3,12 +3,14 @@
 namespace App\Events;
 
 use App\Models\User;
+use App\Models\Chatmessage;
 use App\Interfaces\Tippable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use App\Http\Resources\Chatmessage as ChatmessageResource;
 
 class ItemTipped implements ShouldBroadcast
 {
@@ -29,14 +31,21 @@ class ItemTipped implements ShouldBroadcast
     public $tipper;
 
     /**
+     * The chatmessage this tip is attached to
+     * @var Chatmessage|null
+     */
+    public $message;
+
+    /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(Tippable $item, User $tipper)
+    public function __construct(Tippable $item, User $tipper, Chatmessage $message = null)
     {
         $this->item = $item;
         $this->tipper = $tipper;
+        $this->message = $message;
     }
 
     /**
@@ -64,6 +73,7 @@ class ItemTipped implements ShouldBroadcast
             'item_type' => $this->item->getMorphString(),
             'item_id' => $this->item->getKey(),
             'purchaser_id' => $this->tipper->getKey(),
+            'message' => new ChatmessageResource($this->message),
         ];
     }
 }

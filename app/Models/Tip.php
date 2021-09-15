@@ -237,6 +237,8 @@ class Tip extends Model implements Messagable
         ]);
         try {
             $message->deliver();
+            // Add message to return on successful deliver
+            $transactions['message'] = $message;
         } catch (Exception $e) {
             Log::warning('Tip->process()::sendMessage().broadcast Failed', [
                 'msg' => $e->getMessage(),
@@ -244,7 +246,7 @@ class Tip extends Model implements Messagable
         }
 
         if (isset($this->tippable)) {
-            ItemTipped::dispatch($this->tippable, $this->sender);
+            ItemTipped::dispatch($this->tippable, $this->sender, $message);
         }
 
         return $transactions;

@@ -4,11 +4,6 @@
       <fa-icon :icon="['fas', 'ellipsis-h']" class="fa-sm" />
     </template>
 
-    <b-dropdown-item @click="$emit('tip')">
-      <fa-icon icon="dollar-sign" fixed-width />
-      {{ $t('tip', { name: participant.username }) }}
-    </b-dropdown-item>
-
     <b-dropdown-item @click="$emit('addNotes')">
       <fa-icon icon="pencil" fixed-width />
       {{ addNotesTitle }}
@@ -101,7 +96,6 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
-    "tip": "Send @{name} a tip",
     "addNotes": "Add Notes",
     "deleteThread": "Delete conversation",
     "rename": "Rename alias for @{name}",

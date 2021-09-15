@@ -46,11 +46,13 @@
         </b-card-body>
 
         <b-card-footer>
-          <b-btn type="submit" :disabled="paymentsDisabled" variant="primary" class="w-100">Send Tip</b-btn>
+          <b-btn type="submit" :disabled="paymentsDisabled" variant="primary" class="w-100">
+            {{ $t('send') }}
+          </b-btn>
         </b-card-footer>
       </b-form>
 
-      <b-card-body v-if="step === 'payment'">
+      <b-card-body v-if="step === 'payment' && !paymentsDisabled">
         <PurchaseForm
           :value="payload.resource"
           :item-type="payload.resource_type"
@@ -59,7 +61,9 @@
           type="tip"
           :display-price="formPayload.amount | niceCurrency"
           :extra="{ message: formPayload.message }"
-          class="mt-3"
+          :callback="payload.callback"
+          :wantsMessage="payload.wantsMessage || false"
+          @completed="onCompleted"
         />
       </b-card-body>
     </transition>
@@ -145,17 +149,19 @@ export default {
       currency: 'USD',
       message: '',
     },
+
+    finished: false,
   }),
 
-  created() {
-    try {
-      if ( window.paymentsDisabled || paymentsDisabled ) {
-        this.paymentsDisabled = true
-      }
-    } catch (e) {}
-  },
-
   methods: {
+
+    onCompleted(tip) {
+      this.$log.debug('SendTip onCompleted', { tip })
+      if (typeof this.payload.callback === 'function') {
+        this.finished = true
+        this.payload.callback(tip)
+      }
+    },
 
     sendTip(e) {
       e.preventDefault()
@@ -166,6 +172,32 @@ export default {
       if (amount === this.formPayload.amount && !this.showCustomPrice) return 'secondary'
       if (!amount && this.showCustomPrice) return 'secondary'
       return 'light'
+    }
+  },
+
+    created() {
+    try {
+      if ( window.paymentsDisabled || paymentsDisabled ) {
+        this.paymentsDisabled = true
+      }
+    } catch (e) {}
+    if (this.payload.tip) {
+      this.formPayload.amount = this.payload.tip.amount
+      this.formPayload.currency = this.payload.tip.currency
+    }
+    if (this.payload.skipMessage) {
+      this.step = 'payment'
+    }
+    if (this.payload.message) {
+      this.formPayload.message = this.payload.message
+    }
+  },
+
+  beforeDestroy() {
+    // Handles if modal closes
+    this.$log.debug('SendTip Before Destroy Called', { finished: this.finished})
+    if (!this.finished && typeof this.payload.callback === 'function') {
+      this.payload.callback(false)
     }
   },
 
@@ -234,6 +266,8 @@ body .user-details ul > li {
 
 <i18n lang="json5" scoped>
 {
-  "en": {}
+  "en": {
+    "send": "Send Tip"
+  }
 }
 </i18n>

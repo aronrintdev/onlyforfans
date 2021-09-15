@@ -16,7 +16,7 @@
           v-model="price"
           v-mask="currencyMask"
           :state="valid"
-          inputmode="numeric"
+          inputmode="decimal"
           :placeholder="placeholder"
           :autofocus="autofocus"
           @focus="onFocus"

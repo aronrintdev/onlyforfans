@@ -421,9 +421,75 @@ export default {
 
     //----------------------------------------------------------------------- //
 
+    checkTip() {
+      return new Promise((resolve) => {
+       const callback = content => {
+         resolve(content)
+        }
+
+        // Check for Tip
+        if (this.hasTip) {
+          // Validation
+          if (this.tip.amount <= 0) {
+            eventBus.$emit('validation', { message: this.$t('tipValidation')})
+            this.sending = false
+            // resolve with success == false
+            resolve(false)
+            return
+          }
+          // Open new payment form
+          eventBus.$emit('open-modal', {
+            key: 'render-tip',
+            data: {
+              skipMessage: true,
+              tip: this.tip,
+              wantsMessage: true,
+              message: this.newMessageForm.mcontent,
+              resource: this.thread.timeline, // TODO: should probably move this eventually.
+              resource_type: 'timelines',
+              callback,
+            },
+          })
+        } else {
+          // No tip so resolve with success
+          resolve(true)
+        }
+      })
+ 
+    },
+
     // Called when dropzone completes processing its queue, *OR* manually in 'sendMessage()'
-    //   when sending a message without any attachements
+    //   when sending a message without any attachments
     async finalizeMessageSend() {
+
+      const tipPayload = await this.checkTip()
+      this.$log.debug('check tip returned', { tipPayload })
+      if (!tipPayload) {
+        this.sending = false
+        return
+      }
+      this.$log.debug('tipPayload.message: ', tipPayload.message)
+      if (tipPayload.message) {
+        // Tip Message was created
+        // attach any mediafiles
+        this.$log.debug('this.selectedMediafiles.length: ', this.selectedMediafiles.length)
+        if (this.selectedMediafiles.length > 0) {
+          const response = await this.axios.post(
+            this.$apiRoute('chatmessages.attachMedia', { chatmessage: tipPayload.message }),
+            { attachments: this.selectedMediafiles }
+          )
+          this.$log.debug('whisperMessage with mediafiles', { response: response.data.data })
+          this.whisperMessage(response.data.data)
+        } else {
+          this.$log.debug('whisperMessage')
+          this.whisperMessage(tipPayload.message)
+        }
+        this.$log.debug('clear form')
+        this.clearForm() // removes mediafiles from store list and from Dropzone queue
+        this.sending = false
+        return
+      }
+
       let params = {
         mcontent: this.newMessageForm.mcontent,
       }
@@ -480,7 +546,7 @@ export default {
       this.sending = true
       // Validation check
       const mediafileCount = this.selectedMediafiles ? this.selectedMediafiles.length : 0
-      if (this.newMessageForm.mcontent === '' && mediafileCount === 0) {
+      if (this.newMessageForm.mcontent === '' && mediafileCount === 0 && !this.hasTip) {
         eventBus.$emit('validation', { message: this.$t('validation') })
         this.sending = false
         return
@@ -515,6 +581,7 @@ export default {
       this.CLEAR_SELECTED_MEDIAFILES()
       this.$refs.myVueDropzone.removeAllFiles()
       this.clearScheduled()
+      this.clearTip()
     },
 
     clearPrice() {
@@ -700,6 +767,7 @@ textarea.form-control {
       "title": "Scheduled",
       "message": "Messages has successfully been schedule to send at {time}."
     },
+    "tipValidation": "Tip cannot be zero.",
     "validation": "Please enter a message or select files to send.",
   }
 }

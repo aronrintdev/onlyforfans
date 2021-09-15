@@ -22,9 +22,6 @@
     </b-card-header>
 
     <b-card-body>
-      <p class="w-100 text-center m-0 tag-purchase_amount">
-        Purchase post for {{ post.price_display || (post.price | niceCurrency) }}
-      </p>
       <PurchaseForm
         :value="post"
         item-type="post"
