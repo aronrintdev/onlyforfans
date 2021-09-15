@@ -65,7 +65,7 @@ class Post extends JsonResource
             ];
         } catch (\Exception $e) {
             Log::error($e);
-            return [];
+            return ['id' => $this->id,];
         }
     }
 }
