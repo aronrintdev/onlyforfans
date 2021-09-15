@@ -105,6 +105,8 @@ class Api
 
             'campaign-expired'                                         => 'd-7123f1bdbd3a4b7ea49cf6dad9808afd',
             'new-promotion-campaign-started'                           => 'd-b5afdeceab8e45dca4f06f15fde89500',
+
+            'new-paid-post-purchase'                                   => 'd-0a204d8143464518b71700adbb6b60f',
         ];
     }
 

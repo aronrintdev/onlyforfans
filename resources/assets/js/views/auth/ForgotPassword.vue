@@ -3,8 +3,9 @@
     <div class="h-100 d-flex flex-column px-0 bg-white">
       <div class="forgot-password-form-container p-5">
         <Branding type="text" size="3x" class="signin-logo" />
-        <div class="h2 text-center my-3" v-text="`Forgot Password`" />
-        <div class="my-2 text-center">
+        <div class="h2 d-md-none text-center my-3" v-text="`Forgot Password`" />
+        <div class="h1 d-none d-md-block text-md-left my-3" v-text="`Forgot Password`" />
+        <div class="my-2 text-center text-md-left">
           <router-link :to="{ name: 'login' }">Return to Sign In</router-link>
         </div>
 

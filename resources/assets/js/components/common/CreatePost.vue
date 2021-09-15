@@ -682,7 +682,7 @@ export default {
 
 
     editorChanged(e) {
-      if (e.keyCode == 50) {
+      if (e.keyCode == 50 && e.shiftKey) {
         e.preventDefault();
         let content = e.target.innerHTML;
         content += `<a>@`;
@@ -740,7 +740,7 @@ export default {
     },
 
     selectEmoji(emoji) {
-      this.description += `<span class="emoji">${emoji.data}</span><span>&nbsp;`
+      this.description += `<span class="emoji">${emoji.data}</span><span>&nbsp;</span>`
       this.descriptionForEditor = this.description
       this.$nextTick(() => {
         const p = document.querySelector('.text-editor'),
@@ -985,6 +985,21 @@ li.selectable[disabled] {
     z-index: 1000;
     top: 120%;
     left: 0;
+  }
+
+  @media (max-width: 576px) {
+    #EmojiPicker {
+      left: auto;
+      right: 0px;
+  
+      .container-emoji {
+        height: 200px;
+
+        .emoji {
+          border: none !important;
+        }
+      }
+    }
   }
 </style>
 

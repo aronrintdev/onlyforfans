@@ -72,6 +72,10 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     protected $guarded = ['id', 'created_at', 'updated_at'];
     protected $hidden = ['posts', 'followers']; // %FIXME: why is this ness? timelines.show (route-model binding) loads these by default but should be lazy loading (?) %PSG
 
+    protected $attributes = [
+        'is_follow_for_free' => true,
+    ];
+
     protected $casts = [
         'name' => 'string',
         'about' => 'string',
