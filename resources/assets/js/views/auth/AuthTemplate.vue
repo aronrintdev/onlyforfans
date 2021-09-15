@@ -10,7 +10,7 @@
     <div class="auth-container position-absolute row no-gutters">
       <div class="col-md-6 text-center auth-container-left">
         <div class="auth-description">
-          <Branding type="text" size="3x" class="mb-3 signin-logo" />
+          <Branding type="text" size="3x" class="mb-3 sidebar-logo" />
           <swiper class="auth-slider-swiper" :options="swiperOptions">
             <swiper-slide>
               <h3 class="card-title">Subscribe and Tip</h3>
@@ -197,5 +197,9 @@ export default {
   @media (min-width: 576px) {
     display: block;
   }
+}
+.sidebar-logo {
+  display: block;
+  margin: auto;
 }
 </style>

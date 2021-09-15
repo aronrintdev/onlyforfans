@@ -71,6 +71,17 @@ class UserSettingModelTest extends TestCase
 
         $group = 'notifications';
 
+        // disable site
+        $payload = [
+            'income' => [
+                'new_tip' => [ 'site' ],
+            ],
+        ];
+        $result = $userSettings->disable($group, $payload);
+        $userSettings->refresh();
+        $this->assertNotContains('site', $userSettings->cattrs['notifications']['income']['new_tip']);
+
+        // enable email & sms
         $payload = [
             'income' => [
                 'new_tip' => [ 'email', 'sms' ],

@@ -2,9 +2,8 @@
   <div class="media-slider">
     <div class="single" v-if="!hasMultipleImages" v-touch:tap="tapHandler">
       <VideoPlayer ref="video_player" :play="playVideo" :source="mediafiles[0]" v-if="mediafiles[0].is_video"></VideoPlayer>
-      <div class="wrap">
+      <div class="wrap" v-if="mediafiles[0].is_image">
         <b-img-lazy
-          v-if="mediafiles[0].is_image"
           class="d-block photoswipe-thumbnail"
           :src="use_mid && mediafiles[0].has_mid ? mediafiles[0].midFilepath : mediafiles[0].filepath"
         />

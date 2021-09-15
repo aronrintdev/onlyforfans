@@ -30,7 +30,6 @@ class CampaignModelTest extends TestCase
      * @group lib-campaign-unit
      * @group regression
      * @group regression-unit
-     * @group here0913
      */
     public function test_should_create_campaign()
     {
@@ -46,7 +45,7 @@ class CampaignModelTest extends TestCase
 
         $timeline->refresh();
         $subPrice = $timeline->getBaseSubPriceInCents(); // actual, read from model
-        $this->assertEquals($subPriceInCents, $subPrice);
+        $this->assertEquals($subPriceInCents, $subPrice->getAmount());
 
         // create a new promotion campaign
         Campaign::deactivateAll($creator);
