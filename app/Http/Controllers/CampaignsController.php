@@ -5,6 +5,7 @@ use Exception;
 use Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Validation\ValidationException;
 
 use App\Enums\CampaignTypeEnum;
 use App\Http\Resources\Campaign as CampaignResource;
@@ -55,7 +56,10 @@ class CampaignsController extends AppBaseController
         ]);
 
         if ( !$request->has_expired && !$request->has_new ) {
-            abort(422); // at least 1 of 3 options must be set
+            // at least 1 of 3 options must be set
+            throw ValidationException::withMessages([
+                'has_new' => ['Please select for new or expired subscribers'],
+            ]);
         }
         // $this->authorize('create', Campaign::class);
 
@@ -77,7 +81,10 @@ class CampaignsController extends AppBaseController
         $minPriceInCents = Config::get('subscriptions.minPriceInCents', 300);
         $discounted = applyDiscount($subMonthlyPrice, $attrs['discount_percent']);
         if ( $discounted < $minPriceInCents ) {
-            abort(422, 'Discounted price must be '.nice_currency($discounted).' or higher');
+            //abort(422, 'Discounted price must be '.nice_currency($discounted).' or higher');
+            throw ValidationException::withMessages([
+                'discount_percent' => ['Minimum net price required'],
+            ]);
         }
 
         $campaign = Campaign::create($attrs);

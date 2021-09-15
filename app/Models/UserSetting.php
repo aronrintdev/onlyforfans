@@ -90,6 +90,7 @@ class UserSetting extends Model
             'income' => [ // subcat
                 'new_tip' => [],
                 'new_subscription' => [],
+                'new_paid_post_purchase' => [],
                 //'renewed_subscription' => [],
                 //'returning_subscription' => [],
             ],
@@ -101,6 +102,9 @@ class UserSetting extends Model
                 'new_comment' => [],
                 'new_like' => [],
             ],
+            'timelines' => [ // subcat
+                'new_follower' => [],
+            ],
             'referrals' => [ // subcat
                 'new_referral' => [],
             ],
@@ -109,6 +113,9 @@ class UserSetting extends Model
             ],
             'subscriptions' => [ // subcat
                 'new_payment' => [],
+            ],
+            'usertags' => [ // subcat
+                'new_tag' => [],
             ],
         ],
         'subscriptions' => [ // group
@@ -137,10 +144,20 @@ class UserSetting extends Model
             'income' => [
                 'new_tip' => [ 'email', 'site' ],
                 'new_subscription' => [ 'email', 'site' ],
+                'new_paid_post_purchase' => [ 'email', 'site' ],
             ],
             'posts' => [
                 'new_like' => [ 'email', 'site' ],
                 'new_comment' => [ 'email', 'site' ],
+            ],
+            'messages' => [
+                'new_message' => [ 'email', 'site' ],
+            ],
+            'timelines' => [
+                'new_follower' => [ 'email', 'site' ],
+            ],
+            'usertags' => [
+                'new_tag' => [ 'email', 'site' ],
             ],
         ]);
     }
