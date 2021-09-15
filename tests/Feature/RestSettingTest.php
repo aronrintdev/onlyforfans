@@ -1,7 +1,6 @@
 <?php
 namespace Tests\Feature;
 
-//use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 
 use Tests\TestCase;
@@ -49,6 +48,46 @@ class RestSettingTest extends TestCase
         $this->assertNotNull($postR->description);
         $this->assertEquals($payload['description'], $postR->description);
          */
+    }
+
+    /**
+     *  @group settings
+     *  @group regression
+     *  @group regression-base
+     */
+    public function test_can_update_single_notifications_setting_not_yet_in_template()
+    {
+        // This test ensures that users who registered with a 'legacy' template can still set/unset 
+        //   new cattrs notification settings added aftewards...
+
+        $timeline = Timeline::orderBy('created_at', 'desc')->first(); 
+        $user = $timeline->user;
+        $settings = UserSetting::where('user_id', $user->id)->first();
+
+        // First clear out all notfications settings
+        $_cattrs = $settings->cattrs['notifications']; // pop
+        $_cattrs['notifications'] = null;
+        $settings->cattrs = $_cattrs; // push
+
+        $settings->save();
+
+        $payload = [
+            'income' => [
+                'new_tip' => ['email', 'sms'],
+                //'new_tip' => ['email'],
+            ],
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.enableSetting', [$user->id, 'notifications']), $payload);
+        $response->assertStatus(200);
+
+        $content = json_decode($response->content());
+        //dd($content);
+        $this->assertObjectHasAttribute('notifications', $content->cattrs);
+        $this->assertObjectHasAttribute('income', $content->cattrs->notifications);
+        $this->assertObjectHasAttribute('new_tip', $content->cattrs->notifications->income);
+        $this->assertContains('email', $content->cattrs->notifications->income->new_tip);
+        $this->assertContains('sms', $content->cattrs->notifications->income->new_tip);
+        $this->assertNotContains('site', $content->cattrs->notifications->income->new_tip);
     }
 
     /**
@@ -225,7 +264,7 @@ class RestSettingTest extends TestCase
         $this->assertEquals($payload1['gender'], $settings->gender);
         $this->assertEquals($payload1['birthdate'], $settings->birthdate);
         //dd( json_encode($settings->cattrs, JSON_PRETTY_PRINT) );
-        $this->assertEquals($payload1['weblinks']['instagram'], $settings->cattrs['weblinks']['instagram'] ?? '');
+        $this->assertEquals($payload1['weblinks']['instagram'], $settings->weblinks['instagram'] ?? ''); // %FIXME %FUJIO
 
         $payload2 = [
             'about' => $this->faker->realText,

@@ -20,12 +20,17 @@ class RestCampaignsTest extends TestCase
      *  @group campaigns
      *  @group regression
      *  @group regression-base
-     *  @group here0910
      */
     public function test_can_create_discount_promotion()
     {
         $timeline = Timeline::where('price', '>', 0)->first();
         $creator = $timeline->user;
+
+        // Make sure subscription price is high enough so discount keeps us above $3 min
+        $subPriceInDollars = $this->faker->numberBetween(100, 300);
+        $subPriceInCents = $subPriceInDollars * 100;
+        $result = $creator->settings->setValues('subscriptions', [ 'price_per_1_months' => $subPriceInDollars ]); // %FIXME
+        $creator->refresh();
 
         $priorCampaign = null;
 
@@ -42,12 +47,12 @@ class RestCampaignsTest extends TestCase
         ];
 
         $response = $this->actingAs($creator)->ajaxJSON('POST', route('campaigns.store'), $payload);
+        $content = json_decode($response->content());
         $response->assertStatus(201);
         $response->assertJsonStructure([
             'data' => [ 'type', 'active', 'has_new', 'has_expired', 'targeted_customer_group', 'subscriber_count', 'is_subscriber_count_unlimited', 'offer_days', 'discount_percent', 'trial_days', 'message', 'created_at' ],
         ]);
 
-        $content = json_decode($response->content());
         $data = $content->data;
         //dd($content);
         $this->assertTrue($data->is_subscriber_count_unlimited);
