@@ -16,6 +16,7 @@ class RestUsersTest extends TestCase
 {
     use WithFaker;
 
+
     /**
      *  @group users
      *  @group regression
@@ -88,6 +89,139 @@ class RestUsersTest extends TestCase
         $payload = [ 'email' => $user->email, 'password' => 'foo-123', 'g-recaptcha-response' => $test_token];
         $response = $this->ajaxJSON('POST', '/login', $payload);
         $response->assertStatus(200);
+    }
+
+    /**
+     *  @group users
+     *  @group regression
+     *  @group regression-base
+     *  @group here0914a
+     */
+    public function test_user_can_register()
+    {
+        $testToken = 'test';
+        RecaptchaV3::shouldReceive('verify')
+            ->with($testToken, 'register')
+            ->once()
+            ->andReturn(0.5);
+
+        $payload = [ 
+            'name' => strtolower($this->faker->firstName.'1ac'), // a username
+            'email' => $email = $this->faker->safeEmail,
+            'password' => 'foo-123-456',
+            'g-recaptcha-response' => $testToken,
+            'tos' => true,
+        ];
+        $response = $this->ajaxJSON('POST', '/register', $payload);
+        $response->assertStatus(201);
+        $response->assertJsonStructure([
+            'user' => [ 
+                'id',
+                'username',
+                'email_verified',
+                'referral_code',
+                'created_at',
+                'about',
+                'is_verified',
+                'verifyrequest',
+
+                'avatar' => ['filepath'],
+                'cover' => ['filepath'],
+
+                'settings' => [
+                    'id', 
+                    'created_at', 
+                    'is_creator', 
+
+                    'about',
+                    'birthdate',
+                    'city',
+                    'country',
+                    'gender',
+                    'has_allowed_nsfw',
+                    'body_type',
+                    'chest',
+                    'waist',
+                    'hips',
+                    'arms',
+                    'hair_color',
+                    'eye_color',
+                    'age',
+                    'height',
+                    'weight',
+                    'education',
+                    'language',
+                    'ethnicity',
+                    'profession',
+                    'weblinks',
+
+                    'cattrs' => [
+                        'notifications' => [
+                            'global' => [
+                                'enabled',
+                                'show_full_text',
+                            ],
+                            'campaigns' => [
+                                'goal_achieved',
+                                'new_contribution',
+                            ],
+                            'income' => [
+                                'new_tip',
+                                'new_subscription',
+                            ],
+                            'messages' => [
+                                'new_message',
+                            ],
+                            'posts' => [
+                                'new_comment',
+                                'new_like',
+                            ],
+                            'referrals' => [
+                                'new_referral',
+                            ],
+                            'refunds' => [
+                                'new_refund',
+                            ],
+                            'subscriptions' => [
+                                'new_payment',
+                            ],
+                        ],
+
+                        'subscriptions' => [
+                            'price_per_1_months',
+                        ], 
+                        'localization', 
+                        'weblinks', 
+                        'privacy', 
+                        'blocked' => [
+                            'ips',
+                            'countries', 
+                            'usernames', 
+                        ],
+                        'watermark',
+                    ], // cattrs
+
+                ], // settings
+
+            ], // user
+
+        ]);
+        $content = json_decode($response->content());
+        //dd($content, $payload);
+
+        // Check that certain notifications are enabled by default at user registration
+        $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->global->enabled));
+        $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->global->enabled));
+
+        $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->income->new_tip));
+        $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->income->new_tip));
+        $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->income->new_subscription));
+        $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->income->new_subscription));
+
+        $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->posts->new_comment));
+        $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->posts->new_comment));
+        $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->posts->new_like));
+        $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->posts->new_like));
     }
 
     /**
