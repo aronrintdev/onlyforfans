@@ -198,7 +198,7 @@ class RestUsersTest extends TestCase
                             'price_per_1_months',
                         ], 
                         'localization', 
-                        'weblinks', 
+                        //'weblinks',  // move to its own column
                         'privacy', 
                         'blocked' => [
                             'ips',
