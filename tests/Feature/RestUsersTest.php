@@ -4,13 +4,16 @@ namespace Tests\Feature;
 use Auth;
 use DB;
 use Illuminate\Foundation\Testing\WithFaker;
-//use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
+use Lunaweb\RecaptchaV3\Facades\RecaptchaV3;
+
 use App\Models\Timeline;
 use App\Models\User;
-use Lunaweb\RecaptchaV3\Facades\RecaptchaV3;
+use App\Models\UserSetting;
+use App\Models\Vault;
+use App\Models\Vaultfolder;
 
 class RestUsersTest extends TestCase
 {
@@ -95,7 +98,7 @@ class RestUsersTest extends TestCase
      *  @group users
      *  @group regression
      *  @group regression-base
-     *  @group here0914a
+     *  @group here0915
      */
     public function test_user_can_register()
     {
@@ -216,37 +219,78 @@ class RestUsersTest extends TestCase
         $content = json_decode($response->content());
         //dd($content, $payload);
 
-        // --- Check that certain notifications are enabled by default at user registration ---
+        $newUser = User::find($content->user->id);
+
+        // --- Check User ---
+
+        $this->assertNotNull($newUser);
+        $this->assertNotNull($newUser->id);
+
+        $this->assertNotNull($newUser->timeline);
+        $this->assertNotNull($newUser->timeline->id);
+
+        $this->assertNotNull($newUser->settings);
+        $this->assertNotNull($newUser->settings->id);
+
+        $this->assertNotNull($newUser->vaults);
+        $this->assertEquals(1, $newUser->vaults->count());
+
+        // --- Check Settings ---
+        //   ~ certain notifications should be enabled by default at user registration
+
+        $settings = UserSetting::where('user_id', $newUser->id)->first();
+        $this->assertNotNull($settings);
+        $this->assertNotNull($settings->id);
+
+        $this->assertNotNull($settings->cattrs);
+        $this->assertNotNull($settings->cattrs['notifications']);
+        $this->assertNotNull($settings->cattrs['notifications']['global']);
+        $this->assertNotNull($settings->cattrs['notifications']['global']['enabled']);
 
         // global
-        $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->global->enabled));
-        $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->global->enabled));
+        $this->assertTrue( in_array('email', $settings->cattrs['notifications']['global']['enabled']) );
+        $this->assertTrue( in_array('site', $settings->cattrs['notifications']['global']['enabled']) );
 
         // income
-        $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->income->new_tip));
-        $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->income->new_tip));
-        $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->income->new_subscription));
-        $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->income->new_subscription));
-        $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->income->new_paid_post_purchase));
-        $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->income->new_paid_post_purchase));
+        $this->assertTrue(in_array('email', $settings->cattrs['notifications']['income']['new_tip']));
+        $this->assertTrue(in_array('site', $settings->cattrs['notifications']['income']['new_tip']));
+        $this->assertTrue(in_array('email', $settings->cattrs['notifications']['income']['new_subscription']));
+        $this->assertTrue(in_array('site', $settings->cattrs['notifications']['income']['new_subscription']));
+        $this->assertTrue(in_array('email', $settings->cattrs['notifications']['income']['new_paid_post_purchase']));
+        $this->assertTrue(in_array('site', $settings->cattrs['notifications']['income']['new_paid_post_purchase']));
 
         // posts
-        $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->posts->new_comment));
-        $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->posts->new_comment));
-        $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->posts->new_like));
-        $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->posts->new_like));
+        $this->assertTrue(in_array('email', $settings->cattrs['notifications']['posts']['new_comment']));
+        $this->assertTrue(in_array('site', $settings->cattrs['notifications']['posts']['new_comment']));
+        $this->assertTrue(in_array('email', $settings->cattrs['notifications']['posts']['new_like']));
+        $this->assertTrue(in_array('site', $settings->cattrs['notifications']['posts']['new_like']));
 
         // timelines
-        $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->timelines->new_follower));
-        $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->timelines->new_follower));
+        $this->assertTrue(in_array('email', $settings->cattrs['notifications']['timelines']['new_follower']));
+        $this->assertTrue(in_array('site', $settings->cattrs['notifications']['timelines']['new_follower']));
 
         // messages
-        $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->messages->new_message));
-        $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->messages->new_message));
+        $this->assertTrue(in_array('email', $settings->cattrs['notifications']['messages']['new_message']));
+        $this->assertTrue(in_array('site', $settings->cattrs['notifications']['messages']['new_message']));
 
         // user tags
-        $this->assertTrue(in_array('email', $content->user->settings->cattrs->notifications->usertags->new_tag));
-        $this->assertTrue(in_array('site', $content->user->settings->cattrs->notifications->usertags->new_tag));
+        $this->assertTrue(in_array('email', $settings->cattrs['notifications']['usertags']['new_tag']));
+        $this->assertTrue(in_array('site', $settings->cattrs['notifications']['usertags']['new_tag']));
+
+        // --- Check Timeline ---
+        $timeline = Timeline::where('user_id', $newUser->id)->first();
+        $this->assertNotNull($timeline);
+        $this->assertNotNull($timeline->id);
+        $this->assertTrue(!!$timeline->is_follow_for_free);
+
+        // --- Check Vault --- %TODO
+        $vault = Vault::where('user_id', $newUser->id)->first();
+        $this->assertNotNull($vault);
+        $this->assertNotNull($vault->id);
+        $this->assertTrue(!!$vault->is_primary);
+        $this->assertNotNull($vault->vaultfolders);
+        $this->assertNotNull($vault->vaultfolders);
+        $this->assertEquals(1, $vault->vaultfolders->count());
     }
 
     /**
