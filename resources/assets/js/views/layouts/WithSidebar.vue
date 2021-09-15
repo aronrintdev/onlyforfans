@@ -183,6 +183,9 @@ export default {
     .container-fluid {
       overflow-x: hidden;
     }
+    .sidebar {
+      width: 100%;
+    }
   }
 
   .settings-page {
