@@ -2,10 +2,11 @@
   <AuthTemplate>
     <div class="h-100 d-flex flex-column px-0 bg-white">
       <div class="forgot-password-form-container p-5">
-        <Branding type="text" size="3x" class="mb-3 signin-logo" />
-        <div class="h1 my-3" v-text="`Forgot Password`" />
-        <div class="d-flex my-2">
-          <router-link class="ml-auto" :to="{ name: 'login' }">Return to Sign In</router-link>
+        <Branding type="text" size="3x" class="signin-logo" />
+        <div class="h2 d-md-none text-center my-3" v-text="`Forgot Password`" />
+        <div class="h1 d-none d-md-block text-md-left my-3" v-text="`Forgot Password`" />
+        <div class="my-2 text-center text-md-left">
+          <router-link :to="{ name: 'login' }">Return to Sign In</router-link>
         </div>
 
         <!-- <b-alert variant="info" show>
@@ -17,7 +18,7 @@
         <b-form @submit.prevent="sendForgotPassRequest">
           <div class="login-form">
             <div class="text-left mt-2 mb-3">
-              <div class="d-inline" v-text="`If you have an AllFans account, enter your email address below and you will receive a link to reset your password at this address.`" />
+              <div class="d-inline" v-text="`If you have an AllFans account, enter your email address below and you will receive a link to reset your password.`" />
             </div>
             <b-form-group
               :invalid-feedback="verrors.email ? verrors.email[0] : null"
@@ -118,14 +119,6 @@ export default {
     border-color: rgba(138,150,163,.75);
     opacity: .4;
     pointer-events: none;
-  }
-}
-.signin-logo {
-  display: none;
-  @media (max-width: 576px) {
-    display: block;
-    width: 154px;
-    margin: 0 auto 25px;
   }
 }
 </style>

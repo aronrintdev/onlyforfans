@@ -76,6 +76,7 @@
     "text-mask-addons": "^3.8.0",
     "uuid-encoder": "^1.2.0",
     "v-clipboard": "^2.2.3",
+    "v-emoji-picker": "^2.3.3",
     "v-mask": "^2.2.4",
     "video.js": "^7.11.8",
     "videojs-record": "^4.5.0",

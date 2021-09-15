@@ -29,9 +29,11 @@
     </WithSidebar>
 
     <!-- Desktop View -->
-    <div v-if="!mobile" class="h2">
-      <fa-icon icon="receipt" fixed-width class="mr-2" />
-      {{ $t('title.sidebar') }}
+    <div v-if="!mobile" class="container-fluid">
+      <div class="h4">
+        <fa-icon icon="receipt" size="1x" class="mr-1" />
+        {{ $t('title.sidebar') }}
+      </div>
     </div>
     <WithSidebar v-if="!mobile">
       <template #sidebar>

@@ -7,7 +7,7 @@
           <fa-icon :icon="['fas', 'arrow-left']" class="fa-lg" />
         </b-btn>
         <p class="m-0">
-          <AvatarWithStatus :user="participant" :thumbnail="false" noLink />
+          <AvatarWithStatus :user="participant" :thumbnail="false" />
         </p>
         <OptionsDropdown
           :participant="participant"
@@ -99,6 +99,7 @@
       v-if="!showGallery"
       :session_user="session_user"
       :chatthread_id="id"
+      :thread="thread"
       class="message-form"
       :class="{ mobile: mobile }"
       @sendMessage="addTempMessage"
@@ -176,7 +177,11 @@ export default {
         return null
       }
       // Find first participant that is not the session user
-      return _.find(this.thread.participants, participant => participant.id !== this.session_user.id)
+      const user = _.find(this.thread.participants, participant => participant.id !== this.session_user.id)
+      return {
+        ...user,
+        timeline: this.thread.timeline,
+      }
     },
 
     modalTitle() {

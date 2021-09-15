@@ -103,7 +103,11 @@ export default {
       if (!thread.participants) {
         return null
       }
-      return _.find(thread.participants, participant => participant.id !== this.session_user.id)
+      const user = _.find(thread.participants, participant => participant.id !== this.session_user.id)
+      return {
+        ...user,
+        timeline: thread.timeline,
+      }
     },
   },
 

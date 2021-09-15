@@ -1,19 +1,29 @@
 <template>
   <section v-if="!isLoading" class="conversation-footer d-flex flex-column">
 
-    <div v-if="isScheduled" class="scheduled-message-head d-flex justify-content-start align-items-center">
-      <div>
-        <fa-icon :icon="['fas', 'calendar-alt']" class="fa-lg" fixed-width />
-        <span> Scheduled for </span>
-        <strong>{{ moment(newMessageForm.deliver_at).local().format('MMM DD, h:mm a') }}</strong>
-      </div>
-      <b-button variant="link" @click="clearScheduled">
-        <fa-icon :icon="['fas', 'times']" class="clickable fa-lg" fixed-width />
-      </b-button>
-    </div>
-
     <div class="store-chatmessage mt-auto">
-      <SetPrice v-if="isSetPriceFormActive" v-model="newMessageForm.price" class="mt-3" />
+      <div class="d-flex flex-wrap align-items-stretch mb-3">
+        <ScheduledAtDisplay
+          v-if="isScheduled"
+          :value="newMessageForm.deliver_at"
+          class="w-auto mr-2"
+          @open="openScheduleMessageModal"
+          @clear="clearScheduled"
+        />
+        <TipDisplay
+          v-if="hasTip"
+          :value="tip"
+          class="w-auto mr-2"
+          @open="addTip"
+          @clear="clearTip"
+        />
+        <SetPrice
+          v-if="isSetPriceFormActive"
+          v-model="newMessageForm.price"
+          class="w-auto mr-2"
+          @clear="clearPrice"
+        />
+      </div>
 
       <AudioRecorder
         v-if="showAudioRec"
@@ -72,11 +82,15 @@
       <!-- Bottom Toolbar -->
       <Footer
         :selected="selectedOptions"
+        :hasTip="hasTip"
+        :hasPrice="hasPrice"
+        :hasScheduled="hasScheduled"
         @vaultSelect="renderVaultSelector"
         @openScheduleMessage="openScheduleMessageModal"
         @recordAudio="recordAudio"
         @recordVideo="recordVideo"
         @setPrice="setPrice"
+        @addTip="addTip"
         @submit="sendMessage($event)"
       />
     </div>
@@ -97,6 +111,7 @@
         @close="scheduleMessageOpen = false"
       />
     </b-modal>
+    <AddTip :receiver="participant" v-model="addTipOpen" @submit="tipAdded" />
   </section>
 </template>
 
@@ -110,26 +125,32 @@ import VueDropzone from 'vue2-dropzone'
 
 import ScheduleDateTime from '@components/modals/ScheduleDateTime'
 import UploadMediaPreview from '@components/posts/UploadMediaPreview'
-import VideoRecorder from '@components/videoRecorder';
-import AudioRecorder from '@components/audioRecorder';
+import VideoRecorder from '@components/videoRecorder'
+import AudioRecorder from '@components/audioRecorder'
+import AddTip from './AddTip'
+import TipDisplay from './TipDisplay'
+import ScheduledAtDisplay from './ScheduledAtDisplay'
 
 import SetPrice from './SetPrice.vue'
 import Footer from './Footer'
 
-// 
+//
 //  sendMessage(): Footer form submit ||  press Ctrl + Enter
 //  await this.getUploadsVaultFolder()
 //  dropzone.processQueue()
 //  finalizeMessageSend()
-// 
+//
 export default {
   name: 'NewMessageForm',
 
   components: {
+    AddTip,
     AudioRecorder,
     Footer,
+    ScheduledAtDisplay,
     ScheduleDateTime,
     SetPrice,
+    TipDisplay,
     UploadMediaPreview,
     VideoRecorder,
     VueDropzone,
@@ -138,6 +159,7 @@ export default {
   props: {
     session_user: null,
     chatthread_id: null,
+    thread: { type: Object, default: () => ({}) },
   },
 
   computed: {
@@ -146,9 +168,18 @@ export default {
       'selectedMediafiles',
       'uploadsVaultFolder',
     ]),
+    ...Vuex.mapState('messaging', [ 'threads' ]),
 
     channelName() {
       return `chatthreads.${this.chatthread_id}`
+    },
+
+    participant() {
+      if (!this.thread) {
+        return null
+      }
+      // Find first participant that is not the session user
+      return _.find(this.thread.participants, participant => participant.id !== this.session_user.id)
     },
 
     deliverAtTimestamp() {
@@ -193,7 +224,7 @@ export default {
         selected.push('vaultSelect')
       }
          */
-      if (this.scheduleMessageOpen) {
+      if (this.scheduleMessageOpen || this.hasScheduled) {
         selected.push('openScheduleMessage')
       }
       if (this.showVideoRec) {
@@ -202,12 +233,24 @@ export default {
       if (this.showAudioRec) {
         selected.push('recordAudio')
       }
-      if (this.isSetPriceFormActive) {
+      if (this.isSetPriceFormActive || this.hasPrice) {
         selected.push('setPrice')
       }
 
       return selected
-    }
+    },
+
+    hasTip() {
+      return !(_.isEmpty(this.tip) || this.tip.amount === 0)
+    },
+
+    hasPrice() {
+      return this.isSetPriceFormActive
+    },
+
+    hasScheduled() {
+      return this.isScheduled
+    },
 
   }, // computed
 
@@ -228,6 +271,9 @@ export default {
 
     isSetPriceFormActive: false,
 
+    addTipOpen: false,
+    tip: {},
+
     // If client is sending message
     sending: false,
     uploadProgress: 0,
@@ -245,6 +291,18 @@ export default {
     ...Vuex.mapActions('vault', [
       'getUploadsVaultFolder',
     ]),
+
+    addTip() {
+      this.addTipOpen = true
+    },
+
+    tipAdded(value) {
+      this.tip = value
+    },
+
+    clearTip() {
+      this.tip = {}
+    },
 
     changeMediafiles(data) {
       this.UPDATE_SELECTED_MEDIAFILES([...data])
@@ -271,7 +329,7 @@ export default {
       this.$nextTick(() => this.$forceUpdate())
     },
 
-    // Appends to form data to effectively upload the files to a folder in the vault 
+    // Appends to form data to effectively upload the files to a folder in the vault
     //  before attaching them to the message itself
     onDropzoneSending(file, xhr, formData) {
       if ( !this.uploadsVaultFolder ) {
@@ -289,9 +347,9 @@ export default {
     // Called each time the queue successfully uploads a file
     // We have uploaded any files selected from disk to a 'temporary' vault folder...remove
     //  these files from the Dropzone queue, and add them to selected mediafiles which may already contain
-    //  some pre-existing vault files that were selected 
-    // %NOTE:  user uploads a file in the message form, two [mediafiles] records are created: one 
-    //    with resource_type = ‘vaultfolders’ ,and a second with resource_type=‘messages’...former 
+    //  some pre-existing vault files that were selected
+    // %NOTE:  user uploads a file in the message form, two [mediafiles] records are created: one
+    //    with resource_type = ‘vaultfolders’ ,and a second with resource_type=‘messages’...former
     //    is not needed but is not cleaned up atm
     onDropzoneSuccess(file, response) {
       // Remove Preview
@@ -363,7 +421,7 @@ export default {
 
     //----------------------------------------------------------------------- //
 
-    // Called when dropzone completes processing its queue, *OR* manually in 'sendMessage()' 
+    // Called when dropzone completes processing its queue, *OR* manually in 'sendMessage()'
     //   when sending a message without any attachements
     async finalizeMessageSend() {
       let params = {
@@ -488,7 +546,7 @@ export default {
     renderVaultSelector() {
       eventBus.$emit('open-modal', {
         key: 'render-vault-selector',
-        data: { 
+        data: {
           context: 'create-message',
         },
       })
@@ -577,7 +635,7 @@ export default {
         return
       }
       if (!val) {
-        this.clearPrice() 
+        this.clearPrice()
       }
     },
   }, // watch

@@ -173,12 +173,18 @@ export default {
   .border-class {
     border: none;
   }
+  .sidebar {
+    width: 20rem;
+  }
 }
 
 @media (max-width: 576px) {
   #view-settings {
     .container-fluid {
       overflow-x: hidden;
+    }
+    .sidebar {
+      width: 100%;
     }
   }
 

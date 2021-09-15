@@ -1,32 +1,26 @@
 <template>
-  <div class="toolbar align-items-center pb-sm-5" :class="{'d-flex': !mobile}">
-    <div class="tool-items d-flex flex-shrink-1 mr-3">
-      <b-btn
-        v-for="item in buttons"
-        :key="item.key"
-        variant="link"
-        :disabled="item.disabled"
-        :class="item.class"
-        v-b-tooltip.hover.bottom="{boundary: 'viewport', title: item.tooltip}"
-        @click="item.onClick"
-      >
-        <fa-icon
-          :icon="item.icon"
-          :size="iconSize"
-          fixed-width
-          :class="item.selected ? 'text-primary' : 'text-secondary'"
-        />
-      </b-btn>
-    </div>
+  <div class="toolbar d-flex flex-wrap align-items-center pb-sm-5" :class="{'d-flex': !mobile}">
+    <b-btn
+      v-for="item in buttonsFiltered"
+      :key="item.key"
+      variant="link"
+      :disabled="item.disabled"
+      :class="item.class"
+      v-b-tooltip.hover.bottom="{boundary: 'viewport', title: item.tooltip}"
+      @click="item.onClick"
+    >
+      <fa-icon
+        :icon="item.icon"
+        :size="iconSize"
+        fixed-width
+        :class="item.selected ? 'text-primary' : 'text-secondary'"
+      />
+    </b-btn>
+    <b-btn :disabled="hasPrice || hasScheduled" variant="success" class="text-nowrap" @click="$emit('addTip')">
+      <fa-icon icon="dollar-sign" fixed-width />
+      <span class="mr-2">{{ hasTip ? $t('editTip') : $t('addTip') }}</span>
+    </b-btn>
     <div class="ml-auto d-flex align-items-end" :class="{'float-right': mobile}">
-      <b-btn
-        variant="success"
-        class="mr-3 text-nowrap"
-        v-b-tooltip.hover="mobile ? null :$t('tooltips.sendWithTip')"
-      >
-        <fa-icon icon="dollar-sign" class="mr-2" />
-        <span>{{ $t('sendWithTip') }}</span>
-      </b-btn>
       <div class="d-flex flex-column">
         <b-btn
           variant="primary"
@@ -57,6 +51,9 @@ export default {
 
   props: {
     selected: { type: Array, default: () => ([]) },
+    hasTip: { type: Boolean, default: false },
+    hasPrice: { type: Boolean, default: false },
+    hasScheduled: { type: Boolean, default: false },
   },
 
   computed: {
@@ -74,7 +71,7 @@ export default {
         }, {
           key: 'recordVideo',
           class: 'record-video',
-          disabled: this.isIOS9PlusAndAndroid,
+          hide: this.isIOS9PlusAndAndroid,
           onClick: (e) => this.$emit('recordVideo', e),
           icon: this.isSelected('recordVideo') ? ['fas', 'video'] : ['far', 'video'],
           selected: this.isSelected('recordVideo'),
@@ -82,6 +79,7 @@ export default {
         }, {
           key: 'recordAudio',
           class: 'record-audio',
+          hide: this.isIOS9PlusAndAndroid,
           onClick: (e) => this.$emit('recordAudio', e),
           icon: this.isSelected('recordAudio') ? ['fas', 'microphone'] : ['far', 'microphone'],
           selected: this.isSelected('recordAudio'),
@@ -96,6 +94,7 @@ export default {
         }, {
           key: 'openScheduleMessage',
           class: 'open-schedule-message',
+          disabled: this.hasTip,
           onClick: (e) => this.$emit('openScheduleMessage', e),
           icon: this.isSelected('openScheduleMessage') ? ['fas', 'calendar-alt'] : ['far', 'calendar-alt'],
           selected: this.isSelected('openScheduleMessage'),
@@ -103,12 +102,17 @@ export default {
         }, {
           key: 'setPrice',
           class: 'set-price',
+          disabled: this.hasTip,
           onClick: (e) => this.$emit('setPrice', e),
           icon: this.isSelected('setPrice') ? ['fas', 'tag'] : ['far', 'tag'],
           selected: this.isSelected('setPrice'),
           tooltip: this.$t('tooltips.setPrice'),
         },
       ]
+    },
+
+    buttonsFiltered() {
+      return _.filter(this.buttons, o => (!o.hide) )
     },
 
     iconSize() {
@@ -142,9 +146,9 @@ export default {
 <style lang="scss" scoped>
 .toolbar {
   align-items: end;
-  .tool-items {
-    overflow-x: auto;
-  }
+  // .tool-items {
+  //   overflow-x: auto;
+  // }
 }
 </style>
 
@@ -161,7 +165,8 @@ export default {
       "setPrice": "Set Message Unlock Price",
       "sendWithTip": "Include a tip with your message",
     },
-    "sendWithTip": "Send with Tip",
+    "addTip": "Add Tip",
+    "editTip": "Edit Tip"
   }
 }
 </i18n>
