@@ -1,6 +1,6 @@
 <template>
-  <div v-if="!isLoading" id="view-vault_dashboard" class="row flex-grow-1">
-    <div class="col-sm-12">
+  <div v-if="!isLoading" id="view-vault_dashboard" class="row flex-grow-1 mx-0">
+    <div class="col-sm-12 px-0">
       <VaultDashboardComponent
         :vault_pkid="myVault.id"
         :vaultfolder_pkid="vaultRootFolder.id"
