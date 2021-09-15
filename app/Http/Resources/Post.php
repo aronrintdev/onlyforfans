@@ -16,6 +16,9 @@ class Post extends JsonResource
         try {
           $sessionUser = $request->user();
             $model = PostModel::find($this->id); // %FIXME: n+1 performance issue (not so bad if paginated?)
+            if (!isset($model)) {
+                return ['id' => $this->id];
+            }
             $hasAccess = $sessionUser->can('contentView', $model);
             $isOwner = $model->getPrimaryOwner()->id === $sessionUser->id;
             $isAdmin = $sessionUser->isAdmin();
