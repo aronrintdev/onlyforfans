@@ -43,6 +43,10 @@ class UserSetting extends Model
             }
             $model->cattrs = $cattrs;
         });
+
+        static::created(function ($model) {
+            $model->enableAllNotifications(); // 20210914 - enable all notfications for new accounts
+        });
     }
 
     //--------------------------------------------
@@ -124,6 +128,22 @@ class UserSetting extends Model
         'watermark' => [ // group
         ], 
     ];
+
+    public function enableAllNotifications() {
+        $this->enable('notifications', [
+            'global' => [
+                'enabled' => [ 'email', 'site' ],
+            ],
+            'income' => [
+                'new_tip' => [ 'email', 'site' ],
+                'new_subscription' => [ 'email', 'site' ],
+            ],
+            'posts' => [
+                'new_like' => [ 'email', 'site' ],
+                'new_comment' => [ 'email', 'site' ],
+            ],
+        ]);
+    }
 
     public function setValues(string $group, array $payload) {
         //dump($payload);
