@@ -1,7 +1,7 @@
 <?php
-
 namespace App\Models;
 
+use DB;
 use Faker\Factory as Faker;
 use Illuminate\Database\Eloquent\Model;
 
@@ -67,20 +67,23 @@ class UsernameRule extends Model
         // Check word rules first, this is the fastest check.
         $caught = UsernameRule::where('type', 'blacklist')
             ->where('comparison_type', 'word')
-            // strtolower to avoid capitalization any nonsense
-            ->where('rule', strtolower($value))
+            ->where('rule', strtolower($value)) // strtolower to avoid capitalization any nonsense
             ->first();
+
         if ($caught) {
             return UsernameRule::localize($caught);
         }
 
         // Run through regex rules next, they are more computationally intensive.
-        $caught = UsernameRule::where('type', 'blacklist')
-            ->where('comparison_type', 'regex')
-            ->whereRaw('? regexp rule', [$value])
-            ->first();
-        if ($caught) {
-            return UsernameRule::localize($caught);
+        if ( !DB::Connection() instanceof \Illuminate\Database\SQLiteConnection ) {
+            $caught = UsernameRule::where('type', 'blacklist')
+                ->where('comparison_type', 'regex')
+                ->whereRaw('? regexp rule', [$value])
+                ->first();
+
+            if ($caught) {
+                return UsernameRule::localize($caught);
+            }
         }
 
         return false;
