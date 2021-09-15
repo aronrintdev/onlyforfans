@@ -28,7 +28,7 @@ export default {
     breadcrumbNav() {
       return this.breadcrumb ? this.breadcrumb.map(b => ({
         pkid: b.pkid,
-        text: b.vfname,
+        text: b.vfname === 'Root' ? 'Home' : b.vfname,
         active: b.pkid === this.currentFolderId
       })) : []
     },
