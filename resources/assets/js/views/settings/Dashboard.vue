@@ -52,7 +52,7 @@ export default {
   },
 
   computed: {
-    ...Vuex.mapGetters(['session_user', 'user_settings', 'timeline']),
+    ...Vuex.mapGetters(['session_user', 'user_settings', 'timeline']), // %FIXME: user_settings should be managed by child components not passed down as prop
     ...Vuex.mapState({
       mobile: state => state.mobile,
       subscriptionCount: state => state.subscriptions.count
@@ -216,6 +216,7 @@ export default {
         }
       }
     },
+
   },
 
 }
