@@ -83,7 +83,7 @@
             </b-tab>
 
             <b-tab data-filter="tagged">
-              <template #title> <fa-icon fixed-width icon="tags" /><span> Tagged</span></template>
+              <template #title>@<span> Tagged</span></template>
               <b-card-text>
                 <NotifyList filter="tagged" :session_user="session_user" />
               </b-card-text>
