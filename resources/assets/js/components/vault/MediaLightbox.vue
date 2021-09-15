@@ -12,17 +12,12 @@
       <template v-if="true || mediafile.access">
         <b-row>
           <b-col cols="12" class="d-flex align-items-center justify-content-center">
-            <div class="">
-              <b-img v-if="mediafile.is_image" 
-                fluid
-                class="d-block"
-                :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath"
-                :alt="mediafile.mfname">
+            <div v-if="mediafile.is_image">
+              <b-img fluid class="d-block" :src="(use_mid && mediafile.has_mid) ? mediafile.midFilepath : mediafile.filepath" :alt="mediafile.mfname">
               </b-img>
-              <MediaSlider v-else-if="!mediafile.is_image" 
-                :mediafiles="[mediafile]" 
-                :session_user="session_user" 
-                :use_mid="use_mid" />
+            </div>
+            <div v-else class="w-100">
+              <MediaSlider :mediafiles="[mediafile]" :session_user="session_user" :use_mid="use_mid" />
             </div>
           </b-col>
         </b-row>
