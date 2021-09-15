@@ -66,7 +66,10 @@ class Vaultfolder extends BaseModel implements Guidable, Ownable, Contenttaggabl
     }
 
     public function mediafiles() {
-        return $this->morphMany(Mediafile::class, 'resource');
+        return $this->morphMany(Mediafile::class, 'resource')->orderByDesc('created_at');
+        // %FIXME %PSG 20210915: the orderBy here is a bit of a hack, as a vaultfolder receiveds its files
+        // tacked on as a relation to vaultfolders.show api call...instead we should
+        // invoke a separate call to mediafiles.index or equvalent for the vaultfolder
     }
 
     public function vfparent() {
