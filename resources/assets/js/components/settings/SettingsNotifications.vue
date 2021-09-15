@@ -16,7 +16,7 @@
                   <section class="d-flex justify-content-between align-items-start">
                     <div>
                       <label for="is_email_enabled" class="ml-auto mb-0">Email Notifications</label>
-                      <p><small class="text-muted">Receive email notifications</small></p>
+                      <!-- <p><small class="text-muted">Receive email notifications</small></p> -->
                     </div>
                     <div>
                       <b-form-checkbox id="is_email_enabled" v-model="thisForm.by_email.enabled" name="is_email_enabled" switch ></b-form-checkbox>
@@ -25,63 +25,53 @@
                 </b-form-group>
 
                 <template v-if="thisForm.by_email.enabled">
-                  <b-form-group id="group-email-show_full_text">
-                    <section class="d-flex justify-content-between align-items-start">
-                      <div>
-                        <label for="show_full_text" class="ml-auto mb-0">Show full text</label>
-                        <p><small class="text-muted">Show the full text of the email</small></p>
-                      </div>
-                      <div>
-                        <b-form-checkbox id="show_full_text" v-model="thisForm.by_email.show_full_text" name="show_full_text" switch ></b-form-checkbox>
-                      </div>
-                    </section>
-                  </b-form-group>
 
                   <hr />
 
                   <b-form-group id="group-email-income">
-                    <h5>Income</h5>
+                    <h5>Transactions</h5> <!-- Income -->
                     <div>
-                      <b-form-checkbox id="email_new_tip" v-model="thisForm.by_email.income.new_tip" name="email_new_tip" >New Tip</b-form-checkbox>
-                      <p><small class="text-muted">Email whenever a new tip is received</small></p>
+                      <b-form-checkbox v-model="thisForm.by_email.income.new_tip" >When I receive a new tip</b-form-checkbox>
                     </div>
                     <div>
-                      <b-form-checkbox id="email_new_subscription" v-model="thisForm.by_email.income.new_subscription" name="email_new_subscription" >New Subscription</b-form-checkbox>
-                      <p><small class="text-muted">Email on new subscriptions</small></p>
+                      <b-form-checkbox v-model="thisForm.by_email.income.new_subscription" >When I receive a new subscriber</b-form-checkbox>
+                    </div>
+                    <div>
+                      <b-form-checkbox v-model="thisForm.by_email.income.new_paid_post_purchase" >When I receive a new paid post purchase</b-form-checkbox>
                     </div>
                   </b-form-group>
+
+                  <!-- +++ -->
 
                   <hr />
 
                   <b-form-group id="group-email-post">
                     <h5>Posts</h5>
-                    <!--
                     <div>
-                      <b-form-checkbox id="new_post_summary" v-model="thisForm.by_email.posts.new_post_summary" name="new_post_summary" >New Post Summary</b-form-checkbox>
-                      <p><small class="text-muted">Email a summary of new posts.</small></p>
-                    </div>
-                    -->
-                    <div>
-                      <b-form-checkbox id="email_new_like" v-model="thisForm.by_email.posts.new_like" name="new_like" >New Like</b-form-checkbox>
+                      <b-form-checkbox v-model="thisForm.by_email.posts.new_like" >When I receive a new like on a post</b-form-checkbox>
                     </div>
                     <div>
-                      <b-form-checkbox id="email_new_comment" v-model="thisForm.by_email.posts.new_comment">New Comment</b-form-checkbox>
+                      <b-form-checkbox v-model="thisForm.by_email.posts.new_comment">When I receive a new comment on a post</b-form-checkbox>
                     </div>
                   </b-form-group>
+
+                  <!-- +++ -->
 
                   <hr />
 
-                  <!--
-                  <b-form-group id="group-email-other">
-                    <h5>Other</h5>
+                  <b-form-group id="group-email-interaction">
+                    <h5>User Interaction</h5>
                     <div>
-                      <b-form-checkbox id="new_stream" v-model="thisForm.by_email.other.new_stream" name="new_stream" >New Stream</b-form-checkbox>
+                      <b-form-checkbox v-model="thisForm.by_email.timelines.new_follower">When I receive a new follower</b-form-checkbox>
                     </div>
                     <div>
-                      <b-form-checkbox id="upcoming_stream_reminders" v-model="thisForm.by_email.other.upcoming_stream_reminders" name="upcoming_stream_reminders" >Upcoming Stream Reminders</b-form-checkbox>
+                      <b-form-checkbox v-model="thisForm.by_email.usertags.new_tag">When I am tagged by another user on a post</b-form-checkbox>
+                    </div>
+                    <div>
+                      <b-form-checkbox v-model="thisForm.by_email.messages.new_message">When I receive a new direct message</b-form-checkbox>
                     </div>
                   </b-form-group>
-                  -->
+
                 </template>
 
               </fieldset>
@@ -105,7 +95,7 @@
                       <p><small class="text-muted">Receive site notifications</small></p>
                     </div>
                     <div>
-                      <b-form-checkbox id="is_site_enabled" v-model="thisForm.by_site.enabled" name="is_site_enabled" switch ></b-form-checkbox>
+                      <b-form-checkbox id="is_site_enabled" v-model="thisForm.by_site.enabled" switch ></b-form-checkbox>
                     </div>
                   </section>
                 </b-form-group>
@@ -115,7 +105,7 @@
                 <b-form-group id="group-site-income">
                   <h5>Income</h5>
                   <div>
-                    <b-form-checkbox id="site_new_tip" v-model="thisForm.by_site.income.new_tip" name="new_tip" >New Tip</b-form-checkbox>
+                    <b-form-checkbox id="site_new_tip" v-model="thisForm.by_site.income.new_tip" >New Tip</b-form-checkbox>
                     <p><small class="text-muted">Whenever a new tip is received</small></p>
                   </div>
                 </b-form-group>
@@ -125,10 +115,10 @@
                 <b-form-group id="group-site-post">
                   <h5>Posts</h5>
                   <div>
-                    <b-form-checkbox id="site_new_comment" v-model="thisForm.by_site.posts.new_comment">New Comment</b-form-checkbox>
+                    <b-form-checkbox id="site_new_comment" v-model="thisForm.by_site.posts.new_comment">When I receive a new comment on a post</b-form-checkbox>
                   </div>
                   <div>
-                    <b-form-checkbox id="site_new_like" v-model="thisForm.by_site.posts.new_like" name="new_like" >New Like</b-form-checkbox>
+                    <b-form-checkbox id="site_new_like" v-model="thisForm.by_site.posts.new_like" >When I receive a new like on a post</b-form-checkbox>
                   </div>
                 </b-form-group>
 
@@ -146,7 +136,8 @@
       <!--
       <div class="mx-3 my-1 px-3 py-1" style="border: solid pink 2px;">
         <h2>DEBUG</h2>
-        <pre>{{ JSON.stringify(this.user_settings.cattrs.notifications, null, 2) }}</pre>
+        <pre v-if="true">{{ JSON.stringify(this.user_settings.cattrs.notifications, null, 2) }}</pre>
+        <pre v-else>{{ JSON.stringify(this.user_settings.cattrs, null, 2) }}</pre>
       </div>
       -->
 
@@ -193,6 +184,7 @@ export default {
         income: {
           new_tip: null,
           new_subscription: null,
+          new_paid_post_purchase: null,
           //renewal: null, // ?? %TODO
           //returning_subscriber: null, // ?? %TODO
         },
@@ -204,6 +196,15 @@ export default {
           new_post_summary: null,
           new_comment: null,
           new_like: null,
+        },
+        timelines: {
+          new_follower: null,
+        },
+        messages: {
+          new_message: null,
+        },
+        usertags: {
+          new_tag: null,
         },
 
         referrals: {
@@ -223,6 +224,7 @@ export default {
         income: {
           new_tip: null,
           new_subscription: null,
+          new_paid_post_purchase: null,
         },
         posts: {
           new_post_summary: null,
@@ -276,28 +278,35 @@ export default {
   mounted() {
 
     // by email
-    this.thisForm.by_email.enabled = this.user_settings.cattrs.notifications.global.enabled?.includes('email') || false
-    this.thisForm.by_email.show_full_text = this.user_settings.cattrs.notifications.global.show_full_text?.includes('email') || false
+    this.thisForm.by_email.enabled = this.user_settings.cattrs.notifications.global?.enabled?.includes('email') || false
+    this.thisForm.by_email.show_full_text = this.user_settings.cattrs.notifications.global?.show_full_text?.includes('email') || false
 
-    this.thisForm.by_email.income.new_tip = this.user_settings.cattrs.notifications.income.new_tip?.includes('email') || false
-    this.thisForm.by_email.income.new_subscription = this.user_settings.cattrs.notifications.income.new_subscription?.includes('email') || false
+    this.thisForm.by_email.income.new_tip = this.user_settings.cattrs.notifications.income?.new_tip?.includes('email') || false
+    this.thisForm.by_email.income.new_subscription = this.user_settings.cattrs.notifications.income?.new_subscription?.includes('email') || false
+    this.thisForm.by_email.income.new_paid_post_purchase = this.user_settings.cattrs.notifications?.income.new_paid_post_purchase?.includes('email') || false
     //this.thisForm.by_email.posts.new_post_summary = this.user_settings.cattrs.notifications.posts.new_post_summary?.includes('email') || false
-    this.thisForm.by_email.posts.new_comment = this.user_settings.cattrs.notifications.posts.new_comment?.includes('email') || false
-    this.thisForm.by_email.posts.new_like = this.user_settings.cattrs.notifications.posts.new_like?.includes('email') || false
+    this.thisForm.by_email.posts.new_comment = this.user_settings.cattrs.notifications.posts?.new_comment?.includes('email') || false
+    this.thisForm.by_email.posts.new_like = this.user_settings.cattrs.notifications.posts?.new_like?.includes('email') || false
+    this.thisForm.by_email.timelines.new_follower = this.user_settings.cattrs.notifications.timelines?.new_follower?.includes('email') || false
+    this.thisForm.by_email.messages.new_message = this.user_settings.cattrs.notifications.messages?.new_message?.includes('email') || false
+    this.thisForm.by_email.usertags.new_tag = this.user_settings.cattrs.notifications.usertags?.new_tag?.includes('email') || false
     this.thisForm.by_email.campaigns.goal_achieved = this.user_settings.cattrs.notifications.campaigns?.goal_achieved?.includes('email') || false
     this.thisForm.by_email.campaigns.new_contribution = this.user_settings.cattrs.notifications.campaigns?.new_contribution?.includes('email') || false
 
     // by site
-    this.thisForm.by_site.enabled = this.user_settings.cattrs.notifications.global.enabled?.includes('site') || false
-    this.thisForm.by_site.show_full_text = this.user_settings.cattrs.notifications.global.show_full_text?.includes('site') || false
+    this.thisForm.by_site.enabled = this.user_settings.cattrs.notifications.global?.enabled?.includes('site') || false
+    this.thisForm.by_site.show_full_text = this.user_settings.cattrs.notifications.global?.show_full_text?.includes('site') || false
 
-    this.thisForm.by_site.income.new_tip = this.user_settings.cattrs.notifications.income.new_tip?.includes('site') || false
-    this.thisForm.by_site.income.new_subscription = this.user_settings.cattrs.notifications.income.new_subscription?.includes('site') || false
+    this.thisForm.by_site.income.new_tip = this.user_settings.cattrs.notifications.income?.new_tip?.includes('site') || false
+    this.thisForm.by_site.income.new_subscription = this.user_settings.cattrs.notifications.income?.new_subscription?.includes('site') || false
+    this.thisForm.by_site.income.new_paid_post_purchase = this.user_settings.cattrs.notifications.income?.new_paid_post_purchase?.includes('site') || false
     //this.thisForm.by_site.posts.new_post_summary = this.user_settings.cattrs.notifications.posts.new_post_summary?.includes('site') || false
-    this.thisForm.by_site.posts.new_comment = this.user_settings.cattrs.notifications.posts.new_comment?.includes('site') || false
-    this.thisForm.by_site.posts.new_like = this.user_settings.cattrs.notifications.posts.new_like?.includes('site') || false
+    this.thisForm.by_site.posts.new_comment = this.user_settings.cattrs.notifications.posts?.new_comment?.includes('site') || false
+    this.thisForm.by_site.posts.new_like = this.user_settings.cattrs.notifications.posts?.new_like?.includes('site') || false
     this.thisForm.by_site.campaigns.goal_achieved = this.user_settings.cattrs.notifications.campaigns?.goal_achieved?.includes('site') || false
     this.thisForm.by_site.campaigns.new_contribution = this.user_settings.cattrs.notifications.campaigns?.new_contribution?.includes('site') || false
+
+    // ---
 
     this.$watch('thisForm.by_email.enabled', function (newVal) {
       this.updateSetting('global', {enabled: ['email']}, newVal)
@@ -307,6 +316,9 @@ export default {
     })
     this.$watch('thisForm.by_email.income.new_subscription', function (newVal) { 
       this.updateSetting('income', {new_subscription: ['email']}, newVal)
+    })
+    this.$watch('thisForm.by_email.income.new_paid_post_purchase', function (newVal) { 
+      this.updateSetting('income', {new_paid_post_purchase: ['email']}, newVal)
     })
     /*
     this.$watch('thisForm.by_email.posts.new_post_summary', function (newVal) { 
@@ -318,6 +330,15 @@ export default {
     })
     this.$watch('thisForm.by_email.posts.new_like', function (newVal) { 
       this.updateSetting('posts', {new_like: ['email']}, newVal)
+    })
+    this.$watch('thisForm.by_email.timelines.new_follower', function (newVal) { 
+      this.updateSetting('timelines', {new_follower: ['email']}, newVal)
+    })
+    this.$watch('thisForm.by_email.messages.new_message', function (newVal) { 
+      this.updateSetting('messages', {new_message: ['email']}, newVal)
+    })
+    this.$watch('thisForm.by_email.usertags.new_tag', function (newVal) { 
+      this.updateSetting('usertags', {new_tag: ['email']}, newVal)
     })
     this.$watch('thisForm.by_email.campaigns.goal_achieved', function (newVal) { 
       this.updateSetting('campaigns', {goal_achieved: ['email']}, newVal)
@@ -335,6 +356,9 @@ export default {
     })
     this.$watch('thisForm.by_site.income.new_subscription', function (newVal) { 
       this.updateSetting('income', {new_subscription: ['site']}, newVal)
+    })
+    this.$watch('thisForm.by_site.income.new_paid_post_purchase', function (newVal) { 
+      this.updateSetting('income', {new_paid_post_purchase: ['site']}, newVal)
     })
     /*
     this.$watch('thisForm.by_site.posts.new_post_summary', function (newVal) { 
