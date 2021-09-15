@@ -36,7 +36,6 @@ class UserSettingModelTest extends TestCase
      * @group settings-model
      * @group regression
      * @group regression-base
-     * @group here0913
      */
     // %FIXME %ERIK : deprecate this once we move sub price out of settings
     public function test_can_set_subscription_price()
@@ -47,9 +46,8 @@ class UserSettingModelTest extends TestCase
         $userSettingsOrig = $userSettings;
 
         $group = 'subscriptions';
-
         $payload = [
-            'price_per_1_months' => 30,
+            'price_per_1_months' => 3000, // in cents
         ];
         $result = $userSettings->setValues($group, $payload);
 

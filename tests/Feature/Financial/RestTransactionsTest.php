@@ -16,7 +16,6 @@ class RestTransactionssTest extends TestCase
      *  @group financial-transactions
      *  @group regression
      *  @group regression-financial
-     *  @group here0726
      */
     public function test_admin_can_list_transactions()
     {

@@ -15,7 +15,6 @@ class RestAccountsTest extends TestCase
      *  @group financial-accounts
      *  @group regression
      *  @group regression-financial
-     *  @group here0726
      */
     public function test_admin_can_list_accounts()
     {

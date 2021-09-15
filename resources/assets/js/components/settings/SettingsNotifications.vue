@@ -1,7 +1,12 @@
 <template>
   <div v-if="!isLoading" class="component-settings_notification">
+
     <b-card no-body>
+
       <b-tabs card>
+
+        <!-- ++++++++++++ Email Tab ++++++++++++ -->
+
         <b-tab title="Email" active>
           <b-card-text>
             <b-form>
@@ -57,15 +62,16 @@
                     </div>
                     -->
                     <div>
-                      <b-form-checkbox id="new_like" v-model="thisForm.by_email.posts.new_like" name="new_like" >New Like</b-form-checkbox>
+                      <b-form-checkbox id="email_new_like" v-model="thisForm.by_email.posts.new_like" name="new_like" >New Like</b-form-checkbox>
                     </div>
                     <div>
-                      <b-form-checkbox id="new_comment" v-model="thisForm.by_email.posts.new_comment" name="new_comment" >New Comment</b-form-checkbox>
+                      <b-form-checkbox id="email_new_comment" v-model="thisForm.by_email.posts.new_comment">New Comment</b-form-checkbox>
                     </div>
                   </b-form-group>
 
                   <hr />
 
+                  <!--
                   <b-form-group id="group-email-other">
                     <h5>Other</h5>
                     <div>
@@ -75,13 +81,17 @@
                       <b-form-checkbox id="upcoming_stream_reminders" v-model="thisForm.by_email.other.upcoming_stream_reminders" name="upcoming_stream_reminders" >Upcoming Stream Reminders</b-form-checkbox>
                     </div>
                   </b-form-group>
+                  -->
                 </template>
 
               </fieldset>
 
             </b-form>
           </b-card-text>
+
         </b-tab>
+
+        <!-- ++++++++++++ Site Tab ++++++++++++ -->
 
         <b-tab title="Site">
           <b-card-text>
@@ -105,7 +115,7 @@
                 <b-form-group id="group-site-income">
                   <h5>Income</h5>
                   <div>
-                    <b-form-checkbox id="new_tip" v-model="thisForm.by_site.income.new_tip" name="new_tip" >New Tip</b-form-checkbox>
+                    <b-form-checkbox id="site_new_tip" v-model="thisForm.by_site.income.new_tip" name="new_tip" >New Tip</b-form-checkbox>
                     <p><small class="text-muted">Whenever a new tip is received</small></p>
                   </div>
                 </b-form-group>
@@ -115,10 +125,10 @@
                 <b-form-group id="group-site-post">
                   <h5>Posts</h5>
                   <div>
-                    <b-form-checkbox id="new_comment" v-model="thisForm.by_site.posts.new_comment" name="new_comment" >New Comment</b-form-checkbox>
+                    <b-form-checkbox id="site_new_comment" v-model="thisForm.by_site.posts.new_comment">New Comment</b-form-checkbox>
                   </div>
                   <div>
-                    <b-form-checkbox id="new_like" v-model="thisForm.by_site.posts.new_like" name="new_like" >New Like</b-form-checkbox>
+                    <b-form-checkbox id="site_new_like" v-model="thisForm.by_site.posts.new_like" name="new_like" >New Like</b-form-checkbox>
                   </div>
                 </b-form-group>
 
@@ -128,14 +138,20 @@
 
             </b-form>
           </b-card-text>
+
         </b-tab>
 
-        <!-- <b-tab title="Push">
-          <b-card-text>
-          </b-card-text>
-        </b-tab> -->
       </b-tabs>
+
+      <!--
+      <div class="mx-3 my-1 px-3 py-1" style="border: solid pink 2px;">
+        <h2>DEBUG</h2>
+        <pre>{{ JSON.stringify(this.user_settings.cattrs.notifications, null, 2) }}</pre>
+      </div>
+      -->
+
     </b-card>
+
   </div>
 </template>
 
@@ -146,13 +162,14 @@ export default {
 
   props: {
     session_user: null,
-    user_settings: null,
+    //user_settings: null,
   },
 
   computed: {
     isLoading() {
       return !this.session_user || !this.user_settings
     },
+    ...Vuex.mapGetters(['user_settings']),
   },
 
   data: () => ({
@@ -227,14 +244,26 @@ export default {
 
   methods: {
 
-    async updateSetting(group, val, isEnable) {
+    ...Vuex.mapActions([
+      'getMe',
+      'getUserSettings',
+      'subscriptions/updateCount'
+    ]),
+
+    async updateSetting(group, val, isEnabled) {
+      console.log('updatedSetting', {
+        group,
+        val,
+        isEnabled,
+      })
       const payload = { }
-      const url = isEnable 
+      const url = isEnabled 
         ? route('users.enableSetting', [this.session_user.id, 'notifications'])
         : route('users.disableSetting', [this.session_user.id, 'notifications'])
       payload[group] = val
       console.log('updateSetting', { payload })
       const response = await axios.patch( url, payload )
+      this.getUserSettings( { userId: this.session_user.id })
       //this.isEditing.formPrivacy = false
     },
 
@@ -331,6 +360,14 @@ export default {
 
   watch: {
     // by email
+    session_user(value) {
+      if (value) {
+        if (!this.user_settings) {
+          this.getUserSettings( { userId: this.session_user.id })
+        }
+      }
+    },
+
   },
 
 }

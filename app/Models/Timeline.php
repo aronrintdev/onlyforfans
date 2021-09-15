@@ -276,6 +276,19 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         return $price->equals($amount);
     }
 
+    // added by %PSG 20210914 
+    //  ~ %FIXME: see above...this could be useful as well as a standalone method %ERIK
+    //  ~ %FIXME: will need to account for 'batches', but this can be the base price (ie monthly, pre-discounts)
+    public function getBaseSubPriceInCents(): Money
+    {
+        if (isset($this->getUserstats()['subscriptions']) && isset($this->getUserstats()['subscriptions']['price_per_1_months'])) {
+            $price = $this->asMoney($this->getUserstats()['subscriptions']['price_per_1_months'] * 100);
+        } else {
+            $price = $this->price;
+        }
+        return $price;
+    }
+
     public function getDescriptionNameString(): string
     {
         return "Timeline of {$this->name}";
