@@ -2,31 +2,32 @@
 
 namespace App\Payments;
 
+use Exception;
 use Money\Money;
 use App\Models\Tip;
+use App\Events\TipFailed;
+use App\Events\ItemSubscribed;
+use App\Events\PurchaseFailed;
+use Illuminate\Support\Carbon;
 use App\Interfaces\Purchaseable;
 use App\Interfaces\Subscribable;
 use App\Models\Financial\Account;
+use App\Events\SubscriptionFailed;
 use Illuminate\Support\Facades\App;
-use App\Models\Financial\SegpayCall;
-use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use App\Enums\ShareableAccessLevelEnum;
-use App\Enums\Financial\AccountTypeEnum;
-use App\Models\Financial\Exceptions\AlreadyProcessingException;
+use App\Http\Resources\Chatmessage;
 use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
 use App\Models\Financial\Exceptions\InvalidFinancialSystemException;
 
 /**
- *
+ * Payment Gateway for faking transactions. Only valid in dev and test environments
  * @package App\Payments
  */
-class SegpayPaymentGateway implements PaymentGatewayContract
+class FakedPaymentGateway implements PaymentGatewayContract
 {
-
-    protected $system = 'segpay';
-
     /**
-     * Handle purchase with known Segpay card account
+     * Handle fake purchase
      *
      * @param Account $account
      * @param Purchaseable $item
@@ -36,36 +37,35 @@ class SegpayPaymentGateway implements PaymentGatewayContract
     public function purchase(Account $account, Purchaseable $item, Money $price)
     {
         $this->validateAccount($account);
-        if (Config::get('segpay.fake') && App::environment() != 'production') {
-            return (new FakedPaymentGateway())->purchase($account, $item, $price);
-        }
 
         try {
-            $segpayCall = SegpayCall::confirmPurchase($account, $price, $item);
-        } catch (AlreadyProcessingException $e) {
+            $transactions = $account->purchase($item, $price);
+        } catch (Exception $e) {
+            Log::warning('Purchase Failed to process', ['e' => $e->__toString()]);
+            PurchaseFailed::dispatch($item, $account);
             return [
                 'success' => false,
-                'message' => 'Already Processing Payment',
+                'message' => 'Failed to process purchase',
             ];
         }
 
         // TODO: Add additional checks for instant access
-        $instantAccess = isset($segpayCall->failed_at) ? false : true;
-
+        $instantAccess = true;
         if ($instantAccess) {
             $item->grantAccessFor($account->getOwner(), ShareableAccessLevelEnum::PREMIUM);
         }
 
         return [
-            'success' => isset($segpayCall->failed_at) ? false : true,
+            'success' => true,
             'item' => $item,
             'instantAccess' => $instantAccess,
-            'processed_at' => $segpayCall->processed_at,
+            'faked' => true,
+            'processed_at' => Carbon::now(),
         ];
     }
 
     /**
-     * Handle a tip with a known Segpay card account
+     * Handle a faked tip
      *
      * @param Account $account
      * @param Tip $item
@@ -75,28 +75,29 @@ class SegpayPaymentGateway implements PaymentGatewayContract
     public function tip(Account $account, Tip $tip, Money $price)
     {
         $this->validateAccount($account);
-        if (Config::get('segpay.fake') && App::environment() != 'production') {
-            return(new FakedPaymentGateway())->tip($account, $tip, $price);;
-        }
 
         try {
-            $segpayCall = SegpayCall::confirmTip($account, $price, $tip);
-        } catch (AlreadyProcessingException $e) {
+            $transactions = $tip->process(true, ['account_id' => $account->id]);
+        } catch (Exception $e) {
+            Log::warning('Tip Failed to process', ['e' => $e->__toString()]);
+            TipFailed::dispatch($tip, $account);
             return [
                 'success' => false,
-                'message' => 'Already Processing Payment',
+                'message' => 'Failed to process tip',
             ];
         }
 
         return [
-            'success' => isset($segpayCall->failed_at) ? false : true,
+            'success' => true,
             'tip' => $tip,
-            'processed_at' => $segpayCall->processed_at,
+            'message' => isset($transactions['message']) ? new Chatmessage($transactions['message']) : null,
+            'faked' => true,
+            'processed_at' => Carbon::now(),
         ];
     }
 
     /**
-     * Complete a Segpay Subscription with a known Segpay card account
+     * Complete a faked Subscription
      *
      * @param Account $account
      * @param Subscribable $item
@@ -106,37 +107,37 @@ class SegpayPaymentGateway implements PaymentGatewayContract
     public function subscribe(Account $account, Subscribable $item, Money $price)
     {
         $this->validateAccount($account);
-        if (Config::get('segpay.fake') && App::environment() != 'production') {
-            return (new FakedPaymentGateway())->subscribe($account, $item, $price);
-        }
 
         // Create subscription
         $subscription = $account->createSubscription($item, $price, [
             'manual_charge' => false,
         ]);
 
-        // Send Segpay One click call
         try {
-            $segpayCall = SegpayCall::confirmSubscription($account, $price, $subscription);
-        } catch (AlreadyProcessingException $e) {
+            $transactions = $subscription->process();
+            ItemSubscribed::dispatch($item, $account->owner);
+        } catch (Exception $e) {
+            Log::warning('Subscription Failed to be created', ['e' => $e->__toString()]);
+            SubscriptionFailed::dispatch($item, $account);
             return [
                 'success' => false,
-                'item' => $item,
-                'message' => 'Already Processing Payment',
+                'message' => 'Failed to process subscription',
             ];
         }
 
         // TODO: Add additional checks for instant access
-        $instantAccess = isset($segpayCall->failed_at) ? false : true;
+        $instantAccess = true;
 
         if ($instantAccess) {
             $item->grantAccessFor($account->getOwner(), ShareableAccessLevelEnum::PREMIUM);
         }
 
         return [
-            'success' => isset($segpayCall->failed_at) ? false : true,
+            'success' => true,
+            'item' => $item,
             'instantAccess' => $instantAccess,
-            'processed_at' => $segpayCall->processed_at,
+            'faked' => true,
+            'processed_at' => Carbon::now(),
         ];
     }
 
@@ -150,12 +151,8 @@ class SegpayPaymentGateway implements PaymentGatewayContract
      */
     private function validateAccount(Account $account)
     {
-        if ($account->system !== $this->system) {
-            throw new InvalidFinancialSystemException($this->system, $account);
-        }
-        if ($account->type !== AccountTypeEnum::IN) {
-            throw new IncorrectTypeException($account, AccountTypeEnum::IN);
+        if (App::environment() === 'production') {
+            throw new InvalidFinancialSystemException('Faked', $account);
         }
     }
-
 }
