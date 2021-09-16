@@ -4,10 +4,10 @@
       <template #loading>
         <b-skeleton />
       </template>
-      <div v-if="collapse && !open" class="w-100 d-flex justify-content-around">
+      <div v-if="showChangeButton && collapse && !open" class="w-100 d-flex justify-content-around">
         <b-btn
-          variant="primary"
-          class="mx-auto"
+          variant="link"
+          class="ml-auto"
           v-text="$t('change.button')" @click="open = true"
         />
       </div>
@@ -48,6 +48,7 @@ export default {
   props: {
     selected: { type: Object, default: () => ({}) },
     collapse: { type: Boolean, default: false },
+    showChangeButton: { type: Boolean, default: false },
   },
 
   computed: {
@@ -61,6 +62,10 @@ export default {
 
   methods: {
     ...Vuex.mapActions('payments', [ 'getSavedPaymentMethods' ]),
+
+    change() {
+      this.open = true
+    },
 
     loadPaymentMethods() {
       this.loading = true
@@ -95,7 +100,7 @@ export default {
 {
   "en": {
     "change": {
-      "button": "Choose different payment option"
+      "button": "Change"
     },
     "list": {
       "title": "Use Payment Method:"

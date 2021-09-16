@@ -81,6 +81,20 @@ class ChatmessagesController extends AppBaseController
         return new ChatmessageCollection($data);
     }
 
+    /**
+     * Attaches more media file to a given message
+     */
+    public function attachMedia(Request $request, Chatmessage $chatmessage)
+    {
+        $request->validate([
+            'attachments' => 'required|array'
+        ]);
+        $this->authorize('update', $chatmessage);
+        $chatmessage->addAttachments($request->attachments);
+        $chatmessage->refresh();
+        return new ChatmessageResource($chatmessage);
+    }
+
 
     public function search(Request $request)
     {

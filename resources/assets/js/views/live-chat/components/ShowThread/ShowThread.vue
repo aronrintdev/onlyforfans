@@ -14,7 +14,6 @@
           :favorited="isFavorite"
           :muted="!!isMuted"
           :hasNotes="!!notes"
-          @tip="tip"
           @addNotes="addNotes"
           @toggleMute="toggleMute"
           @toggleFavorite="toggleFavorite"
@@ -61,17 +60,6 @@
         >
           <fa-icon :icon="showGallery ? ['fas', 'image'] : ['far', 'image']" size="lg" class="mr-1" />
           <span v-if="!mobile" v-text="$t('buttons.gallery')" />
-        </b-btn>
-        <div class="text-muted">|</div>
-        <b-btn
-          variant="link"
-          class="text-nowrap"
-          v-b-tooltip:hover
-          :title="$t('tooltip.tip')"
-          @click="tip"
-        >
-          <fa-icon icon="dollar-sign" fixed-width size="lg" class="mr-1" />
-          <span v-if="!mobile" v-text="$t('buttons.tip')" />
         </b-btn>
         <div class="text-muted">|</div>
         <SearchInput v-model="searchQuery" size="lg" />
@@ -405,16 +393,6 @@ export default {
       }
     },
 
-    tip() {
-      eventBus.$emit('open-modal', {
-        key: 'render-tip',
-        data: {
-          resource: this.timeline,
-          resource_type: 'timelines',
-        },
-      })
-    },
-
     addNotes() {
       this.isNotesModalVisible = true
     },
@@ -556,13 +534,11 @@ export default {
     "buttons": {
       "favorite": "Favorite",
       "notifications": "Notifications",
-      "gallery": "Gallery",
-      "tip": "Tip",
+      "gallery": "Gallery"
     },
     "tooltip": {
       "notifications": "Activate or Deactivate Notifications for this Chat Thread",
-      "gallery": "View Gallery of Media",
-      "tip": "Send Tip"
+      "gallery": "View Gallery of Media"
     }
   }
 }
