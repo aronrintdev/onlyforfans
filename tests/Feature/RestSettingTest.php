@@ -20,7 +20,7 @@ class RestSettingTest extends TestCase
      *  @group regression
      *  @group regression-base
      */
-    public function test_can_update_single_notifications_setting_income_new_tip()
+    public function test_can_enable_single_notifications_setting_income_new_tip()
     {
         $timeline = Timeline::has('posts','>=',1)->first(); 
         $user = $timeline->user;
@@ -36,18 +36,24 @@ class RestSettingTest extends TestCase
 
         $content = json_decode($response->content());
         //dd($content);
+
+        // Check the response
         $this->assertObjectHasAttribute('notifications', $content->cattrs);
         $this->assertObjectHasAttribute('income', $content->cattrs->notifications);
         $this->assertObjectHasAttribute('new_tip', $content->cattrs->notifications->income);
-        $this->assertContains('email', $content->cattrs->notifications->income->new_tip);
-        $this->assertContains('sms', $content->cattrs->notifications->income->new_tip);
-        $this->assertNotContains('site', $content->cattrs->notifications->income->new_tip);
-        /*
-        $this->assertNotNull($content->post);
-        $postR = $content->post;
-        $this->assertNotNull($postR->description);
-        $this->assertEquals($payload['description'], $postR->description);
-         */
+        $this->assertContains('email', (array)$content->cattrs->notifications->income->new_tip);
+        $this->assertContains('sms', (array)$content->cattrs->notifications->income->new_tip);
+
+        // Check the actual DB record
+        $settings = UserSetting::where('user_id', $user->id)->first();
+        $this->assertNotNull($settings);
+        $this->assertNotNull($settings->id);
+        $this->assertNotNull($settings->cattrs);
+        $this->assertIsArray($settings->cattrs);
+        $this->assertArrayHasKey('notifications', $settings->cattrs);
+        $this->assertArrayHasKey('income', $settings->cattrs['notifications']);
+        $this->assertArrayHasKey('new_tip', $settings->cattrs['notifications']['income']);
+        $this->assertContains('email', $settings->cattrs['notifications']['income']['new_tip']);
     }
 
     /**
@@ -55,7 +61,47 @@ class RestSettingTest extends TestCase
      *  @group regression
      *  @group regression-base
      */
-    public function test_can_update_single_notifications_setting_not_yet_in_template()
+    public function test_can_disable_single_notifications_setting_income_new_tip()
+    {
+        $timeline = Timeline::has('posts','>=',1)->first(); 
+        $user = $timeline->user;
+
+        // --- First enable so we have something to disable ---
+        $payload = [
+            'income' => [
+                'new_tip' => ['sms'],
+            ],
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.enableSetting', [$user->id, 'notifications']), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+
+        // Check the response
+        $this->assertContains('sms', (array)$content->cattrs->notifications->income->new_tip);
+
+        // Check the actual DB record
+        $settings = UserSetting::where('user_id', $user->id)->first();
+        $this->assertContains('sms', $settings->cattrs['notifications']['income']['new_tip']);
+
+        // --- Disable the setting ---
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.disableSetting', [$user->id, 'notifications']), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+
+        // Check the response
+        $this->assertNotContains('sms', (array)$content->cattrs->notifications->income->new_tip);
+
+        // Check the actual DB record
+        $settings = UserSetting::where('user_id', $user->id)->first();
+        $this->assertNotContains('sms', $settings->cattrs['notifications']['income']['new_tip']);
+    }
+
+    /**
+     *  @group settings
+     *  @group regression
+     *  @group regression-base
+     */
+    public function test_can_enable_single_notifications_setting_not_yet_in_template()
     {
         // This test ensures that users who registered with a 'legacy' template can still set/unset 
         //   new cattrs notification settings added aftewards...
@@ -95,7 +141,7 @@ class RestSettingTest extends TestCase
      *  @group regression
      *  @group regression-base
      */
-    public function test_can_update_single_notifications_setting_post_new_comment()
+    public function test_can_enable_single_notifications_setting_post_new_comment()
     {
         $timeline = Timeline::has('posts','>=',1)->first(); 
         $user = $timeline->user;
@@ -115,7 +161,6 @@ class RestSettingTest extends TestCase
         $this->assertObjectHasAttribute('posts', $content->cattrs->notifications);
         $this->assertObjectHasAttribute('new_comment', $content->cattrs->notifications->posts);
         $this->assertContains('email', $content->cattrs->notifications->posts->new_comment);
-        $this->assertNotContains('site', $content->cattrs->notifications->posts->new_comment);
     }
 
     /**
@@ -152,7 +197,6 @@ class RestSettingTest extends TestCase
         $this->assertObjectHasAttribute('notifications', $content->cattrs);
         $this->assertObjectHasAttribute('global', $content->cattrs->notifications);
         $this->assertObjectHasAttribute('enabled', $content->cattrs->notifications->global);
-        $this->assertNotContains('email', $content->cattrs->notifications->global->enabled);
     }
 
     /**
@@ -228,10 +272,12 @@ class RestSettingTest extends TestCase
         ]);
     }
 
+
     /**
      *  @group settings
      *  @group regression
      *  @group regression-base
+     *  @group here0916
      */
     public function test_can_batch_edit_settings_profile()
     {
@@ -247,7 +293,6 @@ class RestSettingTest extends TestCase
             'birthdate' => $this->faker->dateTimeThisCentury->format('Y-m-d'),
             'weblinks' => [
                 'amazon' => $this->faker->url,
-                //'website' => $this->faker->url,
                 'website' => $this->faker->domainName,
                 'instagram' => $this->faker->url,
             ],
@@ -255,16 +300,21 @@ class RestSettingTest extends TestCase
         ];
         $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSettingsBatch', [$user->id]), $payload1);
         $content = json_decode($response->content());
+        //dd($content);
         $response->assertStatus(200);
 
         $settings = $user->settings;
         $settings->refresh();
-        $this->assertEquals($payload1['about'], $settings->about);
+        $timeline->refresh();
+
+        $this->assertEquals($payload1['about'], $timeline->about);
         $this->assertEquals($payload1['city'], $settings->city);
         $this->assertEquals($payload1['gender'], $settings->gender);
         $this->assertEquals($payload1['birthdate'], $settings->birthdate);
         //dd( json_encode($settings->cattrs, JSON_PRETTY_PRINT) );
-        $this->assertEquals($payload1['weblinks']['instagram'], $settings->weblinks['instagram'] ?? ''); // %FIXME %FUJIO
+        $this->assertEquals($payload1['weblinks']['amazon'], $settings->weblinks['amazon'] ?? ''); // %FIXME %FUJIO
+        $this->assertEquals($payload1['weblinks']['website'], $settings->weblinks['website'] ?? '');
+        $this->assertEquals($payload1['weblinks']['instagram'], $settings->weblinks['instagram'] ?? '');
 
         $payload2 = [
             'about' => $this->faker->realText,
@@ -274,10 +324,37 @@ class RestSettingTest extends TestCase
 
         $settings = $user->settings;
         $settings->refresh();
-        $this->assertEquals($payload2['about'], $settings->about);
+        $timeline->refresh();
+
+        $this->assertEquals($payload2['about'], $timeline->about);
         $this->assertEquals($payload1['city'], $settings->city); // unchanged
         $this->assertEquals($payload1['gender'], $settings->gender); // unchanged
         $this->assertEquals($payload1['birthdate'], $settings->birthdate); // unchanged
+    }
+
+    /**
+     *  @group settings
+     *  @group regression
+     *  @group regression-base
+     */
+    public function test_can_batch_edit_settings_profile_set_website_to_dot_info()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $user = $timeline->user;
+
+        $payload1 = [
+            'weblinks' => [
+                'website' => 'http://www.lind.info', // %FIXME looks like laravel's validation domain rule doesn't accept .info (?)
+            ],
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSettingsBatch', [$user->id]), $payload1);
+        $content = json_decode($response->content());
+        $response->assertStatus(200);
+
+        $settings = $user->settings;
+        $settings->refresh();
+
+        $this->assertEquals($payload1['weblinks']['website'], $settings->weblinks['website'] ?? '');
     }
 
     /**
