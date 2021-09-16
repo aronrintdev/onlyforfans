@@ -1,0 +1,22 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class UpdateUserSettingsRemoveRedundantAboutField extends Migration
+{
+    public function up()
+    {
+        Schema::table('user_settings', function (Blueprint $table) {
+            $table->dropColumn('about');
+        });
+    }
+
+    public function down()
+    {
+        Schema::table('user_settings', function (Blueprint $table) {
+            $table->longtext('about')->nullable();
+        });
+    }
+}
