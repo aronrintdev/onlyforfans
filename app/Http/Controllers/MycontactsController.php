@@ -34,6 +34,8 @@ class MycontactsController extends AppBaseController
             'has_purchased_post'      => 'boolean',
             'has_tipped'              => 'boolean',
             'include_non_contacts'    => 'boolean',
+            'is_offline'              => 'boolean',
+            'is_online'               => 'boolean',
         ]);
         $filters = $request->only([
             'owner_id',
@@ -43,6 +45,8 @@ class MycontactsController extends AppBaseController
             'is_expired_subscriber',
             'has_purchased_post',
             'has_tipped',
+            'is_offline',
+            'is_online',
         ]) ?? [];
 
         $sessionUser = $request->user();
@@ -180,6 +184,26 @@ class MycontactsController extends AppBaseController
                                     });
                                 });
                             });
+                        });
+                    }
+                    break;
+
+                case 'is_offline':
+                    if ($all) {
+                        $usersQuery->where('is_online', 0)->orWhereNull('is_online');
+                    } else {
+                        $query->whereHas('contact', function ($q1) {
+                            $q1->where('is_online', 0)->orWhereNull('is_online');
+                        });
+                    }
+                    break;
+
+                case 'is_online':
+                    if ($all) {
+                        $usersQuery->where('is_online', 1)->where('id', '<>', $sessionUser->id);
+                    } else {
+                        $query->whereHas('contact', function ($q1) {
+                            $q1->where('is_online', 1);
                         });
                     }
                     break;
