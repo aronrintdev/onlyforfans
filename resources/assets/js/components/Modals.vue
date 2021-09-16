@@ -435,6 +435,10 @@ export default {
   align-items: center;
 }
 
+#edit-post {
+  padding: 0 !important;
+}
+
 #modal-post {
 
   .modal-header {
