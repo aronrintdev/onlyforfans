@@ -46,7 +46,7 @@
         </ul>
 
         <div class="mt-3" v-if="timeline.about" :class="{ 'normal-view': !isFullVisiable }">
-          <VueMarkdown :html="false" :source="timeline.about || ''" />
+          <VueMarkdown :html="true" :source="timeline.about || ''" />
         </div>
         <div v-if="!isFullVisiable && isOverLength" class="toggle-read-more text-primary text-right mr-3 mt-1" @click="isFullVisiable = !isFullVisiable">Read more</div>
         <ul class="social-links list-unstyled mt-3" v-if="timeline.userstats.website || timeline.userstats.instagram">
@@ -86,7 +86,13 @@ export default {
     },
 
     isOverLength() {
-      if (this.timeline && this.timeline.about.length > 95) return true
+      if (this.timeline && this.timeline.about) {
+        const ele = $('<div></div>').html(this.timeline.about);
+        const text = $(ele)[0].innerText
+        if (text.length > 95) {
+          return true
+        }
+      }
       return false
     },
     

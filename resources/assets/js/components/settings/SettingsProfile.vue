@@ -380,6 +380,8 @@ export default {
     this.formProfile.name = this.timeline.name || ''
     this.formProfile.slug = this.timeline.slug || ''
     this.formProfile.about = this.timeline.about
+    this.description = this.timeline.about
+    this.descriptionForEditor = this.timeline.about
     this.formProfile.country = this.user_settings.country
     this.formProfile.city = this.user_settings.city
     this.formProfile.gender = this.user_settings.gender
@@ -409,12 +411,12 @@ export default {
 
     async submitProfile(e) {
       this.isSubmitting.formProfile = true
-      console.log('-------- description: ', this.description)
       const formProfile = {
         ...this.formProfile,
+        birthdate: this.formProfile.birthdate == '0000-00-00' ? null : this.formProfile.birthdate,
         about: this.description,
       }
-      axios.patch(`/users/${this.session_user.id}/settings`, this.formProfile)
+      axios.patch(`/users/${this.session_user.id}/settings`, formProfile)
         .then(() => {
           // re-load user settings
           this.getUserSettings({ userId: this.session_user.id })
@@ -445,6 +447,9 @@ export default {
           switch(type) {
             case 'weblinks.website':
               message = 'Website URL is invalid'
+              break;
+            case 'birthdate':
+              message = 'Birthdate is invalid'
               break;
             default:
               message = error.response.data.message;
