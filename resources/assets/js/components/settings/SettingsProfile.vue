@@ -25,7 +25,21 @@
             <b-row>
               <b-col>
                 <b-form-group id="group-about" label="Bio" label-for="about">
-                  <b-form-textarea id="about" v-model="formProfile.about" rows="3"></b-form-textarea>
+                  <div v-custom-click-outside="closeEmojiBox" class="emoji-opener" v-b-tooltip.hover="'Add Emoji Icon'">
+                    <div @click="isEmojiBoxVisible=!isEmojiBoxVisible" >
+                      <fa-icon :icon="isEmojiBoxVisible ? ['fas', 'smile'] : ['far', 'smile']" :class="isEmojiBoxVisible ? 'text-primary' : 'text-secondary'" size="lg" />
+                    </div>
+                    <VEmojiPicker v-if="isEmojiBoxVisible" @select="selectEmoji" />
+                  </div>
+                  <!-- <b-form-textarea id="about" v-model="formProfile.about" rows="3"></b-form-textarea> -->
+                  <div
+                    class="text-left text-editor settings-profile-editor"
+                    contenteditable
+                    v-html="descriptionForEditor"
+                    @keydown="editorChanged"
+                    @input="onInput"
+                    @click="editorClicked"
+                  ></div>
                 </b-form-group>
               </b-col>
             </b-row>
@@ -210,12 +224,17 @@
 
 <script>
 import Vuex from 'vuex';
+import { VEmojiPicker } from 'v-emoji-picker'
 
 export default {
   props: {
     session_user: null,
     user_settings: null,
     timeline: null,
+  },
+
+  components: {
+    VEmojiPicker,
   },
 
   computed: {
@@ -349,6 +368,9 @@ export default {
       ]
     },
     isDemographicsVisible: false,
+    descriptionForEditor: '',
+    description: '',
+    isEmojiBoxVisible: false,
   }),
 
   mounted() {
@@ -387,6 +409,11 @@ export default {
 
     async submitProfile(e) {
       this.isSubmitting.formProfile = true
+      console.log('-------- description: ', this.description)
+      const formProfile = {
+        ...this.formProfile,
+        about: this.description,
+      }
       axios.patch(`/users/${this.session_user.id}/settings`, this.formProfile)
         .then(() => {
           // re-load user settings
@@ -456,10 +483,90 @@ export default {
           break;
         default:
       }
-    }
-  },
+    },
 
-  components: {
+    editorChanged(e) {
+      if (e.keyCode == 50 && e.shiftKey) {
+        e.preventDefault();
+        let content = e.target.innerHTML;
+        content += `<a>@`;
+        this.descriptionForEditor = content;
+        this.$nextTick(() => {
+          const p = e.target,
+              s = window.getSelection(),
+              r = document.createRange();
+          let ele = p.childElementCount > 0 ? p.lastChild : p;
+          if (p.lastChild.textContent == '') {
+            r.setStart(ele, 0);
+            r.setEnd(ele, 0);
+          } else {
+            r.setStart(ele, 1);
+            r.setEnd(ele, 1);
+          }
+    
+          s.removeAllRanges();
+          s.addRange(r);
+        })
+      } else if (e.keyCode == 32) {
+        let content = e.target.innerHTML;
+        if (content.slice(-4) == '</a>') {
+          e.preventDefault();
+          this.descriptionForEditor = content + '<span>&nbsp;';
+          this.$nextTick(() => {
+            const p = e.target,
+                s = window.getSelection(),
+                r = document.createRange();
+            let ele = p.childElementCount > 0 ? p.lastChild : p;
+            if (p.lastChild.textContent == '') {
+              r.setStart(ele, 0);
+              r.setEnd(ele, 0);
+            } else {
+              r.setStart(ele, 1);
+              r.setEnd(ele, 1);
+            }
+      
+            s.removeAllRanges();
+            s.addRange(r);
+          })
+        }
+      }
+    },
+
+    onInput(e) {
+      this.description = e.target.innerHTML
+    },
+
+    editorClicked(e) {
+      if (e.target.tagName == 'A') {
+        const url = e.target.textContent.slice(1)
+        window.location.href = url;
+      }
+    },
+    
+    selectEmoji(emoji) {
+      this.description += `<span class="emoji">${emoji.data}</span><span>&nbsp;</span>`
+      this.descriptionForEditor = this.description
+      this.$nextTick(() => {
+        const p = document.querySelector('#group-about .text-editor'),
+            s = window.getSelection(),
+            r = document.createRange();
+        let ele = p.childElementCount > 0 ? p.lastChild : p;
+        if (!p.lastChild.textContent) {
+          r.setStart(ele, 0);
+          r.setEnd(ele, 0);
+        } else {
+          r.setStart(ele, 1);
+          r.setEnd(ele, 1);
+        }
+  
+        s.removeAllRanges();
+        s.addRange(r);
+      })
+    },
+
+    closeEmojiBox() {
+      this.isEmojiBoxVisible = false;
+    }
   },
 }
 </script>
@@ -476,6 +583,30 @@ textarea#about {
 
 .demographics_visible {
   cursor: pointer;
+}
+
+.settings-profile-editor {
+  color: #495057;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+  &:focus {
+    background-color: #fff;
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgb(0 123 255 / 25%);
+  }
+}
+
+#group-about {
+  position: relative;
+
+  .emoji-opener {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
 }
 
 @media (max-width: 576px) {
@@ -496,6 +627,31 @@ textarea#about {
       border-top-left-radius: 0;
       border-top-right-radius: 0;
       border-bottom-left-radius: 0.25rem;
+    }
+  }
+}
+</style>
+
+<style lang="scss">
+
+#group-about {
+  #EmojiPicker {
+    left: auto;
+    right: -10px;
+    top: auto;
+    bottom: 120%;
+
+    .container-emoji {
+      height: 160px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    #EmojiPicker {
+      left: auto;
+      right: -10px;
+      top: auto;
+      bottom: 120%;
     }
   }
 }
