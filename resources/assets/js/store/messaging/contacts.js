@@ -67,6 +67,20 @@ export const contacts = {
         ],
         // extraFilters: [ 'expired-ago' ],
       },
+      offline: {
+        key: 'offline',
+        rules: [
+          'is_offline',
+          'include_non_contacts',
+        ],
+      },
+      online: {
+        key: 'online',
+        rules: [
+          'is_online',
+          'include_non_contacts',
+        ],
+      },
       purchasers: {
         key: 'purchasers',
         rules: [
