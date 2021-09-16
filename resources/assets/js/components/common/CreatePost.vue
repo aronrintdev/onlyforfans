@@ -63,7 +63,7 @@
               <div class="dz-custom-content">
                 <div
                   class="text-left text-editor"
-                  contenteditable
+                  :contenteditable="!isBusy"
                   v-html="descriptionForEditor"
                   @keydown="editorChanged"
                   @input="onInput"
@@ -115,35 +115,35 @@
               <b-col cols="12" md="8" class="post-create-footer-ctrl d-flex">
                 <ul class="list-inline d-flex mb-0 w-100 justify-content-between justify-content-sm-start align-items-center">
 
-                  <li v-b-tooltip.hover="'Add Photo'" id="clickme_to-select" class="selectable select-pic">
+                  <li v-b-tooltip.hover="'Add Photo'" id="clickme_to-select" class="selectable select-pic" :disabled="isBusy">
                     <fa-icon :icon="selectedIcon==='pic' ? ['fas', 'image'] : ['far', 'image']" size="lg" :class="selectedIcon==='pic' ? 'text-primary' : 'text-secondary'" />
                   </li>
 
-                  <li v-b-tooltip.hover="'Record Video'" v-if="!isIOS9PlusAndAndroid" @click="recordVideo()" class="selectable select-video">
+                  <li v-b-tooltip.hover="'Record Video'" v-if="!isIOS9PlusAndAndroid" @click="recordVideo()" class="selectable select-video" :disabled="isBusy">
                     <fa-icon :icon="selectedIcon==='video' ? ['fas', 'video'] : ['far', 'video']" size="lg" :class="selectedIcon==='video' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li v-b-tooltip.hover="'Record Audio'" @click="recordAudio()" class="selectable select-audio">
+                  <li v-b-tooltip.hover="'Record Audio'" @click="recordAudio()" class="selectable select-audio" :disabled="isBusy">
                     <fa-icon :icon="selectedIcon==='audio' ? ['fas', 'microphone'] : ['far', 'microphone']" size="lg" :class="selectedIcon==='audio' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li v-b-tooltip.hover="'Add Photo From My Media'" @click="renderVaultSelector()" class="selectable">
+                  <li v-b-tooltip.hover="'Add Photo From My Media'" @click="renderVaultSelector()" class="selectable" :disabled="isBusy">
                     <fa-icon :icon="selectedIcon==='vault' ? ['fas', 'photo-video'] : ['far', 'photo-video']" size="lg" :class="selectedIcon==='vault' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li v-b-tooltip.hover="'Set Expiration Date'" class="selectable select-expire-date" :disabled="expirationPeriod" @click="showExpirationPicker()">
+                  <li v-b-tooltip.hover="'Set Expiration Date'" class="selectable select-expire-date" :disabled="expirationPeriod || isBusy" @click="showExpirationPicker()" >
                     <fa-icon :icon="showedModal === 'expiration' ? ['fas', 'hourglass-half'] : ['far', 'hourglass-half']" size="lg" :class="showedModal === 'expiration' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li v-b-tooltip.hover="'Schedule Publish Date'" class="selectable select-calendar" :disabled="scheduled_at" @click="showSchedulePicker()">
+                  <li v-b-tooltip.hover="'Schedule Publish Date'" class="selectable select-calendar" :disabled="scheduled_at || isBusy" @click="showSchedulePicker()" >
                     <fa-icon :icon="showedModal === 'schedule' ? ['fas', 'calendar-alt'] : ['far', 'calendar-alt']" size="lg" :class="showedModal === 'schedule' ? 'text-primary' : 'text-secondary'" />
                   </li>
-                  <li @click="showTagForm()" class="selectable show-tagform" v-b-tooltip.hover="'Add Tags'">
+                  <li @click="showTagForm()" class="selectable show-tagform" v-b-tooltip.hover="'Add Tags'" :disabled="isBusy">
                     <fa-icon :icon="isTagFormVisible ? ['fas', 'hashtag'] : ['far', 'hashtag']" :class="isHashtagIconSelected ? 'text-primary' : 'text-secondary'" size="lg" />
                   </li>
 
-                  <li @click="togglePostPrice()" class="selectable select-pic" v-b-tooltip.hover="'Set Post Unlock Price'">
+                  <li @click="togglePostPrice()" class="selectable select-pic" v-b-tooltip.hover="'Set Post Unlock Price'" :disabled="isBusy">
                     <fa-icon :icon="postType === 'price' ? ['fas', 'tag'] : ['far', 'tag']" size="lg" :class="postType === 'price' ? 'text-primary' : 'text-secondary'" />
                   </li>
                       
-                  <li v-custom-click-outside="closeEmojiBox" class="selectable select-emoji" v-b-tooltip.hover="'Add Emoji Icon'">
-                    <div @click="isEmojiBoxVisible=!isEmojiBoxVisible">
+                  <li v-custom-click-outside="closeEmojiBox" class="selectable select-emoji" v-b-tooltip.hover="'Add Emoji Icon'" :disabled="isBusy">
+                    <div @click="isEmojiBoxVisible=!isEmojiBoxVisible" :disabled="isBusy">
                       <fa-icon :icon="isEmojiBoxVisible ? ['fas', 'smile'] : ['far', 'smile']" :class="isEmojiBoxVisible ? 'text-primary' : 'text-secondary'" size="lg" />
                     </div>
                     <VEmojiPicker v-if="isEmojiBoxVisible" @select="selectEmoji" />
@@ -154,12 +154,12 @@
               <b-col cols="12" md="4" class="px-0">
                 <ul class="list-inline d-flex justify-content-end mb-0 mt-3 mt-md-0">
                   <li class="px-0 mx-0">
-                    <button @click="onHide && onHide()" v-if="data" class="btn btn-submit btn-secondary">
+                    <button @click="onHide && onHide()" v-if="data" class="btn btn-submit btn-secondary" :disabled="isBusy">
                       Cancel
                     </button>
                   </li>
                   <li class="w-100 mx-0">
-                    <button :disabled="isSaveButtonDisabled" @click="savePost()" class="btn btn-submit btn-primary w-100">
+                    <button :disabled="isSaveButtonDisabled || isBusy" @click="savePost()" class="btn btn-submit btn-primary w-100">
                       <span v-if="isBusy" class="text-white spinner-border spinner-border-sm pr-2" role="status" aria-hidden="true"></span>
                       Post
                     </button>
@@ -251,7 +251,7 @@ export default {
         maxFiles: null,
         autoProcessQueue: false,
         thumbnailWidth: 100,
-        clickable: '#clickme_to-select',
+        clickable: '#clickme_to-select', // %FIXME: should be a class or a much more specific ID to avoid duplicates/conflicts elsehwere in markup?
         maxFilesize: 5000, // 5 GB
 
         // https://stackoverflow.com/questions/46379917/dropzone-js-upload-with-php-failed-after-30-seconds-upload
