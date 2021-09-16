@@ -11,7 +11,9 @@ class UpdatePostsTableCharsetToUtf8mb4 extends Migration
      */
     public function up()
     {
-        DB::unprepared('ALTER TABLE `posts` CONVERT TO CHARACTER SET utf8mb4');
+        if ( !DB::Connection() instanceof \Illuminate\Database\SQLiteConnection ) {
+            DB::unprepared('ALTER TABLE `posts` CONVERT TO CHARACTER SET utf8mb4');
+        }
     }
 
     /**
@@ -21,6 +23,8 @@ class UpdatePostsTableCharsetToUtf8mb4 extends Migration
      */
     public function down()
     {
-        DB::unprepared('ALTER TABLE `posts` CONVERT TO CHARACTER SET utf8');
+        if ( !DB::Connection() instanceof \Illuminate\Database\SQLiteConnection ) {
+            DB::unprepared('ALTER TABLE `posts` CONVERT TO CHARACTER SET utf8');
+        }
     }
 }
