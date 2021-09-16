@@ -2,13 +2,14 @@
 
 namespace App\Models\Traits;
 
+use Carbon\Carbon;
+use App\Models\User;
 use Illuminate\Support\Str;
-use App\Enums\ShareableAccessLevelEnum;
 use App\Events\AccessGranted;
 use App\Events\AccessRevoked;
-use App\Models\User;
-use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use App\Enums\ShareableAccessLevelEnum;
 
 trait ShareableTraits
 {
@@ -59,6 +60,13 @@ trait ShareableTraits
         AccessGranted::dispatch($this, $user);
     }
 
+    public function grantAccessFor(Collection $users, string $accessLevel, $cattrs = [], $meta = []): void
+    {
+        $users->each(function($user) use($accessLevel, $cattrs, $meta) {
+            $this->grantAccess($user, $accessLevel, $cattrs, $meta);
+        });
+    }
+
     public function checkAccess(User $user, string $accessLevel = ShareableAccessLevelEnum::PREMIUM): bool
     {
         return $this->sharees()->wherePivot('is_approved', true)
@@ -105,4 +113,12 @@ trait ShareableTraits
 
         AccessRevoked::dispatch($this, $user, $reason);
     }
+
+    public function revokeAccessFor(Collection $users, string $accessLevel, $cattrs = [], $meta = []): void
+    {
+        $users->each(function ($user) use ($accessLevel, $cattrs, $meta) {
+            $this->revokeAccess($user, $accessLevel, $cattrs, $meta);
+        });
+    }
+
 }

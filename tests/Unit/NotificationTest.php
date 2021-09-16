@@ -43,6 +43,7 @@ use App\Models\Tip;
 use App\Models\Verifyrequest;
 
 use App\Enums\VerifyStatusTypeEnum;
+use App\Enums\CampaignTypeEnum;
 
 // Send mail via laravel native, not SendGrid:
 // $ DEBUG_BYPASS_SENDGRID_MAIL_NOTIFY=true php artisan test --group="lib-notification-unit-fake"
@@ -88,6 +89,56 @@ class NotificationTest extends TestCase
         $result = Notification::send( $receiver, new NewReferralReceived($referral, $sender) );
         Notification::assertSentTo( [$receiver], NewReferralReceived::class );
          */
+    }
+
+    /**
+     * @group lib-notification-unit-fake
+     * @group OFF-regression
+     * @group OFF-regression-unit
+     * @group OFF-here0913
+     */
+    public function test_should_notify_new_promotion_campaign_started()
+    {
+        Notification::fake();
+        $timeline = Timeline::has('followers', '>=', 1)->first(); // subscribable
+        $creator = $timeline->user;
+
+        $userSettings = $creator->settings;
+
+        // Set a subscrition price
+        $subPriceInDollars = $this->faker->numberBetween(1, 20) * 5;
+        $subPriceInCents = $subPriceInDollars * 100;
+        $result = $userSettings->setValues('subscriptions', [ 'price_per_1_months' => $subPriceInDollars ]); // %FIXME
+
+        $timeline->refresh();
+        $subPrice = $timeline->getBaseSubPriceInCents(); // actual, read from model
+        $this->assertEquals($subPriceInCents, $subPrice);
+
+        // create a new promotion campaign
+        Campaign::deactivateAll($creator);
+
+        $subscriberCount = 2;
+        $message = "Hey come subscribe you won't be disappointed!";
+        $attrs = [ 
+            'type' => CampaignTypeEnum::DISCOUNT,
+            'has_new' => true, 
+            'has_expired' => true, 
+            'offer_days' => 7, 
+            'discount_percent' => 10, 
+            'trial_days' => 7, 
+        ];
+        $attrs['creator_id'] = $creator->id;
+        $attrs['subscriber_count'] = $subscriberCount;
+        $attrs['message'] = $message;
+
+        $campaign = Campaign::create($attrs);
+
+        $sender = $timeline->followers->first(); // fan
+        $receiver = $campaign->creator; // creator
+
+        $amount = CastsMoney::USD($subPrice);
+        $result = Notification::send( $receiver, new NewCampaignContributionReceived($campaign, $sender, ['amount'=>$amount]) );
+        Notification::assertSentTo( [$receiver], NewCampaignContributionReceived::class );
     }
 
     /**

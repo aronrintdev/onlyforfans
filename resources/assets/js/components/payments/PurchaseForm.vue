@@ -11,9 +11,11 @@
       <LoadingOverlay :loading="processing" :text="$t('processing')" />
 
       <SavedPaymentMethodList
-        class="mb-3"
+        ref="paymentMethods"
+        class="mb-1"
         :selected="selectedPaymentMethod"
         collapse
+        :showChangeButton="(this.selectedPaymentMethod.id === 'new')"
         @loadNewForm="loadNewForm"
         @loadPayWithForm="loadPayWithForm"
       />
@@ -32,6 +34,8 @@
           :price-display="displayPrice"
           @processing="onProcessing"
           @stopProcessing="onStopProcessing"
+          @success="onSuccess"
+          @changePaymentMethod="changePaymentMethod"
         />
       </transition>
     </b-skeleton-wrapper>
@@ -89,6 +93,9 @@ export default {
     type: { type: String, default: 'purchase'},
     /** Extra items to send to server such as notes for a tipped item */
     extra: { type: Object, default: () => ({})},
+
+    /** For tips sent from the messages won't emit success signal until message is received from server */
+    wantsMessage: { type: Boolean, default: false },
   },
 
   computed: {
@@ -116,6 +123,10 @@ export default {
 
   methods: {
     ...Vuex.mapActions('payments', [ 'getSavedPaymentMethods' ]),
+
+    changePaymentMethod() {
+      this.$refs['paymentMethods'].change()
+    },
 
     loadPaymentMethods() {
       this.loading = true
@@ -181,8 +192,18 @@ export default {
       clearTimeout(this.waiting)
     },
 
-    completeAnimate(type) {
+    /** Success event from the loaded form */
+    onSuccess(payload) {
+      if (!this.wantsMessage || payload.message) {
+        this.processing = false
+        clearTimeout(this.waiting)
+        this.completeAnimate(this.type, payload)
+      }
+    },
+
+    completeAnimate(type, payload) {
       this.showCompleted = true
+      this.$emit('completed', payload)
       setTimeout(() => {
         switch(type) {
           case 'purchase':
@@ -196,7 +217,6 @@ export default {
             break
         }
         this.showCompleted = false
-        this.$emit('completed')
       }, this.animationLength)
     },
 
@@ -229,7 +249,7 @@ export default {
           if (e.item_id === this.value.id) {
             this.processing = false
             clearTimeout(this.waiting)
-            this.completeAnimate('tip')
+            this.completeAnimate('tip', e)
           }
         })
 

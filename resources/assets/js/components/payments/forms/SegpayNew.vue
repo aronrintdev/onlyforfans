@@ -129,7 +129,7 @@
 
         <b-row>
           <b-col cols="12">
-            <b-btn block variant="success" @click="onComplete">
+            <b-btn block variant="primary" @click="onComplete">
               {{ $t('Finish') }}
             </b-btn>
           </b-col>

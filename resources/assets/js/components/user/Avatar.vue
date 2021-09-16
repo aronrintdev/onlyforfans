@@ -5,7 +5,7 @@
       :thumbnail="thumbnail"
       rounded="circle"
       class="w-100 h-100"
-      :src="user.avatar.filepath"
+      :src="filepath"
       :alt="user.name"
       :title="user.name"
     />
@@ -17,7 +17,7 @@
         :thumbnail="thumbnail"
         rounded="circle"
         class="w-100 h-100"
-        :src="user.avatar.filepath"
+        :src="filepath"
         :alt="user.name"
         :title="user.name"
       />
@@ -40,6 +40,13 @@ export default {
   },
 
   computed: {
+    filepath() {
+      if (this.user.avatar) {
+        return this.user.avatar.filepath
+      }
+      return '/images/default_avatar.png'
+    },
+
     s() {
       const baseSize = 3
       switch (this.size) {

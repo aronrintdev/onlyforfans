@@ -2,7 +2,7 @@
   <component
     :is="as"
     :button="selectable"
-    class="payment-method-selection d-flex align-items-center"
+    class="payment-method-selection d-flex align-items-center text-secondary"
     :class="{ 'cursor-pointer': selectable }"
     :variant="selected ? 'success' : 'default'"
     @click="select"
@@ -34,6 +34,7 @@ export default {
     selectedIcon: { type: [String, Array], default: 'check'},
     showSelectedIcon: { type: Boolean, default: true },
     value: { type: Object, default: () => ({}), },
+    // changeButton: { type: Boolean, default: false },
   },
   computed: {
     icon() {
@@ -67,7 +68,7 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
-    "last4": "ending in {last_4}"
+    "last4": "{last_4}"
   }
 }
 </i18n>
