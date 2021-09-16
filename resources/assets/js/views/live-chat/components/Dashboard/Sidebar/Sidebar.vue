@@ -13,7 +13,7 @@
       @sortByInput="value => sortBy = value"
       @setAscending="value => asc = value"
     />
-    <MarkAllRead @updateThreadsAllRead="getChatthreads" />
+    <!-- <MarkAllRead @updateThreadsAllRead="getChatthreads" /> -->
     <ThreadList
       :threads="renderedThreads"
       :loading="loading"
