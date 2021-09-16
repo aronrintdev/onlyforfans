@@ -5,13 +5,18 @@ use App\Models\Tip;
 use App\Models\User;
 use RuntimeException;
 use App\Models\Timeline;
+use App\Events\TipFailed;
+use App\Events\ItemTipped;
 use App\Enums\PostTypeEnum;
 use App\Events\AccessGranted;
 use App\Events\AccessRevoked;
 use App\Events\ItemPurchased;
+use App\Events\ItemSubscribed;
+use App\Events\PurchaseFailed;
 use Illuminate\Support\Carbon;
 use App\Payments\PaymentGateway;
 use App\Models\Financial\Account;
+use App\Events\SubscriptionFailed;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Event;
 use App\Enums\Financial\AccountTypeEnum;
@@ -26,6 +31,11 @@ class TipsTableSeeder extends Seeder
         AccessGranted::class,
         AccessRevoked::class,
         ItemPurchased::class,
+        PurchaseFailed::class,
+        ItemTipped::class,
+        TipFailed::class,
+        ItemSubscribed::class,
+        SubscriptionFailed::class,
     ];
 
     public function run()
