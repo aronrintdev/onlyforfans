@@ -40,7 +40,15 @@
           />
           <hr />
         </div>
-        <div class="text-left text-editor" contenteditable v-html="descriptionForEditor" @keydown="editorChanged" @input="onInput" @click="editorClicked"></div>
+        <div
+          class="text-left text-editor"
+          contenteditable
+          v-html="descriptionForEditor"
+          @keydown="editorChanged"
+          @input="onInput"
+          @click="editorClicked"
+        >
+        </div>
 
       </div>
 
@@ -75,8 +83,10 @@
               <li class="selectable select-calendar" v-if="post && post.schedule_datetime" @click="showSchedulePicker()">
                 <fa-icon size="lg" :icon="['far', 'calendar-check']" class="text-secondary" />
               </li>
-              <li @click="isEmojiBoxVisible=true" v-custom-click-outside="closeEmojiBox" class="selectable select-emoji" v-b-tooltip.hover="'Add Emoji Icon'">
-                <fa-icon :icon="isEmojiBoxVisible ? ['fas', 'smile'] : ['far', 'smile']" :class="isEmojiBoxVisible ? 'text-primary' : 'text-secondary'" size="lg" />
+              <li v-custom-click-outside="closeEmojiBox" class="selectable select-emoji" v-b-tooltip.hover="'Add Emoji Icon'">
+                <div @click="isEmojiBoxVisible=!isEmojiBoxVisible" >
+                  <fa-icon :icon="isEmojiBoxVisible ? ['fas', 'smile'] : ['far', 'smile']" :class="isEmojiBoxVisible ? 'text-primary' : 'text-secondary'" size="lg" />
+                </div>
                 <VEmojiPicker v-if="isEmojiBoxVisible" @select="selectEmoji" />
               </li>
             </ul>
@@ -239,7 +249,7 @@ export default {
     },
 
     editorChanged(e) {
-      if (e.keyCode == 50) {
+      if (e.keyCode == 50 && e.shiftKey) {
         e.preventDefault();
         let content = e.target.innerHTML;
         content += `<a>@`;
@@ -297,10 +307,10 @@ export default {
     },
 
     selectEmoji(emoji) {
-      this.description += `<span class="emoji">${emoji.data}</span><span>&nbsp;`
+      this.description += `<span class="emoji">${emoji.data}</span><span>&nbsp;</span>`
       this.descriptionForEditor = this.description
       this.$nextTick(() => {
-        const p = document.querySelector('.text-editor'),
+        const p = document.querySelector('.edit-post .text-editor'),
             s = window.getSelection(),
             r = document.createRange();
         let ele = p.childElementCount > 0 ? p.lastChild : p;
@@ -389,6 +399,19 @@ textarea,
   }
 }
 </style>
+
+<style lang="scss">
+@media (max-width: 576px) {
+  .edit-post {
+    #EmojiPicker {
+      left: 10%;
+      right: auto;
+      top: 90%;
+    }
+  }
+}
+</style>
+
 <i18n lang="json5" scoped>
 {
   "en": {

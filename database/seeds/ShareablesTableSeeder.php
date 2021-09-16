@@ -4,31 +4,36 @@ namespace Database\Seeders;
 use DB;
 use Exception;
 use Carbon\Carbon;
-use Illuminate\Support\Str;
 use App\Models\Post;
 use App\Models\User;
 use App\Libs\UserMgr;
 use RuntimeException;
 use App\Models\Timeline;
+use App\Events\TipFailed;
+use App\Events\ItemTipped;
 use App\Enums\PostTypeEnum;
 use App\Libs\UuidGenerator;
+use Illuminate\Support\Str;
 use App\Libs\FactoryHelpers;
-use App\Enums\PaymentTypeEnum;
-use App\Enums\MediafileTypeEnum;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Mail;
-use App\Enums\ShareableAccessLevelEnum;
-use App\Enums\Financial\AccountTypeEnum;
 use App\Events\AccessGranted;
 use App\Events\AccessRevoked;
 use App\Events\ItemPurchased;
-use App\Jobs\Financial\UpdateAccountBalance;
+use App\Enums\PaymentTypeEnum;
+use App\Events\ItemSubscribed;
+use App\Events\PurchaseFailed;
+use App\Enums\MediafileTypeEnum;
 use App\Models\Financial\Account;
+use App\Events\SubscriptionFailed;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Config;
+use App\Enums\ShareableAccessLevelEnum;
+use App\Enums\Financial\AccountTypeEnum;
+use App\Notifications\ResourcePurchased;
+use App\Jobs\Financial\UpdateAccountBalance;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use App\Notifications\TimelineFollowed as TimelineFollowedNotify;
 use App\Notifications\TimelineSubscribed as TimelineSubscribedNotify;
-use App\Notifications\ResourcePurchased;
-use Symfony\Component\Console\Output\ConsoleOutput;
 
 class ShareablesTableSeeder extends Seeder
 {
@@ -39,6 +44,11 @@ class ShareablesTableSeeder extends Seeder
         AccessGranted::class,
         AccessRevoked::class,
         ItemPurchased::class,
+        PurchaseFailed::class,
+        ItemTipped::class,
+        TipFailed::class,
+        ItemSubscribed::class,
+        SubscriptionFailed::class,
     ];
 
     public function run()
