@@ -108,7 +108,7 @@ export default {
   },
 
   data: () => ({
-    subscriptionMustIFrame: true,
+    subscriptionMustIFrame: false,
     loadedForm: FormNew,
     selectedPaymentMethod: {},
     loading: true,
