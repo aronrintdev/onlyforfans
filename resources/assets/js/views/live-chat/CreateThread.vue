@@ -631,7 +631,9 @@ export default {
       "followers": "Followers",
       "purchasers": "Post Purchasers",
       "subscribers": "Subscribers",
-      "tippers": "Tippers"
+      "tippers": "Tippers",
+      "offline": "Offline",
+      "online": "Online",
     },
     "nav": {
       "return": "Back",
