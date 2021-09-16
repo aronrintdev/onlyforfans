@@ -150,7 +150,9 @@ export default {
             });
           }
           if (videofiles.length > 0) {
-            this.playVideo = !this.playVideo;
+            if ($(params.target).hasClass('video-js')) {
+              this.playVideo = !this.playVideo;
+            }
           }
         } else if (this.tapCount == 2) {
           this.$emit('doubleTap');
