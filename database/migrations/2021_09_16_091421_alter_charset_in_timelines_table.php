@@ -11,8 +11,10 @@ class AlterCharsetInTimelinesTable extends Migration
      */
     public function up()
     {
-        DB::unprepared('ALTER TABLE `timelines` CHARACTER SET = utf8mb4, COLLATE = utf8mb4_unicode_ci');
-        DB::unprepared('ALTER TABLE `timelines` CHANGE COLUMN `about` `about` TEXT CHARACTER SET `utf8mb4` COLLATE `utf8mb4_unicode_ci` NOT NULL');
+        if ( !DB::Connection() instanceof \Illuminate\Database\SQLiteConnection ) {
+            DB::unprepared('ALTER TABLE `timelines` CHARACTER SET = utf8mb4, COLLATE = utf8mb4_unicode_ci');
+            DB::unprepared('ALTER TABLE `timelines` CHANGE COLUMN `about` `about` TEXT CHARACTER SET `utf8mb4` COLLATE `utf8mb4_unicode_ci` NOT NULL');
+        }
     }
 
     /**
@@ -22,7 +24,9 @@ class AlterCharsetInTimelinesTable extends Migration
      */
     public function down()
     {
-        DB::unprepared('ALTER TABLE `timelines` CHARACTER SET = utf8, COLLATE = utf8_unicode_ci');
-        DB::unprepared('ALTER TABLE `timelines` CHANGE COLUMN `about` `about` TEXT CHARACTER SET `utf8` COLLATE `utf8_unicode_ci` NOT NULL');
+        if ( !DB::Connection() instanceof \Illuminate\Database\SQLiteConnection ) {
+            DB::unprepared('ALTER TABLE `timelines` CHARACTER SET = utf8, COLLATE = utf8_unicode_ci');
+            DB::unprepared('ALTER TABLE `timelines` CHANGE COLUMN `about` `about` TEXT CHARACTER SET `utf8` COLLATE `utf8_unicode_ci` NOT NULL');
+        }
     }
 }
