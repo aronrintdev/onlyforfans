@@ -142,8 +142,10 @@
                     <fa-icon :icon="postType === 'price' ? ['fas', 'tag'] : ['far', 'tag']" size="lg" :class="postType === 'price' ? 'text-primary' : 'text-secondary'" />
                   </li>
                       
-                  <li @click="isEmojiBoxVisible=true" v-custom-click-outside="closeEmojiBox" class="selectable select-emoji" v-b-tooltip.hover="'Add Emoji Icon'">
-                    <fa-icon :icon="isEmojiBoxVisible ? ['fas', 'smile'] : ['far', 'smile']" :class="isEmojiBoxVisible ? 'text-primary' : 'text-secondary'" size="lg" />
+                  <li v-custom-click-outside="closeEmojiBox" class="selectable select-emoji" v-b-tooltip.hover="'Add Emoji Icon'">
+                    <div @click="isEmojiBoxVisible=!isEmojiBoxVisible">
+                      <fa-icon :icon="isEmojiBoxVisible ? ['fas', 'smile'] : ['far', 'smile']" :class="isEmojiBoxVisible ? 'text-primary' : 'text-secondary'" size="lg" />
+                    </div>
                     <VEmojiPicker v-if="isEmojiBoxVisible" @select="selectEmoji" />
                   </li>
                 </ul>
@@ -743,7 +745,7 @@ export default {
       this.description += `<span class="emoji">${emoji.data}</span><span>&nbsp;</span>`
       this.descriptionForEditor = this.description
       this.$nextTick(() => {
-        const p = document.querySelector('.text-editor'),
+        const p = document.querySelector('.create_post-crate .text-editor'),
             s = window.getSelection(),
             r = document.createRange();
         let ele = p.childElementCount > 0 ? p.lastChild : p;
@@ -985,6 +987,12 @@ li.selectable[disabled] {
     z-index: 1000;
     top: 120%;
     left: 0;
+
+    .container-emoji {
+      .emoji {
+        border: none !important;
+      }
+    }
   }
 
   @media (max-width: 576px) {
@@ -993,11 +1001,7 @@ li.selectable[disabled] {
       right: 0px;
   
       .container-emoji {
-        height: 200px;
-
-        .emoji {
-          border: none !important;
-        }
+        height: 160px;
       }
     }
   }

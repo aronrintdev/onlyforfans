@@ -196,7 +196,8 @@ class UsersController extends AppBaseController
                 'message_with_tip_only', 
                 'privacy', 
                 'subscriptions', 
-                'watermark', 
+                'watermark',
+                'about',
             ];
             $attrs = $request->except($cattrsFields);
 
