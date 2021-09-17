@@ -1,8 +1,8 @@
 <template>
-  <OnlineStatus :user="user" v-slot="slotProps">
+  <OnlineStatus :user="user" :timeline="timeline" v-slot="slotProps" :textVisible="textVisible">
     <b-media :class="centerAvatar ? 'force-center' : ''">
       <template #aside>
-        <Avatar :user="user" :noLink="noLink" :size="size" :thumbnail="thumbnail" class="position-relative">
+        <Avatar :user="user" :timeline="timeline" :noLink="noLink" :size="size" :thumbnail="thumbnail" class="position-relative">
           <template #append>
             <StatusDot
               v-if="noTooltip"
@@ -23,12 +23,15 @@
       </template>
       <div v-if="!imageOnly">
         <div class="h5 mb-0" :class="noLink ? 'no-clickable' : 'clickable'" @click="handleClickUsername">
-          {{ user.username }}
+          {{ name }}
           <div v-if="user.is_verified" class="d-inline" v-b-tooltip:hover :title="$t('tooltip.verified')">
             <fa-icon icon="check-circle" fixed-width class="text-success" />
           </div>
         </div>
-        <div :class="`text-${textVariant(slotProps.status)}`" v-text="slotProps.message" />
+        <div v-if="size === 'md' || size === 'lg'" :class="noLink ? 'no-clickable' : 'clickable'" @click="handleClickUsername">
+          @{{ handle }}
+        </div>
+        <div v-if="textVisible" :class="`text-${textVariant(slotProps.status)}`" v-text="slotProps.message" />
       </div>
     </b-media>
   </OnlineStatus>
@@ -38,8 +41,6 @@
 /**
  * resources/assets/js/components/user/AvatarWithStatus.vue
  */
-import Vuex from 'vuex'
-
 import OnlineStatus from '@components/common/OnlineStatus'
 
 import Avatar from './Avatar'
@@ -61,10 +62,38 @@ export default {
     noTooltip: { type: Boolean, default: false },
     size: { type: String, default: 'sm' },
     user: { type: Object, default: () => ({}) },
+    timeline: { type: Object, default: () => ({}) },
     thumbnail: { type: Boolean, default: true },
+    textVisible: { type: Boolean, default: true },
   },
 
-  computed: {},
+  computed: {
+    name() {
+      if (this.timeline && this.timeline.name) {
+        return this.timeline.name
+      }
+      if (this.user) { // Fallback
+        if (this.user.timeline && this.user.timeline.name) {
+          return this.user.timeline.name
+        }
+        return this.user.name || this.user.username
+      }
+      return ''
+    },
+    handle() {
+      if (this.timeline && this.timeline.slug) {
+        return this.timeline.slug
+      }
+      if (this.user) { // Fallback
+        if (this.user.timeline && this.user.timeline.slug) {
+          return this.user.timeline.slug
+        }
+        return this.user.username
+      }
+      return ''
+    },
+
+  },
 
   data: () => ({}),
 
