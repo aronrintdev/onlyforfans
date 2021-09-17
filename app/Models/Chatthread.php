@@ -160,9 +160,15 @@ class Chatthread extends Model implements UuidId
     {
         return [
             'id'           => $this->getKey(),
-            'participants' => $this->participants->map(function($item, $key) { return $item->id; } )->all(),
-            'participantUsernames' => $this->participants->map(function($item, $key) { return $item->username; } )->all(),
-            'participantNames' => $this->participants->map(function($item, $key) { return $item->timeline->name; } )->all(),
+            'participants' => $this->participants->map(function($item, $key) {
+                return $item->id;
+            } )->all(),
+            'participantUsernames' => $this->participants->map(function($item, $key) {
+                return $item->username;
+            } )->all(),
+            'participantNames' => $this->participants->map(function($item, $key) {
+                return $item->timeline ? $item->timeline->name : '';
+            } )->all(),
         ];
     }
 
