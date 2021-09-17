@@ -53,7 +53,7 @@ $spacer: 1rem;
   box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
   z-index: 2;
 
-  border: 2px var(--light, #343a40) solid;
+  border: 3px var(--light, #343a40) solid;
 
   .dot {
     border-radius: 50%;

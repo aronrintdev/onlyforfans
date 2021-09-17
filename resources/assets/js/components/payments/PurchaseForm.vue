@@ -146,6 +146,11 @@ export default {
 
     loadPayWithForm(paymentMethod) {
       this.selectedPaymentMethod = paymentMethod
+      // If payment method can't be found
+      if (!this.selectedPaymentMethod) {
+        this.loadNewForm()
+        return
+      }
       if (this.subscriptionMustIFrame && this.type === 'subscription') {
         this.loadedForm = SubscriptionIFrame
       } else {

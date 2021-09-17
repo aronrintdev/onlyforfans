@@ -1,6 +1,6 @@
 <template>
   <OnlineStatus :user="user" :timeline="timeline" v-slot="slotProps" :textVisible="textVisible">
-    <b-media :class="centerAvatar ? 'force-center' : ''">
+    <b-media :class="centerAvatar ? 'force-center' : ''" class="position-relative">
       <template #aside>
         <Avatar :user="user" :timeline="timeline" :noLink="noLink" :size="size" :thumbnail="thumbnail" class="position-relative">
           <template #append>
@@ -25,10 +25,10 @@
         <div class="h5 mb-0" :class="noLink ? 'no-clickable' : 'clickable'" @click="handleClickUsername">
           {{ name }}
           <div v-if="user.is_verified" class="d-inline" v-b-tooltip:hover :title="$t('tooltip.verified')">
-            <fa-icon icon="check-circle" fixed-width class="text-success" />
+            <fa-icon icon="check-circle" fixed-width class="text-primary" />
           </div>
         </div>
-        <div v-if="size === 'md' || size === 'lg'" :class="noLink ? 'no-clickable' : 'clickable'" @click="handleClickUsername">
+        <div v-if="size === 'md' || size === 'lg'" :class="noLink ? 'no-clickable' : 'clickable'" class="text-secondary" @click="handleClickUsername">
           @{{ handle }}
         </div>
         <div v-if="textVisible" :class="`text-${textVariant(slotProps.status)}`" v-text="slotProps.message" />
