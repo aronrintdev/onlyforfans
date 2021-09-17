@@ -72,7 +72,8 @@ class RestUsersTest extends TestCase
         $content = json_decode($response->content());
         $this->assertNotNull($content->data);
         $this->assertObjectHasAttribute('user_id', $content->data);
-        $this->assertObjectHasAttribute('about', $content->data);
+        $this->assertObjectHasAttribute('cattrs', $content->data);
+        $this->assertObjectHasAttribute('weblinks', $content->data);
     }
 
     /**

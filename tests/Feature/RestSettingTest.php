@@ -277,7 +277,6 @@ class RestSettingTest extends TestCase
      *  @group settings
      *  @group regression
      *  @group regression-base
-     *  @group here0916
      */
     public function test_can_batch_edit_settings_profile()
     {
