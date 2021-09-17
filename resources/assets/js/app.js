@@ -97,9 +97,6 @@ Vue.use(VueLazyload, {
   attempt: 1
 });
 
-import VueRecord from '@codekraft-studio/vue-record';
-Vue.use(VueRecord);
-
 /**
  * vue-croppie
  */

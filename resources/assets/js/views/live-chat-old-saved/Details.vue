@@ -443,9 +443,9 @@
                         <span>{{ (audioRecDuration - audioRecDuration % 60) / 60 >= 10 ? (audioRecDuration - audioRecDuration % 60) / 60 : '0' + (audioRecDuration - audioRecDuration % 60) / 60 }}:</span>
                         <span>{{ audioRecDuration % 60 >= 10 ? audioRecDuration % 60 : '0' + audioRecDuration % 60 }}</span>
                       </div>
-                      <div class="record-btn" @click="toggleAudioRec">
+                      <!-- <div class="record-btn" @click="toggleAudioRec">
                         <vue-record-audio mode="press" @result="onGetAudioRec" />
-                      </div>
+                      </div> -->
                     </div>
                   </div>
                 </div>
