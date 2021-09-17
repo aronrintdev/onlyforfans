@@ -1,22 +1,8 @@
 <template>
   <b-card no-body>
 
-    <b-card-header>
-      <section class="user-avatar">
-        <router-link :to="timelineUrl"><b-img-lazy :src="timeline.user.avatar.filepath" :alt="timeline.name" :title="timeline.name"></b-img-lazy></router-link>
-        <OnlineStatus :user="timeline.user" size="lg" :textInvisible="false" />
-      </section>
-      <section class="user-details">
-        <div>
-          <router-link :to="timelineUrl" title="" data-toggle="tooltip" data-placement="top" class="username">{{ timeline.name }}</router-link>
-          <span v-if="timeline.verified" class="verified-badge">
-            <fa-icon icon="check-circle" class="text-primary" />
-          </span>
-        </div>
-        <div>
-          <router-link :to="timelineUrl" class="tag-username">@{{ timeline.slug }}</router-link>
-        </div>
-      </section>
+    <b-card-header v-if="timeline">
+      <AvatarWithStatus :timeline="timeline" :user="timeline.user" size="md" />
     </b-card-header>
     <transition name="quick-fade" mode="out-in">
       <b-card-body v-if="step === 'initial'" key="initial">
@@ -73,17 +59,16 @@
 </template>
 
 <script>
-import moment from 'moment'
 import { eventBus } from '@/eventBus'
+import AvatarWithStatus from '@components/user/AvatarWithStatus'
 import PurchaseForm from '@components/payments/PurchaseForm'
-import OnlineStatus from '@components/common/OnlineStatus'
 import PaymentsDisabled from '@components/payments/PaymentsDisabled'
 
 export default {
 
   components: {
+    AvatarWithStatus,
     PurchaseForm,
-    OnlineStatus,
     PaymentsDisabled,
   },
 

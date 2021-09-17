@@ -23,6 +23,7 @@ export default {
       offline: 'secondary',
     })},
     user: { type: Object, default: () => ({ id: '' }) },
+    timeline: { type: Object, default: () => ({}) },
     indicatorVisible: { default: true, type: Boolean },
     textInvisible: { default: true, type: Boolean },
     size: { type: String, default: 'sm' },
