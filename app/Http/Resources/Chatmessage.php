@@ -12,9 +12,14 @@ class Chatmessage extends JsonResource
     public function toArray($request)
     {
         $sessionUser = $request->user();
-        $model = ChatmessageModel::find($this->id);
-        $hasAccess = $sessionUser->can('view', $model);
-        $isSender = $this->sender_id === $sessionUser->id;
+        if ($sessionUser) {
+            $model = ChatmessageModel::find($this->id);
+            $hasAccess = $sessionUser->can('view', $model);
+            $isSender = $this->sender_id === $sessionUser->id;
+        } else {
+            $hasAccess = false;
+            $isSender = false;
+        }
 
         $attachments = new Collection();
         if (isset($this->cattrs)) {
