@@ -85,6 +85,7 @@
         :hasTip="hasTip"
         :hasPrice="hasPrice"
         :hasScheduled="hasScheduled"
+        :isSending="sending"
         @vaultSelect="renderVaultSelector"
         @openScheduleMessage="openScheduleMessageModal"
         @recordAudio="recordAudio"

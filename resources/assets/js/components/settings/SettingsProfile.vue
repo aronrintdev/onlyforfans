@@ -379,9 +379,9 @@ export default {
   created() {
     this.formProfile.name = this.timeline.name || ''
     this.formProfile.slug = this.timeline.slug || ''
-    this.formProfile.about = this.timeline.about
-    this.description = this.timeline.about
-    this.descriptionForEditor = this.timeline.about
+    this.formProfile.about = this.timeline.about || ''
+    this.description = this.timeline.about || ''
+    this.descriptionForEditor = this.timeline.about || ''
     this.formProfile.country = this.user_settings.country
     this.formProfile.city = this.user_settings.city
     this.formProfile.gender = this.user_settings.gender
@@ -400,10 +400,10 @@ export default {
     this.formProfile.language = this.user_settings.language || null
     this.formProfile.ethnicity = this.user_settings.ethnicity || null
     this.formProfile.profession = this.user_settings.profession
-    this.formProfile.weblinks.amazon = this.user_settings.weblinks && JSON.parse(this.user_settings.weblinks)['amazon']
-    this.formProfile.weblinks.website = this.user_settings.weblinks && JSON.parse(this.user_settings.weblinks)['website']
-    this.formProfile.weblinks.instagram = this.user_settings.weblinks && JSON.parse(this.user_settings.weblinks)['instagram']
-    this.formProfile.weblinks.twitter = this.user_settings.weblinks && JSON.parse(this.user_settings.weblinks)['twitter']
+    this.formProfile.weblinks.amazon = this.user_settings.weblinks && this.user_settings.weblinks['amazon']
+    this.formProfile.weblinks.website = this.user_settings.weblinks && this.user_settings.weblinks['website']
+    this.formProfile.weblinks.instagram = this.user_settings.weblinks && this.user_settings.weblinks['instagram']
+    this.formProfile.weblinks.twitter = this.user_settings.weblinks && this.user_settings.weblinks['twitter']
   },
 
   methods: {
