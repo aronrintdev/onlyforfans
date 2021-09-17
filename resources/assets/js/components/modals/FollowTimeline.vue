@@ -1,8 +1,7 @@
 <template>
   <b-card no-body>
-
     <b-card-header v-if="timeline">
-      <AvatarWithStatus :timeline="timeline" :user="timeline.user" size="md" />
+      <AvatarWithStatus :timeline="timeline" :user="timeline.user" :textVisible="false" size="md" />
     </b-card-header>
     <transition name="quick-fade" mode="out-in">
       <b-card-body v-if="step === 'initial'" key="initial">

@@ -1,5 +1,5 @@
 <template>
-  <OnlineStatus :user="user" :timeline="timeline" v-slot="slotProps">
+  <OnlineStatus :user="user" :timeline="timeline" v-slot="slotProps" :textVisible="textVisible">
     <b-media :class="centerAvatar ? 'force-center' : ''">
       <template #aside>
         <Avatar :user="user" :timeline="timeline" :noLink="noLink" :size="size" :thumbnail="thumbnail" class="position-relative">
@@ -64,6 +64,7 @@ export default {
     user: { type: Object, default: () => ({}) },
     timeline: { type: Object, default: () => ({}) },
     thumbnail: { type: Boolean, default: true },
+    textVisible: { type: Boolean, default: true },
   },
 
   computed: {

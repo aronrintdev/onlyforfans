@@ -49,7 +49,7 @@
         :alt="timeline.name"
         :title="timeline.name"
       />
-      <OnlineStatus :user="timeline.user" size="lg" :textInvisible="false" />
+      <OnlineStatus :user="timeline.user" size="lg" :textVisible="false" />
       <input type="file" id="avatar-upload-btn" class="file-input" accept="image/*" @change="onAvatarChange" />
       <label v-if="uploadAvatarVisible" for="avatar-upload-btn" class="btn photo-btn">
         <fa-icon :icon="['far', 'camera']" size="2x" class="text-white" />

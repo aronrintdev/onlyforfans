@@ -21,7 +21,7 @@
         <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
           <b-img-lazy thumbnail rounded="circle" class="w-100 h-100" :src="avatarImage" :alt="timeline.slug" :title="timeline.name" />
         </router-link>
-        <OnlineStatus :user="timeline.user" size="lg" :textInvisible="false" />
+        <OnlineStatus :user="timeline.user" size="lg" :textVisible="false" />
       </div>
 
       <div class="shareable-id">
