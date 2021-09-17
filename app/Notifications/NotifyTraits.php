@@ -90,7 +90,21 @@ trait NotifyTraits {
                 }
                 $is = $notifications['messages']['new_message'] ? true : false;
                 break;
-            // posts
+            // taggables
+            case 'tag_received':
+                if (!isset($notifications['usertags'])) {
+                    break;
+                }
+                $is = $notifications['usertags']['new_tag'] ? true : false;
+                break;
+            // likeables
+            case 'like-received':
+                if (!isset($notifications['posts'])) {
+                    break;
+                }
+                $is = $notifications['posts']['new_like'] ? true : false;
+                break;
+            // commentables
             case 'comment-received':
                 if (!isset($notifications['posts'])) {
                     break;

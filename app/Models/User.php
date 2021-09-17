@@ -577,7 +577,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
     public function getStats() : array
     {
         $timeline = $this->timeline;
-        $weblinks = json_decode($this->settings->weblinks, true);
+        $weblinks = $this->settings->weblinks;
         $settingsCattrs = $this->settings->cattrs;
         if ( !$timeline ) {
             return [];

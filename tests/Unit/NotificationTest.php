@@ -11,6 +11,8 @@ use Tests\TestCase;
 
 use App\Notifications\CampaignGoalReached;
 use App\Notifications\CommentReceived;
+use App\Notifications\LikeReceived;
+use App\Notifications\TagReceived;
 use App\Notifications\EmailVerified;
 use App\Notifications\IdentityVerificationRejected;
 use App\Notifications\IdentityVerificationRequestSent;
@@ -42,8 +44,9 @@ use App\Models\Subscription;
 use App\Models\Tip;
 use App\Models\Verifyrequest;
 
-use App\Enums\VerifyStatusTypeEnum;
 use App\Enums\CampaignTypeEnum;
+use App\Enums\PostTypeEnum;
+use App\Enums\VerifyStatusTypeEnum;
 
 // Send mail via laravel native, not SendGrid:
 // $ DEBUG_BYPASS_SENDGRID_MAIL_NOTIFY=true php artisan test --group="lib-notification-unit-fake"
@@ -51,6 +54,8 @@ use App\Enums\CampaignTypeEnum;
 class NotificationTest extends TestCase
 {
     use WithFaker;
+
+    // ----- %%% Messages -----
 
     /**
      * @group lib-notification-unit-fake
@@ -76,6 +81,8 @@ class NotificationTest extends TestCase
         Notification::assertSentTo( [$receiver], MessageReceived::class );
     }
 
+    // ----- %%% Referrals -----
+
     /**
      * @group lib-notification-unit-fake
      * @group OFF-regression
@@ -90,6 +97,8 @@ class NotificationTest extends TestCase
         Notification::assertSentTo( [$receiver], NewReferralReceived::class );
          */
     }
+
+    // ----- %%% Promotions -----
 
     /**
      * @group lib-notification-unit-fake
@@ -179,6 +188,8 @@ class NotificationTest extends TestCase
              */
     }
 
+    // ----- %%% Transactions -----
+
     /**
      * @group lib-notification-unit-fake
      * @group regression
@@ -249,7 +260,68 @@ class NotificationTest extends TestCase
      * @group regression
      * @group regression-unit
      */
-    public function test_should_notify_comment_received()
+    public function test_should_notify_paid_post_purchase()
+    {
+        Notification::fake();
+
+        $timeline = Timeline::has('posts','>=',5)->has('followers','>=',1)->firstOrFail();
+        $post = $timeline->posts[0];
+
+        $creator = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        Notification::send( $creator, new ResourcePurchased($post, $fan));
+        Notification::assertSentTo( [$creator], ResourcePurchased::class );
+    }
+
+    // ----- %%% Timelines -----
+
+    /**
+     * @group lib-notification-unit-fake
+     * @group regression
+     * @group regression-unit
+     */
+    public function test_should_notify_timeline_new_follower()
+    {
+        Notification::fake();
+
+        $timeline = Timeline::has('posts','>=',5)->has('followers','>=',1)->firstOrFail();
+
+        $creator = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        Notification::send( $creator, new TimelineFollowed($timeline, $fan));
+        Notification::assertSentTo( [$creator], TimelineFollowed::class );
+    }
+
+
+    // ----- %%% Posts -----
+
+    /**
+     * @group lib-notification-unit-fake
+     * @group regression
+     * @group regression-unit
+     */
+    public function test_should_notify_post_like_received()
+    {
+        Notification::fake();
+
+        $timeline = Timeline::has('posts','>=',5)->has('followers','>=',1)->firstOrFail();
+        $post = $timeline->posts[0];
+
+        $creator = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        Notification::send( $creator, new LikeReceived($post, $fan));
+        Notification::assertSentTo( [$creator], LikeReceived::class );
+    }
+
+    /**
+     * @group lib-notification-unit-fake
+     * @group regression
+     * @group regression-unit
+     */
+    public function test_should_notify_post_comment_received()
     {
         Notification::fake();
 
@@ -259,6 +331,28 @@ class NotificationTest extends TestCase
         Notification::send( $receiver, new CommentReceived($comment, $sender));
         Notification::assertSentTo( [$receiver], CommentReceived::class );
     }
+
+    /**
+     * @group lib-notification-unit-fake
+     * @group regression
+     * @group regression-unit
+     * @group here0915
+     */
+    public function test_should_notify_post_tag_received()
+    {
+        Notification::fake();
+
+        $timeline = Timeline::has('posts','>=',5)->has('followers','>=',1)->firstOrFail();
+        $post = $timeline->posts[0];
+
+        $creator = $timeline->user;
+        $fan = $timeline->followers[0];
+
+        Notification::send( $creator, new TagReceived($post, $fan));
+        Notification::assertSentTo( [$creator], TagReceived::class );
+    }
+
+    // ----- %%% Auth -----
 
     /**
      * @group lib-notification-unit-fake

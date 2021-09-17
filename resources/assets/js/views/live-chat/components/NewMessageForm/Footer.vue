@@ -4,7 +4,7 @@
       v-for="item in buttonsFiltered"
       :key="item.key"
       variant="link"
-      :disabled="item.disabled"
+      :disabled="isSending || item.disabled"
       :class="item.class"
       v-b-tooltip.hover.bottom="{boundary: 'viewport', title: item.tooltip}"
       @click="item.onClick"
@@ -16,7 +16,7 @@
         :class="item.selected ? 'text-primary' : 'text-secondary'"
       />
     </b-btn>
-    <b-btn :disabled="hasPrice || hasScheduled" variant="success" class="text-nowrap" @click="$emit('addTip')">
+    <b-btn :disabled="isSending || hasPrice || hasScheduled" variant="success" class="text-nowrap" @click="$emit('addTip')">
       <fa-icon icon="dollar-sign" fixed-width />
       <span class="mr-2">{{ hasTip ? $t('editTip') : $t('addTip') }}</span>
     </b-btn>
@@ -25,7 +25,7 @@
         <b-btn
           variant="primary"
           class="submit text-nowrap"
-          :disabled="false"
+          :disabled="isSending"
           @click="$emit('submit')"
         >
           <span>{{ $t('send') }}</span>
@@ -54,6 +54,7 @@ export default {
     hasTip: { type: Boolean, default: false },
     hasPrice: { type: Boolean, default: false },
     hasScheduled: { type: Boolean, default: false },
+    isSending: { type: Boolean, default: false },
   },
 
   computed: {

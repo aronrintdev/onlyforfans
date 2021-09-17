@@ -14,6 +14,7 @@ class UserSetting extends Model
         'cattrs' => 'array',
         'meta' => 'array',
         'custom' => 'array',
+        'weblinks' => 'array',
     ];
 
     //--------------------------------------------
