@@ -4,32 +4,33 @@ namespace Tests\Feature;
 use DB;
 use Tests\TestCase;
 
+use Database\Seeders\TestDatabaseSeeder;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Http\File;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
+
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Comment;
 use App\Models\Likeable;
 use App\Models\Timeline;
 use App\Events\TipFailed;
-
 use App\Models\Mediafile;
-use Illuminate\Http\File;
+use App\Models\Financial\SegpayCard;
+use App\Models\Tip;
+use App\Models\Notification;
 
 use App\Events\ItemTipped;
-use App\Enums\PostTypeEnum;
 use App\Events\ItemPurchased;
-use App\Enums\PaymentTypeEnum;
 use App\Events\PurchaseFailed;
+
+use App\Enums\PostTypeEnum;
+use App\Enums\PaymentTypeEnum;
 use App\Enums\MediafileTypeEnum;
-use Illuminate\Http\UploadedFile;
-use App\Models\Financial\SegpayCard;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Storage;
 use App\Enums\Financial\AccountTypeEnum;
-use App\Models\Tip;
-use Database\Seeders\TestDatabaseSeeder;
-use Illuminate\Foundation\Testing\WithFaker;
-//use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class RestPostsTest extends TestCase
 {
@@ -442,7 +443,6 @@ class RestPostsTest extends TestCase
                 $q1->where('type', PostTypeEnum::FREE);
             })->firstOrFail();
         $this->assertNotNull($timeline);
-        //dd($timeline);
         $creator = $timeline->user;
         $this->assertNotNull($creator);
         $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
@@ -809,9 +809,22 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      *  @group regression-base
+     *  @group here0917
      */
     public function test_timeline_follower_can_like_then_unlike_post()
     {
+        $lPath = null;
+        $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
+        if( $isLogScanEnabled ) {
+            $lConfig = Config::get('logging');
+            if ( ($lConfig['default']??null) === 'single' && $lConfig['channels']['single']['path']??null ) {
+                $lPath = $lConfig['channels']['single']['path'];
+            }
+            if ( $lPath ) {
+                $fSizeBefore = filesize($lPath);
+            }
+        }
+
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::FREE);
@@ -819,6 +832,9 @@ class RestPostsTest extends TestCase
         $creator = $timeline->user;
         $post = $timeline->posts->where('type', PostTypeEnum::FREE)->first();
         $fan = $timeline->followers[0];
+
+        // Save the number of notify records to ensure we add one later...
+        $notifyCountBefore = Notification::count();
 
         // remove any existing likes by fan...
         DB::table('likeables')
@@ -850,6 +866,37 @@ class RestPostsTest extends TestCase
         $this->assertEquals($fan->id, $likeable->liker_id);
         $this->assertEquals('posts', $likeable->likeable_type);
         $this->assertEquals($postR->id, $likeable->likeable_id);
+
+        // Check that one notification was added...
+        $notifyCountAfter = Notification::count();
+        $this->assertEquals($notifyCountBefore+1, $notifyCountAfter);
+
+        $n = Notification::where('notifiable_id', $creator->id)->orderBy('created_at', 'desc')->first();
+        $this->assertNotNull($n);
+        $this->assertNotNull($n->id);
+
+        $this->assertEquals('App\Notifications\ResourceLiked', $n->type);
+        $this->assertEquals('users', $n->notifiable_type);
+
+        $this->assertNotNull($n->data);
+        $this->assertIsArray($n->data);
+        $this->assertArrayHasKey('resource_id', $n->data);
+        $this->assertArrayHasKey('resource_type', $n->data);
+        $this->assertArrayHasKey('actor', $n->data);
+        $this->assertEquals($post->id, $n->data['resource_id']);
+        $this->assertEquals('posts', $n->data['resource_type']);
+
+        if ( $isLogScanEnabled && $lPath ) {
+            $fSizeAfter = filesize($lPath);
+            if ( $fSizeBefore && $fSizeAfter && ($fSizeAfter > $fSizeBefore) ) {
+                $fDiff = $fSizeAfter > $fSizeBefore;
+                $fcontents = file_get_contents($lPath, false, null, -($fDiff-2));
+                $this->assertStringContainsStringIgnoringCase('To: '.$creator->email, $fcontents);
+                $this->assertStringContainsStringIgnoringCase('You received a like from', $fcontents);
+                $this->assertStringContainsString('Subject:', $fcontents);
+                $this->assertStringContainsString('From:', $fcontents);
+            }
+        }
 
         // UNLIKE the post
         $payload = [
