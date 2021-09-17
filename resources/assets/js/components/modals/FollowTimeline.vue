@@ -4,7 +4,7 @@
     <b-card-header>
       <section class="user-avatar">
         <router-link :to="timelineUrl"><b-img-lazy :src="timeline.user.avatar.filepath" :alt="timeline.name" :title="timeline.name"></b-img-lazy></router-link>
-        <OnlineStatus :user="timeline.user" size="lg" :textInvisible="false" />
+        <OnlineStatus :user="timeline.user" size="lg" :textVisible="false" />
       </section>
       <section class="user-details">
         <div>

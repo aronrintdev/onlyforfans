@@ -13,7 +13,7 @@
         size="2rem"
       />
       <b-avatar v-else class="mr-2" size="2rem" />
-      <OnlineStatus :user="session_user" size="md" :textInvisible="false" />
+      <OnlineStatus :user="session_user" size="md" :textVisible="false" />
       <span
         v-if="showName && session_user && !mobile"
         v-text="session_user.name || session_user.username"

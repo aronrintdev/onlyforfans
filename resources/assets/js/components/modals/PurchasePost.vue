@@ -5,7 +5,7 @@
       <section class="user-avatar">
         <router-link :to="timelineUrl">
           <b-img-lazy :src="post.user.avatar.filepath" :alt="post.user.name" :title="post.user.name" />
-          <OnlineStatus :user="post.user" size="md" :textInvisible="false" />
+          <OnlineStatus :user="post.user" size="md" :textVisible="false" />
         </router-link>
       </section>
       <section class="user-details">
