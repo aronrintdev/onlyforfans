@@ -6,30 +6,29 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
 use App\Channels\SendgridChannel;
-use App\Models\Comment;
 use App\Models\User;
-use App\Interfaces\Commentable;
+use App\Interfaces\Likeable;
 
-class CommentReceived extends Notification
+class LikeReceived extends Notification
 {
     use NotifyTraits, Queueable;
 
     public $resource;
-    public $actor; // commenter;
+    public $actor; // liker
     protected $settings;
 
-    public function __construct(Commentable $resource, User $actor, array $attrs=[])
+    public function __construct(Likeable $resource, User $actor, array $attrs=[])
     {
         $this->resource = $resource;
         $this->actor = $actor;
-        $this->settings = $resource->getPrimaryOwner()->settings; // resource ~= commentable
+        $this->settings = $resource->getPrimaryOwner()->settings; // resource ~= likeable
     }
 
     // see: https://medium.com/@sirajul.anik/laravel-notifications-part-2-creating-a-custom-notification-channel-6b0eb0d81294
     public function via($notifiable)
     {
         $channels =  ['database'];
-        if ( $this->isMailChannelEnabled('comment-received', $this->settings) ) {
+        if ( $this->isMailChannelEnabled('like-received', $this->settings) ) {
             $channels[] = $this->getMailChannel();
         }
         return $channels;
@@ -38,15 +37,14 @@ class CommentReceived extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->line('You received a comment from '.$this->actor->name)
-            ->action('Read Comment', url('/'));
+            ->line('You received a like from '.$this->actor->name);
     }
 
     public function toSendgrid($notifiable)
     {
 
         $data = [
-            'template_id' => 'new-comment-received',
+            'template_id' => 'new-like-received',
             'to' => [
                 'email' => $notifiable->email,
                 'name' => $notifiable->name, // 'display name'
@@ -74,7 +72,7 @@ class CommentReceived extends Notification
             'resource_type' => $this->resource->getTable(),
             'resource_id' => $this->resource->id,
             'resource_slug' => $this->resource->slug,
-            'actor' => [ // commenter
+            'actor' => [ // liker
                 'username' => $this->actor->username,
                 'name' => $this->actor->name,
                 'avatar' => $this->actor->avatar->filepath ?? null,

@@ -72,7 +72,8 @@ class RestUsersTest extends TestCase
         $content = json_decode($response->content());
         $this->assertNotNull($content->data);
         $this->assertObjectHasAttribute('user_id', $content->data);
-        $this->assertObjectHasAttribute('about', $content->data);
+        $this->assertObjectHasAttribute('cattrs', $content->data);
+        $this->assertObjectHasAttribute('weblinks', $content->data);
     }
 
     /**
@@ -98,7 +99,6 @@ class RestUsersTest extends TestCase
      *  @group users
      *  @group regression
      *  @group regression-base
-     *  @group here0915
      */
     public function test_user_can_register()
     {

@@ -100,13 +100,17 @@ class Api
             'new-referral-received'                                    => 'd-0fc75cd7a59148a0a84a82611d3a5973', 
             'campaign-goal-reached'                                    => 'd-a24f3ec1d11f4bd2b71ba2b9faf30609', 
             'new-tip-received'                                         => 'd-d2220b0b64a442958aad5bdf99dd58e3', 
-            'new-comment-received'                                     => 'd-8bc8911ea1424d8591e0ba05f92476f1', 
             'change-percentage-of-gross-earnings'                      => 'd-455641d888d94f228c6d95a9f36f3e8b',
+
+            'new-comment-received'                                     => 'd-8bc8911ea1424d8591e0ba05f92476f1', 
+            'new-like-received'                                        => 'd-23d207eed5af4d19a53ca82d1362578f',
 
             'campaign-expired'                                         => 'd-7123f1bdbd3a4b7ea49cf6dad9808afd',
             'new-promotion-campaign-started'                           => 'd-b5afdeceab8e45dca4f06f15fde89500',
 
             'new-paid-post-purchase'                                   => 'd-0a204d8143464518b71700adbb6b60f',
+            'new-post-tag'                                             => 'd-3fc62f66cefe4203ade10eab16c659ef',
+            'new-timeline-follower'                                    => 'd-673d95f1d2bb482c9aeea9423eb8c793',
         ];
     }
 
