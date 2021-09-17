@@ -10,15 +10,9 @@
     <transition name="quick-fade" mode="out-in">
       <b-form v-if="step === 'initial'" @submit="sendTip">
         <b-card-body class="pt-2">
-          <PriceSelector
-            class="mb-0"
-            label=" "
-            v-model="formPayload.amount"
-            autofocus
-          />
-
+          <TipInput ref="input" v-model="tip" @isValid="onIsValid" />
           <textarea
-            v-model="formPayload.message"
+            v-model="message"
             cols="60"
             rows="5"
             class="w-100 p-2 tip-modal-text"
@@ -38,11 +32,11 @@
         <PurchaseForm
           :value="payload.resource"
           :item-type="payload.resource_type"
-          :price="formPayload.amount"
-          :currency="formPayload.currency"
+          :price="tip.amount"
+          :currency="tip.currency"
           type="tip"
-          :display-price="formPayload.amount | niceCurrency"
-          :extra="{ message: formPayload.message }"
+          :display-price="tip.amount | niceCurrency"
+          :extra="{ message: message }"
           :callback="payload.callback"
           :wantsMessage="payload.wantsMessage || false"
           @completed="onCompleted"
@@ -56,11 +50,10 @@
 /**
  * Send Tip Modal Content
  */
-import { eventBus } from '@/eventBus'
-import PriceSelector from '@components/common/PriceSelector';
 import PurchaseForm from '@components/payments/PurchaseForm'
 import PaymentsDisabled from '@components/payments/PaymentsDisabled'
 import AvatarWithStatus from '@components/user/AvatarWithStatus'
+import TipInput from '@components/forms/elements/TipInput'
 
 // Tip timeline on another user's timeline page / feed
 // Tip post on another user's timeline page / feed
@@ -70,9 +63,9 @@ export default {
 
   components: {
     AvatarWithStatus,
-    PriceSelector,
     PaymentsDisabled,
     PurchaseForm,
+    TipInput,
   },
 
   props: {
@@ -120,17 +113,11 @@ export default {
     /** 'initial' | 'payment' */
     step: 'initial',
 
-    config: {
-      min: 500,   // $  5.00
-      max: 10000, // $100.00
-      step: 100,  // $  1.00
-    },
+    defaultAmount: 500, // $5.00
 
-    formPayload: {
-      amount: '', // $5.00
-      currency: 'USD',
-      message: '',
-    },
+    tip: { amount: 0, currency: 'USD' },
+    message: '',
+    isValid: true,
 
     finished: false,
   }),
@@ -139,10 +126,24 @@ export default {
 
     onCompleted(tip) {
       this.$log.debug('SendTip onCompleted', { tip })
+      if (this.$refs['input'].$refs['input'].validate() === true) {
+        // false === 'invalid' null === 'valid'
+        if (this.isValid !== false) {
+          if (this.tip.amount === 0) {
+            this.tip.amount = this.defaultAmount
+          }
+          this.$emit('submit', this.tip)
+          this.onHide()
+        }
+      }
       if (typeof this.payload.callback === 'function') {
         this.finished = true
         this.payload.callback(tip)
       }
+    },
+
+    onIsValid(value) {
+      this.isValid = value
     },
 
     sendTip(e) {
@@ -151,7 +152,7 @@ export default {
     },
 
     getVariant(amount) {
-      if (amount === this.formPayload.amount && !this.showCustomPrice) return 'secondary'
+      if (amount === this.tip.amount && !this.showCustomPrice) return 'secondary'
       if (!amount && this.showCustomPrice) return 'secondary'
       return 'light'
     }
@@ -164,14 +165,14 @@ export default {
       }
     } catch (e) {}
     if (this.payload.tip) {
-      this.formPayload.amount = this.payload.tip.amount
-      this.formPayload.currency = this.payload.tip.currency
+      this.tip.amount = this.payload.tip.amount
+      this.tip.currency = this.payload.tip.currency
     }
     if (this.payload.skipMessage) {
       this.step = 'payment'
     }
     if (this.payload.message) {
-      this.formPayload.message = this.payload.message
+      this.message = this.payload.message
     }
   },
 
@@ -249,6 +250,7 @@ body .user-details ul > li {
 <i18n lang="json5" scoped>
 {
   "en": {
+    "label": "Tip Amount",
     "send": "Send Tip"
   }
 }
