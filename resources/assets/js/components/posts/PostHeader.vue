@@ -6,7 +6,7 @@
           :src="post.user.avatar.filepath"
           :title="post.user.name"
         ></b-img-lazy>
-      <OnlineStatus :user="post.user" size="md" :textInvisible="false" />
+      <OnlineStatus :user="post.user" size="md" :textVisible="false" />
       </router-link>
     </section>
     <section class="user-details">

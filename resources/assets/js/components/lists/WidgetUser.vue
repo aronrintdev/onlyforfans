@@ -24,7 +24,7 @@
         <router-link :to="{ name: 'timeline.show', params: { slug } }">
           <b-img-lazy thumbnail rounded="circle" class="w-100 h-100" :src="user.avatar.filepath" :alt="user.username" :title="user.name" />
         </router-link>
-        <OnlineStatus :user="user" size="lg" :textInvisible="false" />
+        <OnlineStatus :user="user" size="lg" :textVisible="false" />
       </div>
 
 

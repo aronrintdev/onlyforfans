@@ -158,10 +158,11 @@ class Mycontact extends Model implements Ownable
      */
     public function toSearchableArray()
     {
+        $timeline = $this->contact->timeline;
         return [
             'id'       => $this->getKey(),
-            'name'     => $this->contact->timeline->name,
-            'slug'     => $this->contact->timeline->slug,
+            'name'     => $timeline ? $this->contact->timeline->name : '',
+            'slug'     => $timeline ? $this->contact->timeline->slug : '',
             'username' => $this->contact->username,
             'alias'    => $this->alias,
             'owner_id' => $this->owner_id,

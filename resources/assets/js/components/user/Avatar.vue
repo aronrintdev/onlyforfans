@@ -6,20 +6,20 @@
       rounded="circle"
       class="w-100 h-100"
       :src="filepath"
-      :alt="user.name"
-      :title="user.name"
+      :alt="name"
+      :title="name"
     />
     <router-link
       v-else
-      :to="{ name: 'timeline.show', params: { slug: user.timeline ? user.timeline.slug : user.slug } }"
+      :to="{ name: 'timeline.show', params: { slug: slug } }"
     >
       <b-img-lazy
         :thumbnail="thumbnail"
         rounded="circle"
         class="w-100 h-100"
         :src="filepath"
-        :alt="user.name"
-        :title="user.name"
+        :alt="name"
+        :title="name"
       />
     </router-link>
     <slot name="append" />
@@ -34,13 +34,37 @@ export default {
 
   props: {
     user: { type: Object, default: () => ({ avatar: {} }) },
+    timeline: { type: Object, default: () => ({}) },
     noLink: { type: Boolean, default: false },
     size: { type: String, default: 'sm' },
     thumbnail: { type: Boolean, default: true },
   },
 
   computed: {
+    name() {
+      if (this.timeline) {
+        return this.timeline.name
+      }
+      if (this.user) {
+        return this.user.name
+      }
+      return ''
+    },
+
+    slug() {
+      if (this.timeline) {
+        return this.timeline.slug
+      }
+      if (this.user) {
+        return this.user.timeline.slug
+      }
+      return ''
+    },
+
     filepath() {
+      if (this.timeline && this.timeline.avatar) {
+        return this.timeline.avatar.filepath
+      }
       if (this.user.avatar) {
         return this.user.avatar.filepath
       }

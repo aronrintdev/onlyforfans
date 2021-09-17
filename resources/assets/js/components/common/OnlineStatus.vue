@@ -2,7 +2,7 @@
   <div class="onlineStatus">
     <slot :loading="loading" :status="status" :textVariant="textVariant" :message="message" :lastSeen="lastSeen">
       <div v-if="indicatorVisible" class="status-indicator" :class="{'bg-success': status === 'online', 'no-border': size ==='sm'}" :style="{ height: s, width: s }" v-b-tooltip.hover.bottom :title="message" />
-      <span v-if="!loading && textInvisible" class="status" :class="[`status-holder-${user.id}`, textVariant]">
+      <span v-if="!loading && textVisible" class="status" :class="[`status-holder-${user.id}`, textVariant]">
       {{ message }}
       </span>
     </slot>
@@ -23,8 +23,9 @@ export default {
       offline: 'secondary',
     })},
     user: { type: Object, default: () => ({ id: '' }) },
+    timeline: { type: Object, default: () => ({}) },
     indicatorVisible: { default: true, type: Boolean },
-    textInvisible: { default: true, type: Boolean },
+    textVisible: { default: true, type: Boolean },
     size: { type: String, default: 'sm' },
   },
   data: () => ({

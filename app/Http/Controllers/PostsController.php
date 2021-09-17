@@ -367,7 +367,7 @@ class PostsController extends AppBaseController
             'amount'          => $request->amount,
             'period'          => $request->period ?? 'single',
             'period_interval' => $request->period_interval ?? 1,
-            'message'         => $request->message ?? null,
+            'message'         => $request->message ?? '',
         ]);
 
         return $paymentGateway->tip($account, $tip, $price);

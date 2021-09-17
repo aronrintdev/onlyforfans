@@ -19,7 +19,7 @@
                 :alt="timeline.name"
                 :title="timeline.name"
               ></b-img-lazy>
-              <OnlineStatus :user="session_user" size="lg" :textInvisible="false" />
+              <OnlineStatus :user="session_user" size="lg" :textVisible="false" />
             </a>
           </div>
 

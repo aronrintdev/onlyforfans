@@ -2,25 +2,7 @@
   <b-card no-body>
 
     <b-card-header>
-      <section class="user-avatar">
-        <router-link :to="tippedTimelineUrl">
-          <b-img-lazy :src="avatarImage" :alt="tippedTimeline.name" :title="tippedTimeline.name" />
-          <OnlineStatus :user="payload.user" size="md" :textInvisible="false" />
-        </router-link>
-      </section>
-      <section class="user-details">
-        <div>
-          <router-link :to="tippedTimelineUrl" title="" data-toggle="tooltip" data-placement="top" class="username">
-            {{ tippedTimeline.name }}
-          </router-link>
-          <span v-if="tippedTimeline.verified" class="verified-badge">
-            <fa-icon icon="check-circle" class="text-primary" />
-          </span>
-        </div>
-        <div>
-          <span class="text-secondary">@{{ tippedTimeline.slug }}</span>
-        </div>
-      </section>
+      <AvatarWithStatus :timeline="tippedTimeline" :user="tippedTimeline.user" :textVisible="false" size="md" />
     </b-card-header>
 
     <PaymentsDisabled v-if="paymentsDisabled" />
@@ -78,7 +60,7 @@ import { eventBus } from '@/eventBus'
 import PriceSelector from '@components/common/PriceSelector';
 import PurchaseForm from '@components/payments/PurchaseForm'
 import PaymentsDisabled from '@components/payments/PaymentsDisabled'
-import OnlineStatus from '@components/common/OnlineStatus'
+import AvatarWithStatus from '@components/user/AvatarWithStatus'
 
 // Tip timeline on another user's timeline page / feed
 // Tip post on another user's timeline page / feed
@@ -87,7 +69,7 @@ export default {
   name: 'SendTip',
 
   components: {
-    OnlineStatus,
+    AvatarWithStatus,
     PriceSelector,
     PaymentsDisabled,
     PurchaseForm,
