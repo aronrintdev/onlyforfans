@@ -1,7 +1,7 @@
 <template>
   <b-card no-body>
     <b-card-header v-if="timeline">
-      <AvatarWithStatus :timeline="timeline" :user="timeline.user" :textVisible="false" size="md" />
+      <AvatarWithStatus :timeline="timeline" :user="timeline.user" :textVisible="true" size="md" />
     </b-card-header>
     <transition name="quick-fade" mode="out-in">
       <b-card-body v-if="step === 'initial'" key="initial">
@@ -46,10 +46,10 @@
           v-else
           :value="timeline"
           item-type="timeline"
-          :price="timeline.userstats.subscriptions.price_per_1_months * 100"
+          :price="price"
           :currency="'USD'"
           type="subscription"
-          :display-price="timeline.userstats.subscriptions.price_per_1_months | niceCurrency"
+          :display-price="price | niceCurrency"
           class="mt-3"
         />
       </b-card-body>
@@ -81,6 +81,13 @@ export default {
     timelineUrl() {
       return `/${this.timeline.slug}`
     },
+
+    price() {
+      if (this.timeline.userstats.is_sub_discounted) {
+        return this.timeline.userstats.display_prices_in_cents.subscribe_1_month_discounted
+      }
+      return this.timeline.userstats.display_prices_in_cents.subscribe_1_month
+    }
   },
 
   created() {
@@ -133,29 +140,30 @@ export default {
       e.preventDefault()
       this.step = 'payment'
 
-      if (!this.paymentsDisabled) {
-        this.isInProcess = true
-        const response = await this.axios.put( this.$apiRoute('timelines.subscribe', this.timeline.id), {
-          account_id: this.session_user.id,
-          amount: this.timeline.userstats.subscriptions.price_per_1_months * 100,
-          currency: this.timeline.currency,
-        })
-        this.$bvModal.hide('modal-follow')
-        this.isInProcess = false
+      // if (!this.paymentsDisabled) {
+      //   this.isInProcess = true
+      //   const response = await this.axios.put( this.$apiRoute('timelines.subscribe', this.timeline.id), {
+      //     account_id: this.session_user.id,
+      //     amount: this.price,
+      //     currency: 'USD',
+      //     // currency: this.timeline.currency,
+      //   })
+      //   this.$bvModal.hide('modal-follow')
+      //   this.isInProcess = false
 
-        // Needs to be moved
+      //   // Needs to be moved
 
-        const msg = response.is_subscribed
-          ? `You are now subscribed to ${this.timeline.name}!`
-          : `You are no longer subscribed to ${this.timeline.name}!`
-        this.$root.$bvToast.toast(msg, {
-          toaster: 'b-toaster-top-center',
-          title: 'Success!',
-        })
-        eventBus.$emit('update-originator') // %ERIK use this
-        eventBus.$emit('update-timeline', this.timeline.id)
-        eventBus.$emit('update-feed') // updates feed being viewed
-      }
+      //   const msg = response.is_subscribed
+      //     ? `You are now subscribed to ${this.timeline.name}!`
+      //     : `You are no longer subscribed to ${this.timeline.name}!`
+      //   this.$root.$bvToast.toast(msg, {
+      //     toaster: 'b-toaster-top-center',
+      //     title: 'Success!',
+      //   })
+      //   eventBus.$emit('update-originator') // %ERIK use this
+      //   eventBus.$emit('update-timeline', this.timeline.id)
+      //   eventBus.$emit('update-feed') // updates feed being viewed
+      // }
     },
 
     async getUserCampaign() {

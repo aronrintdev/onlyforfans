@@ -2,7 +2,7 @@
   <b-card no-body>
 
     <b-card-header>
-      <AvatarWithStatus :timeline="tippedTimeline" :user="tippedTimeline.user" :textVisible="false" size="md" />
+      <AvatarWithStatus :timeline="tippedTimeline" :user="tippedTimeline.user" :textVisible="true" size="md" />
     </b-card-header>
 
     <PaymentsDisabled v-if="paymentsDisabled" />
@@ -127,7 +127,7 @@ export default {
     },
 
     formPayload: {
-      amount: 500, // $5.00
+      amount: '', // $5.00
       currency: 'USD',
       message: '',
     },
