@@ -97,7 +97,7 @@ class TipsTableSeeder extends Seeder
                             'amount'          => $tipAmount,
                             'period'          => 'single',
                             'period_interval' => 1,
-                            'message'         => null,
+                            'message'         => '',
                         ]);
                         $paymentGateway = new PaymentGateway();
                         $paymentGateway->tip($paymentAccount, $tip, $tip->amount);
@@ -135,7 +135,7 @@ class TipsTableSeeder extends Seeder
                                 'amount'          => $tipAmount,
                                 'period'          => 'single',
                                 'period_interval' => 1,
-                                'message'         => null,
+                                'message'         => '',
                             ]);
                             $paymentGateway = new PaymentGateway();
                             $paymentGateway->tip($paymentAccount, $tip, $tip->amount);
