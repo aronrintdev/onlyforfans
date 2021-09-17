@@ -31,7 +31,7 @@
         <div v-if="size === 'md' || size === 'lg'" :class="noLink ? 'no-clickable' : 'clickable'" @click="handleClickUsername">
           @{{ handle }}
         </div>
-        <div :class="`text-${textVariant(slotProps.status)}`" v-text="slotProps.message" />
+        <div v-if="textVisible" :class="`text-${textVariant(slotProps.status)}`" v-text="slotProps.message" />
       </div>
     </b-media>
   </OnlineStatus>
