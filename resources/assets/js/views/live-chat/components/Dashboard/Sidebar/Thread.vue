@@ -31,7 +31,7 @@
             :breaks="false"
             :html="false"
             :linkify="false"
-            :source="chatthread.chatmessages[0].mcontent || ''"
+            :source="lastMessageContent"
           />
           <small class="ml-auto mr-0">
             <timeago :converterOptions="{addSuffix: false}" :datetime="chatthread.updated_at" :auto-update="60" />
@@ -71,6 +71,13 @@ export default {
 
   computed: {
     ...Vuex.mapState([ 'session_user' ]),
+
+    lastMessageContent() {
+      if (this.chatthread && this.chatthread.chatmessages[0]) {
+        return this.chatthread.chatmessages[0].mcontent || ''
+      }
+      return ''
+    },
 
     isLoading() {
       return !this.session_user || !this.participant || !this.chatthread
