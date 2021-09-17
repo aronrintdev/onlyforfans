@@ -19,4 +19,9 @@ return [
         'override_to_email' => env('DEBUG_OVERRIDE_TO_EMAIL_FOR_SENDGRID', false),
     ],
 
+    'testing' => [
+        // Use file_get_contents(with limited length) to check emails in log file for PHP unit tests
+        'scan_log_file_to_check_emails' => env('TESTING_SCAN_LOG_FILE_TO_CHECK_EMAILS', false),
+    ],
+
 ];
