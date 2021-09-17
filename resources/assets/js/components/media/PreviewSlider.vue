@@ -112,6 +112,11 @@ export default {
     if (this.mediafiles) {
       this.files = this.mediafiles.filter(file => file.is_image || file.is_video);
       this.audioFiles = this.mediafiles.filter(file => file.is_audio);
+      const imageCount = this.mediafiles.filter(file => file.is_image).length;
+      // Quick Fixed due to videos not calling back when loaded
+      if (imageCount === 0) {
+        this.loaded = true
+      }
       this.$nextTick(() => {
         this.swiper?.update()
       })
@@ -196,6 +201,7 @@ export default {
     },
 
     onload() {
+      this.$log.debug('PreviewSlider onLoad')
       this.loaded = true
     },
 
