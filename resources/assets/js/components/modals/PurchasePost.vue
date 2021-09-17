@@ -2,23 +2,7 @@
   <b-card v-if="!isLoading" no-body>
 
     <b-card-header>
-      <section class="user-avatar">
-        <router-link :to="timelineUrl">
-          <b-img-lazy :src="post.user.avatar.filepath" :alt="post.user.name" :title="post.user.name" />
-          <OnlineStatus :user="post.user" size="md" :textVisible="false" />
-        </router-link>
-      </section>
-      <section class="user-details">
-        <div>
-          <router-link :to="timelineUrl" title="" data-toggle="tooltip" data-placement="top" class="username">{{ post.user.name }}</router-link>
-          <span v-if="post.user.verified" class="verified-badge">
-            <fa-icon icon="check-circle" class="text-primary" />
-          </span>
-        </div>
-        <div>
-          <router-link :to="timelineUrl" class="tag-username">@{{ post.timeline.slug }}</router-link>
-        </div>
-      </section>
+      <AvatarWithStatus :timeline="post.timeline" :user="post.user" :textVisible="false" size="md" />
     </b-card-header>
 
     <b-card-body>
@@ -35,12 +19,14 @@
 </template>
 
 <script>
+import AvatarWithStatus from '@components/user/AvatarWithStatus'
 import PurchaseForm from '@components/payments/PurchaseForm'
 import OnlineStatus from '@components/common/OnlineStatus'
 
 export default {
 
   components: {
+    AvatarWithStatus,
     OnlineStatus,
     PurchaseForm,
   },
