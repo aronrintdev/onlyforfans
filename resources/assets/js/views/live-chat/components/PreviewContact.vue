@@ -2,7 +2,7 @@
   <b-list-group-item class="cursor-pointer" @click="onClicked">
     <section class="d-flex align-items-center">
       <b-avatar :src="avatarSrc" size="3rem" :alt="contact.contact.name" />
-      <OnlineStatus size="md" :user="user" :textInvisible="false" />
+      <OnlineStatus size="md" :user="user" :textVisible="false" />
       <div class="contact-info pl-2">
         <p class="my-0">
           <span class="msg-username">{{ contact.alias || contact.contact.username || contact.contact.name}}</span>
@@ -115,8 +115,8 @@ body {
   }
 }
 .onlineStatus {
-    position: absolute;
-    left: 40px;
-    bottom: 10px;
+  position: absolute;
+  left: 40px;
+  bottom: 10px;
 }
 </style>

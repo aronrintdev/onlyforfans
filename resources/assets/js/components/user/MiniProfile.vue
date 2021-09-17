@@ -52,7 +52,7 @@
                 :src="timeline.avatar.filepath"
                 :title="timeline.name"
               />
-              <OnlineStatus :user="timeline.user" size="md" :textInvisible="false" />
+              <OnlineStatus :user="timeline.user" size="md" :textVisible="false" />
             </router-link>
           </div>
 
