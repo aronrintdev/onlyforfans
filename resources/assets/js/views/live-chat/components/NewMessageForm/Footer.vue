@@ -89,7 +89,7 @@ export default {
           key: 'vaultSelect',
           class: 'vault-select',
           onClick: (e) => this.$emit('vaultSelect', e),
-          icon: this.isSelected('vaultSelect') ? ['fas', 'archive'] : ['far', 'archive'],
+          icon: this.isSelected('vaultSelect') ? ['fas', 'photo-video'] : ['far', 'photo-video'],
           selected: this.isSelected('vaultSelect'),
           tooltip: this.$t('tooltips.vaultSelect'),
         }, {
