@@ -404,8 +404,8 @@ class PostsController extends AppBaseController
 
     public function indexComments(Request $request, Post $post)
     {
-        $this->authorize('indexComments', $post);
-        //$filters = $request->input('filters', []);
+        //$this->authorize('indexComments', $post);
+        //$filters = $request->input('filters', []); // %PSG remove for now as policy is messed up
         $comments = Comment::with(['user'])
             ->withCount('likes')
             ->withCount('replies')
