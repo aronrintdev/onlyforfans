@@ -2,7 +2,7 @@
   <b-card v-if="!isLoading" no-body>
 
     <b-card-header>
-      <AvatarWithStatus :timeline="post.timeline" :user="post.user" :textVisible="false" size="md" />
+      <AvatarWithStatus :timeline="post.timeline" :user="post.user" :textVisible="true" size="md" />
     </b-card-header>
 
     <b-card-body>
