@@ -21,6 +21,7 @@ return [
 
     'testing' => [
         // Use file_get_contents(with limited length) to check emails in log file for PHP unit tests
+        //   ~ note that emails must be enabled & going to log file for this to work
         'scan_log_file_to_check_emails' => env('TESTING_SCAN_LOG_FILE_TO_CHECK_EMAILS', false),
     ],
 
