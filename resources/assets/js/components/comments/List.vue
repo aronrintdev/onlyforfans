@@ -59,7 +59,7 @@ export default {
       form.parent_id = null // %TODO
 
       // Add comment to list
-      const response = await this.axios.post(this.$apiRoute('comments.store'), form, { headers: { 'Content-Type': 'application/json' } } )
+      const response = await this.axios.post(this.$apiRoute('comments.store'), form)
       this.addComment(response.data.comment)
     },
   },
