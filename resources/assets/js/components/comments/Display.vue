@@ -114,16 +114,15 @@ export default {
       this.isReplyFormVisible = !this.isReplyFormVisible
     },
 
-    submitComment(form) { // reply to comment
+    async submitComment(form) { // reply to comment
       form.post_id = this.postId
       form.user_id = this.session_user.id
       form.parent_id = this.comment.id // %TODO
-      this.axios.post(this.$apiRoute('comments.store'), form)
-        .then(response => {
-          // Add comment to list
-          this.addComment(response.data.comment)
-          this.isReplyFormVisible = false
-        })
+      const response = await this.axios.post(this.$apiRoute('comments.store'), form, { headers: { 'Content-Type': 'application/json' } } )
+
+      // Add comment to list
+      this.addComment(response.data.comment)
+      this.isReplyFormVisible = false
     },
 
     // like/unlike this comment (base comment or reply)
