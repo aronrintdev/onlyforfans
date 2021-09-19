@@ -1221,6 +1221,35 @@ class RestPostsTest extends TestCase
     {
     }
 
+    /**
+     *  @group posts
+     *  @group emojis
+     *  @group regression
+     *  @group regression-base
+     */
+    public function test_can_create_post_with_emojis()
+    {
+        $EMOJI_TEXT = 'bio text with emoji 😘';
+        $timeline = Timeline::has('posts','>=',1)->first();
+        $creator = $timeline->user;
+
+        $payload = [
+            'timeline_id' => $timeline->id,
+            'description' => $EMOJI_TEXT,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('posts.store'), $payload);
+        $response->assertStatus(201);
+
+        $content = json_decode($response->content());
+        $this->assertNotNull($content->post);
+        $this->assertNotNull($content->post->description);
+        $this->assertEquals($EMOJI_TEXT, $content->post->description);
+        $this->assertEquals(PostTypeEnum::FREE, $content->post->type);
+        $this->assertEquals(0, $content->post->price);
+    }
+
+
+
     // ------------------------------
 
     protected function setUp() : void
