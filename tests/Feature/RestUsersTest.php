@@ -424,6 +424,25 @@ class RestUsersTest extends TestCase
     }
 
 
+    /**
+     *  @group users
+     *  @group user-settings
+     *  @group regression
+     *  @group regression-base
+     */
+    public function test_can_update_profile_bio_with_emoji_text()
+    {
+        $user = User::firstOrFail();
+        $payload = [
+            'about' => 'bio text with emoji 😘',
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSettingsBatch', $user->id), $payload);
+        $response->assertStatus(200);
+        $timeline = Timeline::where('user_id', $user->id)->firstOrFail();
+        $this->assertEquals($payload['about'], $timeline->about);
+    }
+
+
     // ------------------------------
 
     protected function setUp() : void
