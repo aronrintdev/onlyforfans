@@ -13,6 +13,7 @@ use App\Notifications\CampaignGoalReached;
 use App\Notifications\CommentReceived;
 use App\Notifications\LikeReceived;
 use App\Notifications\TagReceived;
+use App\Notifications\VerifyEmail;
 use App\Notifications\EmailVerified;
 use App\Notifications\IdentityVerificationRejected;
 use App\Notifications\IdentityVerificationRequestSent;
@@ -358,6 +359,21 @@ class NotificationTest extends TestCase
      * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
+     * @group here0920
+     */
+    public function test_should_notify_verify_email_sent_post_register()
+    {
+        Notification::fake();
+        $user = User::first();
+        $url = url(route('verification.verify', ['id' => $user->id, 'hash' => 'foo-bar']));
+        $result = Notification::send( $user, new VerifyEmail($user, $url) );
+        Notification::assertSentTo( [$user], VerifyEmail::class );
+    }
+
+    /**
+     * @group lib-notification-unit-fake
+     * @group regression
+     * @group regression-unit
      */
     public function test_should_notify_email_verified()
     {
@@ -366,7 +382,6 @@ class NotificationTest extends TestCase
         $result = Notification::send( $user, new EmailVerified($user) );
         Notification::assertSentTo( [$user], EmailVerified::class );
     }
-
 
     /**
      * @group lib-notification-unit-fake
