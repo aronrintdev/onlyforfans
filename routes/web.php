@@ -28,7 +28,6 @@ Route::group(['middleware' => ['web']], function () {
 
     Route::post('/email/verification-notification', function (Request $request) {
         $request->user()->sendEmailVerificationNotification();
-
         return back()->with('message', 'Verification link sent!');
     })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
@@ -53,23 +52,10 @@ Route::get('account/google', 'Auth\RegisterController@google');
 Route::get('twitter', 'Auth\RegisterController@twitterRedirect');
 Route::get('account/twitter', 'Auth\RegisterController@twitter');
 
-/* ---------------------------------- Login --------------------------------- */
-// Route::get('/login', 'Auth\LoginController@getLogin');
-Route::post('/login', 'Auth\LoginController@login');
-// Route::get('/login2', 'Auth\LoginController@login');
-
 /* -------------------------------- Register -------------------------------- */
-// Route::get('/register', 'Auth\RegisterController@register')->name('auth.register');
-Route::post('/register', 'Auth\RegisterController@registerUser');
 Route::post('/forgot-password', 'Auth\ForgotPasswordController@store');
 Route::post('/password/reset/{token}', 'Auth\ForgotPasswordController@checkResetToken');
 Route::post('/password/reset', 'Auth\ForgotPasswordController@resetPass');
-// Route::get('email/verify', 'Auth\RegisterController@verifyEmail');
-
-//main project register
-// Route::get('/main-register', 'Auth\RegisterController@mainProjectRegister');
-// Route::post('/main-login', 'Auth\LoginController@mainProjectLogin');
-// Route::get('/main-user-update', 'Auth\RegisterController@mainUserUpdate');
 
 /*
 |--------------------------------------------------------------------------
