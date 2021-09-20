@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Notifications\IdentityVerificationRequestSent;
 use App\Notifications\IdentityVerificationVerified;
 use App\Notifications\IdentityVerificationRejected;
+use App\Notifications\PasswordChanged;
 
 use App\Http\Resources\UserSetting as UserSettingResource;
 use App\Http\Resources\User as UserResource;
@@ -99,7 +100,10 @@ class UsersController extends AppBaseController
         $sessionUser = $user ?? $request->user(); // $user param for reset by super-admin, TBD
         $sessionUser->password = Hash::make($request->newPassword);
         $sessionUser->save();
+
+        $sessionUser->notify(new PasswordChanged($sessionUser));
         //event(new PasswordReset($sessionUser));
+
         return response()->json([ ]);
     }
 

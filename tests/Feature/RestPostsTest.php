@@ -809,20 +809,13 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      *  @group regression-base
-     *  @group here0917
      */
     public function test_timeline_follower_can_like_then_unlike_post()
     {
-        $lPath = null;
+        $lPath = self::getLogPath();
         $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
         if( $isLogScanEnabled ) {
-            $lConfig = Config::get('logging');
-            if ( ($lConfig['default']??null) === 'single' && $lConfig['channels']['single']['path']??null ) {
-                $lPath = $lConfig['channels']['single']['path'];
-            }
-            if ( $lPath ) {
-                $fSizeBefore = filesize($lPath);
-            }
+            $fSizeBefore = $lPath ? filesize($lPath) : null;
         }
 
         $timeline = Timeline::has('followers', '>=', 1)

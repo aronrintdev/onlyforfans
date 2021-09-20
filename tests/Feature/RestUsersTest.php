@@ -4,11 +4,13 @@ namespace Tests\Feature;
 use Auth;
 use DB;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Config;
 
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 use Lunaweb\RecaptchaV3\Facades\RecaptchaV3;
 
+use App\Models\Notification;
 use App\Models\Timeline;
 use App\Models\User;
 use App\Models\UserSetting;
@@ -317,11 +319,21 @@ class RestUsersTest extends TestCase
      *  @group regression
      *  @group regression-base
      *  @group fujio
+     *  @group here0920
      */
     public function test_user_can_change_password()
     {
+        $lPath = self::getLogPath();
+        $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
+        if( $isLogScanEnabled ) {
+            $fSizeBefore = $lPath ? filesize($lPath) : null;
+        }
+
         $timeline = Timeline::has('followers', '>=', 1)->firstOrFail();
         $creator = $timeline->user;
+
+        // Save the number of notify records to ensure we add one later...
+        $notifyCountBefore = Notification::count();
 
         $oldPassword = 'foo-123'; // yes, hardcoded from the seeders
         $newPassword = 'bar-123';
@@ -350,6 +362,37 @@ class RestUsersTest extends TestCase
         $payload = [ 'email' => $creator->email, 'password' => $newPassword, 'g-recaptcha-response' => $test_token ];
         $response = $this->ajaxJSON('POST', '/login', $payload);
         $response->assertStatus(200);
+
+        // Check that one notification was added...
+        $notifyCountAfter = Notification::count();
+        $this->assertEquals($notifyCountBefore+1, $notifyCountAfter);
+
+        $n = Notification::where('notifiable_id', $creator->id)->orderBy('created_at', 'desc')->first();
+        $this->assertNotNull($n);
+        $this->assertNotNull($n->id);
+
+        $this->assertEquals('App\Notifications\PasswordChanged', $n->type);
+        $this->assertEquals('users', $n->notifiable_type);
+
+        $this->assertNotNull($n->data);
+        $this->assertIsArray($n->data);
+        $this->assertArrayHasKey('actor', $n->data);
+        $this->assertArrayHasKey('username', $n->data['actor']);
+        $this->assertArrayHasKey('name', $n->data['actor']);
+        $this->assertArrayHasKey('avatar', $n->data['actor']);
+        $this->assertEquals($creator->username, $n->data['actor']['username']);
+
+        if ( $isLogScanEnabled && $lPath ) {
+            $fSizeAfter = filesize($lPath);
+            if ( $fSizeBefore && $fSizeAfter && ($fSizeAfter > $fSizeBefore) ) {
+                $fDiff = $fSizeAfter > $fSizeBefore;
+                $fcontents = file_get_contents($lPath, false, null, -($fDiff-2));
+                $this->assertStringContainsStringIgnoringCase('To: '.$creator->email, $fcontents);
+                $this->assertStringContainsStringIgnoringCase('Password Changed', $fcontents);
+                $this->assertStringContainsString('Subject:', $fcontents);
+                $this->assertStringContainsString('From:', $fcontents);
+            }
+        }
     }
 
     /**
