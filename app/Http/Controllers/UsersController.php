@@ -511,7 +511,7 @@ class UsersController extends AppBaseController
 
         // Add new staff user
         $token = str_random(60);
-        $email = $request->input('email');
+        $email = $request->input('email'); // invitee's email
 
         // Check if the same invite exists
         $existingStaff = Staff::where('role', $request->input('role'))->where('email', $email)->where('owner_id', $sessionUser->id)->get();
@@ -520,13 +520,13 @@ class UsersController extends AppBaseController
         }
 
         $staff = Staff::create([
-            'first_name' => $request->input('first_name'),
-            'last_name' => $request->input('last_name'),
-            'email' => $email,
+            'first_name' => $request->input('first_name'), // invitee
+            'last_name' => $request->input('last_name'), // invitee
+            'email' => $email, // invitee
             'role' => $request->input('role'),
-            'owner_id' => $sessionUser->id,
+            'owner_id' => $sessionUser->id, // inviter (?)
             'token' => $token,
-            'creator_id' => $request->input('creator_id'),
+            'creator_id' => $request->input('creator_id'), // inviter (?)
         ]);
 
         if ($request->has('permissions')) {
@@ -535,11 +535,14 @@ class UsersController extends AppBaseController
         }
 
         // Send Inviation email
-        $users = User::where('email', $email)->get();
-        $accept_link = url('/staff/invitations/accept?token='.$token.'&email='.$email.'&inviter='.$sessionUser->name.(count($users) == 0 ? '&is_new=true' : ''));
-
-        if ($request->input('role') == 'manager') {
-            $user = User::where('email', $email)->first();
+        if ($request->input('role') === 'manager') {
+            $invitee = User::where('email', $email)->first(); // invitee
+            $inviter = $sessionUser;
+            $timeline->user->notify(new InviteStaffManager($staff, $inviter, $invitee??null));
+            /*
+            // %FIXME: replace with virtual attribute 'invite_url'
+            $user = User::where('email', $email)->first(); // invitee
+            $accept_link = url('/staff/invitations/accept?token='.$token.'&email='.$email.'&inviter='.$sessionUser->name.( empty($user) ? '&is_new=true' : '' );
             SendgridApi::send('invite-staff-manager', [
                 'to' => [
                     'email' => $email,
@@ -547,7 +550,7 @@ class UsersController extends AppBaseController
                 'dtdata' => [
                     'manager_name' => $request->input('first_name').' '.$request->input('last_name'),
                     'username' => $sessionUser->name,
-                    'login_url' => $accept_link,
+                    'login_url' => $accept_link, // %FIXME: key should be accept_url
                     'home_url' => url('/'),
                     'referral_url' => url('/referrals'),
                     'privacy_url' => url('/privacy'),
@@ -555,8 +558,12 @@ class UsersController extends AppBaseController
                     'unsubscribe_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
                 ],
             ]);
+             */
         } else {
+            // %FIXME: replace with virtual attribute 'invite_url'
             $user = User::where('email', $email)->first();
+            //$accept_link = url('/staff/invitations/accept?token='.$token.'&email='.$email.'&inviter='.$sessionUser->name.(count($users)===0 ? '&is_new=true' : ''));
+            $accept_link = url('/staff/invitations/accept?token='.$token.'&email='.$email.'&inviter='.$sessionUser->name.( empty($user) ? '&is_new=true' : '' );
             SendgridApi::send('invite-staff-member', [
                 'to' => [
                     'email' => $email,
@@ -564,7 +571,7 @@ class UsersController extends AppBaseController
                 'dtdata' => [
                     'staff_name' => $request->input('first_name').' '.$request->input('last_name'),
                     'username' => $sessionUser->name,
-                    'login_url' => $accept_link,
+                    'login_url' => $accept_link, // %FIXME: key should be accept_url
                     'home_url' => url('/'),
                     'referral_url' => url('/referrals'),
                     'privacy_url' => url('/privacy'),

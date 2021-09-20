@@ -13,6 +13,19 @@ class Staff extends Model
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
 
+    public function getInviteUrlAttribute($value) {
+        $existing = User::where('email', $email)->first(); // does invitee have an account or not
+        //$url  = '/staff/invitations/accept';
+        $url  = route('staff.acceptInvite');
+        $url .= '?token='.$this->token;
+        $url .= '&email='.$this->email;
+        $url .= '&inviter='.$this->owner->name;
+        if (!$existing) {
+            $url .= '&is_new=true';
+        }
+        return url($url);
+    }
+
     //--------------------------------------------
     // Relationships
     //--------------------------------------------
