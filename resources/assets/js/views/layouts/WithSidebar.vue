@@ -24,7 +24,12 @@
       <div class="sidebar px-3 pb-3" key="sidebar">
         <slot name="sidebar"></slot>
       </div>
-      <div class="main OFF-px-3 pb-3" key="main">
+
+      <div v-if="isCreateThread" class="main px-3 pb-3" key="main">
+        <slot></slot>
+      </div>
+
+      <div v-else class="main OFF-px-3 pb-3" key="main">
         <slot></slot>
       </div>
     </section>
@@ -59,6 +64,7 @@ export default {
     removeMobileMainNavTop: { type: Boolean, default: false },
 
     isMessages: { type: Boolean, default: false },
+    isCreateThread: { type: Boolean, default: false },
 
     hasBorder: { type: Boolean, default: false },
   },
@@ -84,7 +90,6 @@ export default {
   overflow-x: hidden;
   overflow-y: hidden;
   height: 100%;
-  max-height: 100vh;
   .sidebar, .main {
     transition: transform .3s ease;
     position: relative;

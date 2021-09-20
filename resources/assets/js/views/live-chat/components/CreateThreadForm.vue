@@ -2,8 +2,11 @@
 
   <div v-if="!isLoading" class="d-flex flex-column">
 
-    <section class="chatthread-header">
+    <section class="chatthread-header pt-3">
       <div class="d-flex align-items-center">
+        <b-btn v-if="mobile" variant="link" size="lg" class="back-btn" @click="$emit('back')">
+          <fa-icon icon="arrow-left" size="lg" />
+        </b-btn>
         <p class="m-0"><strong>Select one or more recipients from contacts</strong></p>
       </div>
     </section>
@@ -37,6 +40,7 @@ export default {
 
   props: {
     session_user: null,
+    mobile: false,
   },
 
   computed: {
