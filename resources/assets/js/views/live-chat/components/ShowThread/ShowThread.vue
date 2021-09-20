@@ -7,7 +7,7 @@
           <fa-icon :icon="['fas', 'arrow-left']" class="fa-lg" />
         </b-btn>
         <p class="m-0">
-          <AvatarWithStatus :user="participant" :thumbnail="false" />
+          <AvatarWithStatus :timeline="timeline" :user="participant" :thumbnail="false" />
         </p>
         <OptionsDropdown
           :participant="participant"
