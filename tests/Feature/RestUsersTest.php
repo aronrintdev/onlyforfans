@@ -113,6 +113,9 @@ class RestUsersTest extends TestCase
         // Save the number of notify records to ensure we add one later...
         $notifyCountBefore = Notification::count();
 
+        // ---------------------------------------------------------------
+        // %%% Register the user
+        // ---------------------------------------------------------------
         $testToken = 'test';
         RecaptchaV3::shouldReceive('verify')
             ->with($testToken, 'register')
@@ -235,6 +238,9 @@ class RestUsersTest extends TestCase
 
         $this->assertNotNull($newUser);
         $this->assertNotNull($newUser->id);
+        $this->assertNull($newUser->email_verified_at);
+        $this->assertFalse(!!$newUser->email_verified);
+        $this->assertNotNull($newUser->verification_code);
 
         $this->assertNotNull($newUser->timeline);
         $this->assertNotNull($newUser->timeline->id);
@@ -305,11 +311,17 @@ class RestUsersTest extends TestCase
         // Check that one notification was added...
         $notifyCountAfter = Notification::count();
         $this->assertEquals($notifyCountBefore+1, $notifyCountAfter);
+        $notifyCountBefore = $notifyCountAfter;
 
         $n = Notification::where('notifiable_id', $newUser->id)->orderBy('created_at', 'desc')->first();
         $this->assertNotNull($n);
         $this->assertNotNull($n->id);
 
+        // set the created_at back a bit so it's disambuguated from Notifications below...
+        $n->created_at = $n->created_at->subMinute();
+        $n->save();
+
+        // Check 'VerifyEmail' notification (the email with the link the user clicks to verify)
         $this->assertEquals('App\Notifications\VerifyEmail', $n->type);
         $this->assertEquals('users', $n->notifiable_type);
 
@@ -330,6 +342,56 @@ class RestUsersTest extends TestCase
                 $this->assertStringContainsString('Subject:', $fcontents);
                 $this->assertStringContainsString('From:', $fcontents);
             }
+            $fSizeBefore = filesize($lPath);
+        }
+
+        // ---------------------------------------------------------------
+        // %%% Click on the link in the Verify Email to do the verification
+        // ---------------------------------------------------------------
+
+        $url = url( route('verification.verify', ['id' => $newUser->id, 'hash' => $newUser->verification_code]) );
+        //$response = $this->actingAs($newUser)->ajaxJSON('GET', $url);
+        $response = $this->ajaxJSON('GET', $url);
+        $response->assertStatus(302);
+        $newUser->refresh();
+        $this->assertNotNull($newUser->email_verified_at);
+        $this->assertTrue(!!$newUser->email_verified);
+
+        // Check that one notification was added...
+        $notifyCountAfter = Notification::count();
+        $this->assertEquals($notifyCountBefore+1, $notifyCountAfter);
+        $notifyCountBefore = $notifyCountAfter;
+
+        $n = Notification::where('notifiable_id', $newUser->id)->orderBy('created_at', 'desc')->first();
+        $this->assertNotNull($n);
+        $this->assertNotNull($n->id);
+
+        // set the created_at back a bit so it's disambuguated from Notifications below...
+        $n->created_at = $n->created_at->subMinute();
+        $n->save();
+
+        // Check 'EmailVerified' notification (the email the user receives after confirming/verifying their email)
+        $this->assertEquals('App\Notifications\EmailVerified', $n->type);
+        $this->assertEquals('users', $n->notifiable_type);
+
+        $this->assertNotNull($n->data);
+        $this->assertIsArray($n->data);
+        $this->assertArrayHasKey('actor', $n->data);
+        $this->assertArrayHasKey('username', $n->data['actor']);
+        $this->assertArrayHasKey('name', $n->data['actor']);
+        $this->assertEquals($newUser->username, $n->data['actor']['username']);
+
+        if ( $isLogScanEnabled && $lPath ) {
+            $fSizeAfter = filesize($lPath);
+            if ( $fSizeBefore && $fSizeAfter && ($fSizeAfter > $fSizeBefore) ) {
+                $fDiff = $fSizeAfter > $fSizeBefore;
+                $fcontents = file_get_contents($lPath, false, null, -($fDiff-2));
+                $this->assertStringContainsStringIgnoringCase('To: '.$newUser->email, $fcontents);
+                $this->assertStringContainsString('Subject: Email Verified', $fcontents);
+                $this->assertStringContainsString('From:', $fcontents);
+                $this->assertStringContainsStringIgnoringCase('Now that your email is verified', $fcontents);
+            }
+            $fSizeBefore = filesize($lPath);
         }
     }
 
@@ -476,6 +538,10 @@ class RestUsersTest extends TestCase
         $n = Notification::where('notifiable_id', $creator->id)->orderBy('created_at', 'desc')->first();
         $this->assertNotNull($n);
         $this->assertNotNull($n->id);
+
+        // set the created_at back a bit so it's disambuguated from Notifications below...
+        $n->created_at = $n->created_at->subMinute();
+        $n->save();
 
         $this->assertEquals('App\Notifications\PasswordChanged', $n->type);
         $this->assertEquals('users', $n->notifiable_type);
