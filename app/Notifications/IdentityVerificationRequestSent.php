@@ -7,7 +7,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use App\Models\User;
 use App\Models\Verifyrequest;
 
-class IdentityVerificationRequestSent extends Notification
+class IdentityVerificationRequestSent extends Notification // aka 'pending'
 {
     use NotifyTraits, Queueable;
 

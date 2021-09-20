@@ -24,7 +24,7 @@ class VerifyEmail extends Notification
 
     public function via($notifiable)
     {
-        $channels = [];
+        $channels = ['database'];
         $channels[] = $this->getMailChannel();
         return $channels;
     }
@@ -33,7 +33,7 @@ class VerifyEmail extends Notification
     {
         return (new MailMessage)
             ->line('Hi' . $this->actor->name . ', Welcome to allfans.com')
-            ->line('Verify you email address')
+            ->line('Verify your email address')
             ->action('Verify Email', $this->url);
     }
 
