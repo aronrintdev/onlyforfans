@@ -119,7 +119,6 @@ export default {
 
 <style lang="scss" scoped>
 .chatthread-list {
-  height: calc(100vh - 340px);
   overflow: auto;
   &.mobile {
     margin-right: -1rem;

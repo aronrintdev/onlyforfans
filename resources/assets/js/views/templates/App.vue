@@ -181,10 +181,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.content {
+  &.messages {
+    height: calc(100% - 64px);
+  }
+}
+
 .content.mobile {
   padding-top: 15px;
   padding-bottom: 64px;
-  min-height: calc(100% - 64px);
 
   &.messages {
     padding-top: 0;
