@@ -18,6 +18,8 @@ use App\Notifications\EmailVerified;
 use App\Notifications\IdentityVerificationRejected;
 use App\Notifications\IdentityVerificationRequestSent;
 use App\Notifications\IdentityVerificationVerified;
+use App\Notifications\InviteStaffMember;
+use App\Notifications\InviteStaffManager;
 use App\Notifications\MessageReceived;
 use App\Notifications\NewCampaignContributionReceived;
 use App\Notifications\NewReferralReceived;
@@ -466,6 +468,62 @@ class NotificationTest extends TestCase
         ]);
         Notification::send( $user, new IdentityVerificationRejected($vr, $user));
         Notification::assertSentTo( [$user], IdentityVerificationRejected::class );
+    }
+
+    /**
+     * @group lib-notification-unit-fake
+     * @group regression
+     * @group regression-unit
+     * @group here0920
+     */
+    public function test_should_notify_invite_staff_manager()
+    {
+        Notification::fake();
+        $creator = User::first();
+
+        // Invite new staff user as manager
+        $attrs = [
+            'first_name' => $this->faker->firstName,
+            'last_name' => $this->faker->firstName,
+            'email' => $this->faker->safeEmail,
+            'role' => 'manager',
+            'owner_id' => $creator->id,
+            'token' => str_random(60),
+            'creator_id' => $creator->id,
+        ];
+
+        $staff = Staff::create($attrs);
+
+        Notification::send( $user, new InviteStaffManager($staff, $creator));
+        Notification::assertSentTo( [$user], InviteStaffManager::class );
+    }
+
+    /**
+     * @group lib-notification-unit-fake
+     * @group regression
+     * @group regression-unit
+     * @group %TODO-here0920
+     */
+    public function test_should_notify_invite_staff_member()
+    {
+        Notification::fake();
+        $creator = User::first();
+
+        // Invite new staff user as member
+        $attrs = [
+            'first_name' => $this->faker->firstName,
+            'last_name' => $this->faker->firstName,
+            'email' => $this->faker->safeEmail,
+            'role' => 'member',
+            'owner_id' => $creator->id,
+            'token' => str_random(60),
+            'creator_id' => $creator->id,
+        ];
+
+        $staff = Staff::create($attrs);
+
+        Notification::send( $user, new InviteStaffMember($staff, $user));
+        Notification::assertSentTo( [$user], InviteStaffMember::class );
     }
 
 }
