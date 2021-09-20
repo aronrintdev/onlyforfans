@@ -69,6 +69,7 @@ class RestStaffTest extends TestCase
      *  @group regression
      *  @group regression-base
      *  @group staff
+     *  @group here0920
      */
     public function test_can_send_manager_invitation()
     {
