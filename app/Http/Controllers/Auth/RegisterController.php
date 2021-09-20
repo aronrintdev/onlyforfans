@@ -1,30 +1,33 @@
 <?php
 namespace App\Http\Controllers\Auth;
 
-//use DB;
-
 use Validator;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Laravel\Socialite\Facades\Socialite;
+
+use App\Http\Controllers\Controller;
+
+use App\Models\Diskmediafile;
 use App\Models\User;
 use App\Models\Token;
 use App\Models\Invite;
 use App\Models\Setting;
 use App\Models\Referral;
 
-use Illuminate\Http\Request;
-use App\Models\Diskmediafile;
-use Illuminate\Support\Carbon;
 use App\Enums\MediafileTypeEnum;
+
 use App\Notifications\VerifyEmail;
-use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
-use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Redirect;
-use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Foundation\Auth\RegistersUsers;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Notifications\EmailVerified;
 
 class RegisterController extends Controller
 {
@@ -103,11 +106,6 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-        return $this->registerUser($request);
-    }
-
-    protected function registerUser(Request $request)
-    {
 
         // %FIXME %TODO: use transaction
 
@@ -132,7 +130,6 @@ class RegisterController extends Controller
         } while (User::where('referral_code', '=', str_pad($referral_code, 8 , '0' , STR_PAD_LEFT))->exists());
         $referral_code = str_pad($referral_code, 8 , '0' , STR_PAD_LEFT);
 
-        //Create user record
         $user = User::create([
             'email'             => $request->email,
             'password'          => bcrypt($request->password),
@@ -187,7 +184,7 @@ class RegisterController extends Controller
             }
 
             if ($request->has('ref')) {
-                $referral_user = User::where('referral_code', '=', $request->ref)->first();
+                $referral_user = User::where('referral_code', $request->ref)->first();
                 Referral::create([
                     'user_id' => $referral_user->id,
                     'referral_id' => $user->timeline->id,
@@ -195,9 +192,10 @@ class RegisterController extends Controller
                 ]);
             }
 
-            $user->notify(new VerifyEmail(
-                $user, url(route('verification.verify', ['id' => $user->id, 'hash' => $user->verification_code]))
-            ));
+            $url = url(route('verification.verify', ['id' => $user->id, 'hash' => $user->verification_code]));
+
+            Log::debug('RegisterController::registerUser() - Verify Email', ['notifiable->username'=>$user->username, 'url'=>$url ]);
+            $user->notify(new VerifyEmail( $user, $url ));
             // event(new Registered($user));
 
             return response()->json(['user' => $user], 201);
@@ -229,18 +227,22 @@ class RegisterController extends Controller
      * Verify Email Endpoint
      * @param Request $request
      */
+    // This executes when the user clicks on the link/button in the email received after registration
+    // ...clicking the link confirms their email
     public function verifyEmail(Request $request)
     {
         $user = User::find($request->id);
-
         if ($user->email_verified) {
-            return redirect('/email/verified');
+            return redirect('/email/verified'); // already verified
         } else if ($user->verification_code === $request->hash) {
+            // verification confirmed
             $user->email_verified = 1;
             $user->email_verified_at = Carbon::now();
             $user->update();
+            $user->notify(new EmailVerified($user));
             return redirect('/email/verified');
         } else {
+            // verification NOT confirmed
             return redirect('/login');
         }
     }
