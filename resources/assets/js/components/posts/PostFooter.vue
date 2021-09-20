@@ -18,7 +18,7 @@
           </span>
         </li>
         -->
-        <li class="mr-3">
+        <li class="mr-3" v-if="!ownPost">
           <span @click="renderTip" class="tag-clickable">
             <fa-icon size="lg" icon="dollar-sign" class="text-secondary" />
           </span>
@@ -80,6 +80,11 @@ export default {
     isLoading() {
       return !this.post || !this.session_user
     },
+
+    /** If this one of session_user's own posts */
+    ownPost() {
+      return this.post.timeline.user_id === this.session_user.id
+    },
   },
 
   data: () => ({
@@ -107,6 +112,10 @@ export default {
     share() {},
 
     renderTip() {
+      if (this.ownPost) {
+        return
+      }
+
       eventBus.$emit('open-modal', {
         key: 'render-tip', 
         data: { 
