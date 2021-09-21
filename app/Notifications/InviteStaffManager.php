@@ -71,7 +71,12 @@ class InviteStaffManager extends Notification
     public function toArray($notifiable)
     {
         return [
-            'inviter' => [ // follower
+            'actor' => [
+                'username' => $this->inviter->username,
+                'name' => $this->inviter->name,
+                'avatar' => $this->inviter->avatar->filepath ?? null,
+            ],
+            'inviter' => [
                 'username' => $this->inviter->username,
                 'name' => $this->inviter->name,
                 'avatar' => $this->inviter->avatar->filepath ?? null,
@@ -83,7 +88,8 @@ class InviteStaffManager extends Notification
             ],
             'user_id' => $this->staff->user_id ?? null,
             'creator_id' => $this->staff->creator_id ?? null,
-            'ownwer_id' => $this->staff->ownwer_id ?? null,
+            'owner_id' => $this->staff->ownwer_id ?? null,
+            'invite_url' => $this->staff->invite_url,
         ];
     }
 
