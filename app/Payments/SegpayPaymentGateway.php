@@ -2,8 +2,10 @@
 
 namespace App\Payments;
 
+use App\Enums\CampaignTypeEnum;
 use Money\Money;
 use App\Models\Tip;
+use App\Models\Campaign;
 use App\Interfaces\Purchaseable;
 use App\Interfaces\Subscribable;
 use App\Models\Financial\Account;
@@ -103,17 +105,33 @@ class SegpayPaymentGateway implements PaymentGatewayContract
      * @param Money $price
      * @return array
      */
-    public function subscribe(Account $account, Subscribable $item, Money $price)
+    public function subscribe(Account $account, Subscribable $item, Money $price, Campaign $campaign = null)
     {
         $this->validateAccount($account);
         if (Config::get('segpay.fake') && App::environment() != 'production') {
-            return (new FakedPaymentGateway())->subscribe($account, $item, $price);
+            return (new FakedPaymentGateway())->subscribe($account, $item, $price, $campaign);
         }
 
         // Create subscription
         $subscription = $account->createSubscription($item, $price, [
             'manual_charge' => false,
         ]);
+
+        // Apply campaign setting if there is one
+        if (isset($campaign)) {
+            if ($campaign->type === CampaignTypeEnum::DISCOUNT) {
+                $subscription->initial_period = 'daily';
+                $subscription->initial_period_interval = 30;
+                $subscription->initial_price = $campaign->getDiscountPrice($price)->getAmount();
+                $subscription->save();
+            }
+            if ($campaign->type === CampaignTypeEnum::TRIAL) {
+                $subscription->initial_period = 'daily';
+                $subscription->initial_period_interval = $campaign->trial_days;
+                $subscription->initial_price = 0;
+                $subscription->save();
+            }
+        }
 
         // Send Segpay One click call
         try {

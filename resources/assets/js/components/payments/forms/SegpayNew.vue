@@ -167,6 +167,7 @@ export default {
     currency: { type: String, default: 'USD' },
     /** Type of transaction: `'purchase' | 'subscription' | 'tip'` */
     type: { type: String, default: 'purchase' },
+    campaign: { type: Object, default: () => ({}) },
     extra: { type: Object, default: () => ({})},
   },
 
@@ -280,6 +281,9 @@ export default {
           nickname: this.form.nickname,
           card_is_default: this.form.card_is_default ? '1' : '0',
         },
+      }
+      if (this.campaign.id) {
+        data.userData.campaign_id = this.campaign_id
       }
       if (this.whitesite) {
         data.userData.whitesite = this.whitesite
@@ -415,12 +419,16 @@ export default {
 
     getSessionId() {
       return new Promise((resolve, reject) => {
-        this.axios.post(route('payments.segpay.getPaymentSession'), {
+        var params = {
           item: this.value.id,
           type: this.type,
           price: this.price,
           currency: this.currency,
-        }).then(results => {
+        }
+        if (this.campaign.id) {
+          params.campaign = this.campaign.id
+        }
+        this.axios.post(route('payments.segpay.getPaymentSession'), params).then(results => {
           if (results.data.id === null) {
             reject('Session Id is null')
           }
