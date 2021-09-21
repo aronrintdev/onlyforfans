@@ -6,13 +6,14 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 use App\Interfaces\Likeable;
 use App\Models\User;
 
 // Resource can be Post, Comment, Mediafile, etc
 class ResourceLiked extends Notification
 {
-    use Queueable;
+    use NotifyTraits, Queueable;
 
     public $likeable;
     public $actor; // liker
@@ -40,6 +41,11 @@ class ResourceLiked extends Notification
             }
         }
         return $channels;
+    }
+
+    public function toSendgrid($notifiable)
+    {
+        return []; // %TODO
     }
 
     public function toMail($notifiable)

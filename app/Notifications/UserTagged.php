@@ -2,13 +2,13 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Notification;
 use App\Models\User;
 use App\Models\Post;
 
-
 class UserTagged extends Notification
 {
-    use Queueable;
+    use NotifyTraits, Queueable;
 
     public $post;
     public $actor;
@@ -23,6 +23,11 @@ class UserTagged extends Notification
     {
         $channels =  ['database'];
         return $channels;
+    }
+
+    public function toSendgrid($notifiable)
+    {
+        return []; // %TODO
     }
 
     public function toArray($notifiable)

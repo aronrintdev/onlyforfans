@@ -4,13 +4,14 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 use App\Models\Timeline;
 use App\Models\Post;
 use App\Models\User;
 
 class PostTipped extends Notification
 {
-    use Queueable;
+    use NotifyTraits, Queueable;
 
     public $post;
     public $purchaser;
@@ -35,6 +36,11 @@ class PostTipped extends Notification
     {
         return (new MailMessage)
                     ->line($this->purchaser->name.' sent you a tip!');
+    }
+
+    public function toSendgrid($notifiable)
+    {
+        return []; // %TODO
     }
 
     public function toArray($notifiable)

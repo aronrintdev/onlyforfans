@@ -1,11 +1,11 @@
 <?php
-
 namespace App\Notifications;
 
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 
 class VerifyEmail extends Notification
 {

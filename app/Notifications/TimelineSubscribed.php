@@ -4,12 +4,13 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 use App\Models\Timeline;
 use App\Models\User;
 
 class TimelineSubscribed extends Notification
 {
-    use Queueable;
+    use NotifyTraits, Queueable;
 
     public $timeline;
     public $actor; // subscriber
@@ -29,6 +30,12 @@ class TimelineSubscribed extends Notification
     {
         return (new MailMessage)
                     ->line($this->actor->name.' subscribed to your timeline');
+    }
+
+    public function toSendgrid($notifiable)
+    {
+        $data = [];
+        return $data;
     }
 
     public function toArray($notifiable)

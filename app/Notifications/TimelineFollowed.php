@@ -4,12 +4,13 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 use App\Models\Timeline;
 use App\Models\User;
 
 class TimelineFollowed extends Notification
 {
-    use Queueable;
+    use NotifyTraits, Queueable;
 
     public $timeline;
     public $actor; // follower
@@ -22,13 +23,21 @@ class TimelineFollowed extends Notification
 
     public function via($notifiable)
     {
-        return ['database', 'mail'];
+        $channels = ['database'];
+        $channels[] = $this->getMailChannel();
+        return $channels;
     }
 
     public function toMail($notifiable)
     {
         return (new MailMessage)
                     ->line($this->actor->name.' followed your timeline');
+    }
+
+    public function toSendgrid($notifiable)
+    {
+        $data = [];
+        return $data;
     }
 
     public function toArray($notifiable)
