@@ -27,10 +27,12 @@
               Subscribe for {{ timeline.userstats.display_prices_in_cents.subscribe_1_month | niceCurrency }} per month now
             </template>
           </b-button>
-          <p v-if="subscribe_only && timeline.userstats.is_sub_discounted" class="text-muted text-center m-0"><small>
-            Discount applied: Subscribe for {{ timeline.userstats.display_prices_in_cents.subscribe_1_month_discounted | niceCurrency}}. 
-            Renews at {{  timeline.userstats.display_prices_in_cents.subscribe_1_month | niceCurrency  }}
-          </small></p>
+
+          <DiscountDisplay
+            v-if="subscribe_only && userCampaign && userCampaign.id"
+            :price="{ amount: price, currency: 'USD' }"
+            :campaign="userCampaign"
+          />
 
           <b-button v-if="!subscribe_only" @click="doFollow" :disabled="isInProcess" variant="primary" class="w-100 mt-3">
             <b-spinner small v-if="isInProcess" class="mr-2"></b-spinner>
@@ -50,6 +52,7 @@
           :currency="'USD'"
           type="subscription"
           :display-price="price | niceCurrency"
+          :campaign="userCampaign"
           class="mt-3"
         />
       </b-card-body>
@@ -62,11 +65,13 @@ import { eventBus } from '@/eventBus'
 import AvatarWithStatus from '@components/user/AvatarWithStatus'
 import PurchaseForm from '@components/payments/PurchaseForm'
 import PaymentsDisabled from '@components/payments/PaymentsDisabled'
+import DiscountDisplay from '@components/payments/DiscountDisplay'
 
 export default {
 
   components: {
     AvatarWithStatus,
+    DiscountDisplay,
     PurchaseForm,
     PaymentsDisabled,
   },
@@ -83,11 +88,19 @@ export default {
     },
 
     price() {
-      if (this.timeline.userstats.is_sub_discounted) {
-        return this.timeline.userstats.display_prices_in_cents.subscribe_1_month_discounted
-      }
+      // if (this.timeline.userstats.is_sub_discounted) {
+      //   return this.timeline.userstats.display_prices_in_cents.subscribe_1_month_discounted
+      // }
       return this.timeline.userstats.display_prices_in_cents.subscribe_1_month
-    }
+    },
+
+    campaign() {
+      if (this.timeline.userstats.campaign) {
+        return this.timeline.userstats.campaign
+      }
+      return null
+    },
+
   },
 
   created() {
@@ -99,7 +112,6 @@ export default {
   },
 
   mounted() {
-    console.log({timeline: this.timeline})
     if (true || this.subscribe_only) {
       this.getUserCampaign() // if none exists will return null
     }

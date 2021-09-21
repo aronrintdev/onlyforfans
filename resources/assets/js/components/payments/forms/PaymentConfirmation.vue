@@ -10,9 +10,20 @@
         <div>
           <b-btn block variant="primary" size="lg" class="d-flex justify-content-center align-items-center" @click="onConfirm">
             <fa-icon icon="check" size="lg" class="mr-2" />
-            {{ $t('confirm.button', { type: $t(`types.${this.type}`), price: priceDisplay }) }}
+            {{
+              displayPriceOnButton ? $t('confirm.button', { type: $t(`types.${this.type}`), price: priceDisplay })
+                : $t('confirm.buttonNoPrice', { type: $t(`types.${this.type}`) })
+            }}
           </b-btn>
         </div>
+        <DiscountDisplay
+          v-if="campaign.id"
+          :price="{
+            amount: typeof price === 'object' ? parseInt(price.amount) : price,
+            currency: typeof price === 'object' ? price.currency : currency,
+          }"
+          :campaign="campaign"
+        />
         <div class="mt-3 mb-3 mb-md-0 mx-auto">
           <SavedPaymentMethod as="div" :value="paymentMethod">
             <b-btn variant="link" @click="$emit('changePaymentMethod')">{{ $t('change') }}</b-btn>
@@ -31,12 +42,14 @@
  */
 import Vuex from 'vuex'
 import { eventBus } from '@/eventBus'
+import DiscountDisplay from '@components/payments/DiscountDisplay'
 import LoadingOverlay from '@components/common/LoadingOverlay'
 import SavedPaymentMethod from '@components/payments/SavedPaymentMethod'
 
 export default {
   name: 'PaymentConfirmation',
   components: {
+    DiscountDisplay,
     LoadingOverlay,
     SavedPaymentMethod,
   },
@@ -47,13 +60,33 @@ export default {
     price: { type: Number, default: 0 },
     currency: { type: String, default: 'USD' },
     type: { type: String, default: 'purchase' }, // purchase | tip | subscribe
+
+    /** Subscription campaign */
+    campaign: { type: Object, default: () => ({}) },
+
     extra: { type: Object, default: () => ({})},
   },
 
   computed: {
     ...Vuex.mapState(['session_user']),
 
+    displayPriceOnButton() {
+      if (this.campaign.id) {
+        if (this.campaign.type === 'trial') {
+          return false
+        }
+      }
+      return true
+    },
+
     priceDisplay() {
+      if (this.campaign.id) {
+        const price = typeof this.price === 'object' ? this.price.amount : this.price
+        return this.$options.filters.niceCurrency(
+          Math.round(price * ((100 - this.campaign.discount_percent) / 100)),
+          this.currency
+        )
+      }
       return this.$options.filters.niceCurrency(this.price, this.currency)
     },
 
@@ -78,18 +111,39 @@ export default {
 
     onConfirm() {
       this.$emit('processing')
-      var route = ``
-      switch(this.itemType) {
-        case 'post': case 'posts':
-          route = this.$apiRoute(`posts.${this.type}`, { post: this.value })
+
+      var type
+
+      switch(this.type) {
+        case 'subscribe': case 'subscription': case 'subscriptions':
+          type = 'subscribe'
           break
-        case 'timeline': case 'timelines':
-          route = this.$apiRoute(`timelines.${this.type}`, { timeline: this.value })
+        case 'purchase': default:
+          type = 'purchase'
           break
-        default:
-          route = this.$apiRoute(`${this.itemType}.${this.type}`, { [this.itemType]: this.value })
+        case 'tip':
+          type = 'tip'
           break
       }
+
+      var route = ``
+      try {
+        switch(this.itemType) {
+          case 'post': case 'posts':
+            route = this.$apiRoute(`posts.${type}`, { post: this.value })
+            break
+          case 'timeline': case 'timelines':
+            route = this.$apiRoute(`timelines.${type}`, { timeline: this.value })
+            break
+          default:
+            route = this.$apiRoute(`${this.itemType}.${type}`, { [this.itemType]: this.value })
+            break
+        }
+      } catch (e) {
+        eventBus.$emit('error', { error: e, message: "Invalid Item type", })
+        this.$emit('stopProcessing')
+      }
+
       if (route === '') {
         this.$nextTick(() => {
           eventBus.$emit('error', { message: "Invalid Item type", })
@@ -105,6 +159,7 @@ export default {
         message: this.extra
           ? this.extra.message ? this.extra.message : null
           : null,
+        campaign: this.campaign.id ?? null
       }).then(response => {
         this.$log.debug('PaymentConfirmation onConfirm', { response })
         if (response.data.success) {
@@ -144,6 +199,7 @@ export default {
     },
     "confirm": {
       "header": "Confirm {type}:",
+      "buttonNoPrice": "Confirm {type}",
       "button": "Confirm {type} of {price}"
     }
   }

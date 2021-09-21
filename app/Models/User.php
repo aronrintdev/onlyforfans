@@ -591,7 +591,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
             $subAttrs = $settingsCattrs['subscriptions'];
 
             // TODO: FIX price should not be stored as a decimal
-            $subAttrs['price_per_1_months'] = intval(( (float)$subAttrs['price_per_1_months'] ?? 0) * 100);
+            $subAttrs['price_per_1_months'] = intval(( (float)($subAttrs['price_per_1_months'] ?? 0)) * 100) ?? 0;
 
             $display_prices_in_cents['subscribe_1_month'] = $subAttrs['price_per_1_months'];
             $display_prices_in_cents['subscribe_1_month_discounted'] = $isSubDiscounted

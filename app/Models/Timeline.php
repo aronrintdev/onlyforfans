@@ -277,7 +277,25 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         } else {
             $price = $this->price;
         }
-        return $price->equals($amount);
+
+        if ($price->equals($amount)) {
+            // Amount is price for 1 month
+            return true;
+        }
+
+        // See if there are any promotions
+        $promotions = Campaign::forTimeline($this)->isActive()->get();
+
+        if ($promotions->count() > 0) {
+            foreach ($promotions as $promotion) {
+                $discount = $promotion->getDiscountPrice($price);
+                if ($discount->equals($amount)) {
+                    return true;
+                }
+            }
+        }
+        // No active promotions match this price
+        return false;
     }
 
     // added by %PSG 20210914 

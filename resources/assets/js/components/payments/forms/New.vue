@@ -7,6 +7,7 @@
         :price="price"
         :currency="currency"
         :type="type"
+        :campaign="campaign"
         :extra="extra"
         @processing="$emit('processing')"
         @stopProcessing="$emit('stopProcessing')"
@@ -38,6 +39,7 @@ export default {
     price: { type: Number, default: 0 },
     currency: { type: String, default: 'USD' },
     value: { type: Object, default: () => ({})},
+    campaign: { type: Object, default: () => ({}) },
     extra: { type: Object, default: () => ({})},
   },
 

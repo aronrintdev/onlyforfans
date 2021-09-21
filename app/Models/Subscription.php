@@ -8,6 +8,7 @@ use LogicException;
 use App\Apis\Segpay\Api;
 use App\Interfaces\Ownable;
 use InvalidArgumentException;
+use App\Enums\CampaignTypeEnum;
 use App\Models\Traits\UsesUuid;
 use App\Interfaces\Subscribable;
 use App\Models\Financial\Account;
@@ -22,9 +23,9 @@ use App\Enums\Financial\TransactionTypeEnum;
 use App\Models\Financial\Traits\HasCurrency;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Exceptions\InvalidIntervalException;
-use Illuminate\Database\Eloquent\InvalidCastException as EloquentInvalidCastException;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\InvalidCastException as EloquentInvalidCastException;
 
 /**
  * Subscription model
@@ -37,18 +38,28 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string $account_id         - Id of account being charged
  * @property bool   $manual_charge      - If the application needs to take care of the charges or if it is done
  *                                          automatically by payment processor
+ *
+ * @property string|null $initial_period   - The initial period unit if there is an initial period
+ * @property int|null    $initial_interval - The initial period interval if there is an initial period
+ * @property Money|null  $initial_price    - The initial period price if there is an initial period
+ *
  * @property string $period             - Period unit, e.i Daily, Monthly, Yearly
  * @property int    $period_interval    - Period Interval, 15 Daily would be every 15 days, 1 Monthly is every month
  * @property Money  $price              - Price of the subscription
  * @property string $currency           - Currency of the subscription price
+ *
  * @property bool   $active             - If the subscription is currently active
  * @property Carbon $canceled_at        - When the subscription was canceled
  * @property string $access_level       - Access level of this subscription
+ *
+ * @property string|null $campaign_id   - Campaign id if this subscription was activated as part of a campaign
+ *
  * @property array  $custom_attributes
  * @property array  $metadata
+ *
  * @property string $last_transaction_id - The id of the last transaction for this subscription
- * @property Carbon $next_payment_at    - Timestamp of when the next payment transaction is due to occur.
- * @property Carbon $last_payment_at    - Timestamp of when the last payment transaction occurred.
+ * @property Carbon $next_payment_at     - Timestamp of when the next payment transaction is due to occur.
+ * @property Carbon $last_payment_at     - Timestamp of when the last payment transaction occurred.
  *
  * ===== Relations =========================================================== *
  * @property User         $user
@@ -81,6 +92,7 @@ class Subscription extends Model implements Ownable
     ];
 
     protected $casts = [
+        'initial_price' => CastsMoney::class,
         'price' => CastsMoney::class,
         'custom_attributes' => 'array',
     ];
@@ -139,6 +151,15 @@ class Subscription extends Model implements Ownable
     public function account()
     {
         return $this->belongsTo(Account::class);
+    }
+
+    /**
+     * The campaign this subscription was activated under
+     * @return BelongsTo
+     */
+    public function campaign()
+    {
+        return $this->belongsTo(Campaign::class);
     }
 
     #endregion Relationships
@@ -355,6 +376,29 @@ class Subscription extends Model implements Ownable
         }
         $this->next_payment_at = $this->next_payment_at->add($this->period, $this->period_interval);
         $this->save();
+    }
+
+    /**
+     * Applies a campaigns rules to this subscription
+     */
+    public function applyCampaign(Campaign $campaign, $initial_period = 'daily', $initial_period_interval = 30)
+    {
+        if ($campaign->type === CampaignTypeEnum::DISCOUNT) {
+            $this->initial_period = $initial_period;
+            $this->initial_period_interval = $initial_period_interval;
+            $this->initial_price = $campaign->getDiscountPrice($this->price)->getAmount();
+            $this->campaign_id = $campaign->id;
+            $this->save();
+        }
+        if ($campaign->type === CampaignTypeEnum::TRIAL) {
+            $this->initial_period = $initial_period;
+            $this->initial_period_interval = $campaign->trial_days;
+            $this->initial_price = 0;
+            $this->campaign_id = $campaign->id;
+            $this->save();
+        }
+        $campaign->decrementRemaining();
+        return $this;
     }
 
     #endregion Functions
