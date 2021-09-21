@@ -589,11 +589,13 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
         $display_prices_in_cents = [];
         if ( array_key_exists('subscriptions', $settingsCattrs) ) {
             $subAttrs = $settingsCattrs['subscriptions'];
-            $subAttrs['price_per_1_months'] = ( intval($subAttrs['price_per_1_months'] ?? 0) ) * 100;  // convert to cents
+
+            // TODO: FIX price should not be stored as a decimal
+            $subAttrs['price_per_1_months'] = intval(( (float)$subAttrs['price_per_1_months'] ?? 0) * 100);
 
             $display_prices_in_cents['subscribe_1_month'] = $subAttrs['price_per_1_months'];
-            $display_prices_in_cents['subscribe_1_month_discounted'] = $isSubDiscounted 
-                ? applyDiscount($subAttrs['price_per_1_months'], $discountPercent) 
+            $display_prices_in_cents['subscribe_1_month_discounted'] = $isSubDiscounted
+                ? applyDiscount($subAttrs['price_per_1_months'], $discountPercent)
                 : $subAttrs['price_per_1_months'];
         }
 
