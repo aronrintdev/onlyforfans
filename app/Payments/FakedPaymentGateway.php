@@ -18,6 +18,7 @@ use App\Events\SubscriptionFailed;
 use App\Http\Resources\Chatmessage;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 use App\Enums\ShareableAccessLevelEnum;
 use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
 use App\Models\Financial\Exceptions\InvalidFinancialSystemException;
@@ -160,7 +161,8 @@ class FakedPaymentGateway implements PaymentGatewayContract
      */
     private function validateAccount(Account $account)
     {
-        if (App::environment() === 'production') {
+        // if (App::environment() === 'production') {
+        if (Config::get('segpay.fake') === false) {
             throw new InvalidFinancialSystemException('Faked', $account);
         }
     }
