@@ -32,10 +32,14 @@ export default {
   props: {
     price: { type: Object, default: () => ({ amount: 0, currency: 'USD' }) },
     campaign: { type: Object, default: () => ({}) },
+    display: null,
   },
 
   computed: {
     discountPrice() {
+      if (this.display) {
+        return this.display
+      }
       return {
         amount: Math.round(this.price.amount * ((100 - this.campaign.discount_percent) / 100)),
         currency: this.campaign.currency,

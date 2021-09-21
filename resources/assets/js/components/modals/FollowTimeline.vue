@@ -32,6 +32,7 @@
             v-if="subscribe_only && userCampaign && userCampaign.id"
             :price="{ amount: price, currency: 'USD' }"
             :campaign="userCampaign"
+            :display="displayDiscount"
           />
 
           <b-button v-if="!subscribe_only" @click="doFollow" :disabled="isInProcess" variant="primary" class="w-100 mt-3">
@@ -53,6 +54,7 @@
           type="subscription"
           :display-price="price | niceCurrency"
           :campaign="userCampaign"
+          :discountDisplay="displayDiscount"
           class="mt-3"
         />
       </b-card-body>
@@ -100,6 +102,13 @@ export default {
       }
       return null
     },
+
+    displayDiscount() {
+      if (this.timeline.userstats.display_prices_in_cents) {
+        return this.timeline.userstats.display_prices_in_cents.subscribe_1_month_discounted
+      }
+      return null
+    }
 
   },
 
