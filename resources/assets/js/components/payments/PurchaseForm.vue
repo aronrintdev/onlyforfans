@@ -17,6 +17,7 @@
           currency: typeof price === 'object' ? price.currency : currency,
         }"
         :campaign="campaign"
+        :display="discountDisplay"
       />
 
       <SavedPaymentMethodList
@@ -42,6 +43,7 @@
           :currency="typeof price === 'object' ? price.currency : currency"
           :price-display="displayPrice"
           :campaign="campaign"
+          :discountDisplay="discountDisplay"
           @processing="onProcessing"
           @stopProcessing="onStopProcessing"
           @success="onSuccess"
@@ -109,6 +111,7 @@ export default {
 
     /** Subscription campaign */
     campaign: { type: Object, default: () => ({}) },
+    discountDisplay: null,
 
     /** For tips sent from the messages won't emit success signal until message is received from server */
     wantsMessage: { type: Boolean, default: false },

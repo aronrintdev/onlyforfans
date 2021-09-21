@@ -19,19 +19,8 @@
               <b-button @click="renderSubscribe" :disabled="timeline.is_owner" variant="primary" class="w-100" >
                 Subscribe - {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} per month
               </b-button>
-              <section v-if="activeCampaign" class="box-campaign-blurb mt-1">
-                <h6 v-if="activeCampaign.type==='trial'" class="m-0 text-center">Limited offer - Free trial for {{ activeCampaign.trial_days }} days!</h6>
-                <h6 v-if="activeCampaign.type==='discount'" class="m-0 text-center">Limited offer - {{ activeCampaign.discount_percent }}% off for {{ activeCampaign.offer_days }} days!</h6>
-                <p class="m-0 text-center"><small class="text-muted">{{ activeCampaign | renderCampaignBlurb }}</small></p>
-                <article v-if="activeCampaign.message" class="tag-message d-flex align-items-center">
-                  <div class="user-avatar">
-                    <b-img rounded="circle" :src="timeline.avatar.filepath" :title="timeline.name" />
-                  </div>
-                  <div class="text-wrap py-2 w-100">
-                    <p class="mb-0">{{ activeCampaign.message }}</p>
-                  </div>
-                </article>
-              </section>
+
+              <CampaignDisplay v-if="activeCampaign" :value="activeCampaign" :timeline="timeline" />
             </template>
           </li>
           <li v-if="!timeline.is_following && timeline.is_follow_for_free" class="mb-3">
@@ -72,6 +61,7 @@ import { eventBus } from '@/eventBus'
 
 // https://github.com/adapttive/vue-markdown
 import VueMarkdown from '@adapttive/vue-markdown'
+import CampaignDisplay from '@components/common/CampaignDisplay'
 
 export default {
 
@@ -116,8 +106,7 @@ export default {
 
   created() { },
 
-  methods: { 
-
+  methods: {
     renderFollow() {
       eventBus.$emit('open-modal', {
         key: 'render-follow',
@@ -184,6 +173,7 @@ export default {
   },
 
   components: {
+    CampaignDisplay,
     VueMarkdown,
   },
 }

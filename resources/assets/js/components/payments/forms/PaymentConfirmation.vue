@@ -23,6 +23,7 @@
             currency: typeof price === 'object' ? price.currency : currency,
           }"
           :campaign="campaign"
+          :display="discountDisplay"
         />
         <div class="mt-3 mb-3 mb-md-0 mx-auto">
           <SavedPaymentMethod as="div" :value="paymentMethod">
@@ -63,6 +64,7 @@ export default {
 
     /** Subscription campaign */
     campaign: { type: Object, default: () => ({}) },
+    discountDisplay: null,
 
     extra: { type: Object, default: () => ({})},
   },
@@ -81,6 +83,12 @@ export default {
 
     priceDisplay() {
       if (this.campaign.id) {
+        if (this.discountDisplay) {
+          return this.$options.filters.niceCurrency(
+            this.discountDisplay,
+            this.currency
+          )
+        }
         const price = typeof this.price === 'object' ? this.price.amount : this.price
         return this.$options.filters.niceCurrency(
           Math.round(price * ((100 - this.campaign.discount_percent) / 100)),
