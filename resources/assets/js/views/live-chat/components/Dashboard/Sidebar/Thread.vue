@@ -6,7 +6,7 @@
   >
 
     <section class="d-flex align-items-center">
-      <AvatarWithStatus :user="participant" :thumbnail="false" imageOnly />
+      <AvatarWithStatus :timeline="participant.timeline" :user="participant" :thumbnail="false" imageOnly />
       <div class="participant-info pl-2">
         <div class="d-flex my-0">
           <span class="msg-username" v-bind:class="{ 'tag-unread': chatthread.unread_count }">
