@@ -296,35 +296,90 @@ export default {
     },
 
     onInput(e) {
+      const font = $(e.target).find('font');
+      if (font) {
+        const newEle = $('<span>' + font.text() + '</span>')
+        $(font).before(newEle);
+        $(font).remove();
+      }
+      this.lastRange = this.saveSelection()
       this.description = e.target.innerHTML
     },
 
     editorClicked(e) {
+      this.lastRange = this.saveSelection()
       if (e.target.tagName == 'A') {
         const url = e.target.textContent.slice(1)
         window.location.href = url;
       }
     },
 
-    selectEmoji(emoji) {
-      this.description += `<span class="emoji">${emoji.data}</span><span>&nbsp;</span>`
-      this.descriptionForEditor = this.description
-      this.$nextTick(() => {
-        const p = document.querySelector('.edit-post .text-editor'),
-            s = window.getSelection(),
-            r = document.createRange();
-        let ele = p.childElementCount > 0 ? p.lastChild : p;
-        if (!p.lastChild.textContent) {
-          r.setStart(ele, 0);
-          r.setEnd(ele, 0);
-        } else {
-          r.setStart(ele, 1);
-          r.setEnd(ele, 1);
+    saveSelection() {
+        if (window.getSelection) {
+            var sel = window.getSelection();
+            if (sel.getRangeAt && sel.rangeCount) {
+                return sel.getRangeAt(0);
+            }
+        } else if (document.selection && document.selection.createRange) {
+            return document.selection.createRange();
         }
-  
-        s.removeAllRanges();
-        s.addRange(r);
-      })
+        return null;
+    },
+
+    restoreSelection(range) {
+        if (range) {
+            if (window.getSelection) {
+                var sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+            } else if (document.selection && range.select) {
+                range.select();
+            }
+        }
+    },
+
+    pasteHtmlAtCaret(html) {
+        var sel, range;
+        if (window.getSelection) {
+            // IE9 and non-IE
+            sel = window.getSelection();
+            if (sel.getRangeAt && sel.rangeCount) {
+                range = sel.getRangeAt(0);
+                range.deleteContents();
+
+                // Range.createContextualFragment() would be useful here but is
+                // non-standard and not supported in all browsers (IE9, for one)
+                var el = document.createElement("div");
+                el.innerHTML = html;
+                var frag = document.createDocumentFragment(), node, lastNode;
+                while ( (node = el.firstChild) ) {
+                    lastNode = frag.appendChild(node);
+                }
+                range.insertNode(frag);
+                
+                // Preserve the selection
+                if (lastNode) {
+                    range = range.cloneRange();
+                    range.setStartAfter(lastNode);
+                    range.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            }
+        } else if (document.selection && document.selection.type != "Control") {
+            // IE < 9
+            document.selection.createRange().pasteHTML(html);
+        }
+        this.lastRange = this.saveSelection()
+    },
+
+
+    selectEmoji(emoji) {
+      const ele = document.querySelector('.edit-post .text-editor')
+      ele.focus()
+      this.restoreSelection(this.lastRange)
+      this.pasteHtmlAtCaret(emoji.data)
+      this.description = ele.innerHTML
     },
 
     closeEmojiBox() {

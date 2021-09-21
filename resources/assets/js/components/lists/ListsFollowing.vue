@@ -27,7 +27,7 @@
             <b-button @click="redirectToMessages(s)" class="mb-1" variant="primary">Message</b-button>
             <b-button class="mb-1" @click="renderTip(s.shareable, 'timelines')" variant="primary">Tip</b-button>
             <b-button class="mb-1" v-if="s.access_level==='default' && s.shareable.userstats.subscriptions.price_per_1_months" @click="renderSubscribeModal(s.shareable)" variant="primary">Subscribe</b-button>
-            <b-button class="mb-1" @click="showUnfollowConfirmation=true;timeline=s.shareable" variant="primary">
+            <b-button class="mb-1" @click="showUnfollowConfirmation=true; selectedTimeline=s.shareable" variant="primary">
               Unfollow
             </b-button>
           </WidgetTimeline>
@@ -114,7 +114,7 @@ export default {
     },
     showUnfollowConfirmation: false,
     isInProcess: false,
-    timeline: null,
+    selectedTimeline: null, // this will be initialized in Unfollow button click event
   }),
 
   methods: {
@@ -215,14 +215,14 @@ export default {
     async doUnfollow(e) {
       this.isInProcess = true
       e.preventDefault()
-      const response = await this.axios.put( route('timelines.follow', this.timeline.id), {
+      const response = await this.axios.put( route('timelines.follow', this.selectedTimeline.id), {
         sharee_id: this.session_user.id,
         notes: '',
       })
       this.$bvModal.hide('modal-follow')
       const msg = response.data.is_following
-        ? `You are now following ${this.timeline.name}!`
-        : `You are no longer following ${this.timeline.name}!`
+        ? `You are now following ${this.selectedTimeline.name}!`
+        : `You are no longer following ${this.selectedTimeline.name}!`
       this.$root.$bvToast.toast(msg, {
         toaster: 'b-toaster-top-center',
         title: 'Success!',
@@ -230,7 +230,7 @@ export default {
       })
       this.isInProcess = false
       this.showUnfollowConfirmation = false
-       eventBus.$emit('update-timelines', this.timeline.id)
+       eventBus.$emit('update-timelines', this.selectedTimeline.id)
     },
 
     renderSubscribeModal(timeline) {
