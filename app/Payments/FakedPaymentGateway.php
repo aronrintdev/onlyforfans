@@ -89,6 +89,8 @@ class FakedPaymentGateway implements PaymentGatewayContract
             ];
         }
 
+        Log::info('Faked Tip Processed', [ 'info' => $transactions ]);
+
         return [
             'success' => true,
             'tip' => $tip,
