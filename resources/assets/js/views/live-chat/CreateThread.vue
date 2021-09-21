@@ -28,41 +28,19 @@
           <Search v-model="searchQuery" :label="$t('search.label')" />
 
           <div class="d-flex pt-3 pb-2 w-100">
-            <!-- Quick Filters Buttons -->
-            <article class="d-flex flex-wrap align-items-center flex-grow-1">
-              <FilterSelect
-                v-for="filter in quickAccessFiltersList"
-                :key="filter.key"
-                :label="filtersLabel(filter.key)"
-                :selected="selectedFilter === filter.key"
-                selectedVariant="secondary"
-                variant="light"
-                @selected=" selectedFilter = filter.key"
-                class="mx-1 my-1"
-              />
-              <FilterSelect
-                v-if="showAddFilter"
-                no-selected-icon
-                variant="light"
-                selectedVariant="secondary"
-                @selected="filterAdd"
-              >
-                <fa-icon :icon="['fas', 'plus']" />
-              </FilterSelect>
-            </article>
-
             <!-- Filters Dropdown -->
             <b-dropdown
               ref="filterControls"
               class="filter-controls"
               variant="link"
               size="sm"
-              right
+              left
               no-caret
             >
               <template #button-content>
-                <b-badge show class="alert-primary" :style="{ fontSize: '100%' }">
-                  <span class="mr-2" v-text="$t('filter.label')" /> <fa-icon icon="filter" />
+                <b-badge show variant="primary" :style="{ fontSize: '100%' }">
+                  <span class="mr-2" v-text="$t('filter.label')" />
+                  <fa-icon icon="caret-down" class="fa-lg" />
                 </b-badge>
               </template>
 

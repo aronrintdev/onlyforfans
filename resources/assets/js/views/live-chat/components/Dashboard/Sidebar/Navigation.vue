@@ -5,6 +5,9 @@
       <b-btn variant="link" disabled class="clickme_to-schedule_message" @click="scheduleMessage">
         <fa-icon :icon="['far', 'calendar-alt']" class="fa-lg" />
       </b-btn>
+      <b-btn variant="link" @click="$emit('onSearchIconClick')">
+        <fa-icon :icon="'search'" :class="searchIconClass" size="lg" />
+      </b-btn>
       <b-btn variant="link" class="clickme_to-send_message" :to="linkCreateThread">
         <fa-icon :icon="['fas', 'plus']" size="lg" />
       </b-btn>
@@ -23,7 +26,9 @@ export default {
 
   components: {},
 
-  props: {},
+  props: {
+    enableSearch: { type: Boolean, default: false },
+  },
 
   computed: {
     linkCreateThread() {
@@ -31,7 +36,9 @@ export default {
     },
   },
 
-  data: () => ({}),
+  data: () => ({
+    searchIconClass: 'text-secondary',
+  }),
 
   methods: {
     // TODO: Schedule Message Implementation
@@ -39,7 +46,15 @@ export default {
     scheduleMessage() {},
   },
 
-  watch: {},
+  watch: {
+    enableSearch(value) {
+      if (value) {
+        this.searchIconClass = 'text-primary'
+      } else {
+        this.searchIconClass = 'text-secondary'
+      }
+    }
+  },
 
   created() {},
 }
