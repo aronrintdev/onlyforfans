@@ -73,7 +73,7 @@ class RestStaffTest extends TestCase
      */
     public function test_can_send_manager_invitation()
     {
-        Mail::fake();
+        //Mail::fake();
 
         // Find a creator account with managers
         $manager = Staff::where('role', 'manager')->firstOrFail();

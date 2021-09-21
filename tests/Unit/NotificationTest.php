@@ -42,8 +42,9 @@ use App\Models\Chatmessage;
 use App\Models\Comment;
 use App\Models\User;
 use App\Models\Post;
-use App\Models\Timeline;
+use App\Models\Staff;
 use App\Models\Subscription;
+use App\Models\Timeline;
 use App\Models\Tip;
 use App\Models\Verifyrequest;
 
@@ -474,12 +475,14 @@ class NotificationTest extends TestCase
      * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
-     * @group here0920
+     * @group %TODO-here0920
      */
     public function test_should_notify_invite_staff_manager()
     {
         Notification::fake();
         $creator = User::first();
+
+        // %TODO: 2 cases: invitee is a registered user, invitee is not a registered user
 
         // Invite new staff user as manager
         $attrs = [
@@ -493,9 +496,11 @@ class NotificationTest extends TestCase
         ];
 
         $staff = Staff::create($attrs);
+        Notification::route('mail', ['peter@peltronic.com'=>'Peter G'])->notify(new InviteStaffManager($staff, $creator));
+        //InviteStaffManager::sendGuestInvite($staff, $creator);
 
-        Notification::send( $user, new InviteStaffManager($staff, $creator));
-        Notification::assertSentTo( [$user], InviteStaffManager::class );
+        //Notification::send( $user, new InviteStaffManager($staff, $creator));
+        //Notification::assertSentTo( [$user], InviteStaffManager::class );
     }
 
     /**
