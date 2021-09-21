@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Mail;
 use App\Notifications\IdentityVerificationRequestSent;
 use App\Notifications\IdentityVerificationVerified;
 use App\Notifications\IdentityVerificationRejected;
+use App\Notifications\InviteStaffManager;
+use App\Notifications\InviteStaffMember;
 use App\Notifications\PasswordChanged;
 
 use App\Http\Resources\UserSetting as UserSettingResource;
@@ -501,20 +503,20 @@ class UsersController extends AppBaseController
     // Add new staff account and send invitation email
     public function sendStaffInvite(Request $request)
     {
-        $sessionUser = $request->user();
         $request->validate([
             'first_name' => 'required|string',
             'last_name' => 'required|string',
-            'email' => 'required|string',
-            'role' => 'required|string',
+            'email' => 'required|email',
+            'role' => 'required|string|in:manager,member',
         ]);
 
         // Add new staff user
-        $token = str_random(60);
-        $email = $request->input('email'); // invitee's email
+        $inviteeEmail = $request->input('email'); // invitee's email
+        $invitee = User::where('email', $inviteeEmail)->first(); // invitee
+        $inviter = $request->user();
 
         // Check if the same invite exists
-        $existingStaff = Staff::where('role', $request->input('role'))->where('email', $email)->where('owner_id', $sessionUser->id)->get();
+        $existingStaff = Staff::where('role', $request->input('role'))->where('email', $inviteeEmail)->where('owner_id', $inviter->id)->get();
         if (count($existingStaff) > 0) {
             return response()->json( [ 'message' => 'This user was already invited as a '.$request->input('role') ], 400);
         }
@@ -522,10 +524,9 @@ class UsersController extends AppBaseController
         $staff = Staff::create([
             'first_name' => $request->input('first_name'), // invitee
             'last_name' => $request->input('last_name'), // invitee
-            'email' => $email, // invitee
+            'email' => $inviteeEmail, // invitee
             'role' => $request->input('role'),
-            'owner_id' => $sessionUser->id, // inviter (?)
-            'token' => $token,
+            'owner_id' => $inviter->id,
             'creator_id' => $request->input('creator_id'), // inviter (?)
         ]);
 
@@ -534,51 +535,22 @@ class UsersController extends AppBaseController
             $staff->permissions()->attach($permissions);
         }
 
-        // Send Inviation email
-        if ($request->input('role') === 'manager') {
-            $invitee = User::where('email', $email)->first(); // invitee
-            $inviter = $sessionUser;
-            $timeline->user->notify(new InviteStaffManager($staff, $inviter, $invitee??null));
-            /*
-            // %FIXME: replace with virtual attribute 'invite_url'
-            $user = User::where('email', $email)->first(); // invitee
-            $accept_link = url('/staff/invitations/accept?token='.$token.'&email='.$email.'&inviter='.$sessionUser->name.( empty($user) ? '&is_new=true' : '' );
-            SendgridApi::send('invite-staff-manager', [
-                'to' => [
-                    'email' => $email,
-                ],
-                'dtdata' => [
-                    'manager_name' => $request->input('first_name').' '.$request->input('last_name'),
-                    'username' => $sessionUser->name,
-                    'login_url' => $accept_link, // %FIXME: key should be accept_url
-                    'home_url' => url('/'),
-                    'referral_url' => url('/referrals'),
-                    'privacy_url' => url('/privacy'),
-                    'manage_preferences_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
-                    'unsubscribe_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
-                ],
-            ]);
-             */
-        } else {
-            // %FIXME: replace with virtual attribute 'invite_url'
-            $user = User::where('email', $email)->first();
-            //$accept_link = url('/staff/invitations/accept?token='.$token.'&email='.$email.'&inviter='.$sessionUser->name.(count($users)===0 ? '&is_new=true' : ''));
-            $accept_link = url('/staff/invitations/accept?token='.$token.'&email='.$email.'&inviter='.$sessionUser->name.( empty($user) ? '&is_new=true' : '' );
-            SendgridApi::send('invite-staff-member', [
-                'to' => [
-                    'email' => $email,
-                ],
-                'dtdata' => [
-                    'staff_name' => $request->input('first_name').' '.$request->input('last_name'),
-                    'username' => $sessionUser->name,
-                    'login_url' => $accept_link, // %FIXME: key should be accept_url
-                    'home_url' => url('/'),
-                    'referral_url' => url('/referrals'),
-                    'privacy_url' => url('/privacy'),
-                    'manage_preferences_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
-                    'unsubscribe_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
-                ],
-            ]);
+        // Send Invitation email
+        switch ( $request->input('role', 'none') ) {
+            case 'manager':
+                if ( !empty($invitee) ) {
+                    $invitee->notify(new InviteStaffManager($staff, $inviter, $invitee));
+                } else {
+                    InviteStaffManager::sendGuestInvite($staff, $inviter);
+                }
+                break;
+            case 'member':
+                if ( !empty($invitee) ) {
+                    $invitee->notify(new InviteStaffMember($staff, $inviter, $invitee));
+                } else {
+                    InviteStaffMember::sendGuestInvite($staff, $inviter);
+                }
+                break;
         }
 
         return response()->json( ['status' => 200] );

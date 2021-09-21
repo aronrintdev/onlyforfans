@@ -20,7 +20,7 @@ class NotificationsController extends AppBaseController
         $sessionUser = $request->user();
 
         $request->validate([
-            'type' => 'string|in:ResourcePurchased,TipReceived,ResourceLiked,TimelineFollowed,TimelineSubscribed,CommentReceived,MessageReceived,StaffSettingsChanged,UserTagged',
+            'type' => 'string|in:ResourcePurchased,TipReceived,ResourceLiked,TimelineFollowed,TimelineSubscribed,CommentReceived,MessageReceived,StaffSettingsChanged,UserTagged,InviteStaffManager,InviteStaffMember',
         ]);
         $filters = $request->only(['type']) ?? [];
 
@@ -52,11 +52,14 @@ class NotificationsController extends AppBaseController
             $query->where('type', 'App\\Notifications\\'.$request->type);
         }
 
+        /*
         // Check if notification has valid actors or sender or requesters
         $users = User::pluck('username')->toArray();
         $query->where(function ($q) use (&$users) {
+            dd($users);
             $q->whereIn('data->actor->username', $users)->orWhereIn('data->sender->username', $users)->orWhereIn('data->requester->username', $users);
         });
+         */
 
         // Mark all my notifications as 'read' if I access this route as sesson user
         $sessionUser->unreadNotifications()->update(['read_at' => now()]);
