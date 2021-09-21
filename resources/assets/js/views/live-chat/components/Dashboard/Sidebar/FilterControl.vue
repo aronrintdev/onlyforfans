@@ -1,7 +1,7 @@
 <template>
   <b-dropdown class="filter-controls" variant="link" size="sm" left no-caret>
     <template #button-content>
-      <span class="sort-button">Sort</span>
+      <span class="filter-button">View</span>
       <fa-icon :icon="['fas', 'caret-down']" class="fa-lg" />
     </template>
 
@@ -9,27 +9,23 @@
       {{ $t('header') }}
     </b-dropdown-header>
 
-    <b-dropdown-item :active="value === 'recent'" @click="onSelect('recent')" >
-      <fa-icon icon="sort-up" fixed-width class="mx-2" size="lg" />
-      {{ $t('recent') }}
-    </b-dropdown-item>
-    <b-dropdown-item :active="value === 'oldest'" @click="onSelect('oldest')" >
-      <fa-icon icon="sort-down" fixed-width class="mx-2" size="lg" />
-      {{ $t('oldest') }}
+    <b-dropdown-item v-for="filter in filters" :active="value === filter.value" @click="onSelect(filter.value)" :key="filter.value">
+      <span class="ml-3">{{ filter.text }}</span>
     </b-dropdown-item>
   </b-dropdown>
 </template>
 
 <script>
 /**
- * resources/assets/js/views/live-chat/components/SortControl.vue
+ * resources/assets/js/views/live-chat/components/FilterControl.vue
  */
 
 export default {
-  name: 'SortControl',
+  name: 'FilterControl',
 
   props: {
     value: { type: String, default: '' },
+    filters: { type: Array, default: () => ([]) },
   },
 
   methods: {
@@ -46,7 +42,7 @@ export default {
     padding-left: 0;
   }
 }
-.sort-button {
+.filter-button {
   font-size: 16px;
   font-weight: 500;
 }
@@ -55,9 +51,7 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
-    "header": "Sort By",
-    "recent": "Most Recent First",
-    "oldest": "Oldest First"
+    "header": "View By",
   }
 }
 </i18n>

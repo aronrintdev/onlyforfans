@@ -1,7 +1,8 @@
 <template>
-  <b-dropdown class="filter-controls" variant="link" size="sm" right no-caret>
+  <b-dropdown class="filter-controls" variant="link" size="sm" left no-caret>
     <template #button-content>
-      <fa-icon :icon="asc ? ['fas', 'sort-amount-up'] : ['fas', 'sort-amount-down']" class="fa-lg" />
+      <span class="sort-button">Sort</span>
+      <fa-icon :icon="asc ? ['fas', 'caret-up'] : ['fas', 'caret-down']" class="fa-lg" />
     </template>
 
     <b-dropdown-header>
@@ -61,6 +62,10 @@ export default {
   ::v-deep .dropdown-item {
     padding-left: 0;
   }
+}
+.sort-button {
+  font-size: 16px;
+  font-weight: 500;
 }
 </style>
 
