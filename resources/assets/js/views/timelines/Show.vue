@@ -71,8 +71,12 @@ export default {
     },
 
     canCreatePostAsStaff() {
-      const index = this.session_user.companies.findIndex(company => company.id == this.timeline.id);
-      return index > -1 && this.session_user.companies[index].permissions.findIndex(permission => permission.name   == 'Post.create') > -1
+      if ( this.session_user.companies && Array.isArray(this.session_user.companies) ) {
+        const index = this.session_user.companies?.findIndex(company => company.id == this.timeline.id);
+        return index > -1 && this.session_user.companies[index].permissions?.findIndex(permission => permission.name   == 'Post.create') > -1
+      } else {
+        return false;
+      }
     }
   },
 
