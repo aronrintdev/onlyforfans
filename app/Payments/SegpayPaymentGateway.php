@@ -38,7 +38,7 @@ class SegpayPaymentGateway implements PaymentGatewayContract
     public function purchase(Account $account, Purchaseable $item, Money $price)
     {
         $this->validateAccount($account);
-        if (Config::get('segpay.fake') && App::environment() != 'production') {
+        if (Config::get('segpay.fake')) {
             return (new FakedPaymentGateway())->purchase($account, $item, $price);
         }
 
@@ -77,7 +77,7 @@ class SegpayPaymentGateway implements PaymentGatewayContract
     public function tip(Account $account, Tip $tip, Money $price)
     {
         $this->validateAccount($account);
-        if (Config::get('segpay.fake') && App::environment() != 'production') {
+        if (Config::get('segpay.fake')) {
             return(new FakedPaymentGateway())->tip($account, $tip, $price);;
         }
 
@@ -108,7 +108,7 @@ class SegpayPaymentGateway implements PaymentGatewayContract
     public function subscribe(Account $account, Subscribable $item, Money $price, Campaign $campaign = null)
     {
         $this->validateAccount($account);
-        if (Config::get('segpay.fake') && App::environment() != 'production') {
+        if (Config::get('segpay.fake')) {
             return (new FakedPaymentGateway())->subscribe($account, $item, $price, $campaign);
         }
 
