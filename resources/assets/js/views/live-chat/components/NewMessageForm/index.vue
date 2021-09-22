@@ -504,7 +504,8 @@ export default {
       }
 
       if (this.isScheduled) {
-        params.is_scheduled = this.deliverAtTimestamp
+        params.is_scheduled = this.isScheduled
+        params.deliver_at = this.deliverAtTimestamp
       }
 
       if (this.chatthread_id === 'new') {
