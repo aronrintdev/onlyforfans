@@ -5,8 +5,13 @@
         <span>{{ moment(value.delivered_at).format('MMM DD, YYYY') }}</span>
       </section>
 
-      <Unlocked v-if="!value.purchase_only || value.is_sender || havePurchased()" :value="value" @onUnsend="showConfirmModal(true)" />
-      <Locked v-else :value="value" @onUnsend="showConfirmModal" />
+      <Unlocked
+        v-if="!value.purchase_only || value.is_sender || hasPurchased"
+        :value="value"
+        :timeline="timeline"
+        @onUnsend="showConfirmModal(true)"
+      />
+      <Locked v-else :value="value" :timeline="timeline" @onUnsend="showConfirmModal" @unlock="onUnlock" />
 
     </b-list-group-item>
 
@@ -31,6 +36,7 @@
 /**
  * resources/assets/js/views/live-chat/components/Message.vue
  */
+import { eventBus } from '@/eventBus'
 import Vuex from 'vuex'
 import moment from 'moment'
 import Attachments from './Attachments'
@@ -53,6 +59,7 @@ export default {
   props: {
     isDateBreak: { type: Boolean, default: false },
     value: { type: Object, default: () => ({})},
+    timeline: { type: Object, default: () => ({}) },
   },
 
   computed: {
@@ -62,18 +69,33 @@ export default {
       return this.value.mcontent || ( Array.isArray(this.value.attachments) && this.value.attachments.length > 0 )
     },
 
+    // If session_user has purchased this message
+    hasPurchased() {
+      if (this.value.has_access) {
+        return true
+      }
+      return _.indexOf(this.value.purchased_by, u => u.id === this.session_user.id) > -1
+    },
+
   },
 
   data: () => ({
     moment: moment,
     isConfirmModalVisible: false,
     isUnableModalVisible: false,
+    loading: false,
   }),
 
   methods: {
-    // If session_user has purchased this message
-    havePurchased() {
-      return _.indexOf(this.value.purchased_by, u => u.id === this.session_user.id) > -1
+
+    reload() {
+      this.loading = true
+      this.axios.get(this.$apiRoute('chatmessages.show', {chatmessage: this.value}))
+      .then(response => {
+        this.$emit('update', response.data.data)
+      })
+      .catch(error => { eventBus.$emit('error', {error, message: this.$t('error')}) })
+      .finally( () => { this.loading = false })
     },
 
     showConfirmModal() {
@@ -86,6 +108,10 @@ export default {
 
     hideUnableModal() {
       this.isUnableModalVisible = false
+    },
+
+    onUnlock() {
+      this.reload()
     },
 
     onUnsendClicked() {
@@ -142,6 +168,7 @@ export default {
 <i18n lang="json5" scoped>
 {
   "en": {
+    "error": "An error has occurred reloading a message",
     "seen": "Seen",
     "tipTimestampTooltip": "This message contains financial transaction information",
     "unsend": {

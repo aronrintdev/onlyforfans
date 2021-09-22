@@ -33,6 +33,12 @@
             Not yet Purchased
           </span>
         </span>
+        <span v-if="!value.is_sender && value.purchase_only">
+          {{ value.price | niceCurrency }}
+          <span v-if="value.purchased_by.length > 0">
+            Purchased
+          </span>
+        </span>
       </div>
     </article>
   </section>
