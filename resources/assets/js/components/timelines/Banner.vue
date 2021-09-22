@@ -367,6 +367,7 @@ header.masthead .profile-ctrl.dropdown button {
 
     .avatar-details {
       margin-left: 56px;
+      max-width: calc(100% - 56px);
     }
   }
 }

@@ -137,6 +137,54 @@ class RestCampaignsTest extends TestCase
 
     }
 
+
+    /**
+     *  @group campaigns
+     *  @group regression
+     *  @group emojis
+     *  @group regression-base
+     */
+    public function test_can_create_discount_promotion_with_emoji_text()
+    {
+        $timeline = Timeline::where('price', '>', 0)->first();
+        $creator = $timeline->user;
+        $settings = $creator->settings;
+        $cattrs = $settings->cattrs;
+        $cattrs['subscriptions']['price_per_1_months'] = 500;
+        $creator->settings->cattrs = $cattrs;
+        $creator->save();
+
+        $EMOJI_TEXT = 'text with emoji 😘';
+
+        $payload = [
+            'type' => CampaignTypeEnum::DISCOUNT,
+            'has_new' => true,
+            'has_expired' => true,
+            'subscriber_count' => 0,
+            'offer_days' => $this->faker->numberBetween(1, 20),
+            'discount_percent' => 5,
+            'trial_days' => $this->faker->numberBetween(1, 20),
+            'message' => $EMOJI_TEXT,
+        ];
+
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('campaigns.store'), $payload);
+        $content = json_decode($response->content());
+        $response->assertStatus(201);
+        $response->assertJsonStructure([
+            'data' => [ 'type', 'active', 'has_new', 'has_expired', 'targeted_customer_group', 'subscriber_count', 'is_subscriber_count_unlimited', 'offer_days', 'discount_percent', 'trial_days', 'message', 'created_at' ],
+        ]);
+
+        $data = $content->data;
+        $this->assertTrue($data->is_subscriber_count_unlimited);
+        $this->assertTrue($data->has_new);
+        $this->assertTrue($data->has_expired);
+        $this->assertEquals($payload['offer_days'], $data->offer_days);
+        $this->assertEquals($payload['trial_days'], $data->trial_days);
+        $this->assertEquals($payload['discount_percent'], $data->discount_percent);
+        $this->assertEquals($payload['message'], $data->message);
+        $this->assertTrue($data->active);
+    }
+
     // ------------------------------
 
     protected function setUp() : void {
