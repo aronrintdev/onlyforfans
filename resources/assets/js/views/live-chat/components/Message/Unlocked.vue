@@ -4,7 +4,7 @@
       <Attachments :attachments="value.attachments" />
       <VueMarkdown :html="false" v-if="value.mcontent" class="content" :source="value.mcontent || ''" />
       <div v-if="isSentMessage && isEnableUnsend" v-b-tooltip.hover.bottom :title="$t('unsend')" class="bg-info unsend-button" @click="$emit('onUnsend')">
-        <fa-icon icon="redo" size="xs" class="text-white" />
+        <fa-icon icon="undo" size="xs" class="text-white" />
       </div>
       <div
         class="timestamp d-flex align-items-center"
@@ -108,12 +108,13 @@ export default {
       border-radius: 100%;
       right: 10px;
       bottom: 20px;
+      z-index: 1;
       cursor: pointer;
     }
     .content {
       width: auto;
       //background: rgba(218,237,255,.53);
-      border-radius: 5px;
+      border-radius: 21px;
       padding: 9px 12px;
       color: #1a1a1a;
       background: #eeeeee;

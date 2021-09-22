@@ -6,10 +6,14 @@ use Carbon\Carbon;
 use App\Models\Tip;
 use App\Rules\InEnum;
 use GuzzleHttp\Client;
+use App\Models\Campaign;
+use App\Models\Timeline;
 use Illuminate\Support\Str;
 use App\Interfaces\Tippable;
+use App\Rules\ValidCampaign;
 use Illuminate\Http\Request;
 use App\Enums\PaymentTypeEnum;
+use App\Enums\CampaignTypeEnum;
 use App\Interfaces\Purchaseable;
 use App\Interfaces\Subscribable;
 use App\Models\Financial\Account;
@@ -21,7 +25,6 @@ use App\Models\Casts\Money as MoneyCast;
 use App\Helpers\Tippable as TippableHelpers;
 use App\Helpers\Purchasable as PurchasableHelpers;
 use App\Helpers\Subscribable as SubscribableHelpers;
-use App\Models\Timeline;
 
 class SegPayController extends Controller
 {
@@ -223,6 +226,7 @@ class SegPayController extends Controller
             'type' => [ 'required', new InEnum(new PaymentTypeEnum())],
             'price' => 'required',
             'currency' => 'required',
+            'campaign' => ['uuid', 'exists:campaigns,id', new ValidCampaign() ],
         ]);
 
         // Validate Payment allowed
@@ -281,6 +285,25 @@ class SegPayController extends Controller
             if ($item instanceof Timeline) {
                 $whitesite = SegpayWebsite::urlFor($item);
             }
+
+            if ($request->has('campaign_id')) {
+                $campaign = Campaign::find($request->campaign_id);
+                if ($campaign->isValid()) {
+                    if ($campaign->type === CampaignTypeEnum::DISCOUNT) {
+                        $query['dynamicInitialAmount'] = $item->formatMoneyDecimal(
+                            $campaign->getDiscountPrice($price)
+                        );
+                    }
+                    if ($campaign->type === CampaignTypeEnum::TRIAL) {
+                        $query['dynamicInitialAmount'] = '0';
+                        $query['dynamicInitialDurationInDays'] = $campaign->trial_days;
+                    }
+
+                } else {
+                    abort(400, 'campaign is not active');
+                }
+            }
+
         }
 
         $client = new Client();

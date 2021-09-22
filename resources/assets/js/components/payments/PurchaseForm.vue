@@ -10,6 +10,16 @@
       </template>
       <LoadingOverlay :loading="processing" :text="$t('processing')" />
 
+      <DiscountDisplay
+        v-if="campaign.id && this.selectedPaymentMethod.id === 'new'"
+        :price="{
+          amount: typeof price === 'object' ? parseInt(price.amount) : price,
+          currency: typeof price === 'object' ? price.currency : currency,
+        }"
+        :campaign="campaign"
+        :display="discountDisplay"
+      />
+
       <SavedPaymentMethodList
         ref="paymentMethods"
         class="mb-1"
@@ -32,6 +42,8 @@
           :price="typeof price === 'object' ? parseInt(price.amount) : price"
           :currency="typeof price === 'object' ? price.currency : currency"
           :price-display="displayPrice"
+          :campaign="campaign"
+          :discountDisplay="discountDisplay"
           @processing="onProcessing"
           @stopProcessing="onStopProcessing"
           @success="onSuccess"
@@ -62,6 +74,8 @@ import LoadingOverlay from '@components/common/LoadingOverlay'
 import SubscriptionIFrame from './forms/SegpaySubscriptionIFrame'
 import LongRunningTransactionToast from './LongRunningTransactionToast'
 
+import DiscountDisplay from '@components/payments/DiscountDisplay'
+
 import PaymentsDisabled from './PaymentsDisabled'
 import ConfirmationCheckAnime from '@components/common/flair/ConfirmationCheckAnime'
 
@@ -69,6 +83,7 @@ export default {
   name: 'PurchaseForm',
   components: {
     ConfirmationCheckAnime,
+    DiscountDisplay,
     FormNew,
     LongRunningTransactionToast,
     PaymentConfirmation,
@@ -93,6 +108,10 @@ export default {
     type: { type: String, default: 'purchase'},
     /** Extra items to send to server such as notes for a tipped item */
     extra: { type: Object, default: () => ({})},
+
+    /** Subscription campaign */
+    campaign: { type: Object, default: () => ({}) },
+    discountDisplay: null,
 
     /** For tips sent from the messages won't emit success signal until message is received from server */
     wantsMessage: { type: Boolean, default: false },
@@ -210,17 +229,9 @@ export default {
       this.showCompleted = true
       this.$emit('completed', payload)
       setTimeout(() => {
-        switch(type) {
-          case 'purchase':
-            this.$bvModal.hide('modal-purchase-post')
-            break
-          case 'tip':
-            this.$bvModal.hide('modal-tip')
-            break
-          case 'subscribed':
-            this.$bvModal.hide('modal-follow')
-            break
-        }
+        this.$bvModal.hide('modal-purchase-post')
+        this.$bvModal.hide('modal-tip')
+        this.$bvModal.hide('modal-follow')
         this.showCompleted = false
       }, this.animationLength)
     },
@@ -235,7 +246,7 @@ export default {
           }
         })
         this.$echo.private(this.purchasesChannel).listen('ItemPurchased', e => {
-          if (e.item_id === this.value.id) {
+          if (e.item_id === this.value.id && !this.showCompleted) {
             this.processing = false
             clearTimeout(this.waiting)
             this.completeAnimate('purchase')
@@ -251,7 +262,7 @@ export default {
           }
         })
         this.$echo.private(this.purchasesChannel).listen('ItemTipped', e => {
-          if (e.item_id === this.value.id) {
+          if (e.item_id === this.value.id && !this.showCompleted) {
             this.processing = false
             clearTimeout(this.waiting)
             this.completeAnimate('tip', e)
@@ -268,7 +279,7 @@ export default {
         })
         this.$echo.private(this.purchasesChannel).listen('ItemSubscribed', e => {
           this.$log.debug('ItemSubscribed received', { e, this_item_id: this.value.id })
-          if (e.item_id === this.value.id) {
+          if (e.item_id === this.value.id && !this.showCompleted) {
             this.processing = false
             clearTimeout(this.waiting)
             this.completeAnimate('subscribed')

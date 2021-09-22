@@ -33,7 +33,7 @@ body,
 .app {
   margin: 0;
   padding: 0;
-  // overflow: hidden;
+  height: 100%;
 }
 
 body.modal-open {
@@ -42,7 +42,6 @@ body.modal-open {
 
 .app {
   position: relative;
-  min-height: 100vh;
   overflow: auto;
 }
 

@@ -525,7 +525,7 @@ export default {
         if (this.isScheduled) {
           // Message was scheduled toast notification
           this.$root.$bvToast.toast(
-            this.$t('scheduled.message', { time: this.deliverAtTimestamp }),
+            this.$t('scheduled.message', { time: moment(this.newMessageForm.deliver_at).local().format('h:mm a, MMM DD') }),
             { variant: 'primary', title: this.$t('scheduled.title') }
           )
         }
@@ -766,7 +766,7 @@ textarea.form-control {
     "pricedValidation": "Messages with a set unlock price must contain media (photo or video). Please attach and resend.",
     "scheduled": {
       "title": "Scheduled",
-      "message": "Messages has successfully been schedule to send at {time}."
+      "message": "Messages has successfully been scheduled to send at {time}."
     },
     "tipValidation": "Tip cannot be zero.",
     "validation": "Please enter a message or select files to send.",

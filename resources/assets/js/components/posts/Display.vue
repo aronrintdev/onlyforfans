@@ -340,6 +340,7 @@ export default {
         if ($(`#${this.post.id} .tag-post_desc`)[0] && $(`#${this.post.id} .tag-post_desc`)[0].scrollHeight > 24 * MAX_LINES) { // MAX_LINES = 3
           if ($(`#${this.post.id} .tag-post_desc`)[0].clientHeight < $(`#${this.post.id} .tag-post_desc`)[0].scrollHeight) {
             this.isCollapsed = 'collapsed';
+            $(`#${this.post.id} .tag-post_desc`).height(72);
           } else {
             this.isCollapsed = 'expanded';
           }

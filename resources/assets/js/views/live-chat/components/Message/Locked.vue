@@ -143,7 +143,7 @@ export default {
     .content {
       width: auto;
       background: rgba(218,237,255,.53);
-      border-radius: 5px;
+      border-radius: 21px;
       padding: 9px 12px;
       color: #1a1a1a;
     }

@@ -272,11 +272,11 @@ export default {
 <style lang="scss" scoped>
 // thread view should be full screen on mobile
 .content.thread #view-livechat.mobile {
-  height: 100vh;
-  max-height: 100vh;
+  height: 100%;
 }
 
 #view-livechat {
+  height: 100%;
   background-color: #fff;
 
   &.mobile {
@@ -285,12 +285,9 @@ export default {
     bottom: 0;
     padding-left: 0;
     padding-right: 0;
-    height: calc(100vh - 64px);
-    max-height: calc(100vh - 64px);
   }
 
   .chatthread-list {
-    height: calc(100vh - 350px);
     overflow: auto;
 
     .list-group-item.active {
@@ -302,9 +299,6 @@ export default {
       border-bottom: 1px solid rgba(138,150,163,.25);
     }
   }
-
-  height: calc(100vh - 6rem);
-  max-height: calc(100vh - 6rem);
 }
 
 </style>
