@@ -12,7 +12,7 @@
             so you can receive payments.</p>
         </section>
 
-        <section v-if="verifiedStatus==='none'">
+        <section v-if="verifiedStatus==='none' || verifiedStatus==='rejected'">
 
           <hr />
           <b-form id="form-send-verify-request" @submit.prevent>
@@ -27,7 +27,7 @@
             </b-form-row>
             <b-form-row>
               <b-form-group class="col-sm-6" label="Mobile Phone" label-for="mobile" >
-                <b-form-input id="mobile" v-model="form.mobile" required inputmode="numeric" pattern="[0-9]*" v-mask="'(###) ###-####'" />
+                <b-form-input id="mobile" v-model="form.mobile" required v-mask="'(###) ###-####'" />
               </b-form-group>
             </b-form-row>
             <!-- <b-form-row>
