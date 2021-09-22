@@ -323,12 +323,14 @@ export default {
         this.tapped += 1;
         setTimeout(async () => {
           if (this.tapped == 2) {
+            this.tapped = 0;
             await this.toggleLike();
             this.startLikeUnlikeAnime = true
             e.preventDefault();
+          } else {
+            this.tapped = 0;
           }
-          this.tapped = 0;
-        }, 500);
+        }, 300);
       } else {
         await this.toggleLike();
         this.startLikeUnlikeAnime = true
@@ -340,6 +342,7 @@ export default {
         if ($(`#${this.post.id} .tag-post_desc`)[0] && $(`#${this.post.id} .tag-post_desc`)[0].scrollHeight > 24 * MAX_LINES) { // MAX_LINES = 3
           if ($(`#${this.post.id} .tag-post_desc`)[0].clientHeight < $(`#${this.post.id} .tag-post_desc`)[0].scrollHeight) {
             this.isCollapsed = 'collapsed';
+            $(`#${this.post.id} .tag-post_desc`).height(72);
           } else {
             this.isCollapsed = 'expanded';
           }

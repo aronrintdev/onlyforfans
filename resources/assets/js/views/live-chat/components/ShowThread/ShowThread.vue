@@ -7,7 +7,7 @@
           <fa-icon :icon="['fas', 'arrow-left']" class="fa-lg" />
         </b-btn>
         <p class="m-0">
-          <AvatarWithStatus :user="participant" :thumbnail="false" />
+          <AvatarWithStatus :timeline="timeline" :user="participant" :thumbnail="false" />
         </p>
         <OptionsDropdown
           :participant="participant"
@@ -28,8 +28,6 @@
         <b-btn
           variant="link"
           class="text-nowrap"
-          v-b-tooltip:hover
-          :title="$t('tooltip.notifications')"
           @click="toggleMute"
         >
           <fa-icon
@@ -54,8 +52,6 @@
         <b-btn
           variant="link"
           class="text-nowrap"
-          v-b-tooltip:hover
-          :title="$t('tooltip.gallery')"
           @click="toggleGallery"
         >
           <fa-icon :icon="showGallery ? ['fas', 'image'] : ['far', 'image']" size="lg" class="mr-1" />

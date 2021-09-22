@@ -5,18 +5,21 @@ namespace App\Payments;
 use Exception;
 use Money\Money;
 use App\Models\Tip;
+use App\Models\Campaign;
 use App\Events\TipFailed;
 use App\Events\ItemSubscribed;
 use App\Events\PurchaseFailed;
 use Illuminate\Support\Carbon;
+use App\Enums\CampaignTypeEnum;
 use App\Interfaces\Purchaseable;
 use App\Interfaces\Subscribable;
 use App\Models\Financial\Account;
 use App\Events\SubscriptionFailed;
+use App\Http\Resources\Chatmessage;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 use App\Enums\ShareableAccessLevelEnum;
-use App\Http\Resources\Chatmessage;
 use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
 use App\Models\Financial\Exceptions\InvalidFinancialSystemException;
 
@@ -87,6 +90,8 @@ class FakedPaymentGateway implements PaymentGatewayContract
             ];
         }
 
+        Log::info('Faked Tip Processed', [ 'info' => $transactions ]);
+
         return [
             'success' => true,
             'tip' => $tip,
@@ -104,7 +109,7 @@ class FakedPaymentGateway implements PaymentGatewayContract
      * @param Money $price
      * @return array
      */
-    public function subscribe(Account $account, Subscribable $item, Money $price)
+    public function subscribe(Account $account, Subscribable $item, Money $price, Campaign $campaign = null)
     {
         $this->validateAccount($account);
 
@@ -112,6 +117,11 @@ class FakedPaymentGateway implements PaymentGatewayContract
         $subscription = $account->createSubscription($item, $price, [
             'manual_charge' => false,
         ]);
+
+        // Apply campaign setting if there is one
+        if (isset($campaign)) {
+            $subscription->applyCampaign($campaign);
+        }
 
         try {
             $transactions = $subscription->process();
@@ -151,7 +161,8 @@ class FakedPaymentGateway implements PaymentGatewayContract
      */
     private function validateAccount(Account $account)
     {
-        if (App::environment() === 'production') {
+        // if (App::environment() === 'production') {
+        if (Config::get('segpay.fake') === false) {
             throw new InvalidFinancialSystemException('Faked', $account);
         }
     }

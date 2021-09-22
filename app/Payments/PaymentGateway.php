@@ -4,6 +4,7 @@ namespace App\Payments;
 
 use Money\Money;
 use App\Models\Tip;
+use App\Models\Campaign;
 use App\Interfaces\Purchaseable;
 use App\Interfaces\Subscribable;
 use App\Models\Financial\Account;
@@ -44,7 +45,7 @@ class PaymentGateway implements PaymentGatewayContract
         }
     }
 
-    public function subscribe(Account $account, Subscribable $item, Money $price)
+    public function subscribe(Account $account, Subscribable $item, Money $price, Campaign $campaign = null)
     {
         // Validate Payment allowed
         if (!$account->owner->canMakePayments()) {
@@ -52,7 +53,7 @@ class PaymentGateway implements PaymentGatewayContract
         }
         switch ($account->system) {
             case 'segpay':
-                return (new SegpayPaymentGateway)->subscribe($account, $item, $price);
+                return (new SegpayPaymentGateway)->subscribe($account, $item, $price, $campaign);
             default:
                 throw new InvalidFinancialSystemException($account->system, $account);
         }
