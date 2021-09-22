@@ -29,7 +29,7 @@
         <slot></slot>
       </div>
 
-      <div v-else class="main OFF-px-3 pb-3" key="main">
+      <div v-else class="main OFF-px-3" key="main">
         <slot></slot>
       </div>
     </section>

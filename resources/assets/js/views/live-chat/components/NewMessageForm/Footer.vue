@@ -18,7 +18,7 @@
     </b-btn>
     <b-btn :disabled="isSending || hasPrice || hasScheduled" variant="success" class="text-nowrap" @click="$emit('addTip')">
       <fa-icon icon="dollar-sign" fixed-width />
-      <span class="mr-2">{{ hasTip ? $t('editTip') : $t('addTip') }}</span>
+      <span v-if="!mobile" class="mr-2">{{ hasTip ? $t('editTip') : $t('addTip') }}</span>
     </b-btn>
     <div class="ml-auto d-flex align-items-end" :class="{'float-right': mobile}">
       <div class="d-flex flex-column">
