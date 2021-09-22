@@ -151,7 +151,11 @@ Vue.filter('renderCampaignBlurb', function (campaign) {
   if (campaign.is_subscriber_count_unlimited) {
     str += ` \u2022 unlimited`
   } else {
-    str += ` \u2022 ${campaign.subscriber_count} left`
+    if (campaign.remaining_count > 0) {
+      str += ` \u2022 ${campaign.remaining_count} left`
+    } else {
+      str += ` \u2022 none left`
+    }
   }
   return str
 })

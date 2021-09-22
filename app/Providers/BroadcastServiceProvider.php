@@ -1,6 +1,7 @@
 <?php
 namespace App\Providers;
 
+use App\Broadcasting\CampaignChannel;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
@@ -45,6 +46,8 @@ class BroadcastServiceProvider extends ServiceProvider
         Broadcast::channel('user.status.{userId}'   , UserStatusChannel::class);
         Broadcast::channel('user.{userId}.purchases', UserPurchasesChannel::class);
         Broadcast::channel('user.{userId}.events'   , UserEventsChannel::class);
+
+        Broadcast::channel('campaign.{campaignId}', CampaignChannel::class);
 
         // private-chatthreads.{chatthreadId} ??
         Broadcast::channel('chatthreads.{chatthread}', ChatthreadChannel::class);

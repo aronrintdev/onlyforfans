@@ -7,6 +7,8 @@ use Carbon\Carbon;
 use App\Models\Tip;
 use GuzzleHttp\Client;
 use App\Models\Webhook;
+use App\Models\Campaign;
+use App\Models\Timeline;
 use App\Interfaces\Tippable;
 use App\Models\Subscription;
 use InvalidArgumentException;
@@ -19,7 +21,6 @@ use Illuminate\Support\Facades\Config;
 use App\Models\Casts\Money as MoneyCast;
 use GuzzleHttp\Exception\GuzzleException;
 use App\Models\Financial\Exceptions\AlreadyProcessingException;
-use App\Models\Timeline;
 
 class SegpayCall extends Model
 {
@@ -175,11 +176,19 @@ class SegpayCall extends Model
             $whitesite = SegpayWebsite::urlFor($subscription->subscribable);
         }
 
+        if ($subscription->initial_period) {
+            $initialAmount = $subscription->initial_price;
+            $initialDuration = $subscription->initial_interval;
+        } else {
+            $initialAmount = $price;
+            $initialDuration = 30;
+        }
+
         $query_items = [
             'eticketid' => "{$packageId}:{$pricePointId}",
-            'amount' => MoneyCast::formatMoneyDecimal($price),
+            'amount' => MoneyCast::formatMoneyDecimal($initialAmount),
             'dynamicdesc' => urlencode(Config::get('segpay.description.subscription')),
-            'dynamicInitialDurationInDays'   => 30,
+            'dynamicInitialDurationInDays'   => $initialDuration,
             'dynamicRecurringAmount'         => MoneyCast::formatMoneyDecimal($price),
             'dynamicRecurringDurationInDays' => 30,
             'OCToken' => $account->resource->token,

@@ -1,7 +1,11 @@
 <template>
   <div class="d-flex flex-column h-100 pt-3 pb-0">
-    <Navigation />
+    <Navigation
+      :enableSearch="enableSearch"
+      @onSearchIconClick="onSearchIconClick"
+    />
     <SearchAndFilter
+      :enableSearch="enableSearch"
       :filters="selectFilters"
       :search="searchQuery"
       :selectFilter="selectedFilter"
@@ -12,8 +16,9 @@
       @filterInput="value => selectedFilter = value"
       @sortByInput="value => sortBy = value"
       @setAscending="value => asc = value"
+      @updateThreadsAllRead="getChatthreads"
+      ref="childComponentRef"
     />
-    <!-- <MarkAllRead @updateThreadsAllRead="getChatthreads" /> -->
     <ThreadList
       :threads="renderedThreads"
       :loading="loading"
@@ -34,7 +39,6 @@
  */
 import Vuex from 'vuex'
 
-import MarkAllRead from './MarkAllRead'
 import Navigation from './Navigation'
 import SearchAndFilter from './SearchAndFilter'
 import ThreadList from './ThreadList'
@@ -43,7 +47,6 @@ export default {
   name: 'Sidebar',
 
   components: {
-    MarkAllRead,
     Navigation,
     SearchAndFilter,
     ThreadList,
@@ -125,6 +128,7 @@ export default {
     filters: {},
     sortBy: 'recent',
     asc: false,
+    enableSearch: false,
   }),
 
   methods: {
@@ -187,6 +191,13 @@ export default {
 
     async getQueue() {
       const response = await axios.get(route('chatmessagegroups.queue'))
+    },
+
+    onSearchIconClick() {
+      this.enableSearch = !this.enableSearch
+      if (this.enableSearch) {
+        this.searchQuery = ''
+      }
     },
   },
 

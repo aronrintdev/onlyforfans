@@ -49,7 +49,7 @@ class CampaignsController extends AppBaseController
             'has_new' => 'nullable|boolean',
             'has_expired' => 'nullable|boolean',
             'subscriber_count' => 'nullable|integer|min:0',
-            'offer_days' => 'required|integer|min:1',
+            'offer_days' => 'required|integer|min:0',
             'discount_percent' => 'nullable|integer|min:1',
             'trial_days' => 'nullable|integer|min:1',
             'message' => 'nullable|string',

@@ -41,6 +41,8 @@ use App\Models\User;
 use App\Enums\PostTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\MediafileTypeEnum;
+use App\Models\Campaign;
+use App\Rules\ValidCampaign;
 
 class TimelinesController extends AppBaseController
 {
@@ -311,6 +313,7 @@ class TimelinesController extends AppBaseController
             'account_id' => 'required|uuid',
             'amount' => 'required|numeric',
             'currency' => 'required',
+            'campaign' => ['nullable', 'uuid', 'exists:campaigns,id', new ValidCampaign()],
         ]);
 
         $price = CastsMoney::toMoney($request->amount, $request->currency);
@@ -326,6 +329,10 @@ class TimelinesController extends AppBaseController
         // Verify not resubscribing within waiting period
         if (Subscription::canResubscribe($request->user(), $timeline)) {
             abort(400, 'Too soon to resubscribe');
+        }
+
+        if ($request->has('campaign')) {
+            return $paymentGateway->subscribe($account, $timeline, $price, Campaign::find($request->campaign));
         }
 
         return $paymentGateway->subscribe($account, $timeline, $price);
