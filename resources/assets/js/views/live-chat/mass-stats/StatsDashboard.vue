@@ -237,7 +237,7 @@ export default {
 
     onUnsendClicked() {
       this.isConfirmModalVisible = false
-      axios.get(route('chatmessagegroups.unsend', { id: this.selectedId })).then(() => {
+      axios.post(route('chatmessagegroups.unsend', { id: this.selectedId })).then(() => {
         const index = this.chatmessagegroups.findIndex(cm => cm.id === this.selectedId)
         this.chatmessagegroups[index].sent_count = this.chatmessagegroups[index].read_count
         this.$forceUpdate()

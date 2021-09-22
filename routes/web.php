@@ -91,7 +91,7 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
 
     Route::get('/chatmessagegroups/queue', 'ChatmessagegroupsController@queue')->name('chatmessagegroups.queue');
-    Route::get('/chatmessagegroups/{chatmessagegroup}/unsend', 'ChatmessagegroupsController@unsend')->name('chatmessagegroups.unsend');
+    Route::post('/chatmessagegroups/{chatmessagegroup}/unsend', 'ChatmessagegroupsController@unsend')->name('chatmessagegroups.unsend');
     Route::apiResource('chatmessagegroups', 'ChatmessagegroupsController', [
         'only' => [ 'index', ],
     ]);
