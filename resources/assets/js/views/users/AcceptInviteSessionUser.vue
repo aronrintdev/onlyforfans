@@ -1,8 +1,8 @@
 <template>
-  <div class="container-xl" id="view-staff_invitations_accpet">
-    <div v-if="!isLoading">
+  <div v-if="!isLoading" class="container-xl" id="view-staff_invitations_accept">
+
       <b-card class="w-50 m-auto">
-        <b-card-text v-if="email == session_user.email">
+        <b-card-text v-if="email === session_user.email">
           <h3>Invitation from {{ inviter }}</h3>
           <p class="mt-4 mb-3"><strong>{{ inviter }}</strong> has invited you to work on their team.</p>
           <b-btn variant="primary" @click="acceptInvite" :disabled="isProcessing">
@@ -16,7 +16,7 @@
           <b-btn variant="primary" @click="switchAccount">Switch account</b-btn>
         </b-card-text>
       </b-card>
-    </div>
+
   </div>
 </template>
 
@@ -40,6 +40,14 @@ export default {
     },
   },
 
+/*
+// this is a spa/vue  route...
+https://allfans.com/staff/invitations/accept
+?token=VD3KClEUpsROXw82BZ0mimOTAQ1qa9ghqPq3axLFiIETO9tPiHOjuX5C4vPE
+&email=peter+smith@peltronic.com
+&inviter=peter
+&is_new=true
+*/
   watch: {
     session_user(value) {
       if (value) {

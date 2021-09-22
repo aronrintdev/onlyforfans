@@ -42,7 +42,7 @@ class InviteStaffManager extends Notification
             ->line('Hi '.$this->staff->invitee_fullname)
             ->line("You've been invited to become a manager of ".$this->inviter->name."'s profile.")
             ->line("To confirm, click the link below to accept the invite.")
-            ->action('Accept Invite', $this->staff->invite_url);
+            ->action('Accept Invite', $this->staff->invite_landing_url);
     }
 
     // For case where the invitee already has an AllFans account
@@ -58,7 +58,7 @@ class InviteStaffManager extends Notification
             'dtdata' => [
                 'manager_name' => $this->staff->first_name.' '.$this->staff->last_name, // invitee
                 'username' => $this->inviter->name,
-                'login_url' => $this->staff->invite_url, // %FIXME: key should be accept_url
+                'login_url' => $this->staff->invite_landing_url, // %FIXME: key should be accept_url
                 'home_url' => url('/'),
                 'referral_url' => url('/referrals'),
                 'privacy_url' => url('/privacy'),
@@ -89,7 +89,8 @@ class InviteStaffManager extends Notification
             'user_id' => $this->staff->user_id ?? null,
             'creator_id' => $this->staff->creator_id ?? null,
             'owner_id' => $this->staff->ownwer_id ?? null,
-            'invite_url' => $this->staff->invite_url,
+            'invite_landing_url' => $this->staff->invite_landing_url,
+            'invite_action_url' => $this->staff->invite_action_url,
         ];
     }
 
@@ -108,36 +109,6 @@ class InviteStaffManager extends Notification
         } else if ( in_array('App\Channels\SendgridChannel', $via) ) {
             Notification::route('App\Channels\SendgridChannel', $to)->notify(new InviteStaffManager($staff, $inviter));
         }
-
-        /*
-        $notify = new InviteStaffManager($staff, $inviter);
-
-        $via = $notify->via(null);
-        if ( in_array('database', $via) ) {
-        }
-        if ( in_array('mail', $via) ) {
-            $r = $notify->toMail(null);
-        } else if ( in_array('App\Channels\SendgridChannel', $via) ) {
-            SendgridApi::send('invite-staff-manager', [
-                'to' => [
-                    'email' => $staff->email, // invitee
-                    'name' => $staff->invitee_fullname, // invitee | display name
-                ],
-                'dtdata' => [
-                    'manager_name' => $staff->invitee_fullname,
-                    'username' => $inviter->name,
-                    'login_url' => $staff->invite_url, // %FIXME: key should be accept_url
-                    'home_url' => url('/'),
-                    'referral_url' => url('/referrals'),
-                    'privacy_url' => url('/privacy'),
-                    'manage_preferences_url' => url('/'),
-                    'unsubscribe_url' => url('/'),
-                ],
-            ]);
-        }
-
-        //dd('via', $notify->via(null));
-         */
 
     }
 

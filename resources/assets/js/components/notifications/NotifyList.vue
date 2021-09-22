@@ -70,7 +70,7 @@
           </template>
           <template v-if="n.type==='App\\Notifications\\InviteStaffManager'">
             You've been invited to become a manager of {{ n.data.actor.name }}'s profile.
-            Click <a :href="n.data.invite_url">HERE</a> to accept the invitation.
+            Click <a :href="n.data.invite_landing_url">HERE</a> to accept the invitation.
           </template>
           <template v-if="n.type==='App\\Notifications\\UserTagged'">
             tagged you in a

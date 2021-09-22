@@ -25,27 +25,36 @@ class Staff extends Model
 
     // -------------------- %%% Accessors/Mutators | Casts  ----------------------
 
-    public function getInviteUrlAttribute($value) {
+    // the 'clickable' link to accept the invite...(POST)
+    public function getInviteActionUrlAttribute($value) {
         $existing = User::where('email', $this->email)->first(); // does invitee have an account or not
-        return self::makeInviteUrl($this->owner->name, $this->email, $this->token, !$existing);
-    }
-
-    public function getInviteeFullnameAttribute($value) {
-        return $this->first_name.' '.$this->last_name;
-    }
-
-    // helper function
-    public static function makeInviteUrl(string $inviterName, string $inviteeEmail, string $token, bool $isNew=false) : string
-    {
-        //$url  = '/staff/invitations/accept';
+        $isNew = !$existing;
         $url  = route('staff.acceptInvite');
-        $url .= '?token='.$token;
-        $url .= '&email='.$inviteeEmail;
-        $url .= '&inviter='.$inviterName;
+        $url .= '?token='.$this->token;
+        $url .= '&email='.$this->email;
+        $url .= '&inviter='.$this->owner->name;
         if ($isNew) {
             $url .= '&is_new=true';
         }
         return url($url);
+    }
+
+    // the 'landing page' for the invite... (GET)
+    public function getInviteLandingUrlAttribute($value) {
+        $existing = User::where('email', $this->email)->first(); // does invitee have an account or not
+        $isNew = !$existing;
+        $url  = '/staff/invitations/accept';
+        $url .= '?token='.$this->token;
+        $url .= '&email='.$this->email;
+        $url .= '&inviter='.$this->owner->name;
+        if ($isNew) {
+            $url .= '&is_new=true';
+        }
+        return url($url);
+    }
+
+    public function getInviteeFullnameAttribute($value) {
+        return $this->first_name.' '.$this->last_name;
     }
 
     // -------------------- %%% Relationships  ----------------------
