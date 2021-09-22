@@ -41,6 +41,7 @@
           :sort-by="sortBy"
           :sort-desc="sortDesc"
           @sort-changed="sortHandler"
+          sort-icon-left
         >
           <template #cell(mcontent)="data">
             <ContentViewer :str=data.item.mcontent />
@@ -67,7 +68,7 @@
         <section v-if="mobile" class="crate-as_cards"> <!-- responsive 'table' using cards -->
           <b-card v-for="(cmg,idx) in chatmessagegroups" :key="idx" v-observe-visibility="idx===chatmessagegroups.length-1 ? visibilityChanged : false" class="px-1 py-2 mb-3" no-body>
             <b-list-group flush>
-              <b-list-group-item class="d-flex"><div class="text-muted tag-label">Date</div> <div class="ml-auto">{{ cmg.created_at | niceDateTime(false) }}</div></b-list-group-item>
+              <b-list-group-item class="d-flex"><div class="text-muted tag-label">Date</div> <div class="ml-auto">{{ cmg.created_at }}</div></b-list-group-item>
               <b-list-group-item class="d-flex"><div class="text-muted tag-label">Text</div> <div class="ml-auto" style="width: 80%;"><ContentViewer :str=cmg.mcontent /></div></b-list-group-item>
               <b-list-group-item class="d-flex"><div class="text-muted tag-label">Attachment</div>
                 <div class="ml-auto">
@@ -135,7 +136,7 @@ export default {
 
     fields() {
       return [
-        { key: 'delivered_at', label: 'Date', formatter: v => Vue.options.filters.niceDateTime(v, false), sortable: true },
+        { key: 'created_at', label: 'Date', formatter: v => Vue.options.filters.niceDateTime(v, false), sortable: true },
         { key: 'mcontent', label: 'Text', tdClass: 'tag-col-mcontent', },
         { key: 'mediafile_counts', label: 'Attachment', },
         { key: 'price', label: 'Price', formatter: v => Vue.options.filters.niceCurrency(v), sortable: true },
