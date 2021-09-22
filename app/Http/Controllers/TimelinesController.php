@@ -313,7 +313,7 @@ class TimelinesController extends AppBaseController
             'account_id' => 'required|uuid',
             'amount' => 'required|numeric',
             'currency' => 'required',
-            'campaign' => ['uuid', 'exists:campaigns,id', new ValidCampaign()],
+            'campaign' => ['nullable', 'uuid', 'exists:campaigns,id', new ValidCampaign()],
         ]);
 
         $price = CastsMoney::toMoney($request->amount, $request->currency);

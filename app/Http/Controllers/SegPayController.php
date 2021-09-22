@@ -226,7 +226,7 @@ class SegPayController extends Controller
             'type' => [ 'required', new InEnum(new PaymentTypeEnum())],
             'price' => 'required',
             'currency' => 'required',
-            'campaign' => ['uuid', 'exists:campaigns,id', new ValidCampaign() ],
+            'campaign' => ['nullable', 'uuid', 'exists:campaigns,id', new ValidCampaign() ],
         ]);
 
         // Validate Payment allowed
