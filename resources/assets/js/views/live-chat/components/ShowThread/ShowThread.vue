@@ -67,14 +67,16 @@
     </section>
     <MessageDisplay
       v-else
-      :items="searchResults === null ? chatmessages: searchResults"
+      :items="searchResults === null ? chatmessages : searchResults"
       :loading="moreLoading"
       :isLastPage="isLastPage"
       :isSearch="searchResults !== null"
       :searchQuery="searchQuery"
+      :timeline="timeline"
       key="messages"
       class="flex-fill"
       @endVisible="endVisible"
+      @updateMessage="onUpdateMessage"
     />
 
     <TypingIndicator :threadId="id" />
@@ -292,6 +294,13 @@ export default {
       this.isEndVisible = isVisible
       if (isVisible && !this.moreLoading && !this.isLastPage) {
         this.loadNextPage()
+      }
+    },
+
+    onUpdateMessage(message) {
+      if (message.id) {
+        const index = _.findIndex(this.chatmessages, [ 'id', message.id ])
+        this.$set(this.chatmessages, index, message)
       }
     },
 

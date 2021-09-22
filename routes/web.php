@@ -84,8 +84,10 @@ Route::group(['middleware' => ['auth']], function () {
     // -- chatmessages --
     Route::get('/chatmessages/search', 'ChatmessagesController@search')->name('chatmessages.search');
     Route::post('/chatmessage/{chatmessage}/media', "ChatmessagesController@attachMedia")->name('chatmessages.attachMedia');
+    Route::put('/chatmessage/{chatmessage}/purchase', 'ChatmessagesController@purchase')
+        ->name('chatmessages.purchase');
     Route::apiResource('chatmessages', 'ChatmessagesController', [
-        'only' => [ 'index', 'destroy' ],
+        'only' => [ 'index', 'show', 'destroy' ],
     ]);
 
     Route::get('/chatmessagegroups/queue', 'ChatmessagegroupsController@queue')->name('chatmessagegroups.queue');
