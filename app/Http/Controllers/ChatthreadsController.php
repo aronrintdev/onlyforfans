@@ -66,6 +66,9 @@ class ChatthreadsController extends AppBaseController
 
         $query = Chatthread::query(); // Init query
 
+        // Always two participants in chatthread
+        $query->withCount('participants')->having('participants_count', '=', 2);
+
         // If user is admin and originator or participant ids are not specified then can perform query where user is
         // not a part of the participants
         if ( true || 
