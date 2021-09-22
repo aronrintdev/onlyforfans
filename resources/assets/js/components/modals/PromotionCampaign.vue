@@ -49,7 +49,7 @@
           <section v-if="campaignPreview" class="box-campaign-blurb mt-1">
             <article v-if="campaignPreview.message" class="tag-message d-flex align-items-center">
               <div class="user-avatar">
-                <b-img rounded="circle" :src="timeline.avatar.filepath" :title="timeline.name" />
+                <b-img rounded="circle" :src="avatarImage" :title="timeline.name" />
               </div>
               <div class="text-wrap py-2 w-100">
                 <p class="mb-0">{{ campaignPreview.message }}</p>
@@ -179,6 +179,10 @@ export default {
       }
     },
 
+    avatarImage() {
+      return this.timeline.avatar ? this.timeline.avatar.filepath : '/images/default_avatar.png'
+    }
+
   }, // computed
 
 
@@ -222,7 +226,9 @@ export default {
       return origAmountInCents - discountInCents
     }
   }, // methods
-
+  mounted() {
+    console.log('-------- this timeline', this.timeline)
+  }
 }
 </script>
 
