@@ -13,6 +13,25 @@ class Chatmessagegroup extends JsonResource
         $model = ChatmessagegroupModel::find($this->id);
         //$hasAccess = $sessionUser->can('view', $model);
 
+        $purchasedCount = (function() use(&$model) {
+            $result = 0;
+            if ( $model->chatmessages && $model->chatmessages->count() ) {
+                foreach ( $model->chatmessages as $cm ) {
+                    if ( !$cm->shareables || !$cm->shareables->count() ) {
+                        continue;
+                    }
+                    $contains = $cm->shareables->contains( function($v) {
+                        $has = $v->shareable_type === 'chatmessages' && $v->access_level === 'premium';
+                        return $has;
+                    });
+                    if ($contains) {
+                        $result += 1;
+                    }
+                }
+            }
+            return $result;
+        })();
+
         $attachmentCounts = (function() {
             $result = [
                 'images_count' => 0,
@@ -51,7 +70,7 @@ class Chatmessagegroup extends JsonResource
             'attachment_counts' => $attachmentCounts,
             'sent_count' => $this->chatmessages->count(),
             'read_count' => $this->chatmessages()->where('is_read', true)->count(),
-            'purchased_count' => '??',
+            'purchased_count' => $purchasedCount,
             'scheduled_count' => 'tbd',
             'delivered_count' => 'tbd',
             'verified_count' => 'tbd',
