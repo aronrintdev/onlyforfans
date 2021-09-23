@@ -6,15 +6,17 @@ use Log;
 use Exception;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Models\Diskmediafile;
 use Illuminate\Http\Response;
 use Illuminate\Bus\Dispatcher;
 use App\Models\Traits\UsesUuid;
 use App\Jobs\ProcessSegPayWebhook;
+use App\Jobs\ProcessIdMeritWebhook;
 use App\Enums\WebhookTypeEnum as Type;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Validator;
 use App\Enums\WebhookStatusEnum as Status;
-use App\Jobs\ProcessIdMeritWebhook;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @property string $type      The type of webhook this is
@@ -160,7 +162,14 @@ class Webhook extends Model
 
     public static function receiveIdMerit(Request $request): Response
     {
-        Log::info('Received SegPay Webhook');
+        Log::info('Received IdMerit Webhook');
+
+        if ($request->has('scanImage')) {
+            // Throw away for now, is huge encrypted value that breaks our encryption
+            // $scanImage = $request->scanImage;
+            $request->request->remove('scanImage');
+        }
+
         $webhook = Webhook::create([
             'type' => Type::IDMERIT,
             'origin' => $request->getClientIp(),
@@ -173,7 +182,7 @@ class Webhook extends Model
 
         ProcessIdMeritWebhook::dispatch($webhook);
 
-        return response(); // 200 response
+        return response('ok', 200); // 200 response
     }
 
     #endregion IdMerit
