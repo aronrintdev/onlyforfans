@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Money\Money;
+use Money\Number;
 
 /**
  * Timeline Model
@@ -114,7 +115,9 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     }
     public function setPriceAttribute($value)
     {
-        $this->updateOneMonthPrice($this->castToMoney($value));
+        if ($value instanceof Money || Number::fromString($value)->isInteger()) {
+            $this->updateOneMonthPrice($this->castToMoney($value));
+        }
     }
     /* -------------------------------------------------------------------------- */
 
