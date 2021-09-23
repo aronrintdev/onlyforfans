@@ -62,15 +62,15 @@ class LoginController extends Controller
             if (empty($user)) {
                 throw new Exception( config('app.debug', false) ? '(No User)' : 'These credentials do not match our records' );
             }
-    
+
             // Password check
             if (!Hash::check($request->password, $user->password)) {
                 throw new Exception( config('app.debug', false) ? '(Bad Password)' : 'These credentials do not match our records' );
             }
-    
+
             // Email verified Check
-            if ($user->email_verified === false) {
-                throw new Exception( 'Your account email has not verified yet. Please verify your email account before continuing' );
+            if (!$user->email_verified) {
+                throw new Exception( 'Email not verified' );
             }
 
             Auth::login($user, $request->remember ? true : false);
@@ -93,7 +93,7 @@ class LoginController extends Controller
     public function mainProjectLogin(Request $request)
     {
         $session = Session::get('users.profile');
-        
+
         $data = $request->all();
         $validate = Validator::make($data, [
             'email'    => 'required',
