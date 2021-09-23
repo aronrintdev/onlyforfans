@@ -2,6 +2,9 @@
   <article class="top-bar d-flex justify-content-between align-items-center mb-3">
     <div class="h4" v-text="$t('header')" />
     <div class="d-flex">
+      <b-btn variant="link" class="clickme_to-view_mass_mgs_analytics" :to="linkMassMsgAnalytics">
+        <fa-icon :icon="['fas', 'chart-bar']" class="fa-lg" />
+      </b-btn>
       <b-btn variant="link" disabled class="clickme_to-schedule_message" @click="scheduleMessage">
         <fa-icon :icon="['far', 'calendar-alt']" class="fa-lg" />
       </b-btn>
@@ -33,6 +36,9 @@ export default {
   computed: {
     linkCreateThread() {
       return { name: 'chatthreads.create' }
+    },
+    linkMassMsgAnalytics() {
+      return { name: 'chatthreads.stats' }
     },
   },
 

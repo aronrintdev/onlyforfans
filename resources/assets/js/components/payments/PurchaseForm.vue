@@ -232,6 +232,7 @@ export default {
         this.$bvModal.hide('modal-purchase-post')
         this.$bvModal.hide('modal-tip')
         this.$bvModal.hide('modal-follow')
+        this.$bvModal.hide('modal-purchase-message')
         this.showCompleted = false
       }, this.animationLength)
     },
@@ -242,6 +243,9 @@ export default {
         this.$log.debug('Registering purchase listeners')
         this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
           if (modalId === 'modal-purchase-post' && this.processing) {
+            bvEvent.preventDefault()
+          }
+          if (modalId === 'modal-purchase-message' && this.processing) {
             bvEvent.preventDefault()
           }
         })

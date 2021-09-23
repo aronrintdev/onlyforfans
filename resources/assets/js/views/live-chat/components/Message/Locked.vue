@@ -84,13 +84,20 @@ export default {
   props: {
     isDateBreak: { type: Boolean, default: false },
     value: { type: Object, default: () => ({})},
+    timeline: { type: Object, default: () => ({}) },
   },
 
   computed: {
     ...Vuex.mapState( ['session_user'] ),
 
     images() {
-      return this.value.attachments.filter(a => a.is_image)
+      if (this.value.mediafile_counts) {
+        return this.value.mediafile_counts.images
+      }
+      if (this.value.attachments) {
+        return this.value.attachments.filter(a => a.is_image)
+      }
+      return 0
     },
 
     firstImageBlur() {
@@ -102,11 +109,23 @@ export default {
     },
 
     videos() {
-      return this.value.attachments.filter(a => a.is_video)
+      if (this.value.mediafile_counts) {
+        return this.value.mediafile_counts.videos
+      }
+      if (this.value.attachments) {
+        return this.value.attachments.filter(a => a.is_video)
+      }
+      return 0
     },
 
     audios() {
-      return this.value.attachments.filter(a => a.is_audio)
+      if (this.value.mediafile_counts) {
+        return this.value.mediafile_counts.audios
+      }
+      if (this.value.attachments) {
+        return this.value.attachments.filter(a => a.is_audio)
+      }
+      return 0
     },
 
     other() {
@@ -120,14 +139,24 @@ export default {
 
   methods: {
     onPurchase() {
-      eventBus.$emit('open-modal', { key: 'render-purchase-message', data: { message: this.value } })
+      eventBus.$emit('open-modal', { key: 'render-purchase-message', data: {
+        message: this.value,
+        timeline: this.timeline
+      } })
     },
 
   },
 
   watch: {},
 
-  created() {},
+  created() {
+    eventBus.$on('unlock-message', e => {
+      if (e.id === this.value.id) {
+        this.$emit('unlock')
+      }
+    })
+
+  },
 }
 </script>
 

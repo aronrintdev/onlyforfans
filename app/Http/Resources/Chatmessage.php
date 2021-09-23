@@ -14,8 +14,14 @@ class Chatmessage extends JsonResource
         $sessionUser = $request->user();
         if ($sessionUser) {
             $model = ChatmessageModel::find($this->id);
-            $hasAccess = $sessionUser->can('view', $model);
             $isSender = $this->sender_id === $sessionUser->id;
+            if ($isSender) {
+                $hasAccess = true;
+            } else if ( $this->purchase_only ) {
+                $hasAccess = $model->checkAccess($sessionUser);
+            } else {
+                $hasAccess = $sessionUser->can('view', $model);
+            }
         } else {
             $hasAccess = false;
             $isSender = false;
@@ -55,7 +61,7 @@ class Chatmessage extends JsonResource
             'is_delivered' => $this->is_delivered,
             'is_read' => $this->is_read,
             'is_flagged' => $this->is_flagged,
-            'attachments' => $attachments->all(),
+            'attachments' => $hasAccess ? $attachments->all() : [], // Only send attachments is user has access
             'mediafile_counts' => [
                 'images' => $this->mediafiles->where('is_image', true)->count(),
                 'videos' => $this->mediafiles->where('is_video', true)->count(),

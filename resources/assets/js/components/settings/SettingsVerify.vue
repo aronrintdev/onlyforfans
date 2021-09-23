@@ -6,13 +6,13 @@
         <section>
           <p v-if="verifiedStatus==='none'">Please provide your full legal name and a mobile phone number. You will receive a verification text from the "ID Merit" Service. Follow the instructions and once complete check this page again to review your status.</p>
           <p v-else-if="verifiedStatus==='pending'">Your identity verification request was successfully submitted and is pending review</p>
-          <p v-else-if="verifiedStatus==='rejected'">Unfortunately we could't successfully complete the identity verification process. Please contact support.</p>
+          <p v-else-if="verifiedStatus==='rejected'">Unfortunately we could't successfully complete the identity verification process. Please contact support, or try again below.</p>
           <p v-else-if="verifiedStatus==='verified'">Congratulations! You are now verified. Please complete your sign-up by 
             <router-link :to="{ name: 'settings.banking' }">adding a bank account</router-link> 
             so you can receive payments.</p>
         </section>
 
-        <section v-if="verifiedStatus==='none'">
+        <section v-if="verifiedStatus==='none' || verifiedStatus==='rejected'">
 
           <hr />
           <b-form id="form-send-verify-request" @submit.prevent>
@@ -27,7 +27,7 @@
             </b-form-row>
             <b-form-row>
               <b-form-group class="col-sm-6" label="Mobile Phone" label-for="mobile" >
-                <b-form-input id="mobile" v-model="form.mobile" required inputmode="numeric" pattern="[0-9]*" v-mask="'(###) ###-####'" />
+                <b-form-input id="mobile" v-model="form.mobile" required v-mask="'(###) ###-####'" />
               </b-form-group>
             </b-form-row>
             <!-- <b-form-row>
