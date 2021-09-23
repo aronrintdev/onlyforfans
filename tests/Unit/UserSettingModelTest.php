@@ -37,32 +37,6 @@ class UserSettingModelTest extends TestCase
      * @group regression
      * @group regression-base
      */
-    // %FIXME %ERIK : deprecate this once we move sub price out of settings
-    public function test_can_set_subscription_price()
-    {
-        $timeline = Timeline::has('posts','>=',1)->first(); 
-        $user = $timeline->user;
-        $userSettings = $user->settings;
-        $userSettingsOrig = $userSettings;
-
-        $group = 'subscriptions';
-        $payload = [
-            'price_per_1_months' => 3000, // in cents
-        ];
-        $result = $userSettings->setValues($group, $payload);
-
-        $userSettings->refresh();
-        $this->assertArrayHasKey('subscriptions', $userSettings->cattrs);
-        $this->assertArrayHasKey('price_per_1_months', $userSettings->cattrs['subscriptions']);
-        $this->assertEquals($payload['price_per_1_months'], $userSettings->cattrs['subscriptions']['price_per_1_months']);
-        //dd($userSettingsOrig->toArray(), $userSettings->toArray());
-    }
-
-    /**
-     * @group settings-model
-     * @group regression
-     * @group regression-base
-     */
     public function test_can_enable_and_disable_notification_settings()
     {
         $timeline = Timeline::has('posts','>=',1)->first(); 
