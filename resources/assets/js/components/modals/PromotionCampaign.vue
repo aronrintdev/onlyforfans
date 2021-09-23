@@ -62,8 +62,8 @@
 
         <!-- Details -->
         <div class="m-0">
-            Original Price {{ timeline.userstats.display_prices_in_cents.subscribe_1_month | niceCurrency }}
-            - Discounted to {{ applyDiscount(timeline.userstats.display_prices_in_cents.subscribe_1_month, discountPercent) | niceCurrency }}
+            Original Price {{ timeline.userstats.display_prices['1_month'] | niceCurrency }}
+            - Discounted to {{ applyDiscount(timeline.userstats.display_prices['1_month'], discountPercent) | niceCurrency }}
         </div>
 
       </b-card-body>
@@ -148,7 +148,7 @@ export default {
     discountPercentOptions() {
       const options = []
       for ( let i = 5 ; i <= 95 ; i+= 5 ) {
-        const discounted = this.applyDiscount(this.timeline.userstats.display_prices_in_cents.subscribe_1_month, i)
+        const discounted = this.applyDiscount(this.timeline.userstats.prices['1_month'], i)
         if (discounted >= 300) { // $3.00
           options.push({ text: `${i}% discount`, value: i })
         }

@@ -871,16 +871,46 @@ class RestTimelinesTest extends TestCase
         $creator = $timeline->user;
 
         $payload = [
-            'amount_in_cents' => $this->faker->numberBetween(1, 20) * 500, // in cents
+            '1_month' => [
+                'amount' => $this->faker->numberBetween(300, 10000),
+                'currency' => 'USD'
+            ],
         ];
         $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('timelines.setSubscriptionPrice', ['timeline' => $timeline->id]), $payload);
         $response->assertStatus(200);
         $content = json_decode($response->content());
+        $this->assertEquals($payload['1_month']['amount'], $content->data->userstats->prices->{'1_month'}->amount);
+    }
 
-        $userSettings = UserSetting::where('user_id', $creator->id)->firstOrFail();
-        $this->assertArrayHasKey('subscriptions', $userSettings->cattrs);
-        $this->assertArrayHasKey('price_per_1_months', $userSettings->cattrs['subscriptions']);
-        $this->assertEquals($payload['amount_in_cents'], $userSettings->cattrs['subscriptions']['price_per_1_months']);
+    /**
+     *  @group timelines
+     *  @group regression
+     *  @group regression-base
+     */
+    public function test_can_set_follow_for_free()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->where('is_follow_for_free', false)->first(); // includes subscribers
+        $creator = $timeline->user;
+
+        $payload = [
+            'is_follow_for_free' => 1,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('timelines.setSubscriptionPrice', ['timeline' => $timeline->id]), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertEquals($payload['is_follow_for_free'], $content->data->is_follow_for_free);
+        $timeline->refresh();
+        $this->assertNotFalse($timeline->is_follow_for_free);
+
+        $payload = [
+            'is_follow_for_free' => 0,
+        ];
+        $response = $this->actingAs($creator)->ajaxJSON('PATCH', route('timelines.setSubscriptionPrice', ['timeline' => $timeline->id]), $payload);
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $this->assertEquals($payload['is_follow_for_free'], $content->data->is_follow_for_free);
+        $timeline->refresh();
+        $this->assertNotTrue($timeline->is_follow_for_free);
     }
 
     // ------------------------------

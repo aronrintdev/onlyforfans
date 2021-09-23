@@ -12,18 +12,21 @@
       >
         <b-form-input
           ref="price-input"
-          :class="{ 'limit-width': limitWidth }"
+          class="position-relative"
+          :class="{ 'limit-width': limitWidth, 'clearable': clearable }"
           v-model="price"
           v-mask="currencyMask"
           :state="valid"
           inputmode="decimal"
-          :placeholder="placeholder"
+          :placeholder="showPlaceholder ? placeholder : null"
           :autofocus="autofocus"
+          :disabled="disabled"
           @focus="onFocus"
           @blur="onBlur"
           @wheel.prevent="onMousewheel"
           @keypress.enter="doBlur"
         />
+        <FormInputClearButton v-if="clearable && price !== ''" @clear="onClear" />
         <slot name="append"></slot>
       </b-input-group>
     </b-form-group>
@@ -50,30 +53,35 @@ import _ from 'lodash'
 import createNumberMask from 'text-mask-addons/dist/createNumberMask'
 import currencyCodes from 'currency-codes'
 import PriceSelectorSlider from '@components/common/PriceSelectorSlider'
+import FormInputClearButton from '@components/forms/elements/FormInputClearButton'
 
 export default {
   name: 'PriceSelector',
 
   components: {
     PriceSelectorSlider,
+    FormInputClearButton,
   },
 
   props: {
     /** v-model: price as integer */
-    value:      { type: Number },
-    min:        { type: Number, default: 300 },
-    max:        { type: Number, default: 10000 },
-    default:    { type: Number, default: 300 },
-    showSlider: { type: Boolean, default: false },
-    interval:   { type: Number, default: 100 },
-    minorMark:  { type: Number, default: 500 },
-    majorMark:  { type: Number, default: 1000 },
-    currency:   { type: String, default: 'USD' },
-    label:      { type: String },
-    autofocus:  { type: Boolean, default: false },
-    limitWidth: { type: Boolean, default: true },
-    horizontal: { type: Boolean, default: true },
-    noBottomMargin: { type: Boolean, default: false },
+    value:           { type: [Number, String] },
+    min:             { type: Number, default: 300 },   // Default $3
+    max:             { type: Number, default: 10000 }, // Default $100
+    default:         { type: Number, default: 300 },   // Default $3
+    showPlaceholder: { type: Boolean, default: true },
+    showSlider:      { type: Boolean, default: false },
+    interval:        { type: Number, default: 100 },
+    minorMark:       { type: Number, default: 500 },
+    majorMark:       { type: Number, default: 1000 },
+    currency:        { type: String, default: 'USD' },
+    label:           { type: String },
+    autofocus:       { type: Boolean, default: false },
+    limitWidth:      { type: Boolean, default: true },
+    horizontal:      { type: Boolean, default: true },
+    noBottomMargin:  { type: Boolean, default: false },
+    disabled:        { type: Boolean, default: false },
+    clearable:       { type: Boolean, default: false },
   },
 
   computed: {
@@ -124,6 +132,11 @@ export default {
       if (soft && this.valid === null) {
         return true
       }
+      if ((this.price === '' || this.$parseNumber(this.price) === 0) && this.clearable) {
+        this.valid = null
+        return true
+      }
+
       const value = this.price !== ''
         ? typeof this.price === 'string'
           ? Math.round(this.$parseNumber(this.price) * this.currencyModifier)
@@ -142,6 +155,7 @@ export default {
       this.valid = null
       return true
     },
+
     onInput(value) {
       this.validate(true)
       if (value !== '') {
@@ -150,25 +164,45 @@ export default {
         this.$emit('input', 0)
       }
     },
+
     onSliderChange(value) {
       this.price = this.numberFormatter.format(value / this.currencyModifier)
       this.validate()
       this.$emit('input', Math.round(value))
     },
+
     onFocus(e) {
       this.focus = true
-      if (this.price === '0') {
+      if (this.$parseNumber(this.price) === 0) {
         this.price = ''
       }
     },
+
     onBlur(e) {
       if (this.price === '') {
-        this.price = this.formatNumber(this.default)
+        if (!this.clearable) {
+          this.price = this.formatNumber(this.default)
+        }
+      }
+      if (this.clearable && this.$parseNumber(this.price) === 0 || this.price === '') {
+        this.price = ''
+        this.validate()
+        this.$emit('input', 0)
+        return
       }
       this.focus = false
-      this.price = this.numberFormatter.format(this.price)
+      this.price = this.numberFormatter.format(this.$parseNumber(this.price))
       this.validate()
       this.$emit('input', Math.round(this.$parseNumber(this.price) * this.currencyModifier))
+    },
+
+    onClear() {
+      this.$emit('input', 0)
+      this.$nextTick(() => {
+        // Needed due to timing issue with thousands separators
+        this.$emit('input', 0)
+        this.price = ''
+      })
     },
 
     onMousewheel(e) {
@@ -206,10 +240,19 @@ export default {
 
   watch: {
     price(value) {
+      if (this.clearable && value === '') {
+        this.validate()
+        this.$emit('input', 0)
+        return
+      }
       this.onInput(value)
     },
     value(value) {
       if (!this.focus) {
+        if (this.clearable && this.$parseNumber(value) === 0) {
+          this.price = ''
+          return
+        }
         this.price = this.formatNumber(value)
       }
     },
@@ -220,16 +263,12 @@ export default {
 
   mounted() {
     if (this.value < this.min ) {
-      this.$emit('input', this.min)
+      if (!this.clearable) {
+        this.$emit('input', this.min)
+      }
     } else {
       this.price = this.formatNumber(this.value)
     }
-    // Not Needed use vue bootstrap b-form-input autofocus property
-    // if (this.autofocus) {
-    //   setTimeout(() => {
-    //     this.$refs['price-input'].focus()
-    //   }, 500);
-    // }
   }
 
 }
@@ -250,7 +289,8 @@ export default {
   "en": {
     "label": "Price",
     "minError": "{label} cannot be lower than {price}",
-    "maxError": "{label} cannot be higher than {price}"
+    "maxError": "{label} cannot be higher than {price}",
+    "clear": "Clear"
   }
 }
 </i18n>

@@ -34,11 +34,11 @@ use Illuminate\Database\Eloquent\Builder;
  * @property User $creator
  * @property Collection $subscriptions
  *
- * @method Builder forTimeline(Timeline $timeline)
- * @method Builder isActive()
- * @method Builder hasExpired()
- * @method Builder hasNotExpired()
- * @method Builder hasRemaining()
+ * @method static static|Builder forTimeline(Timeline $timeline)
+ * @method static static|Builder isActive()
+ * @method static static|Builder hasExpired()
+ * @method static static|Builder hasNotExpired()
+ * @method static static|Builder hasRemaining()
  *
  * @package App\Models
  */

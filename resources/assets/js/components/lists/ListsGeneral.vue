@@ -188,7 +188,6 @@ export default {
         price_per_3_months: null,
         price_per_6_months: null,
         price_per_12_months: null,
-        referral_rewards: '',
       },
     },
     formLocalization: {

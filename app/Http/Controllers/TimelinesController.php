@@ -6,43 +6,45 @@ use Auth;
 use Exception;
 use Throwable;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Validation\UnauthorizedException;
-
+use Money\Money;
 use Carbon\Carbon;
-
-use App\Payments\PaymentGateway;
-
-use App\Notifications\TimelineFollowed;
-use App\Notifications\TipReceived;
-//use App\Notifications\TimelineSubscribed;
-
-use App\Http\Resources\PostCollection;
-use App\Http\Resources\TimelineCollection;
-use App\Http\Resources\MediafileCollection;
-use App\Http\Resources\Timeline as TimelineResource;
-
-use App\Models\Financial\Account;
-use App\Models\Casts\Money as CastsMoney;
-use App\Models\Financial\SegpayCall;
-use App\Models\Mediafile;
-use App\Models\Mycontact;
-use App\Models\Post;
-use App\Models\Setting;
-use App\Models\Storyqueue;
-use App\Models\Subscription;
-use App\Models\Timeline;
 use App\Models\Tip;
+use Money\Currency;
+use App\Models\Post;
+
 use App\Models\User;
 
+use App\Models\Setting;
+
+use App\Models\Campaign;
+use App\Models\Timeline;
+//use App\Notifications\TimelineSubscribed;
+
+use App\Models\Mediafile;
+use App\Models\Mycontact;
+use App\Models\Storyqueue;
 use App\Enums\PostTypeEnum;
+
+use App\Models\Subscription;
+use App\Rules\ValidCampaign;
+use Illuminate\Http\Request;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\MediafileTypeEnum;
-use App\Models\Campaign;
-use App\Rules\ValidCampaign;
+use App\Payments\PaymentGateway;
+use App\Models\Financial\Account;
+use App\Notifications\TipReceived;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use App\Models\Financial\SegpayCall;
+use App\Http\Resources\PostCollection;
+
+use Illuminate\Support\Facades\Config;
+use App\Notifications\TimelineFollowed;
+use App\Models\Casts\Money as CastsMoney;
+use App\Http\Resources\TimelineCollection;
+use App\Http\Resources\MediafileCollection;
+use Illuminate\Validation\UnauthorizedException;
+use App\Http\Resources\Timeline as TimelineResource;
 
 class TimelinesController extends AppBaseController
 {
@@ -490,13 +492,20 @@ class TimelinesController extends AppBaseController
     {
         $this->authorize('update', $timeline);
         $request->validate([
-            'amount_in_cents' => 'required|numeric',
+            '1_month' => 'nullable|array',
+            'is_follow_for_free' => 'nullable|boolean',
         ]);
-        $userSettings = $request->user()->settings;
-        $group = 'subscriptions';
-        $result = $userSettings->setValues('subscriptions', [
-            'price_per_1_months' => $request->amount_in_cents,
-        ]);
+
+        if ($request->has('is_follow_for_free')) {
+            $timeline->is_follow_for_free = $request->boolean('is_follow_for_free');
+            $timeline->save();
+        }
+
+        if ($request->has('1_month')) {
+            $price = new Money($request['1_month']['amount'], new Currency($request['1_month']['currency']));
+            $timeline->updateOneMonthPrice($price);
+        }
+
         $timeline->refresh();
         return new TimelineResource($timeline);
     }
