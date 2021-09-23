@@ -466,7 +466,6 @@ class RestSettingTest extends TestCase
                 'subscribe_price_3_month' => null,
                 'subscribe_price_6_month' => null,
                 'subscribe_price_year' => null,
-                'referral-rewards' =>  'disabled',
                 '_token' => csrf_token()
             ]);
 
@@ -479,31 +478,6 @@ class RestSettingTest extends TestCase
             'subscribe_price_3_month' => 50.00,
             'subscribe_price_6_month' => null,
             'subscribe_price_year' => null,
-            'referral-rewards' =>  'disabled',
-            '_token' => csrf_token()
-        ]);
-
-        $response->assertStatus(302);
-    }
-
-    /**
-     *  @group OFF-settings
-     *  @group OFF-regression
-     */
-    public function test_can_enable_referral_rewards()
-    {
-
-        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
-        $creator = $timeline->user;
-
-        $response = $this->actingAs($creator)
-        ->json('POST', '/'.$creator->username.'/settings/subscription', [
-            'subscribe_price_month' => null,
-            'is_follow_for_free' => 'on',
-            'subscribe_price_3_month' => 50.00,
-            'subscribe_price_6_month' => null,
-            'subscribe_price_year' => null,
-            'referral-rewards' =>  '1-free-month',
             '_token' => csrf_token()
         ]);
 
@@ -528,7 +502,6 @@ class RestSettingTest extends TestCase
             'subscribe_price_3_month' => 50.00,
             'subscribe_price_6_month' => null,
             'subscribe_price_year' => null,
-            'referral-rewards' =>  '1-free-month',
             '_token' => csrf_token()
         ]);
         $response->assertStatus(302);
@@ -540,7 +513,6 @@ class RestSettingTest extends TestCase
             'subscribe_price_3_month' => 50.00,
             'subscribe_price_6_month' => null,
             'subscribe_price_year' => null,
-            'referral-rewards' =>  '1-free-month',
             '_token' => csrf_token()
         ]);
 
