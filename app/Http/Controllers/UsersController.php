@@ -172,11 +172,16 @@ class UsersController extends AppBaseController
 
             // handle fields that reside in [timelines]
             $timeline = $user->timeline;
-            $timeline->about = $request->about;
-            $timeline->fill($request->only([
-                'name',
-            ]));
+            if ($request->has('about')) {
+                $timeline->about = $request->about;
+            }
+            if ($request->has('name')) {
+                $timeline->fill($request->only([
+                    'name',
+                ]));
+            }
             $timeline->save();
+
 
             $cattrsFields = [
                 'blocked',
