@@ -7,6 +7,7 @@ use Money\Money;
 use App\Models\Tip;
 use App\Models\Campaign;
 use App\Events\TipFailed;
+use App\Events\ItemPurchased;
 use App\Events\ItemSubscribed;
 use App\Events\PurchaseFailed;
 use Illuminate\Support\Carbon;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
 use App\Enums\ShareableAccessLevelEnum;
+use App\Events\ItemTipped;
 use App\Models\Financial\Exceptions\Account\IncorrectTypeException;
 use App\Models\Financial\Exceptions\InvalidFinancialSystemException;
 
@@ -81,6 +83,7 @@ class FakedPaymentGateway implements PaymentGatewayContract
 
         try {
             $transactions = $tip->process(true, ['account_id' => $account->id]);
+
         } catch (Exception $e) {
             Log::warning('Tip Failed to process', ['e' => $e->__toString()]);
             TipFailed::dispatch($tip, $account);
@@ -125,7 +128,7 @@ class FakedPaymentGateway implements PaymentGatewayContract
 
         try {
             $transactions = $subscription->process();
-            ItemSubscribed::dispatch($item, $account->owner);
+            // ItemSubscribed::dispatch($item, $account->owner); // Was issue with popping two messages
         } catch (Exception $e) {
             Log::warning('Subscription Failed to be created', ['e' => $e->__toString()]);
             SubscriptionFailed::dispatch($item, $account);

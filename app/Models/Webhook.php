@@ -14,6 +14,7 @@ use App\Enums\WebhookTypeEnum as Type;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Validator;
 use App\Enums\WebhookStatusEnum as Status;
+use App\Jobs\ProcessIdMeritWebhook;
 
 /**
  * @property string $type      The type of webhook this is
@@ -153,6 +154,31 @@ class Webhook extends Model
     }
 
     #endregion SegPay
+
+    /* --------------------------------- IdMerit -------------------------------- */
+    #region IdMerit
+
+    public static function receiveIdMerit(Request $request): Response
+    {
+        Log::info('Received SegPay Webhook');
+        $webhook = Webhook::create([
+            'type' => Type::IDMERIT,
+            'origin' => $request->getClientIp(),
+            'headers' => $request->headers->all(),
+            'verified' => false,
+            'body' => $request->all(),
+            'notes' => [],
+            'status' => Status::UNHANDLED,
+        ]);
+
+        ProcessIdMeritWebhook::dispatch($webhook);
+
+        return response(); // 200 response
+    }
+
+    #endregion IdMerit
+    /* -------------------------------------------------------------------------- */
+
 
     /* ------------------------------- Pusher ------------------------------- */
     #region Pusher

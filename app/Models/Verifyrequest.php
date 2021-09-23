@@ -3,16 +3,21 @@ namespace App\Models;
 
 use DB;
 use Exception;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
 use Carbon\Carbon;
 use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Collection;
 
-use App\Apis\Idmerit\Api as IdMeritApi;
-use App\Enums\VerifyServiceTypeEnum;
 use App\Enums\VerifyStatusTypeEnum;
+use Illuminate\Support\Facades\Log;
+
+use Illuminate\Support\Facades\URL;
+use App\Enums\VerifyServiceTypeEnum;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Config;
+use App\Apis\Idmerit\Api as IdMeritApi;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Notifications\IdentityVerificationRejected;
+use App\Notifications\IdentityVerificationVerified;
 
 class Verifyrequest extends Model
 {
@@ -67,7 +72,12 @@ class Verifyrequest extends Model
             if ( $pending->count() > 0 ) {
                 throw new Exception('verifyUser() - User has verification request currently pending :', $pending[0]->id);
             }
-    
+
+            // Limit number of verification attempts a user can try
+            if (Verifyrequest::where('requester_id', $userId)->count() > Config::get('verification.maxAttempts', 3)) {
+                throw new Exception('User has reached max number of verification requests.');
+            }
+
             $vr = Verifyrequest::create([
                 'requester_id' => $userId,
                 'vservice' => VerifyServiceTypeEnum::IDMERIT,
@@ -79,7 +89,7 @@ class Verifyrequest extends Model
 	            'country' => $attrs['country'] ?? null, // 'LK',
 	            'dateOfBirth' => $attrs['dob'] ?? null, // '19901231',
 	            'requestID' => $vr->guid ?? $vr->id,
-	            'callbackURL' => null,
+	            'callbackURL' => url((route('webhook.receive.id-merit'))), // URL to webhook receive endpoint
 	            //'callbackURL': 'https://devapp.idmvalidate.com/verify/endpoint/success'
             ];
     
@@ -189,9 +199,11 @@ class Verifyrequest extends Model
             switch ( $json['status'] ?? null ) {
             case 'verified':
                 $vr->vstatus =  VerifyStatusTypeEnum::VERIFIED;
+                $vr->requester->notify(new IdentityVerificationVerified($vr, $vr->requester));
                 break;
             case 'failed':
                 $vr->vstatus =  VerifyStatusTypeEnum::REJECTED;
+                $vr->requester->notify(new IdentityVerificationRejected($vr, $vr->requester));
                 break;
             case 'in_progress':
                 //$vr->vstatus =  VerifyStatusTypeEnum::PENDING; // no change
@@ -207,7 +219,7 @@ class Verifyrequest extends Model
             Log::error( json_encode([
                 'src' => 'App/Models/Verifyreqeust::checkStatusByGUID()',
                 'message' => $e->getMessage(),
-                'userId' => $userId,
+                // 'userId' => $userId,
                 'userAttrs' => $userAttrs ?? 'not-set',
                 'json' => $json || [],
             ]) );
