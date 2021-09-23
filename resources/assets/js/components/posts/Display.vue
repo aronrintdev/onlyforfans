@@ -352,6 +352,11 @@ export default {
 
     changeCollapsable() {
       this.isCollapsed = this.isCollapsed == 'expanded' ? 'collapsed' : 'expanded';
+      if (this.isCollapsed == 'collapsed') {
+        $(`#${this.post.id} .tag-post_desc`).height(72);
+      } else {
+        $(`#${this.post.id} .tag-post_desc`).height('auto');
+      }
     }
   },
 
