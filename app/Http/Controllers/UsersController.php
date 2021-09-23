@@ -21,7 +21,6 @@ use App\Http\Resources\User as UserResource;
 use App\Http\Resources\UserCollection;
 use App\Models\User;
 use App\Models\UserSetting;
-use App\Models\Country;
 use App\Models\Timeline;
 use App\Rules\MatchOldPassword;
 use App\Models\Diskmediafile;
@@ -372,15 +371,31 @@ class UsersController extends AppBaseController
             return [];
         }
 
-        $collection = User::where( function($q1) use($term) {
-                         //$q1->where('first_name', 'like', $term.'%')->orWhere('last_name', 'like', $term.'%');
-                         $q1->where('email', 'like', $term.'%');
-                      })
-                      //->where('estatus', EmployeeStatusEnum::ACTIVE) // active users only
-                      ->get();
-
         //return \Response::json([ 'collection'=> $collection, ]);
         $field = $request->has('field') ? $request->field : null;
+
+        if ($field == 'slug') {
+            $collection = Timeline::where( function($q1) use($term) {
+                //$q1->where('first_name', 'like', $term.'%')->orWhere('last_name', 'like', $term.'%');
+                $q1->where('slug', 'like', $term.'%');
+             })
+             //->where('estatus', EmployeeStatusEnum::ACTIVE) // active users only
+             ->get();
+             return response()->json( $collection->map( function($item,$key) {
+                $attrs = [
+                    'id' => $item->id,
+                    'label' => $item->slug,
+                ];
+                return $attrs;
+             }) );
+        }
+
+        $collection = User::where( function($q1) use($term) {
+            //$q1->where('first_name', 'like', $term.'%')->orWhere('last_name', 'like', $term.'%');
+            $q1->where('email', 'like', $term.'%');
+         })
+         //->where('estatus', EmployeeStatusEnum::ACTIVE) // active users only
+         ->get();
 
         return response()->json( $collection->map( function($item,$key) use($field) {
             $attrs = [
