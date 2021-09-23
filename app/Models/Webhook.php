@@ -175,7 +175,7 @@ class Webhook extends Model
             'origin' => $request->getClientIp(),
             'headers' => $request->headers->all(),
             'verified' => false,
-            'body' => $request->all(),
+            'body' => $request->all() ?? [],
             'notes' => [],
             'status' => Status::UNHANDLED,
         ]);
