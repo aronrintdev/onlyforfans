@@ -34,4 +34,8 @@ class WebhooksController extends Controller
     public function receiveSegpay(Request $request) {
         return Webhook::receiveSegPay($request);
     }
+
+    public function receiveIdMerit(Request $request) {
+        return Webhook::receiveIdMerit($request);
+    }
 }
