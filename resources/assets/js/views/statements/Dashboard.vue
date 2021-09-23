@@ -1,7 +1,11 @@
 <template>
   <div class="w-100">
     <!-- Mobile View -->
-    <WithSidebar v-if="mobile" :focusMain="$route.name !== 'statements.dashboard'" @back="$router.push({name: 'statements.dashboard'})">
+    <WithSidebar
+      v-if="mobile"
+      :focusMain="$route.name !== 'statements.dashboard'"
+      @back="$router.push({name: 'statements.dashboard'})"
+    >
       <template #sidebar>
         <TopEarners class="mb-3" />
         <Balance class="mb-3" />

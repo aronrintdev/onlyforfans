@@ -1,6 +1,8 @@
 <template>
   <div>
-    Chargebacks
+    <div v-if="empty" class="d-flex align-items-center justify-content-center py-5">
+      <div class="h4">{{ $t('emptyMessage') }}</div>
+    </div>
   </div>
 </template>
 
@@ -8,6 +10,7 @@
 /**
  * resources/assets/js/components/statements/Chargebacks/Chargebacks.vue
  */
+import _ from 'lodash'
 import Vuex from 'vuex'
 
 export default {
@@ -17,9 +20,15 @@ export default {
 
   props: {},
 
-  computed: {},
+  computed: {
+    empty() {
+      return _.isEmpty(this.chargebacks)
+    }
+  },
 
-  data: () => ({}),
+  data: () => ({
+    chargebacks: []
+  }),
 
   methods: {},
 
@@ -33,6 +42,8 @@ export default {
 
 <i18n lang="json5" scoped>
 {
-  "en": {}
+  "en": {
+    "emptyMessage": "You have no chargebacks on file"
+  }
 }
 </i18n>
