@@ -19,23 +19,26 @@ class CreateSubscriptionPricesTable extends Migration
      */
     public function up()
     {
-        Schema::create('subscription_prices', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuidMorphs('subscribeable');
-            $table->bigInteger('price');
-            $table->string('currency', 3);
-            $table->string('period');
-            $table->integer('period_interval');
-            $table->json('custom_attributes')->nullable();
-            $table->timestamp('disabled_at')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
-        });
+        if (!Schema::hasTable('subscriptions_prices')) {
+            Schema::create('subscription_prices', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->uuidMorphs('subscribeable');
+                $table->bigInteger('price');
+                $table->string('currency', 3);
+                $table->string('period');
+                $table->integer('period_interval');
+                $table->json('custom_attributes')->nullable();
+                $table->timestamp('disabled_at')->nullable();
+                $table->timestamps();
+                $table->softDeletes();
+            });
+        }
 
         // Transfer over old values
         // From timeline price first
         Timeline::where('price', '>', 0)->get()->each(function($timeline) {
-            $timeline->updateOneMonthPrice($timeline->price);
+            $price = Money::USD(intval($timeline->price));
+            $timeline->updateOneMonthPrice($price);
         });
 
         // Then attempt from user_setting
