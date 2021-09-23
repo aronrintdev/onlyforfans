@@ -162,9 +162,11 @@ class UsersTableSeeder extends Seeder
             $timeline->avatar_id = $avatar->id ?? null;
             $timeline->cover_id = $cover->id ?? null;
             $timeline->is_follow_for_free = $isFollowForFree;
-            $isFree = $isFollowForFree ? false :
-            $timeline->setOneMonthPrice($timeline->toMoney($this->faker->numberBetween(300, 10000)));
-            $timeline->price = $isFollowForFree ? 0.00 : $this->faker->numberBetween(300, 10000);
+            $isFree = $isFollowForFree ? false : $this->faker->numberBetween(0, 1);
+            if (!$isFree) {
+                $timeline->updateOneMonthPrice($timeline->castToMoney($this->faker->numberBetween(300, 10000)));
+            }
+            // $timeline->price = $isFollowForFree ? 0.00 : $this->faker->numberBetween(300, 10000);
             $timeline->save(); // update the timeline
 
             $isFollowForFree = !$isFollowForFree; // toggle so we get at least one of each

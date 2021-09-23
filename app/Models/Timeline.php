@@ -284,12 +284,20 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     /* ---------------------------- Subscribable ---------------------------- */
     #region Subscribable
 
-    public function setPrice(Money $amount, string $period, int $period_interval): SubscriptionPrice
+    public function setPrice(
+        Money $amount,
+        string $period = SubscriptionPeriodEnum::DAILY,
+        int $period_interval = 30
+    ): SubscriptionPrice
     {
         return SubscriptionPrice::updatePrice($this, $amount, $period, $period_interval);
     }
 
-    public function verifyPrice($amount, string $period = SubscriptionPeriodEnum::DAILY, int $period_interval = 30): bool
+    public function verifyPrice(
+        $amount,
+        string $period = SubscriptionPeriodEnum::DAILY,
+        int $period_interval = 30
+    ): bool
     {
         $amount = $this->asMoney($amount);
 

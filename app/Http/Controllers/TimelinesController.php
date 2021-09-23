@@ -492,8 +492,8 @@ class TimelinesController extends AppBaseController
     {
         $this->authorize('update', $timeline);
         $request->validate([
-            '1_month' => 'required|array',
-            'is_follow_for_free' => 'required|boolean',
+            '1_month' => 'nullable|array',
+            'is_follow_for_free' => 'nullable|boolean',
         ]);
 
         if ($request->has('is_follow_for_free')) {
@@ -501,8 +501,11 @@ class TimelinesController extends AppBaseController
             $timeline->save();
         }
 
-        $price = new Money($request['1_month']['amount'], new Currency($request['1_month']['currency']));
-        $timeline->updateOneMonthPrice($price);
+        if ($request->has('1_month')) {
+            $price = new Money($request['1_month']['amount'], new Currency($request['1_month']['currency']));
+            $timeline->updateOneMonthPrice($price);
+        }
+
         $timeline->refresh();
         return new TimelineResource($timeline);
     }

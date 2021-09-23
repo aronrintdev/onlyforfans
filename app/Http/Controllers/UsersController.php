@@ -139,47 +139,44 @@ class UsersController extends AppBaseController
     {
         $this->authorize('update', $user);
         $request->validate([
-            'name' => 'string',
-            'city' => 'string|min:2|nullable',
-            'blocked' => 'array',
-            'message_with_tip_only' => 'boolean',
+            'name'                             => 'string',
+            'city'                             => 'string|min:2|nullable',
+            'blocked'                          => 'array',
+            'message_with_tip_only'            => 'boolean',
             'enable_message_with_tip_only_pay' => 'boolean',
-            'about' => 'string|nullable', // goes to timeline
-            'country' => 'string|nullable',
-            'gender' => 'in:male,female,other|nullable',
-            'birthdate' => 'date|nullable',
-            'weblinks' => 'array|nullable',
-            'weblinks.*' => 'string|nullable',
+            'about'            => 'string|nullable', // goes to timeline
+            'country'          => 'string|nullable',
+            'gender'           => 'in:male,female,other|nullable',
+            'birthdate'        => 'date|nullable',
+            'weblinks'         => 'array|nullable',
+            'weblinks.*'       => 'string|nullable',
             'weblinks.website' => 'domain|nullable',
-            'body_type' => 'string|nullable',
-            'chest' => 'string|nullable',
-            'waist' => 'string|nullable',
-            'hips' => 'string|nullable',
-            'arms' => 'string|nullable',
-            'hair_color' => 'string|nullable',
-            'eye_color' => 'string|nullable',
-            'age' => 'string|nullable',
-            'height' => 'string|nullable',
-            'weight' => 'string|nullable',
-            'education' => 'string|nullable',
-            'language' => 'string|nullable',
-            'ethnicity' => 'string|nullable',
-            'profession' => 'string|nullable',
+            'body_type'        => 'string|nullable',
+            'chest'            => 'string|nullable',
+            'waist'            => 'string|nullable',
+            'hips'             => 'string|nullable',
+            'arms'             => 'string|nullable',
+            'hair_color'       => 'string|nullable',
+            'eye_color'        => 'string|nullable',
+            'age'              => 'string|nullable',
+            'height'           => 'string|nullable',
+            'weight'           => 'string|nullable',
+            'education'        => 'string|nullable',
+            'language'         => 'string|nullable',
+            'ethnicity'        => 'string|nullable',
+            'profession'       => 'string|nullable',
         ]);
         $request->request->remove('username'); // disallow username updates for now
 
         $userSetting = DB::transaction(function () use(&$user, &$request) {
 
+            // handle fields that reside in [timelines]
             $timeline = $user->timeline;
             $timeline->about = $request->about;
             $timeline->fill($request->only([
                 'name',
             ]));
-
-            // %TODO %FIXME: subscriptions should be in [timelines].cattrs, not user settings
-
-            // handle fields that reside in [timelines]
-            
+            $timeline->save();
 
             $cattrsFields = [
                 'blocked',
@@ -210,11 +207,11 @@ class UsersController extends AppBaseController
                 }
                 $userSetting->cattrs = $cattrs; // 'push'
             }
-    
+
             $userSetting->save();
             return $userSetting;
         });
-    
+
         return new UserSettingResource($userSetting);
     }
 
