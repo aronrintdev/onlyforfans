@@ -55,8 +55,7 @@ class ProcessIdMeritWebhook implements ShouldQueue
                 return;
             }
             try {
-                $body = json_decode($webhook->body);
-                $verifyrequest = Verifyrequest::checkStatusByGUID($body->uniqueId);
+                $verifyrequest = Verifyrequest::checkStatusByGUID($webhook->body->uniqueId);
 
                 $webhook->status = Status::HANDLED;
                 $webhook->handled_at = Carbon::now();
