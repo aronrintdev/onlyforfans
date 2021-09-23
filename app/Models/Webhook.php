@@ -170,6 +170,11 @@ class Webhook extends Model
             $request->request->remove('scanImage');
         }
 
+        if ($request->has('selfieImage')) {
+            // Throw away this as well
+            $request->request->remove('selfieImage');
+        }
+
         $webhook = Webhook::create([
             'type' => Type::IDMERIT,
             'origin' => $request->getClientIp(),
