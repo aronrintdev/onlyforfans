@@ -29,7 +29,7 @@ class RestChatthreadsTest extends TestCase
      *  @group chatthreads
      *  @group regression
      *  @group regression-base
-     *  @group erik0922
+     *  @group niko0922
      */
     public function test_can_list_chatthreads()
     {
@@ -210,13 +210,19 @@ class RestChatthreadsTest extends TestCase
         })->firstOrFail();
         $participant = $chatthread->participants[0];
 
-        $response = $this->actingAs($participant)->ajaxJSON('POST', route('chatthreads.markRead', $chatthread->id));
+        $unreadCntSenderBefore = $chatthread->chatmessages()->where('is_read', 0)->where('sender_id', $participant->id)->count();
+        $unreadCntReceiver = $chatthread->chatmessages()->where('is_read', 0)->where('sender_id', '<>', $participant->id)->count();
+        $this->assertGreaterThan(0, $unreadCntReceiver);
 
+        $response = $this->actingAs($participant)->ajaxJSON('POST', route('chatthreads.markRead', $chatthread->id));
         $response->assertStatus(200);
-        $this->assertTrue($chatthread->chatmessages()->where([
-            ['is_read', '=', 0],
-            ['sender_id', '<>', $participant->id]
-        ])->count() == 0);
+        $chatthread->refresh();
+
+        $unreadCntSenderAfter = $chatthread->chatmessages()->where('is_read', 0)->where('sender_id', $participant->id)->count();
+        $unreadCntReceiver = $chatthread->chatmessages()->where('is_read', 0)->where('sender_id', '<>', $participant->id)->count();
+        $this->assertEquals(0, $unreadCntReceiver);
+
+        $this->assertEquals($unreadCntSenderBefore, $unreadCntSenderAfter); // unchanged for sender 
     }
 
     /**

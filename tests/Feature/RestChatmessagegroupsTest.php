@@ -93,7 +93,6 @@ class RestChatmessagegroupsTest extends TestCase
      *  @group chatmessagegroups
      *  @group regression
      *  @group regression-base
-     *  @group here0922
      */
     public function test_can_unsend_mass_message()
     {
@@ -137,11 +136,11 @@ class RestChatmessagegroupsTest extends TestCase
         $this->assertNotNull($ct);
         $this->assertNotNull($ct->id);
 
-        // --- Mark 1 message (thread) as 'read' (past tense) ---
+        // --- Mark 1 message (thread) as 'read' (past tense) by a fan/receiver ---
 
         $expectedDeletedCount = $fans->count();
 
-        $response = $this->actingAs($originator)->ajaxJSON('POST', route('chatthreads.markRead', $ct->id));
+        $response = $this->actingAs($fans[0])->ajaxJSON('POST', route('chatthreads.markRead', $ct->id));
         $response->assertStatus(200);
         $expectedDeletedCount -= 1; // won't delete read message
 
