@@ -138,7 +138,6 @@ export default {
       '6_months': { amount: 0, currency: 'USD' },
       '12_months': { amount: 0, currency: 'USD' },
     },
-    referral_rewards: '',
     formSubscriptions: {
       is_follow_for_free: null,
     },

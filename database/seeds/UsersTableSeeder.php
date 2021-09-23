@@ -139,7 +139,7 @@ class UsersTableSeeder extends Seeder
                     $avatar = FactoryHelpers::createImage( $u, MediafileTypeEnum::AVATAR, $u->id, $this->doS3Upload );
                 } catch (Exception $e) {
                     if ( $this->appEnv !== 'testing' ) {
-                        $this->output->writeln("  - Could not create fake media for user ".$user->name.", skipping - ".$e->getMessage() );
+                        $this->output->writeln("  - Could not create fake media for user ".$u->name.", skipping - ".$e->getMessage() );
                     }
                 }
 
@@ -147,7 +147,7 @@ class UsersTableSeeder extends Seeder
                     $cover = FactoryHelpers::createImage( $u, MediafileTypeEnum::COVER, $u->id, $this->doS3Upload );
                 } catch (Exception $e) {
                     if ( $this->appEnv !== 'testing' ) {
-                        $this->output->writeln("  - Could not create fake media for user ".$user->name.", skipping - ".$e->getMessage() );
+                        $this->output->writeln("  - Could not create fake media for user ".$u->name.", skipping - ".$e->getMessage() );
                     }
                 }
             } else {
@@ -162,7 +162,9 @@ class UsersTableSeeder extends Seeder
             $timeline->avatar_id = $avatar->id ?? null;
             $timeline->cover_id = $cover->id ?? null;
             $timeline->is_follow_for_free = $isFollowForFree;
-            $timeline->price = $isFollowForFree ? 0.00 : $this->faker->randomFloat(2, 1, 300);
+            $isFree = $isFollowForFree ? false :
+            $timeline->setOneMonthPrice($timeline->toMoney($this->faker->numberBetween(300, 10000)));
+            $timeline->price = $isFollowForFree ? 0.00 : $this->faker->numberBetween(300, 10000);
             $timeline->save(); // update the timeline
 
             $isFollowForFree = !$isFollowForFree; // toggle so we get at least one of each
