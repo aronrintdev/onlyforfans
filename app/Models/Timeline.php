@@ -207,9 +207,18 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         return $this->belongsTo(Mediafile::class, 'cover_id');
     }
 
+    public function prices() {
+        return $this->morphMany(SubscriptionPrice::class, 'subscribeable')->active();
+    }
+
     //--------------------------------------------
     // %%% Scopes
     //--------------------------------------------
+
+    public function scopeHasPrice($query)
+    {
+        return $query->has('prices');
+    }
 
     /*
     public function scopeSort($query, $sortBy, $sortDir='desc')

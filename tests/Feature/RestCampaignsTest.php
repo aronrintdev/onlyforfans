@@ -23,7 +23,7 @@ class RestCampaignsTest extends TestCase
      */
     public function test_can_create_discount_promotion()
     {
-        $timeline = Timeline::where('price', '>', 0)->first();
+        $timeline = Timeline::hasPrice()->with('prices')->first();
         $creator = $timeline->user;
 
         // Make sure subscription price is high enough so discount keeps us above $3 min
@@ -108,9 +108,9 @@ class RestCampaignsTest extends TestCase
      *  @group regression-base
      *  @group here0910
      */
-    public function test_can_cancel_discount_promotion() 
+    public function test_can_cancel_discount_promotion()
     {
-        $timeline = Timeline::where('price', '>', 0)->first();
+        $timeline = Timeline::hasPrice()->with('prices')->first();
         $creator = $timeline->user;
 
         // --- (1a) unlimited subcribers ---
@@ -148,7 +148,7 @@ class RestCampaignsTest extends TestCase
      */
     public function test_can_create_discount_promotion_with_emoji_text()
     {
-        $timeline = Timeline::where('price', '>', 0)->first();
+        $timeline = Timeline::hasPrice()->with('prices')->first();
         $creator = $timeline->user;
         $settings = $creator->settings;
         $cattrs = $settings->cattrs;

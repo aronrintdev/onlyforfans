@@ -75,7 +75,7 @@ class CampaignsController extends AppBaseController
 
         // Check that discount keeps monthly price above 300 cents ($3.00) %FIXME: unhardcode
         $userStats = $request->user()->getStats(); // call to get subscription price & other info
-        if ( empty($userStats['subscriptions']) ) {
+        if ( empty($userStats['prices']) ) {
             throw new Exception('Subscription price is required before creating a promotion');
         }
         $subMonthlyPrice = $userStats['prices']['1_month'] ?? 0;
