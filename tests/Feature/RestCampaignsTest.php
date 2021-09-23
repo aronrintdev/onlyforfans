@@ -29,7 +29,9 @@ class RestCampaignsTest extends TestCase
         // Make sure subscription price is high enough so discount keeps us above $3 min
         $subPriceInDollars = $this->faker->numberBetween(100, 300);
         $subPriceInCents = $subPriceInDollars * 100;
-        $result = $creator->settings->setValues('subscriptions', [ 'price_per_1_months' => $subPriceInDollars ]); // %FIXME
+        // $result = $creator->settings->setValues('subscriptions', [ '1_month' => [ 'amount' => $subPriceInCents,
+        // 'currency' => 'USD' ] ]); // %FIXME
+        $timeline->updateOneMonthPrice($timeline->asMoney($subPriceInCents));
         $creator->refresh();
 
         $priorCampaign = null;

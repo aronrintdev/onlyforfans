@@ -1,17 +1,18 @@
 <?php
 namespace App\Http\Controllers;
 
-use Exception;
 use Log;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Validation\ValidationException;
-
-use App\Enums\CampaignTypeEnum;
-use App\Http\Resources\Campaign as CampaignResource;
-use App\Models\Campaign;
+use Exception;
+use Money\Money;
 use App\Models\User;
 use App\Rules\InEnum;
+
+use App\Models\Campaign;
+use Illuminate\Http\Request;
+use App\Enums\CampaignTypeEnum;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Validation\ValidationException;
+use App\Http\Resources\Campaign as CampaignResource;
 
 class CampaignsController extends AppBaseController
 {
@@ -77,10 +78,10 @@ class CampaignsController extends AppBaseController
         if ( empty($userStats['subscriptions']) ) {
             throw new Exception('Subscription price is required before creating a promotion');
         }
-        $subMonthlyPrice = $userStats['display_prices_in_cents']['subscribe_1_month'] ?? 0;
-        $minPriceInCents = Config::get('subscriptions.minPriceInCents', 300);
-        $discounted = applyDiscount($subMonthlyPrice, $attrs['discount_percent']);
-        if ( $discounted < $minPriceInCents ) {
+        $subMonthlyPrice = $userStats['prices']['1_month'] ?? 0;
+        $minPrice = Money::USD(Config::get('subscriptions.minPriceInCents', 300));
+        $discounted = $subMonthlyPrice->multiply((100 - $attrs['discount_percent']) / 100);
+        if ( $discounted->lessThan($minPrice) ) {
             //abort(422, 'Discounted price must be '.nice_currency($discounted).' or higher');
             throw ValidationException::withMessages([
                 'discount_percent' => ['Minimum net price required'],

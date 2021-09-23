@@ -6,10 +6,42 @@
           <fieldset :disabled="isSubmitting.formSubscriptions">
             <b-row>
               <b-col sm="12" md="6">
-                <FormTextInput itype="currency" ikey="subscriptions.price_per_1_months"  v-model="subscriptions.price_per_1_months"  label="Price per Month" :verrors="verrors" />
-                <FormTextInput itype="currency" ikey="subscriptions.price_per_3_months"  v-model="subscriptions.price_per_3_months"  label="Price per 3 Months" :verrors="verrors" disabled />
-                <FormTextInput itype="currency" ikey="subscriptions.price_per_6_months"  v-model="subscriptions.price_per_6_months"  label="Price per 6 Months" :verrors="verrors" disabled />
-                <FormTextInput itype="currency" ikey="subscriptions.price_per_12_months" v-model="subscriptions.price_per_12_months" label="Price per Year" :verrors="verrors" disabled />
+                <PriceSelector
+                  v-model="subscriptions['1_month'].amount"
+                  :currency="subscriptions['1_month'].currency"
+                  label="Price per Month"
+                  :horizontal="false"
+                  :showPlaceholder="false"
+                  clearable
+                  :limitWidth="false"
+                />
+                <PriceSelector
+                  v-model="subscriptions['3_months'].amount"
+                  label="Price per 3 Months"
+                  disabled
+                  :horizontal="false"
+                  :showPlaceholder="false"
+                  clearable
+                  :limitWidth="false"
+                />
+                <PriceSelector
+                  v-model="subscriptions['6_months'].amount"
+                  label="Price per 6 Months"
+                  disabled
+                  :horizontal="false"
+                  :showPlaceholder="false"
+                  clearable
+                  :limitWidth="false"
+                />
+                <PriceSelector
+                  v-model="subscriptions['12_months'].amount"
+                  label="Price per Year"
+                  disabled
+                  :horizontal="false"
+                  :showPlaceholder="false"
+                  clearable
+                  :limitWidth="false"
+                />
               </b-col>
               <b-col sm="12" md="6">
                 <b-form-group id="group-is_follow_for_free" label="Allow Follow for Free" label-for="is_follow_for_free">
@@ -78,6 +110,7 @@ import moment from 'moment'
 import Vuex from 'vuex'
 import { eventBus } from '@/eventBus'
 import FormTextInput from '@components/forms/elements/FormTextInput'
+import PriceSelector from '@components/common/PriceSelector'
 
 export default {
   props: {
@@ -100,12 +133,12 @@ export default {
 
     verrors: null,
     subscriptions: { // cattrs
-      price_per_1_months: null,
-      price_per_3_months: null,
-      price_per_6_months: null,
-      price_per_12_months: null,
-      referral_rewards: '',
+      '1_month': { amount: 0, currency: 'USD' },
+      '3_months': { amount: 0, currency: 'USD' },
+      '6_months': { amount: 0, currency: 'USD' },
+      '12_months': { amount: 0, currency: 'USD' },
     },
+    referral_rewards: '',
     formSubscriptions: {
       is_follow_for_free: null,
     },
@@ -116,9 +149,9 @@ export default {
 
   watch: {
     user_settings(newVal) {
-      if ( newVal.cattrs.subscriptions ) {
-        this.subscriptions = newVal.cattrs.subscriptions
-      }
+      // if ( newVal.cattrs.subscriptions ) {
+      //   this.subscriptions = newVal.cattrs.subscriptions
+      // }
       if ( newVal.hasOwnProperty('is_follow_for_free') ) {
         this.formSubscriptions.is_follow_for_free = newVal.is_follow_for_free ? 1 : 0
       }
@@ -129,9 +162,12 @@ export default {
   },
 
   created() {
-    if ( this.user_settings.cattrs.subscriptions) {
-      this.subscriptions = {
-        ...this.user_settings.cattrs.subscriptions
+    if (this.timeline && this.timeline.userstats) {
+      if (this.timeline.userstats.prices) {
+        this.subscriptions = {
+          ...this.subscriptions,
+          ...this.timeline.userstats.prices
+        }
       }
     }
     if ( this.user_settings.hasOwnProperty('is_follow_for_free') ) {
@@ -151,16 +187,22 @@ export default {
     async submitSubscriptions(e) {
       this.isSubmitting.formSubscriptions = true
       try {
-        const response = await axios.patch(`/users/${this.session_user.id}/settings`, {
-          ...this.formSubscriptions,
-          name: this.timeline.name,
-          subscriptions: this.subscriptions,
-        })
+        // const response = await axios.patch(`/users/${this.session_user.id}/settings`, {
+        //   ...this.formSubscriptions,
+        //   name: this.timeline.name,
+        //   subscriptions: this.subscriptions,
+        // })
+
+        const response = await axios.patch(
+          this.$apiRoute('timelines.setSubscriptionPrice', { timeline: this.timeline }),
+          { ...this.subscriptions, ...this.formSubscriptions }
+        )
 
         this.getUserSettings({ userId: this.session_user.id })
         this.verrors = null
         this.onSuccess()
       } catch(err) {
+        console.error(err)
         this.verrors = err.response.data.errors
       }
 
@@ -208,6 +250,7 @@ export default {
 
   components: {
     FormTextInput,
+    PriceSelector,
   },
 }
 </script>

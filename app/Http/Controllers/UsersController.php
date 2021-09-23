@@ -31,6 +31,8 @@ use App\Enums\PaymentTypeEnum;
 use App\Enums\VerifyStatusTypeEnum;
 use App\Models\Staff;
 use App\Apis\Sendgrid\Api as SendgridApi;
+use Money\Currency;
+use Money\Money;
 
 class UsersController extends AppBaseController
 {
@@ -138,12 +140,7 @@ class UsersController extends AppBaseController
         $this->authorize('update', $user);
         $request->validate([
             'name' => 'string',
-            'subscriptions.price_per_1_months' => 'numeric',
-            'subscriptions.price_per_3_months' => 'numeric|nullable',
-            'subscriptions.price_per_6_months' => 'numeric|nullable',
-            'subscriptions.price_per_12_months' => 'numeric|nullable',
             'city' => 'string|min:2|nullable',
-            'is_follow_for_free' => 'boolean',
             'blocked' => 'array',
             'message_with_tip_only' => 'boolean',
             'enable_message_with_tip_only_pay' => 'boolean',
@@ -182,19 +179,14 @@ class UsersController extends AppBaseController
             // %TODO %FIXME: subscriptions should be in [timelines].cattrs, not user settings
 
             // handle fields that reside in [timelines]
-            if ( $request->has('is_follow_for_free') ) {
-                $timeline->is_follow_for_free = $request->boolean('is_follow_for_free');
-                $request->request->remove('is_follow_for_free');
-            }
-            $timeline->save();
+            
 
-            $cattrsFields = [ 
-                'blocked', 
+            $cattrsFields = [
+                'blocked',
                 'enable_message_with_tip_only_pay',
-                'localization', 
-                'message_with_tip_only', 
-                'privacy', 
-                'subscriptions', 
+                'localization',
+                'message_with_tip_only',
+                'privacy',
                 'watermark',
             ];
             $attrs = $request->except($cattrsFields);

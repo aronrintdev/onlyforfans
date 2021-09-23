@@ -1,37 +1,32 @@
 <?php
 namespace App\Models;
 
-use Exception;
-use App\Interfaces\Ownable;
-use App\Interfaces\ShortUuid;
-use App\Enums\PaymentTypeEnum;
-use App\Interfaces\Reportable;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Config;
-
-use App\Models\Traits\UsesUuid;
-use App\Interfaces\Purchaseable;
-use App\Models\Financial\Account;
-use Illuminate\Support\Collection;
-use App\Models\Traits\OwnableTraits;
-use App\Models\Traits\UsesShortUuid;
-use App\Models\Financial\Transaction;
-use App\Models\Traits\SluggableTraits;
-use App\Enums\ShareableAccessLevelEnum;
-use App\Enums\VerifyStatusTypeEnum;
-use App\Interfaces\Subscribable;
+use Carbon\Carbon;
+use App\Models\Casts\Money as CastsMoney;
 use App\Interfaces\Tippable;
-use App\Models\Casts\Money;
-use App\Models\Financial\Traits\HasCurrency;
+use Laravel\Scout\Searchable;
+
+use App\Interfaces\Reportable;
+use App\Models\Traits\UsesUuid;
+use App\Interfaces\Subscribable;
+use App\Models\Financial\Account;
 use App\Models\Traits\FormatMoney;
+use Illuminate\Support\Collection;
+use App\Enums\VerifyStatusTypeEnum;
+use App\Models\Traits\OwnableTraits;
+use App\Enums\SubscriptionPeriodEnum;
+use App\Models\Financial\Transaction;
 use App\Models\Traits\ShareableTraits;
+use App\Models\Traits\SluggableTraits;
+use Illuminate\Support\Facades\Config;
+use App\Enums\ShareableAccessLevelEnum;
 use Cviebrock\EloquentSluggable\Sluggable;
+use App\Models\Financial\Traits\HasCurrency;
+use App\Models\Traits\SubscribeableTraits;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Laravel\Scout\Searchable;
-use Money\Currencies\ISOCurrencies;
-use Carbon\Carbon;
+use Money\Money;
 
 /**
  * Timeline Model
@@ -44,7 +39,7 @@ use Carbon\Carbon;
  * @property string $cover_id
  * @property bool   $verified
  * @property bool   $is_follow_for_free
- * @property \Money\Money $price
+ * @property Money $price @deprecated
  * @property string $currency
  * @property array  $cattrs
  * @property array  $meta
@@ -65,7 +60,8 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         ShareableTraits,
         FormatMoney,
         HasCurrency,
-        Searchable;
+        Searchable,
+        SubscribeableTraits;
 
     //protected $appends = [ ];
     protected $keyType = 'string';
@@ -79,7 +75,7 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     protected $casts = [
         'name' => 'string',
         'about' => 'string',
-        'price' => Money::class,
+        // 'price' => CastsMoney::class,
         'cattrs' => 'array',
         'meta' => 'array',
     ];
@@ -107,11 +103,31 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
         return $this->user->verifyrequest && ($this->user->verifyrequest->vstatus===VerifyStatusTypeEnum::VERIFIED);
     }
 
+    /* ---------------------------------- price --------------------------------- */
+    public function getPriceAttribute()
+    {
+        $price = $this->getOneMonthPrice();
+        if ($price) {
+            return $price->price;
+        }
+        return null;
+    }
+    public function setPriceAttribute($value)
+    {
+        $this->updateOneMonthPrice($this->castToMoney($value));
+    }
+    /* -------------------------------------------------------------------------- */
+
+    public function getSubscriptionPricesAttribute($value)
+    {
+        return SubscriptionPrice::for($this)->active()->get();
+    }
+
     public function toArray()
     {
         $array = parent::toArray();
         // Localize Price
-        $array['price_display'] = static::formatMoney($this->price);
+        $array['price_display'] = static::formatMoney($this->price ?? Money::USD(0));
         $array['userstats'] = $this->getUserstats();
         return $array;
     }
@@ -268,18 +284,24 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     /* ---------------------------- Subscribable ---------------------------- */
     #region Subscribable
 
-    public function verifyPrice($amount): bool
+    public function setPrice(Money $amount, string $period, int $period_interval): SubscriptionPrice
     {
-        // TODO: Don't want to hard code price per 1 month, Price is also stored incorrectly
+        return SubscriptionPrice::updatePrice($this, $amount, $period, $period_interval);
+    }
+
+    public function verifyPrice($amount, string $period = SubscriptionPeriodEnum::DAILY, int $period_interval = 30): bool
+    {
         $amount = $this->asMoney($amount);
-        if (isset($this->getUserstats()['subscriptions']) && isset($this->getUserstats()['subscriptions']['price_per_1_months'])) {
-            $price = $this->asMoney($this->getUserstats()['subscriptions']['price_per_1_months'] * 100);
-        } else {
-            $price = $this->price;
+
+        $subscriptionPrice = SubscriptionPrice::activePriceFor($this, $period, $period_interval);
+
+        if (!isset($subscriptionPrice)) {
+            // No active subscription price for this period
+            return false;
         }
 
-        if ($price->equals($amount)) {
-            // Amount is price for 1 month
+        if ($subscriptionPrice->price->equals($amount)) {
+            // Amount is good for this subscription
             return true;
         }
 
@@ -288,12 +310,13 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
 
         if ($promotions->count() > 0) {
             foreach ($promotions as $promotion) {
-                $discount = $promotion->getDiscountPrice($price);
+                $discount = $promotion->getDiscountPrice($subscriptionPrice->price);
                 if ($discount->equals($amount)) {
                     return true;
                 }
             }
         }
+
         // No active promotions match this price
         return false;
     }
@@ -303,12 +326,17 @@ class Timeline extends Model implements Subscribable, Tippable, Reportable
     //  ~ %FIXME: will need to account for 'batches', but this can be the base price (ie monthly, pre-discounts)
     public function getBaseSubPriceInCents() // : Money
     {
-        if (isset($this->getUserstats()['subscriptions']) && isset($this->getUserstats()['subscriptions']['price_per_1_months'])) {
-            $price = $this->asMoney($this->getUserstats()['subscriptions']['price_per_1_months'] * 100);
-        } else {
-            $price = $this->price;
+        $subscriptionPrice = SubscriptionPrice::oneMonthPrice($this);
+        if ($subscriptionPrice) {
+            return $subscriptionPrice->price;
         }
-        return $price;
+        return Money::USD(0);
+        // if (isset($this->getUserstats()['subscriptions']) && isset($this->getUserstats()['subscriptions']['price_per_1_months'])) {
+        //     $price = $this->asMoney($this->getUserstats()['subscriptions']['price_per_1_months'] * 100);
+        // } else {
+        //    $price = $this->price;
+        // }
+        // return $price;
     }
 
     public function getDescriptionNameString(): string
