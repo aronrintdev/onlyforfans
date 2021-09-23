@@ -119,6 +119,10 @@ class Chatmessage extends Model implements UuidId, Ownable, Purchaseable
         return $this->belongsTo(Chatmessagegroup::class);
     }
 
+    public function shareables() {
+        return $this->morphMany(Shareable::class, 'shareable');
+    }
+
     #endregion Relationships
 
     /* -------------------------------------------------------------------------- */

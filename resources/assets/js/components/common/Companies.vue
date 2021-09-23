@@ -6,51 +6,47 @@
     </section>
 
     <ul class="list-suggested list-group">
-      <li v-for="(timeline, i) in timelines" :key="timeline.id || i">
-        <div class="d-flex align-items-center mb-3 ml-3">
-          <div class="avatar-img" :class="hasStaffNotification(timeline) ? 'has-staff-notification' : ''">
-            <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
-              <b-img-lazy
-                thumbnail
-                rounded="circle"
-                class="w-100 h-100"
-                :src="timeline.avatar.filepath"
-                :title="timeline.name"
-              />
-            </router-link>
-          </div>
+      <template v-for="(timeline, i) in timelines">
+        <li :key="timeline.id || i" v-if="timeline.slug">
+          <div class="d-flex align-items-center mb-3 ml-3">
+            <div class="avatar-img" :class="hasStaffNotification(timeline) ? 'has-staff-notification' : ''">
+              <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
+                <b-img-lazy
+                  thumbnail
+                  rounded="circle"
+                  class="w-100 h-100"
+                  :src="timeline.avatar ? timeline.avatar.filepath : '/images/default_avatar.png'"
+                  :title="timeline.name"
+                />
+              </router-link>
+            </div>
 
-          <div class="avatar-profile d-flex justify-content-between">
-            <div class="avatar-details">
-              <h2 class="avatar-name my-0">
-                <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
-                  {{ timeline.name }}
-                </router-link>
-                <span v-if="timeline.verified" class="verified-badge">
-                  <fa-icon icon="check-circle" class="text-primary" />
-                </span>
-              </h2>
-              <p class="avatar-mail my-0">
-                <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
-                  @{{ timeline.slug }}
-                </router-link>
-              </p>
+            <div class="avatar-profile d-flex justify-content-between">
+              <div class="avatar-details">
+                <h2 class="avatar-name my-0">
+                  <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
+                    {{ timeline.name }}
+                  </router-link>
+                  <span v-if="timeline.verified" class="verified-badge">
+                    <fa-icon icon="check-circle" class="text-primary" />
+                  </span>
+                </h2>
+                <p class="avatar-mail my-0">
+                  <router-link :to="{ name: 'timeline.show', params: { slug: timeline.slug } }">
+                    @{{ timeline.slug }}
+                  </router-link>
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </li>
+        </li>
+      </template>
     </ul>
   </div>
 </template>
 
 <script>
-import MiniProfile from '@components/user/MiniProfile'
-
 export default {
-  components: {
-    MiniProfile,
-  },
-
   props: {
     session_user: null,
     unread_notifications: Array,
@@ -61,13 +57,13 @@ export default {
       return this.session_user === null
     },
     timelines() {
-      return this.session_user.companies || []
+      return this.session_user && this.session_user.companies || []
     },
   },
 
   methods: {
     hasStaffNotification(timeline) {
-      return this.unread_notifications.filter(n => n.data.actor.id == timeline.user_id && n.type == 'App\\Notifications\\StaffSettingsChanged').length > 0;
+      return this.unread_notifications.filter(n => n.data.actor && n.data.actor.id == timeline.user_id && n.type == 'App\\Notifications\\StaffSettingsChanged').length > 0;
     }
   }
 }

@@ -34,7 +34,8 @@ class ChatmessagegroupsController extends AppBaseController
             'mgtype',
         ]) ?? [];
 
-        $query = Chatmessagegroup::query(); // Init query
+        //$query = Chatmessagegroup::query(); // Init query
+        $query = Chatmessagegroup::with('chatmessages.shareables');
 
         // Check permissions | Restrict
         $query->where('sender_id', $request->user()->id);
@@ -68,6 +69,8 @@ class ChatmessagegroupsController extends AppBaseController
         default:
             $query->orderBy('updated_at', 'desc');
         }
+//$_data = $query->latest()->get();
+//dd($_data);
 
         $data = $query->latest()->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
         return new ChatmessagegroupCollection($data);

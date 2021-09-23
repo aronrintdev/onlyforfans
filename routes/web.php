@@ -91,7 +91,7 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
 
     Route::get('/chatmessagegroups/queue', 'ChatmessagegroupsController@queue')->name('chatmessagegroups.queue');
-    Route::get('/chatmessagegroups/{chatmessagegroup}/unsend', 'ChatmessagegroupsController@unsend')->name('chatmessagegroups.unsend');
+    Route::post('/chatmessagegroups/{chatmessagegroup}/unsend', 'ChatmessagegroupsController@unsend')->name('chatmessagegroups.unsend');
     Route::apiResource('chatmessagegroups', 'ChatmessagegroupsController', [
         'only' => [ 'index', ],
     ]);
@@ -276,7 +276,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/users/avatar', ['as' => 'users.updateAvatar', 'uses' => 'UsersController@updateAvatar']);
     Route::post('/users/cover', ['as' => 'users.updateCover', 'uses' => 'UsersController@updateCover']);
     Route::post('/users/send-staff-invite', ['as'=>'users.sendStaffInvite', 'uses' => 'UsersController@sendStaffInvite']);
-    Route::resource('users', 'UsersController', [ 'except' => [ 'create', 'edit', 'store' ] ]);
+    Route::get('/users', ['as'=>'users.index', 'uses' => 'UsersController@index'])->middleware(['role:admin|super-admin']); // describe manually to add middleware for admin
+    Route::resource('users', 'UsersController', [ 'except' => [ 'index', 'create', 'edit', 'store' ] ]);
 
     /* ------------------------------ Vault ------------------------------ */
     // -- vaults:  --
