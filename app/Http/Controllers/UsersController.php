@@ -521,8 +521,8 @@ class UsersController extends AppBaseController
 
         // Add new staff user
         $inviteeEmail = $request->input('email'); // invitee's email
-        $invitee = User::where('email', $inviteeEmail)->first(); // invitee
-        $inviter = $request->user();
+        $invitee = User::where('email', $inviteeEmail)->first(); // ->makeVisible('email'); // invitee
+        $inviter = $request->user(); // ->makeVisible('email');
 
         // Check if the same invite exists
         $existingStaff = Staff::where('role', $request->input('role'))->where('email', $inviteeEmail)->where('owner_id', $inviter->id)->get();

@@ -10,6 +10,7 @@ use Tests\TestCase;
 
 use App\Models\User;
 use App\Models\Staff;
+use App\Models\Timeline;
 use App\Models\Permission;
 use App\Notifications\StaffSettingsChanged;
 
@@ -70,9 +71,8 @@ class RestStaffTest extends TestCase
      *  @group regression
      *  @group regression-base
      *  @group staff
-     *  @group here0923
      */
-    public function test_can_send_manager_invitation()
+    public function test_can_send_manager_invitation_as_guest()
     {
         //Mail::fake();
 
@@ -82,7 +82,7 @@ class RestStaffTest extends TestCase
             $fSizeBefore = $lPath ? filesize($lPath) : null;
         }
 
-        // Find a creator account with managers
+        // Find a creator account with managers (?? %FIXME)
         $manager = Staff::where('role', 'manager')->firstOrFail();
         $sessionUser = User::where('id', $manager->owner_id)->firstOrFail();
         //dump($manager->name, $sessionUser->name);
@@ -107,6 +107,65 @@ class RestStaffTest extends TestCase
                 $fDiff = $fSizeAfter > $fSizeBefore;
                 $fcontents = file_get_contents($lPath, false, null, -($fDiff-2));
                 $toStr = $payload['first_name'].' '.$payload['last_name'].' <'.$payload['email'].'>';
+                $this->assertStringContainsStringIgnoringCase('To: '.$toStr, $fcontents);
+                $this->assertStringContainsStringIgnoringCase('been invited to become a manager', $fcontents);
+                $this->assertStringContainsString('Subject: Invite Staff Manager', $fcontents);
+                $this->assertStringContainsString('From:', $fcontents);
+            }
+        }
+    }
+
+    /**
+     *  @group regression
+     *  @group regression-base
+     *  @group staff
+     *  @group here0923
+     */
+    public function test_can_send_manager_invitation_as_registered_user()
+    {
+        //Mail::fake();
+
+        $lPath = self::getLogPath();
+        $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
+        if( $isLogScanEnabled ) {
+            $fSizeBefore = $lPath ? filesize($lPath) : null;
+        }
+
+        $timeline = Timeline::has('posts','>=',1)->first(); 
+        $creator = $timeline->user;
+
+        $existingStaff = Staff::where('role', 'manager')->where('owner_id', $creator->id)->pluck('email')->toArray();
+        //$existingStaff = Staff::where('role', $request->input('role'))->where('email', $inviteeEmail)->where('owner_id', $inviter->id)->get();
+        //dd($existingStaff);
+        $notInA = $existingStaff;
+        $notInA[] = $creator->email;
+        $preManager = User::whereNotIn('email', $notInA)->first();
+        $this->assertNotNull($preManager->id??null);
+        $this->assertFalse( in_array($preManager->id, $existingStaff) );
+        $this->assertFalse( $preManager->id === $creator->id );
+        //$preManager = User::where('id', '<>', $creator->id)->first();
+
+        $payload = [
+            'first_name' => $preManager->real_firstname ?? $preManager->name,
+            'last_name' => $preManager->real_lastname ?? 'Smith',
+            'email' => $preManager->email,
+            'pending' => true, // %FIXME: this should be set in model default
+            'role' => 'manager',
+            'creator_id' => null, // %FIXME: what is this?
+        ];
+
+        $response = $this->actingAs($creator)->ajaxJSON( 'POST', route('users.sendStaffInvite', $payload) );
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $response->assertJsonStructure([ 'status' ]);
+
+        if ( $isLogScanEnabled && $lPath ) {
+            $fSizeAfter = filesize($lPath);
+            if ( $fSizeBefore && $fSizeAfter && ($fSizeAfter > $fSizeBefore) ) {
+                $fDiff = $fSizeAfter > $fSizeBefore;
+                $fcontents = file_get_contents($lPath, false, null, -($fDiff-2));
+                //$toStr = $payload['first_name'].' '.$payload['last_name'].' <'.$payload['email'].'>';
+                $toStr = $payload['email'];
                 $this->assertStringContainsStringIgnoringCase('To: '.$toStr, $fcontents);
                 $this->assertStringContainsStringIgnoringCase('been invited to become a manager', $fcontents);
                 $this->assertStringContainsString('Subject: Invite Staff Manager', $fcontents);
