@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Enums\WebhookStatusEnum;
+use App\Enums\WebhookTypeEnum;
+use App\Jobs\ProcessIdMeritWebhook;
 use App\Jobs\ProcessSegPayWebhook;
 use App\Models\Webhook;
 use Illuminate\Bus\Dispatcher;
@@ -41,12 +43,18 @@ class WebhooksRetry extends Command
      */
     public function handle()
     {
-        Webhook::where('id', $this->option('id'))->where('type', 'SegPay')->each(function (Webhook $webhook) {
+        Webhook::where('id', $this->option('id'))->each(function (Webhook $webhook) {
             $webhook->status = WebhookStatusEnum::UNHANDLED;
             $webhook->save();
-            $this->info("Dispatching job for segpay webhook {$webhook->id}");
-            app(Dispatcher::class)->dispatch(new ProcessSegPayWebhook($webhook));
-            // ProcessSegPayWebhook::dispatch($webhook);
+            switch($webhook->type) {
+                case WebhookTypeEnum::SEGPAY:
+                    $this->info("Dispatching job for segpay webhook {$webhook->id}");
+                    app(Dispatcher::class)->dispatch(new ProcessSegPayWebhook($webhook));
+                    break;
+                case WebhookTypeEnum::IDMERIT:
+                    $this->info("Dispatching job for ID Merit webhook {$webhook->id}");
+                    ProcessIdMeritWebhook::dispatch($webhook);
+            }
         });
 
         return 0;

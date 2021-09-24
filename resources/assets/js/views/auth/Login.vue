@@ -8,7 +8,11 @@
             <Branding type="text" size="3x" class="signin-logo" />
             <div class="h1 mb-3 text-center text-md-left" v-text="$t('signInHeader')"></div>
             <div v-if="verrors && verrors.message">
-              <b-alert variant="danger" v-text="verrors.message" show />
+              <b-alert v-if="!showEmailNotVerified" variant="danger" v-text="verrors.message" show />
+              <b-alert :show="showEmailNotVerified" variant="danger">
+                Email not verified. Please verify to continue.
+                <b-btn variant="link" :to="{ name: 'resend-email' }">Resend email</b-btn>
+              </b-alert>
             </div>
             <b-form-group :invalid-feedback="verrors.email ? verrors.email[0] : null" :state="verrors.email ? false : null">
               <b-form-input
@@ -94,6 +98,17 @@ export default {
     LinkBar,
     AuthTemplate,
   },
+
+  computed: {
+    showEmailNotVerified() {
+      if (this.verrors) {
+        // TODO: Quick and dirty, should update to avoid issues with message change
+        return this.verrors.message === "Email not verified"
+      }
+      return false
+    },
+  },
+
   data: () => ({
     state: 'form', // form | loading
     verrors: {}, // rendered validation Errors

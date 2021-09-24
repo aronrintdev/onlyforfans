@@ -116,8 +116,8 @@ export default {
 
     onUnsendClicked() {
       this.isConfirmModalVisible = false
-      axios.delete(route('chatmessages.destroy', { id: this.value.id }))
-        .then(() => this.$emit('unsend', { id: this.value.id }))
+      axios.delete(route('chatmessages.destroy', { id: this.value.id })) // performs 'unsend' via delete
+        .then(() => this.$emit('unsend', { id: this.value.id })) // update display
         .catch(err => {
           this.isUnableModalVisible = true
         })

@@ -313,7 +313,6 @@ export default {
     uploadFailedFilesCount: 0,
     uploadingFilesCount: 0,
     isEmojiBoxVisible: false,
-    usernameList: [],
     lastRange: null,
     suggestions: [],
     lastMatches: [],
@@ -759,27 +758,27 @@ export default {
     },
 
     saveSelection() {
-        if (window.getSelection) {
-            var sel = window.getSelection();
-            if (sel.getRangeAt && sel.rangeCount) {
-                return sel.getRangeAt(0);
-            }
-        } else if (document.selection && document.selection.createRange) {
-            return document.selection.createRange();
+      if (window.getSelection) {
+        let sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+          return sel.getRangeAt(0);
         }
-        return null;
+      } else if (document.selection && document.selection.createRange) {
+        return document.selection.createRange();
+      }
+      return null;
     },
 
     restoreSelection(range) {
-        if (range) {
-            if (window.getSelection) {
-                var sel = window.getSelection();
-                sel.removeAllRanges();
-                sel.addRange(range);
-            } else if (document.selection && range.select) {
-                range.select();
-            }
+      if (range) {
+        if (window.getSelection) {
+          let sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } else if (document.selection && range.select) {
+          range.select();
         }
+      }
     },
 
     setCursorPosition(ele) {
@@ -793,43 +792,43 @@ export default {
     },
 
     pasteHtmlAtCaret(html) {
-        var sel, range;
-        if (window.getSelection) {
-            // IE9 and non-IE
-            sel = window.getSelection();
-            if (sel.getRangeAt && sel.rangeCount) {
-                range = sel.getRangeAt(0);
-                range.deleteContents();
+      let sel, range;
+      if (window.getSelection) {
+        // IE9 and non-IE
+        sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+          range = sel.getRangeAt(0);
+          range.deleteContents();
 
-                // Range.createContextualFragment() would be useful here but is
-                // non-standard and not supported in all browsers (IE9, for one)
-                var el = document.createElement("span");
-                el.innerHTML = html;
-                var frag = document.createDocumentFragment(), node, lastNode;
-                while ( (node = el.firstChild) ) {
-                    lastNode = frag.appendChild(node);
-                }
-                range.insertNode(frag);
+          // Range.createContextualFragment() would be useful here but is
+          // non-standard and not supported in all browsers (IE9, for one)
+          const el = document.createElement("span");
+          el.innerHTML = html;
+          let frag = document.createDocumentFragment(), node, lastNode;
+          while ( (node = el.firstChild) ) {
+            lastNode = frag.appendChild(node);
+          }
+          range.insertNode(frag);
 
-                const text = range.startContainer.textContent
-                if (text && this.newMatch) {
-                  range.startContainer.textContent = text.substring(0, text.length - this.newMatch.length)
-                }
-                
-                // Preserve the selection
-                if (lastNode) {
-                    range = range.cloneRange();
-                    range.setStartAfter(lastNode);
-                    range.collapse(true);
-                    sel.removeAllRanges();
-                    sel.addRange(range);
-                }
-            }
-        } else if (document.selection && document.selection.type != "Control") {
-            // IE < 9
-            document.selection.createRange().pasteHTML(html);
+          const text = range.startContainer.textContent
+          if (text && this.newMatch) {
+            range.startContainer.textContent = text.substring(0, text.length - this.newMatch.length)
+          }
+          
+          // Preserve the selection
+          if (lastNode) {
+            range = range.cloneRange();
+            range.setStartAfter(lastNode);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
         }
-        this.lastRange = this.saveSelection()
+      } else if (document.selection && document.selection.type != "Control") {
+        // IE < 9
+        document.selection.createRange().pasteHTML(html);
+      }
+      this.lastRange = this.saveSelection()
     },
 
 

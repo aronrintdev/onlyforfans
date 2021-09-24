@@ -19,7 +19,7 @@ class CreateSubscriptionPricesTable extends Migration
      */
     public function up()
     {
-        if (!Schema::hasTable('subscriptions_prices')) {
+        if (!Schema::hasTable('subscription_prices')) {
             Schema::create('subscription_prices', function (Blueprint $table) {
                 $table->uuid('id')->primary();
                 $table->uuidMorphs('subscribeable');
