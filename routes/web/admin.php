@@ -82,4 +82,13 @@ Route::group(['prefix' => '/n0g1cg9sbx', 'middleware' => ['auth', 'role:admin|su
     /* ----------------------------- SegpayCalls ---------------------------- */
     Route::apiResource('segpay-calls', 'Admin\SegpayCallsController', ['only' => ['index']]);
 
+
+    /* ---------------------------------- Users --------------------------------- */
+    Route::group(['prefix' => '/users'], function() {
+        Route::get('/', 'Admin\UsersController@index')->name('admin.users.index');
+        Route::post('/{user}', 'Admin\UsersController@show')->name('admin.user.show');
+        Route::post('/{user}/disable-payment', 'Admin\UsersController@updateDisablePayments')
+            ->name('admin.user.disable-payment');
+    });
+
 });
