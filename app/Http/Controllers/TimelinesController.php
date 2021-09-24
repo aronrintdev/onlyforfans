@@ -139,7 +139,9 @@ class TimelinesController extends AppBaseController
         $query = Post::with('mediafiles', 'user')
                     ->withCount(['comments', 'likes'])
                     ->where('active', 1)
-                    ->where('schedule_datetime', null)
+                    ->where(function ($query) {
+                        $query->whereNull('schedule_datetime')->orWhere('schedule_datetime', '<=', Carbon::now());
+                    })
                     ->where(function ($query) {
                         $query->where('expire_at', '>', Carbon::now('UTC'))
                               ->orWhere('expire_at', null);
@@ -158,7 +160,14 @@ class TimelinesController extends AppBaseController
             //->whereIn('mimetype', ['image/jpeg', 'image/jpg', 'image/png'])
             ->where('mftype', MediafileTypeEnum::POST);
         $query->whereHasMorph( 'resource', [Post::class], function($q1) use(&$timeline) {
-            $q1->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
+            $q1->where('postable_type', 'timelines')->where('postable_id', $timeline->id)
+            ->where(function ($query) {
+                $query->whereNull('schedule_datetime')->orWhere('schedule_datetime', '<=', Carbon::now());
+            })
+            ->where(function ($query) {
+                $query->where('expire_at', '>', Carbon::now('UTC'))
+                        ->orWhere('expire_at', null);
+            });
         });
         $query->orderByDesc(Post::select('created_at')
             ->whereColumn('posts.id', 'resource_id'));
@@ -174,7 +183,13 @@ class TimelinesController extends AppBaseController
             ->isVideo()
             ->where('mftype', MediafileTypeEnum::POST);
         $query->whereHasMorph( 'resource', [Post::class], function($q1) use(&$timeline) {
-            $q1->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
+            $q1->where('postable_type', 'timelines')->where('postable_id', $timeline->id)
+                ->where(function ($query) {
+                    $query->whereNull('schedule_datetime')->orWhere('schedule_datetime', '<=', Carbon::now());
+                })
+                ->where(function ($query) {
+                    $query->where('expire_at', '>', Carbon::now('UTC'))->orWhere('expire_at', null);
+            });
         });
         $data = $query->paginate( $request->input('take', Config::get('collections.max.posts', 10)) );
         return new MediafileCollection($data);
@@ -189,7 +204,13 @@ class TimelinesController extends AppBaseController
             ->isVideo()
             ->where('mftype', MediafileTypeEnum::POST);
         $query1->whereHasMorph( 'resource', [Post::class], function($q1) use(&$timeline) {
-            $q1->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
+            $q1->where('postable_type', 'timelines')->where('postable_id', $timeline->id)
+                ->where(function ($query) {
+                    $query->whereNull('schedule_datetime')->orWhere('schedule_datetime', '<=', Carbon::now());
+                })
+                ->where(function ($query) {
+                    $query->where('expire_at', '>', Carbon::now('UTC'))->orWhere('expire_at', null);
+            });
         });
         $videos = $query1->count();
 
@@ -246,8 +267,10 @@ class TimelinesController extends AppBaseController
             //->withCount('likes')->orderBy('likes_count', 'desc')
             ->where('active', 1)
             ->where(function ($query) {
-                $query->where('expire_at', '>', Carbon::now('UTC'))
-                      ->orWhere('expire_at', null);
+                $query->whereNull('schedule_datetime')->orWhere('schedule_datetime', '<=', Carbon::now());
+            })
+            ->where(function ($query) {
+                $query->where('expire_at', '>', Carbon::now('UTC'))->orWhere('expire_at', null);
             });
         $query->where('postable_type', 'timelines')->where('postable_id', $timeline->id);
         $data = $query->take($TAKE)->latest()->get();
