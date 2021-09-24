@@ -451,8 +451,12 @@ export default {
 
       //this.$log.debug('createChatthread', { params: params })
       const response = await axios.post( this.$apiRoute('chatthreads.store'), params )
-
-      this.$router.push({ name: 'chatthreads.dashboard' })
+      if (response.data.chatthreads.length === 1) {
+        const chatthread_id = response.data.chatthreads[0].id
+        this.$router.push({ name: 'chatthreads.show', params: { id: chatthread_id }})
+      } else {
+        this.$router.push({ name: 'chatthreads.dashboard' })
+      }
       this.clearCache()
       // %FIXME: clear MessageForm...can we just re-render the CreateThreadForm component to accomplish this?
 

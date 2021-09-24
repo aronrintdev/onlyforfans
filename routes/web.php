@@ -70,12 +70,14 @@ Route::group(['middleware' => ['auth']], function () {
     // -- chatmessages --
     Route::get('/chatmessages/search', 'ChatmessagesController@search')->name('chatmessages.search');
     Route::post('/chatmessage/{chatmessage}/media', "ChatmessagesController@attachMedia")->name('chatmessages.attachMedia');
+    Route::put('/chatmessage/{chatmessage}/purchase', 'ChatmessagesController@purchase')
+        ->name('chatmessages.purchase');
     Route::apiResource('chatmessages', 'ChatmessagesController', [
-        'only' => [ 'index', 'destroy' ],
+        'only' => [ 'index', 'show', 'destroy' ],
     ]);
 
     Route::get('/chatmessagegroups/queue', 'ChatmessagegroupsController@queue')->name('chatmessagegroups.queue');
-    Route::get('/chatmessagegroups/{chatmessagegroup}/unsend', 'ChatmessagegroupsController@unsend')->name('chatmessagegroups.unsend');
+    Route::post('/chatmessagegroups/{chatmessagegroup}/unsend', 'ChatmessagegroupsController@unsend')->name('chatmessagegroups.unsend');
     Route::apiResource('chatmessagegroups', 'ChatmessagegroupsController', [
         'only' => [ 'index', ],
     ]);
@@ -232,7 +234,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::put('/timelines/{timeline}/subscribe', ['as'=>'timelines.subscribe', 'uses' => 'TimelinesController@subscribe']);
 
     Route::put('/timelines/{timeline}/unsubscribe', ['as' => 'timelines.unsubscribe', 'uses' => 'TimelinesController@unsubscribe']);
-    Route::patch('/timelines/{timeline}/set-subscription-price', ['as' => 'timelines.setSubscriptionPrice', 'uses' => 'TimelinesController@setSubscriptionPrice']);
+    Route::patch('/timelines/{timeline}/set-subscription-price', 'TimelinesController@setSubscriptionPrice')
+        ->name('timelines.setSubscriptionPrice');
     Route::resource('timelines', 'TimelinesController', [
         'only' => ['index', 'show'],
     ]);
@@ -259,7 +262,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/users/avatar', ['as' => 'users.updateAvatar', 'uses' => 'UsersController@updateAvatar']);
     Route::post('/users/cover', ['as' => 'users.updateCover', 'uses' => 'UsersController@updateCover']);
     Route::post('/users/send-staff-invite', ['as'=>'users.sendStaffInvite', 'uses' => 'UsersController@sendStaffInvite']);
-    Route::resource('users', 'UsersController', [ 'except' => [ 'create', 'edit', 'store' ] ]);
+    Route::get('/users', ['as'=>'users.index', 'uses' => 'UsersController@index'])->middleware(['role:admin|super-admin']); // describe manually to add middleware for admin
+    Route::resource('users', 'UsersController', [ 'except' => [ 'index', 'create', 'edit', 'store' ] ]);
 
     /* ------------------------------ Vault ------------------------------ */
     // -- vaults:  --

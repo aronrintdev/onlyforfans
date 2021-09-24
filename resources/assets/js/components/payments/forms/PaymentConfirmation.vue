@@ -143,6 +143,9 @@ export default {
           case 'timeline': case 'timelines':
             route = this.$apiRoute(`timelines.${type}`, { timeline: this.value })
             break
+          case 'chatmessage': case 'chatmessages':
+            route = this.$apiRoute(`chatmessages.${type}`, { chatmessage: this.value })
+            break
           default:
             route = this.$apiRoute(`${this.itemType}.${type}`, { [this.itemType]: this.value })
             break
@@ -173,7 +176,8 @@ export default {
         if (response.data.success) {
           this.$emit('success', response.data)
         } else {
-          eventBus.$emit('error', { error, message: "An error has occurred", })
+          this.$log.error(response.data)
+          eventBus.$emit('error', { message: "An error has occurred", })
           this.$emit('stopProcessing')
         }
       }).catch(error => {

@@ -62,9 +62,11 @@
           />
         </div>
 
+        <b-progress v-if="sending" :value="uploadProgress" max="100" animated class="my-2" />
+
         <!-- Text area -->
         <div class="mt-1">
-          <b-form-group>
+          <b-form-group class="mb-2">
             <b-form-textarea
               class="message"
               v-model="newMessageForm.mcontent"
@@ -101,8 +103,6 @@
       @close="showVideoRec = false"
       @complete="videoRecCompleted"
     />
-
-    <b-progress v-if="sending" :value="uploadProgress" max="100" animated />
 
     <b-modal v-model="scheduleMessageOpen" body-class="p-0" hide-header centered hide-footer>
       <ScheduleDateTime
@@ -504,7 +504,8 @@ export default {
       }
 
       if (this.isScheduled) {
-        params.is_scheduled = this.deliverAtTimestamp
+        params.is_scheduled = this.isScheduled
+        params.deliver_at = this.deliverAtTimestamp
       }
 
       if (this.chatthread_id === 'new') {

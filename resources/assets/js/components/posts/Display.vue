@@ -323,12 +323,14 @@ export default {
         this.tapped += 1;
         setTimeout(async () => {
           if (this.tapped == 2) {
+            this.tapped = 0;
             await this.toggleLike();
             this.startLikeUnlikeAnime = true
             e.preventDefault();
+          } else {
+            this.tapped = 0;
           }
-          this.tapped = 0;
-        }, 500);
+        }, 300);
       } else {
         await this.toggleLike();
         this.startLikeUnlikeAnime = true
@@ -350,6 +352,11 @@ export default {
 
     changeCollapsable() {
       this.isCollapsed = this.isCollapsed == 'expanded' ? 'collapsed' : 'expanded';
+      if (this.isCollapsed == 'collapsed') {
+        $(`#${this.post.id} .tag-post_desc`).height(72);
+      } else {
+        $(`#${this.post.id} .tag-post_desc`).height('auto');
+      }
     }
   },
 

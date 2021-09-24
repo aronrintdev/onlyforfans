@@ -34,7 +34,7 @@
             :source="lastMessageContent"
           />
           <small class="ml-auto mr-0">
-            <timeago :converterOptions="{addSuffix: false}" :datetime="chatthread.updated_at" :auto-update="60" />
+            <timeago v-if="hasMessages" :converterOptions="{addSuffix: false}" :datetime="lastMessageTime" :auto-update="60" />
           </small>
         </div>
       </div>
@@ -82,6 +82,20 @@ export default {
     isLoading() {
       return !this.session_user || !this.participant || !this.chatthread
     },
+
+    hasMessages() {
+      if (this.chatthread.chatmessages.length) {
+        return true
+      } else {
+        return false
+      }
+    },
+
+    lastMessageTime() {
+      if (this.chatthread.chatmessages.length) {
+        return this.chatthread.chatmessages[0].updated_at
+      }
+    }
 
   },
 

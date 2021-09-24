@@ -6,14 +6,17 @@ use Log;
 use Exception;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Models\Diskmediafile;
 use Illuminate\Http\Response;
 use Illuminate\Bus\Dispatcher;
 use App\Models\Traits\UsesUuid;
 use App\Jobs\ProcessSegPayWebhook;
+use App\Jobs\ProcessIdMeritWebhook;
 use App\Enums\WebhookTypeEnum as Type;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Validator;
 use App\Enums\WebhookStatusEnum as Status;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @property string $type      The type of webhook this is
@@ -153,6 +156,43 @@ class Webhook extends Model
     }
 
     #endregion SegPay
+
+    /* --------------------------------- IdMerit -------------------------------- */
+    #region IdMerit
+
+    public static function receiveIdMerit(Request $request): Response
+    {
+        Log::info('Received IdMerit Webhook');
+
+        if ($request->has('scanImage')) {
+            // Throw away for now, is huge encrypted value that breaks our encryption
+            // $scanImage = $request->scanImage;
+            $request->request->remove('scanImage');
+        }
+
+        if ($request->has('selfieImage')) {
+            // Throw away this as well
+            $request->request->remove('selfieImage');
+        }
+
+        $webhook = Webhook::create([
+            'type' => Type::IDMERIT,
+            'origin' => $request->getClientIp(),
+            'headers' => $request->headers->all(),
+            'verified' => false,
+            'body' => $request->all() ?? [],
+            'notes' => [],
+            'status' => Status::UNHANDLED,
+        ]);
+
+        ProcessIdMeritWebhook::dispatch($webhook);
+
+        return response('ok', 200); // 200 response
+    }
+
+    #endregion IdMerit
+    /* -------------------------------------------------------------------------- */
+
 
     /* ------------------------------- Pusher ------------------------------- */
     #region Pusher

@@ -44,7 +44,7 @@
       @hide="closeModal('modal-purchase-message')"
       :centered="mobile"
     >
-      <PurchaseMessage ref="purchaseMessage" :message="selectedResource" />
+      <PurchaseMessage ref="purchaseMessage" :message="selectedResource" :timeline="selectedTimeline" />
     </b-modal>
 
     <b-modal
@@ -272,6 +272,7 @@ export default {
             break
           case 'render-purchase-message':
             this.selectedResource = data.message
+            this.selectedTimeline = data.timeline
             this.$bvModal.show('modal-purchase-message')
             break
 

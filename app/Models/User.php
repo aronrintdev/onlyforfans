@@ -587,37 +587,32 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
         $isSubDiscounted =  $this->campaign && $this->campaign->active && ($this->campaign->type===CampaignTypeEnum::DISCOUNT);
         $discountPercent = $isSubDiscounted ? $this->campaign->discount_percent : 0;
 
-        $display_prices_in_cents = [];
-        if ( array_key_exists('subscriptions', $settingsCattrs) ) {
-            $subAttrs = $settingsCattrs['subscriptions'];
-
-            // TODO: FIX price should not be stored as a decimal
-            $subAttrs['price_per_1_months'] = intval(( (float)($subAttrs['price_per_1_months'] ?? 0)) * 100) ?? 0;
-
-            $display_prices_in_cents['subscribe_1_month'] = $subAttrs['price_per_1_months'];
-            $display_prices_in_cents['subscribe_1_month_discounted'] = $isSubDiscounted
-                ? applyDiscount($subAttrs['price_per_1_months'], $discountPercent)
-                : $subAttrs['price_per_1_months'];
+        $prices = [];
+        if ($this->timeline->price) {
+            $prices['1_month'] = $this->timeline->price;
+            $prices['1_month_discounted'] = $isSubDiscounted
+                ? $this->timeline->price->multiply((100 - $discountPercent) / 100)
+                : $this->timeline->price;
         }
 
         return [
-            'post_count'              => $timeline->posts->count(),
-            'like_count'              => $timeline->user->likedposts->count(),
-            'follower_count'          => $timeline->followers->count(),
-            'following_count'         => $timeline->user->followedtimelines->count(),
-            'subscribed_count'        => 0, // %TODO $sessionUser->timeline->subscribed->count()
-            'earnings'                => '', // TODO: Hook up to earnings controller
-            'website'                 => array_key_exists('website', $weblinks??[]) ? $weblinks['website'] : '', // %TODO
-            'instagram'               => array_key_exists('instagram', $weblinks??[]) ? $weblinks['instagram'] : '', // %TODO
-            'twitter'                 => array_key_exists('twitter', $weblinks??[]) ? $weblinks['twitter'] : '',
-            'amazon'                  => array_key_exists('amazon', $weblinks??[]) ? $weblinks['amazon'] : '',
-            'city'                    => (isset($this->settings)) ? $this->settings->city : null,
-            'country'                 => (isset($this->settings)) ? $this->settings->country : null,
-            'subscriptions'           => $settingsCattrs['subscriptions'] ?? null,
-            'display_prices_in_cents' => $display_prices_in_cents,
-            'is_sub_discounted'       => $isSubDiscounted,
+            'post_count'        => $timeline->posts->count(),
+            'like_count'        => $timeline->user->likedposts->count(),
+            'follower_count'    => $timeline->followers->count(),
+            'following_count'   => $timeline->user->followedtimelines->count(),
+            'subscribed_count'  => 0, // %TODO $sessionUser->timeline->subscribed->count()
+            'earnings'          => '', // TODO: Hook up to earnings controller
+            'website'           => array_key_exists('website', $weblinks??[]) ? $weblinks['website'] : '', // %TODO
+            'instagram'         => array_key_exists('instagram', $weblinks??[]) ? $weblinks['instagram'] : '', // %TODO
+            'twitter'           => array_key_exists('twitter', $weblinks??[]) ? $weblinks['twitter'] : '',
+            'amazon'            => array_key_exists('amazon', $weblinks??[]) ? $weblinks['amazon'] : '',
+            'city'              => (isset($this->settings)) ? $this->settings->city : null,
+            'country'           => (isset($this->settings)) ? $this->settings->country : null,
+            'subscriptions'     => $display_prices ?? null,
+            'prices'            => $prices,
+            'is_sub_discounted' => $isSubDiscounted,
             //'campaign'                => $this->campaign && $this->campaign->active ? $this->campaign : null,
-            'campaign'                => $this->campaign ?? null,
+            'campaign'          => $this->campaign ?? null,
         ];
     }
 

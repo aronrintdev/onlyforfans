@@ -28,4 +28,9 @@ class ChatmessagePolicy extends BasePolicy
         return $chatmessage->isOwner($user);
     }
 
+    protected function purchase(User $user, Chatmessage $chatmessage)
+    {
+        return $chatmessage->chatthread->participants->contains($user->id);
+    }
+
 }

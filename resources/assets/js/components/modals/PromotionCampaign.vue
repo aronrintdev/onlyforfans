@@ -49,7 +49,7 @@
           <section v-if="campaignPreview" class="box-campaign-blurb mt-1">
             <article v-if="campaignPreview.message" class="tag-message d-flex align-items-center">
               <div class="user-avatar">
-                <b-img rounded="circle" :src="timeline.avatar.filepath" :title="timeline.name" />
+                <b-img rounded="circle" :src="avatarImage" :title="timeline.name" />
               </div>
               <div class="text-wrap py-2 w-100">
                 <p class="mb-0">{{ campaignPreview.message }}</p>
@@ -62,8 +62,8 @@
 
         <!-- Details -->
         <div class="m-0">
-            Original Price {{ timeline.userstats.display_prices_in_cents.subscribe_1_month | niceCurrency }}
-            - Discounted to {{ applyDiscount(timeline.userstats.display_prices_in_cents.subscribe_1_month, discountPercent) | niceCurrency }}
+            Original Price {{ timeline.userstats.display_prices['1_month'] | niceCurrency }}
+            - Discounted to {{ applyDiscount(timeline.userstats.display_prices['1_month'], discountPercent) | niceCurrency }}
         </div>
 
       </b-card-body>
@@ -148,7 +148,7 @@ export default {
     discountPercentOptions() {
       const options = []
       for ( let i = 5 ; i <= 95 ; i+= 5 ) {
-        const discounted = this.applyDiscount(this.timeline.userstats.display_prices_in_cents.subscribe_1_month, i)
+        const discounted = this.applyDiscount(this.timeline.userstats.prices['1_month'], i)
         if (discounted >= 300) { // $3.00
           options.push({ text: `${i}% discount`, value: i })
         }
@@ -178,6 +178,10 @@ export default {
         message: this.message,
       }
     },
+
+    avatarImage() {
+      return this.timeline.avatar ? this.timeline.avatar.filepath : '/images/default_avatar.png'
+    }
 
   }, // computed
 
@@ -222,7 +226,9 @@ export default {
       return origAmountInCents - discountInCents
     }
   }, // methods
-
+  mounted() {
+    console.log('-------- this timeline', this.timeline)
+  }
 }
 </script>
 

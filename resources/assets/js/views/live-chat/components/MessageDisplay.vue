@@ -5,7 +5,9 @@
       :key="item.id"
       :value="item"
       :isDateBreak="isDateBreak(idx)"
+      :timeline="timeline"
       @unsend="unsend"
+      @update="onMessageUpdate"
       v-observe-visibility="idx === items.length - 1 ? endVisible : false"
     />
     <b-list-group-item class="load-more" v-observe-visibility="endVisible"> </b-list-group-item>
@@ -47,6 +49,7 @@ export default {
     items: { type: Array, default: () => ([]) },
     loading: { type: Boolean, default: false },
     searchQuery: { type: String, default: '' },
+    timeline: { type: Object, default: () => ({}) },
   },
 
   computed: {},
@@ -67,7 +70,11 @@ export default {
       return !current.isSame(next, 'date')
     },
 
-    unsend(data) {
+    onMessageUpdate(message) {
+      this.$emit('updateMessage', message)
+    },
+
+    unsend(data) { // note, server call to delete message is done elsewhere
       const index = this.items.findIndex(t => t.id === data.id)
       this.items.splice(index, 1)
       this.$forceUpdate()

@@ -531,6 +531,36 @@ class RestCommentsTest extends TestCase
         $response->assertStatus(403);
     }
 
+    /**
+     *  @group comments
+     *  @group emojis
+     *  @group regression
+     *  @group regression-base
+     */
+    public function test_follower_can_create_comment_with_emojis_on_timeline_post()
+    {
+        $timeline = Timeline::has('followers', '>=', 1)
+            ->whereHas('posts', function($q1) {
+                $q1->where('type', PostTypeEnum::FREE)->has('comments', '>=', 1);
+            })->firstOrFail();
+        $fan = $timeline->followers[0];
+        $post = $timeline->posts()->where('type', PostTypeEnum::FREE)->has('comments','>=',1)->first();
+
+        $EMOJI_TEXT = 'bio text with emoji 😘';
+        $payload = [
+            'post_id' => $post->id,
+            'user_id' => $fan->id,
+            'description' => $EMOJI_TEXT,
+        ];
+
+        $response = $this->actingAs($fan)->ajaxJSON('POST', route('comments.store'), $payload);
+        $response->assertStatus(201);
+
+        $content = json_decode($response->content());
+        $this->assertObjectHasAttribute('comment', $content);
+        $this->assertEquals($EMOJI_TEXT, $content->comment->description);
+    }
+
     // ------------------------------
 
     protected function setUp() : void

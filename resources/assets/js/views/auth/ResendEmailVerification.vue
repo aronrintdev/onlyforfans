@@ -1,42 +1,40 @@
 <template>
-  <div class="container w-100 d-flex flex-column mt-5">
-    <b-card class="login-card mx-auto">
-      <template #header>
-        <div class="h2 text-center mb-0" v-text="$t('header')" />
-        <div class="d-flex mt-2">
-          <router-link :to="{ name: 'login' }" class="ml-auto" v-text="$t('returnToLogin')" />
+  <AuthTemplate>
+    <div class="h-100 d-flex flex-column px-0 bg-white">
+      <div class="form-container p-5 d-flex flex-column mt-5">
+        <Branding type="text" size="3x" class="signin-logo" />
+        <div class="h2 d-md-none text-center my-3" v-text="$t('header')" />
+        <div class="h1 d-none d-md-block text-md-left my-3" v-text="$t('header')" />
+        <div class="my-2 text-center text-md-left">
+          <router-link :to="{ name: 'login' }">Return to Sign In</router-link>
         </div>
-      </template>
-      <transition-group tag="div" name="quick-fade" mode="out-in">
-        <div v-if="state === 'form'" key="form">
-          <b-form-group :label="$t('email')">
-            <b-form-input v-model="email" />
-          </b-form-group>
-          <b-btn variant="primary" block :disabled="email === ''" v-text="$t('send')" @click="send" />
-        </div>
-        <div v-if="state === 'alreadyConfirmed'" key="alreadyConfirmed">
-          <b-alert variant="success" show>
-            {{ $t('alreadyConfirmed') }}
-          </b-alert>
-          <b-btn variant="primary" block :to="{ name: 'login' }">
-            {{ $t('returnToLogin') }}
-          </b-btn>
-        </div>
-        <div v-if="state === 'sent'" key="sent">
-          <b-alert variant="success" show>
-            {{ $t('sent') }}
-          </b-alert>
-          <b-btn variant="primary" block :to="{ name: 'login' }">
-            {{ $t('returnToLogin') }}
-          </b-btn>
-        </div>
-      </transition-group>
-    </b-card>
-
-    <div class="mt-auto mb-3">
-      <LinkBar />
+        <transition-group tag="div" name="quick-fade" mode="out-in">
+          <div v-if="state === 'form'" key="form">
+            <b-form-group>
+              <b-form-input v-model="email" :placeholder="$t('email')" />
+            </b-form-group>
+            <b-btn variant="primary" block :disabled="email === ''" v-text="$t('send')" @click="send" />
+          </div>
+          <div v-if="state === 'alreadyConfirmed'" key="alreadyConfirmed">
+            <b-alert variant="success" show>
+              {{ $t('alreadyConfirmed') }}
+            </b-alert>
+            <b-btn variant="primary" block :to="{ name: 'login' }">
+              {{ $t('returnToLogin') }}
+            </b-btn>
+          </div>
+          <div v-if="state === 'sent'" key="sent">
+            <b-alert variant="success" show>
+              {{ $t('sent') }}
+            </b-alert>
+            <b-btn variant="primary" block :to="{ name: 'login' }">
+              {{ $t('returnToLogin') }}
+            </b-btn>
+          </div>
+        </transition-group>
+      </div>
     </div>
-  </div>
+  </AuthTemplate>
 </template>
 
 <script>
@@ -44,11 +42,14 @@
  * Register Page
  */
 import LinkBar from '../../components/staticPages/LinkBar'
+import AuthTemplate from './AuthTemplate'
+import Branding from '@components/common/Branding'
 
 export default {
   name: 'ResendEmailVerification',
   components: {
-    LinkBar,
+    AuthTemplate,
+    Branding,
   },
 
   data: () => ({
@@ -79,8 +80,28 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.login-card {
-  width: 500px;
+.form-container {
+  max-width: 600px;
+}
+.cta-btn {
+  height: 42px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &.loading {
+    opacity: 0.65;
+    pointer-events: none;
+  }
+
+  &:disabled {
+    background: rgba(138,150,163,.75);
+    border-color: rgba(138,150,163,.75);
+    opacity: .4;
+    pointer-events: none;
+  }
 }
 </style>
 

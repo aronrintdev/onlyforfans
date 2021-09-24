@@ -33,6 +33,12 @@
             Not yet Purchased
           </span>
         </span>
+        <span v-if="!value.is_sender && value.purchase_only">
+          {{ value.price | niceCurrency }}
+          <span v-if="value.purchased_by.length > 0">
+            Purchased
+          </span>
+        </span>
       </div>
     </article>
   </section>
@@ -42,6 +48,7 @@
 /**
  * resources/assets/js/views/live-chat/components/Message/Unlocked.vue
  */
+import _ from 'lodash'
 import Vuex from 'vuex'
 import moment from 'moment'
 import Attachments from './Attachments'
@@ -74,6 +81,12 @@ export default {
     },
 
     isEnableUnsend() {
+      if (!_.isEmpty(this.value.attachments)) {
+        if ( _.findIndex(this.value.attachments, o => (o.type === 'tip')) > -1 ) {
+          return false
+        }
+      }
+
       const currentTime = moment.utc().format("YYYY-MM-DD HH:mm:ss");
       const diff = this.moment(currentTime).diff(this.moment(this.value.delivered_at), 'minutes')
       return diff < 3 && !this.value.is_read ? true : false

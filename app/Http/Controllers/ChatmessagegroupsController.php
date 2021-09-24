@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Config;
 
 use App\Http\Resources\MediafileCollection;
 use App\Http\Resources\ChatmessagegroupCollection;
-use App\Http\Resources\Chatmessagegroup as ChatmessageResourcegroup;
+use App\Http\Resources\Chatmessagegroup as ChatmessagegroupResource;
 
 use App\Models\User;
 use App\Models\Mediafile;
@@ -34,7 +34,8 @@ class ChatmessagegroupsController extends AppBaseController
             'mgtype',
         ]) ?? [];
 
-        $query = Chatmessagegroup::query(); // Init query
+        //$query = Chatmessagegroup::query(); // Init query
+        $query = Chatmessagegroup::with('chatmessages.shareables');
 
         // Check permissions | Restrict
         $query->where('sender_id', $request->user()->id);
@@ -87,12 +88,13 @@ class ChatmessagegroupsController extends AppBaseController
 
     public function unsend(Request $request, Chatmessagegroup $chatmessagegroup) {
         $chatmessages = $chatmessagegroup->chatmessages;
-        foreach($chatmessages as $chatmessage) {
-            if (!$chatmessage->is_read) {
-                $chatmessage->delete();
+        foreach($chatmessages as $cm) {
+            if (!$cm->is_read) { // covers purchased case as well since is_purchased => is_read
+                $cm->delete();
             }
         }
-        return response()->json(200);
+        $chatmessagegroup->refresh();
+        return new ChatmessagegroupResource($chatmessagegroup);
     }
 
 }

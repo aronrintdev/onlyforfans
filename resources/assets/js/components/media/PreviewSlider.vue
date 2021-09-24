@@ -1,57 +1,92 @@
 <template>
-  <div class="swiper-slider" v-if="files.length > 0">
-    <!-- %FILE: resources/assets/js/components/media/PreviewSlider.vue -->
-    <swiper ref="mySwiper" :options="swiperOptions">
-      <swiper-slide class="slide">
-        <div>
-          <div v-observe-visibility="onFirstVisible"> </div>
-          <div class="swiper-image-wrapper" v-for="(media, idx) in files" :key="idx" :class="{ 'tag-last':idx==Object.keys(files).length-1}">
-            <b-img
-              v-if="media.is_image && media.access"
-              v-show="loaded"
-              class="swiper-lazy"
-              :src="media.filepath || media.src"
-              @click="openPhotoSwipe(idx)"
-              @load="onload"
-            />
-            <b-img
-              v-if="media.is_image && !media.access"
-              v-show="loaded"
-              class="swiper-lazy"
-              :src="media.blurFilepath"
-              @click="openPhotoSwipe(idx)"
-              @load="onload"
-            />
-            <div v-if="media.is_video" class="swiper-lazy video" @click="openPhotoSwipe(idx)">
-              <video>
-                <source :src="media.filepath" :type=" media.mimetype || media.type" />
-              </video>
-              <fa-icon :icon="['far', 'play-circle']" class="text-white icon-play" />
+  <div class="media-slider">
+    <div class="multiple swiper-slider" v-if="hasMultiFiles">
+      <!-- %FILE: resources/assets/js/components/media/PreviewSlider.vue -->
+      <swiper ref="mySwiper" :options="swiperOptions">
+        <swiper-slide class="slide">
+          <div>
+            <div v-observe-visibility="onFirstVisible"> </div>
+            <div class="swiper-image-wrapper" v-for="(media, idx) in files" :key="idx" :class="{ 'tag-last':idx==Object.keys(files).length-1}">
+              <b-img
+                v-if="media.is_image && media.access"
+                v-show="loaded"
+                class="swiper-lazy"
+                :src="media.filepath || media.src"
+                @click="openPhotoSwipe(idx)"
+                @load="onload"
+              />
+              <b-img
+                v-if="media.is_image && !media.access"
+                v-show="loaded"
+                class="swiper-lazy"
+                :src="media.blurFilepath"
+                @click="openPhotoSwipe(idx)"
+                @load="onload"
+              />
+              <div v-if="media.is_video" class="swiper-lazy video" @click="openPhotoSwipe(idx)">
+                <video>
+                  <source :src="media.filepath" :type=" media.mimetype || media.type" />
+                </video>
+                <fa-icon :icon="['far', 'play-circle']" class="text-white icon-play" />
+              </div>
             </div>
+            <b-spinner v-show="!loaded" variant="secondary" class="m-3" />
+            <div v-observe-visibility="onLastVisible"> </div>
           </div>
-          <b-spinner v-show="!loaded" variant="secondary" class="m-3" />
-          <div v-observe-visibility="onLastVisible"> </div>
+        </swiper-slide>
+      </swiper>
+      <transition name="indicator-fade-prev">
+        <div v-if="!firstVisible" class="indicator prev" @click="onClickPrev">
+          <fa-icon icon="chevron-left" />
         </div>
-      </swiper-slide>
-    </swiper>
-    <transition name="indicator-fade-prev">
-      <div v-if="!firstVisible" class="indicator prev" @click="onClickPrev">
-        <fa-icon icon="chevron-left" />
+      </transition>
+      <transition name="indicator-fade-next">
+        <div v-if="!lastVisible" class="indicator next" @click="onClickNext">
+          <fa-icon icon="chevron-right" />
+        </div>
+      </transition>
+      <div class="audio" v-for="(audio, idx) in audioFiles" :key="idx">
+        <vue-plyr>
+          <audio controls playsinline>
+            <source :src="audio.filepath" type="audio/webm" />
+            <source :src="audio.filepath" type="audio/mp3" />
+            <source :src="audio.filepath" type="audio/ogg" />
+          </audio>
+        </vue-plyr>
       </div>
-    </transition>
-    <transition name="indicator-fade-next">
-      <div v-if="!lastVisible" class="indicator next" @click="onClickNext">
-        <fa-icon icon="chevron-right" />
+    </div>
+    <div class="single" v-if="!hasMultiFiles">
+      <div class="media-wrapper">
+        <b-img
+          v-if="files[0].is_image && files[0].access"
+          v-show="loaded"
+          class="media-item"
+          :src="files[0].filepath || files[0].src"
+          @click="openPhotoSwipe(0)"
+          @load="onload"
+        />
+        <b-img
+          v-if="files[0].is_image && !files[0].access"
+          v-show="loaded"
+          class="media-item"
+          :src="files[0].blurFilepath"
+          @click="openPhotoSwipe(0)"
+          @load="onload"
+        />
+        <div v-if="files[0].is_video" class="media-item video" @click="openPhotoSwipe(0)">
+          <video>
+            <source :src="files[0].filepath" :type=" files[0].mimetype || files[0].type" />
+          </video>
+          <fa-icon :icon="['far', 'play-circle']" class="text-white icon-play" />
+        </div>
+        <vue-plyr v-if="files[0].is_audio">
+          <audio controls playsinline>
+            <source :src="files[0].filepath" type="audio/webm" />
+            <source :src="files[0].filepath" type="audio/mp3" />
+            <source :src="files[0].filepath" type="audio/ogg" />
+          </audio>
+        </vue-plyr>
       </div>
-    </transition>
-    <div class="audio" v-for="(audio, idx) in audioFiles" :key="idx">
-      <vue-plyr>
-        <audio controls playsinline>
-          <source :src="audio.filepath" type="audio/webm" />
-          <source :src="audio.filepath" type="audio/mp3" />
-          <source :src="audio.filepath" type="audio/ogg" />
-        </audio>
-      </vue-plyr>
     </div>
   </div>
 </template>
@@ -105,6 +140,10 @@ export default {
   computed: {
     swiper() {
       return this.$refs.mySwiper && this.$refs.mySwiper.$swiper;
+    },
+
+    hasMultiFiles() {
+      return this.files.length > 1
     },
   },
 
@@ -322,6 +361,48 @@ export default {
           width: 14px;
           height: 14px;
         }
+      }
+    }
+  }
+}
+
+.media-wrapper {
+  position: relative;
+  .media-item {
+    height: 144px;
+    border-radius: 10px;
+    margin-right: 8px;
+    width: auto;
+    max-width: 100%;
+    overflow: hidden;
+    object-fit: contain;
+    cursor: pointer;
+
+
+    &.video {
+      position: relative;
+
+      &::before {
+        content: "";
+        display: block;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.2);
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      video {
+        height: 100%;
+      }
+
+      .icon-play {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 34px;
       }
     }
   }

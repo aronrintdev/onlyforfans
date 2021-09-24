@@ -11,13 +11,13 @@
               <b-button :to="{ name: 'settings.subscription' }" variant="primary" class="w-100">Add a Promotion</b-button>
             </template>
           </li>
-          <li v-if="timeline.userstats.subscriptions && timeline.userstats.subscriptions.price_per_1_months" class="mb-3">
+          <li v-if="timeline.userstats.prices && timeline.userstats.prices['1_month']" class="mb-3">
             <b-button v-if="timeline.is_subscribed" :disabled="timeline.is_subscribed" variant="primary" class="w-100" >
               Subscribed
             </b-button>
             <template v-else>
               <b-button @click="renderSubscribe" :disabled="timeline.is_owner" variant="primary" class="w-100" >
-                Subscribe - {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} per month
+                Subscribe - {{ timeline.userstats.prices['1_month'] | niceCurrency }} per month
               </b-button>
 
               <CampaignDisplay v-if="activeCampaign" :value="activeCampaign" :timeline="timeline" />

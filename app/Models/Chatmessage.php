@@ -119,6 +119,10 @@ class Chatmessage extends Model implements UuidId, Ownable, Purchaseable
         return $this->belongsTo(Chatmessagegroup::class);
     }
 
+    public function shareables() {
+        return $this->morphMany(Shareable::class, 'shareable');
+    }
+
     #endregion Relationships
 
     /* -------------------------------------------------------------------------- */
@@ -234,8 +238,8 @@ class Chatmessage extends Model implements UuidId, Ownable, Purchaseable
     public function addAttachments(array $attachments = null)
     {
         if (isset($attachments) && count($attachments)) {
-            foreach($attachments ?? [] as $attachment) {
-                $this->addAttachment($attachment);
+            foreach($attachments ?? [] as $a) {
+                $this->addAttachment($a);
             }
         }
     }

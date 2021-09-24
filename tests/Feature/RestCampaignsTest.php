@@ -23,13 +23,15 @@ class RestCampaignsTest extends TestCase
      */
     public function test_can_create_discount_promotion()
     {
-        $timeline = Timeline::where('price', '>', 0)->first();
+        $timeline = Timeline::hasPrice()->with('prices')->first();
         $creator = $timeline->user;
 
         // Make sure subscription price is high enough so discount keeps us above $3 min
         $subPriceInDollars = $this->faker->numberBetween(100, 300);
         $subPriceInCents = $subPriceInDollars * 100;
-        $result = $creator->settings->setValues('subscriptions', [ 'price_per_1_months' => $subPriceInDollars ]); // %FIXME
+        // $result = $creator->settings->setValues('subscriptions', [ '1_month' => [ 'amount' => $subPriceInCents,
+        // 'currency' => 'USD' ] ]); // %FIXME
+        $timeline->updateOneMonthPrice($timeline->asMoney($subPriceInCents));
         $creator->refresh();
 
         $priorCampaign = null;
@@ -106,9 +108,9 @@ class RestCampaignsTest extends TestCase
      *  @group regression-base
      *  @group here0910
      */
-    public function test_can_cancel_discount_promotion() 
+    public function test_can_cancel_discount_promotion()
     {
-        $timeline = Timeline::where('price', '>', 0)->first();
+        $timeline = Timeline::hasPrice()->with('prices')->first();
         $creator = $timeline->user;
 
         // --- (1a) unlimited subcribers ---
@@ -135,6 +137,54 @@ class RestCampaignsTest extends TestCase
         $campaign->refresh();
         $this->assertFalse(!!$campaign->active);
 
+    }
+
+
+    /**
+     *  @group campaigns
+     *  @group regression
+     *  @group emojis
+     *  @group regression-base
+     */
+    public function test_can_create_discount_promotion_with_emoji_text()
+    {
+        $timeline = Timeline::hasPrice()->with('prices')->first();
+        $creator = $timeline->user;
+        $settings = $creator->settings;
+        $cattrs = $settings->cattrs;
+        $cattrs['subscriptions']['price_per_1_months'] = 500;
+        $creator->settings->cattrs = $cattrs;
+        $creator->save();
+
+        $EMOJI_TEXT = 'text with emoji 😘';
+
+        $payload = [
+            'type' => CampaignTypeEnum::DISCOUNT,
+            'has_new' => true,
+            'has_expired' => true,
+            'subscriber_count' => 0,
+            'offer_days' => $this->faker->numberBetween(1, 20),
+            'discount_percent' => 5,
+            'trial_days' => $this->faker->numberBetween(1, 20),
+            'message' => $EMOJI_TEXT,
+        ];
+
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('campaigns.store'), $payload);
+        $content = json_decode($response->content());
+        $response->assertStatus(201);
+        $response->assertJsonStructure([
+            'data' => [ 'type', 'active', 'has_new', 'has_expired', 'targeted_customer_group', 'subscriber_count', 'is_subscriber_count_unlimited', 'offer_days', 'discount_percent', 'trial_days', 'message', 'created_at' ],
+        ]);
+
+        $data = $content->data;
+        $this->assertTrue($data->is_subscriber_count_unlimited);
+        $this->assertTrue($data->has_new);
+        $this->assertTrue($data->has_expired);
+        $this->assertEquals($payload['offer_days'], $data->offer_days);
+        $this->assertEquals($payload['trial_days'], $data->trial_days);
+        $this->assertEquals($payload['discount_percent'], $data->discount_percent);
+        $this->assertEquals($payload['message'], $data->message);
+        $this->assertTrue($data->active);
     }
 
     // ------------------------------

@@ -11,7 +11,7 @@
               <p v-if="!subscribe_only"><fa-icon :icon="['fas', 'check']" /> Get access to purchase content</p>
               <p v-else><fa-icon :icon="['fas', 'check']" /> Get access to premium content</p>
               <p v-if="!subscribe_only"><fa-icon :icon="['fas', 'check']" /> Upgrade to full access anytime</p>
-              <!-- <p v-if="subscribe_only"><fa-icon :icon="['fas', 'check']" /> Full access for {{ timeline.userstats.subscriptions.price_per_1_months * 100 | niceCurrency }} monthly</p> -->
+              <!-- <p v-if="subscribe_only"><fa-icon :icon="['fas', 'check']" /> Full access for {{ timeline.userstats.prices['1_month'] | niceCurrency }} monthly</p> -->
               <p><fa-icon :icon="['fas', 'check']" /> Quick and easy cancellation</p>
               <p><fa-icon :icon="['fas', 'check']" /> Safe and secure transaction</p>
               <p><fa-icon :icon="['fas', 'check']" /> Ability to Message with {{ timeline.name }}</p>
@@ -21,10 +21,10 @@
           <b-button v-if="subscribe_only" @click="doSubscribe" :disabled="isInProcess" variant="primary" class="w-100">
             <b-spinner small v-if="isInProcess" class="mr-2"></b-spinner>
             <template v-if="timeline.userstats.is_sub_discounted">
-              Subscribe for {{ timeline.userstats.display_prices_in_cents.subscribe_1_month_discounted | niceCurrency }} now
+              Subscribe for {{ timeline.userstats.prices['1_month_discounted'] | niceCurrency }} now
             </template>
             <template v-else>
-              Subscribe for {{ timeline.userstats.display_prices_in_cents.subscribe_1_month | niceCurrency }} per month now
+              Subscribe for {{ timeline.userstats.prices['1_month'] | niceCurrency }} per month now
             </template>
           </b-button>
 
@@ -91,9 +91,9 @@ export default {
 
     price() {
       // if (this.timeline.userstats.is_sub_discounted) {
-      //   return this.timeline.userstats.display_prices_in_cents.subscribe_1_month_discounted
+      //   return this.timeline.userstats.prices['1_month_discounted']
       // }
-      return this.timeline.userstats.display_prices_in_cents.subscribe_1_month
+      return this.timeline.userstats.prices['1_month']
     },
 
     campaign() {
@@ -104,8 +104,8 @@ export default {
     },
 
     displayDiscount() {
-      if (this.timeline.userstats.display_prices_in_cents) {
-        return this.timeline.userstats.display_prices_in_cents.subscribe_1_month_discounted
+      if (this.timeline.userstats.prices) {
+        return this.timeline.userstats.prices['1_month_discounted']
       }
       return null
     }

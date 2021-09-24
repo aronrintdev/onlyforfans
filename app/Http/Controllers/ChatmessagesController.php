@@ -1,10 +1,6 @@
 <?php
 namespace App\Http\Controllers;
 
-use DB;
-use Exception;
-use Throwable;
-use App\Models\User;
 use App\Models\Mediafile;
 use App\Models\Chatthread;
 use App\Models\Casts\Money;
@@ -12,7 +8,6 @@ use App\Models\Chatmessage;
 use Illuminate\Http\Request;
 use App\Payments\PaymentGateway;
 use App\Models\Financial\Account;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
 use App\Http\Resources\MediafileCollection;
 use App\Http\Resources\ChatmessageCollection;
@@ -65,7 +60,7 @@ class ChatmessagesController extends AppBaseController
         foreach ($filters as $key => $v) {
             switch ($key) {
             case 'sender_id':
-                $query->where('sender_id', $v); // %FIXME: if non-admin limit 
+                $query->where('sender_id', $v); // %FIXME: if non-admin limit
                 break;
             case 'participant_id':
                 $query->whereHas('chatthread.participants', function($q1) use($key, $v) {
@@ -79,6 +74,13 @@ class ChatmessagesController extends AppBaseController
 
         $data = $query->latestDelivered()->paginate( $request->input('take', Config::get('collections.defaultMax', 10)) );
         return new ChatmessageCollection($data);
+    }
+
+    public function show(Request $request, Chatmessage $chatmessage)
+    {
+        $this->authorize('view', $chatmessage);
+
+        return new ChatmessageResource($chatmessage);
     }
 
     /**
