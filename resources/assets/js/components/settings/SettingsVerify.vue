@@ -30,16 +30,22 @@
                 <b-form-input id="mobile" v-model="form.mobile" required v-mask="'(###) ###-####'" />
               </b-form-group>
             </b-form-row>
-            <!-- <b-form-row>
-              <b-form-group class="col-sm-6 ">
-                <b-form-checkbox
-                  :disabled="!session_user.is_verified"
+            <b-form-row>
+              <b-form-group class="col-sm-6 " label="Will your profile contain adult content?">
+                <b-form-radio-group
+                  :disabled="session_user.is_verified"
+                  required
                   v-model="form.hasAllowedNSFW"
                 >
-                  Enable NSFW
-                </b-form-checkbox>
+                  <b-form-radio value="1">
+                    Yes, my profile may contain adult content.
+                  </b-form-radio>
+                  <b-form-radio value="0">
+                    No, my profile will never contain adult content.
+                  </b-form-radio>
+                </b-form-radio-group>
               </b-form-group>
-            </b-form-row> -->
+            </b-form-row>
             <!--
             <b-form-row>
               <b-form-group class="col-sm-4" label="Country" label-for="country">
@@ -173,7 +179,7 @@ export default {
       mobile: null,
       firstname: null,
       lastname: null,
-      hasAllowedNSFW: false,
+      hasAllowedNSFW: null,
       //country: null,
       //dob: null,
     },

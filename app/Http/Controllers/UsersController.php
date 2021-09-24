@@ -435,6 +435,7 @@ class UsersController extends AppBaseController
             'mobile' => 'required|digits:10', // assume US (w/o country code) for now & Vue client strips out extra chars
             'firstname' => 'required|string',
             'lastname' => 'required|string',
+            'hasAllowedNSFW' => 'required|bool',
             //'country' => 'required|string|size:2',
             //'dob' => 'required|date',
         ]);
