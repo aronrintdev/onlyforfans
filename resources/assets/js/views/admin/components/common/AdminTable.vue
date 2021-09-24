@@ -19,12 +19,35 @@
       :sort-by="tobj.sortBy"
       :sort-desc="tobj.sortDesc"
       :no-local-sorting="true"
+      :busy="busy || loading"
+      :selectable="selectable"
       @sort-changed="sortHandler"
       sort-icon-left
       small
     >
       <template #cell(id)="data">
-        <span @click="doEmit('render-show', data.item)" class="clickable">{{ data.item.id | niceGuid }}</span>
+        <span>
+          <span
+            :title="data.item.id"
+            v-b-tooltip.hover
+            class="clickable text-monospace"
+            @click="doEmit('render-show', data.item)"
+          >
+            {{ data.item.id | niceGuid }}
+          </span>
+          <b-btn
+            variant="link"
+            class="cursor-pointer"
+            title="copy"
+            size="sm"
+            v-clipboard:copy="data.item.id"
+            v-clipboard:success="onCopy"
+            v-clipboard:error="onCopyError"
+          >
+            <fa-icon icon="copy" fixed-width />
+          </b-btn>
+        </span>
+
       </template>
       <template #cell(ctrls)="data">
         <span @click="doEmit('render-ellipsis', data.item)">
@@ -54,6 +77,9 @@
 </template>
 
 <script>
+/**
+ * resources/assets/js/views/admin/components/common/AdminTable.vue
+ */
 import Vue from 'vue'
 import Vuex from 'vuex'
 import _ from 'lodash'
@@ -66,6 +92,8 @@ export default {
     tblFilters: null,
     indexRouteName: { type: String, default: null },
     encodedQueryFilters: null,
+    busy: { type: Boolean, default: false },
+    selectable: { type: Boolean, default: false },
   },
 
   computed: {
@@ -83,9 +111,19 @@ export default {
       sortBy: 'created_at',
       sortDesc: false,
     },
+
+    loading: false,
   }),
 
   methods: {
+
+    onCopy(e) {
+      console.log('onCopy', {e})
+    },
+
+    onCopyError(e) {
+      console.error('onCopyError', {e})
+    },
 
     doEmit(action, data) {
       this.$emit('table-event', { action, data } )
@@ -111,6 +149,7 @@ export default {
         ...this.encodedQueryFilters,
       }
       console.log('_getData', { params })
+      this.loading = true
       try {
         const response = await axios.get( this.$apiRoute(this.indexRouteName), { params } )
         this.tobj.totalRows = response.data.meta.total // %NOTE: coupled to table
@@ -119,6 +158,20 @@ export default {
         throw e
         return []
       }
+      this.loading = false
+    },
+
+    updateItem(slotData, newValue) {
+      console.log('updateItem', {slotData, newValue})
+      this.$set(this.tobj.data, slotData.index, newValue)
+    },
+
+    setItemBusy(slotData) {
+      this.$set(this.tobj.data, slotData.index, { ...this.tobj.data[slotData.index], busy: slotData.field.key })
+    },
+
+    unsetItemBusy(slotData) {
+      this.$set(this.tobj.data, slotData.index, { ...this.tobj.data[slotData.index], busy: null })
     },
 
     pageClickHandler(e, page) {
