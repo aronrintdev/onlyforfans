@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 
 use App\Models\Permission;
 use App\Models\Staff;
@@ -20,6 +21,23 @@ use App\Notifications\InviteStaffMember;
 
 class StaffController extends Controller
 {
+    public function index(Request $request)
+    {
+        $request->validate([
+            // filters
+            'role' => 'string|in:member,manager',
+        ]);
+
+        $query = Staff::with('user');
+        $query->where('owner_id', $request->user()->id);
+        if ( $request->has('role') ) {
+            $query->where('role', $request->role);
+        }
+
+        $data = $query->paginate( $request->input('take', Config::get('collections.max.default', 10)) );
+        return new StaffCollection($data);
+    }
+
     // Add new staff account and send invitation email
     // sendStaffInvite
     public function store(Request $request)
@@ -75,24 +93,6 @@ class StaffController extends Controller
         }
 
         return new StaffResource($staff);
-    }
-
-    /**
-     * Retrieves the logged in user's staff accounts
-     *
-     * @param Request $request
-     * @return array
-     */
-    public function indexManagers(Request $request)
-    {
-        $sessionUser = $request->user();
-
-        $accounts = $sessionUser->staffMembers()
-            ->with('user')
-            ->where('role', 'manager')
-            ->paginate($request->input('take', 10));
-
-        return new StaffCollection($accounts);
     }
 
     /**

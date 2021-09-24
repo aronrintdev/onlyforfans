@@ -29,17 +29,16 @@ class RestStaffTest extends TestCase
      *  @group regression
      *  @group regression-base
      *  @group staff
+     *  @group here0924
      */
-    public function test_can_fetch_manager_list()
+    public function test_can_index_staffaccounts()
     {
         // Find a creator account with managers
         $manager = Staff::where('role', 'manager')->firstOrFail();
-        $sessionUser = User::where('id', $manager->owner_id)->firstOrFail();
+        $owner = User::where('id', $manager->owner_id)->firstOrFail();
 
-        $payload = [ 
-            'page' => 1,
-        ];
-        $response = $this->actingAs($sessionUser)->ajaxJSON( 'GET', route('staff.indexManagers', $payload) );
+        $payload = [ 'role' => 'manager', ];
+        $response = $this->actingAs($owner)->ajaxJSON( 'GET', route('staffaccounts.index', $payload) );
 
         $response->assertStatus(200);
         $content = json_decode($response->content());
@@ -65,18 +64,29 @@ class RestStaffTest extends TestCase
         foreach($managers as $manager) {
             $dt = Staff::find($manager->id);
             $this->assertNotNull($dt->owner_id);
-            $this->assertEquals($dt->owner_id, $sessionUser->id);
+            $this->assertEquals($dt->owner_id, $owner->id);
         }
     }
 
-    
     /**
      *  @group regression
      *  @group regression-base
      *  @group staff
      *  @group here0924
      */
-    public function test_can_send_staff_manager_invitation_as_guest()
+    public function test_can_not_fetch_manager_list_as_guest()
+    {
+        $payload = [ 'role' => 'manager', ];
+        $response = $this->ajaxJSON( 'GET', route('staffaccounts.index', $payload) );
+        $response->assertUnauthorized();
+    }
+    
+    /**
+     *  @group regression
+     *  @group regression-base
+     *  @group staff
+     */
+    public function test_can_send_staff_manager_invitation_to_guest()
     {
         $lPath = self::getLogPath();
         $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
@@ -145,9 +155,8 @@ class RestStaffTest extends TestCase
      *  @group regression
      *  @group regression-base
      *  @group staff
-     *  @group here0924
      */
-    public function test_can_send_staff_manager_invitation_as_registered_user()
+    public function test_can_send_staff_manager_invitation_to_registered_user()
     {
         NotificationFacade::fake();
 
@@ -380,9 +389,8 @@ class RestStaffTest extends TestCase
      *  @group regression
      *  @group regression-base
      *  @group staff
-     *  @group here0924
      */
-    public function test_can_send_staff_member_invitation_as_guest()
+    public function test_can_send_staff_member_invitation_to_guest()
     {
         $lPath = self::getLogPath();
         $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
@@ -451,9 +459,8 @@ class RestStaffTest extends TestCase
      *  @group regression
      *  @group regression-base
      *  @group staff
-     *  @group here0924
      */
-    public function test_can_send_staff_member_invitation_as_registered_user()
+    public function test_can_send_staff_member_invitation_to_registered_user()
     {
         NotificationFacade::fake();
 

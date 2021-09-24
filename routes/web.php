@@ -193,7 +193,8 @@ Route::group(['middleware' => ['auth']], function () {
 
     /* ------------------------------ Staff ------------------------------ */
     //Route::post('/users/send-staff-invite', ['as'=>'users.sendStaffInvite', 'uses' => 'UsersController@sendStaffInvite']);
-    Route::resource('staffaccounts', 'StaffController', [ 'only' => [ 'store', ] ]); // was sendStaffInvite
+    //Route::get('/staff-members/managers', ['as'=>'staff.indexManagers', 'uses' => 'StaffController@indexManagers']);
+    Route::resource('staffaccounts', 'StaffController', [ 'only' => [ 'index', 'store', ] ]); // was sendStaffInvite, indexManagers
 
     /* ------------------------------ Stories ------------------------------ */
     Route::get('/stories/player', ['as' => 'stories.player', 'uses' => 'SpaController@index']);
@@ -386,7 +387,6 @@ Route::delete('/lists/{id}/pin', 'ListsController@removeFromPin')->name('lists.r
 /*
   Staff
  */
-Route::get('/staff-members/managers', ['as'=>'staff.indexManagers', 'uses' => 'StaffController@indexManagers']);
 Route::get('/staff-members/staff', ['as'=>'staff.indexStaffMembers', 'uses' => 'StaffController@indexStaffMembers']);
 Route::delete('/staff-members/{id}', ['as'=>'staff.remove', 'uses' => 'StaffController@remove']);
 //Route::get('/staff-members/invitations/accept', ['as'=>'staff.acceptInvite', 'uses' => 'StaffController@acceptInvite']);

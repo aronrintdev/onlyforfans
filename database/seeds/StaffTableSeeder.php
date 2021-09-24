@@ -19,8 +19,42 @@ class StaffTableSeeder extends Seeder
 
         if ( $this->appEnv === 'testing' ) {
             $this->output->writeln("  - Creating managers and staff members for testing...");
+        }
 
-            $users = User::get();
+        $users = User::get();
+
+        $bin = collect();
+        $users->each( function($u) use(&$users, &$bin) {
+            static $iter = 1;
+
+            $t = $this->faker->randomElement([
+                'manager',
+                'member',
+                'owner',
+                'none',
+                'none',
+                'none',
+            ]);
+            switch ($t) {
+                case 'manager',
+                    break;
+                case 'member',
+                    break;
+                case 'owner',
+                    break;
+            }
+        }
+        /*
+            pending
+            active
+            manager
+            member
+            registered invite
+            guest invite
+         */
+
+
+
             $sessionsUser = $users[0];
             // Creating a pending manager
             $pendingManager = $users[1];
@@ -50,11 +84,11 @@ class StaffTableSeeder extends Seeder
             ]);
 
             // Creating a pending staff member of the above active manager
-            $pendignStaff = $users[3];
+            $pendingStaff = $users[3];
             Staff::create([
                 'first_name' => $this->faker->firstName,
                 'last_name' => $this->faker->lastName,
-                'email' => $pendignStaff->email,
+                'email' => $pendingStaff->email,
                 'role' => 'staff',
                 'owner_id' => $activeManager->id,
                 'token' => str_random(60),
@@ -76,6 +110,5 @@ class StaffTableSeeder extends Seeder
                 'pending' => false,
                 'user_id' => $activeStaff->id,
             ]);
-        }
     }
 }

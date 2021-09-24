@@ -333,18 +333,15 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
         return $this->hasOne(Verifyrequest::class, 'requester_id')->latestOfMany();
     }
 
-    public function campaign()
-    {
+    public function campaign() {
         return $this->hasOne(Campaign::class, 'creator_id')->where('active', true);
     }
 
-    public function staffMembers()
-    {
+    public function staffaccounts() { // includes managers and members
         return $this->hasMany(Staff::class, 'owner_id');
     }
 
-    public function staff()
-    {
+    public function staff() {
         return $this->hasOne(Staff::class, 'user_id');
     }
 
