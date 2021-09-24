@@ -238,8 +238,8 @@ class Chatmessage extends Model implements UuidId, Ownable, Purchaseable
     public function addAttachments(array $attachments = null)
     {
         if (isset($attachments) && count($attachments)) {
-            foreach($attachments ?? [] as $attachment) {
-                $this->addAttachment($attachment);
+            foreach($attachments ?? [] as $a) {
+                $this->addAttachment($a);
             }
         }
     }
