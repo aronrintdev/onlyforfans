@@ -191,6 +191,10 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/campaigns/stop', ['as'=>'campaigns.stop', 'uses' => 'CampaignsController@stop']);
     Route::resource('campaigns', 'CampaignsController', [ 'only' => [ 'store' ] ]);
 
+    /* ------------------------------ Staff ------------------------------ */
+    //Route::post('/users/send-staff-invite', ['as'=>'users.sendStaffInvite', 'uses' => 'UsersController@sendStaffInvite']);
+    Route::resource('staffaccounts', 'StaffController', [ 'only' => [ 'store', ] ]); // was sendStaffInvite
+
     /* ------------------------------ Stories ------------------------------ */
     Route::get('/stories/player', ['as' => 'stories.player', 'uses' => 'SpaController@index']);
     Route::get('/stories/match', ['as'=>'stories.match', 'uses' => 'StoriesController@match']);
@@ -261,7 +265,6 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
     Route::post('/users/avatar', ['as' => 'users.updateAvatar', 'uses' => 'UsersController@updateAvatar']);
     Route::post('/users/cover', ['as' => 'users.updateCover', 'uses' => 'UsersController@updateCover']);
-    Route::post('/users/send-staff-invite', ['as'=>'users.sendStaffInvite', 'uses' => 'UsersController@sendStaffInvite']);
     Route::get('/users', ['as'=>'users.index', 'uses' => 'UsersController@index'])->middleware(['role:admin|super-admin']); // describe manually to add middleware for admin
     Route::resource('users', 'UsersController', [ 'except' => [ 'index', 'create', 'edit', 'store' ] ]);
 

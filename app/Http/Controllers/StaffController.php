@@ -1,20 +1,82 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Models\User;
+use App\Models\Permission;
 use App\Models\Staff;
 use App\Models\Timeline;
+use App\Models\User;
+
 use App\Http\Resources\StaffCollection;
+use App\Http\Resources\Staff as StaffResource;
 use App\Http\Resources\UserCollection;
-use App\Models\Permission;
+
 use App\Apis\Sendgrid\Api as SendgridApi;
+
 use App\Notifications\StaffSettingsChanged;
+use App\Notifications\InviteStaffManager;
+use App\Notifications\InviteStaffMember;
 
 class StaffController extends Controller
 {
+    // Add new staff account and send invitation email
+    // sendStaffInvite
+    public function store(Request $request)
+    {
+        $request->validate([
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'email' => 'required|email',
+            'role' => 'required|string|in:manager,member',
+        ]);
+
+        // Add new staff user
+        $inviteeEmail = $request->input('email'); // invitee's email
+        $invitee = User::where('email', $inviteeEmail)->first(); // ->makeVisible('email'); // invitee
+        $inviter = $request->user(); // ->makeVisible('email');
+
+        // Check if the same invite exists
+        $existingStaff = Staff::where('role', $request->input('role'))->where('email', $inviteeEmail)->where('owner_id', $inviter->id)->get();
+        if (count($existingStaff) > 0) {
+            return response()->json( [ 'message' => 'This user was already invited as a '.$request->input('role') ], 400);
+        }
+
+        $staff = Staff::create([
+            'first_name' => $request->input('first_name'), // invitee
+            'last_name' => $request->input('last_name'), // invitee
+            'email' => $inviteeEmail, // invitee
+            'role' => $request->input('role'),
+            'owner_id' => $inviter->id,
+            'creator_id' => $request->input('creator_id'), // inviter (?)
+        ]);
+
+        if ($request->has('permissions')) {
+            $permissions = $request->input('permissions');
+            $staff->permissions()->attach($permissions);
+        }
+
+        // Send Invitation email
+        switch ( $request->input('role', 'none') ) {
+            case 'manager':
+                if ( !empty($invitee) ) {
+                    $invitee->notify(new InviteStaffManager($staff, $inviter, $invitee));
+                } else {
+                    InviteStaffManager::sendGuestInvite($staff, $inviter);
+                }
+                break;
+            case 'member':
+                if ( !empty($invitee) ) {
+                    $invitee->notify(new InviteStaffMember($staff, $inviter, $invitee));
+                } else {
+                    InviteStaffMember::sendGuestInvite($staff, $inviter);
+                }
+                break;
+        }
+
+        return new StaffResource($staff);
+    }
+
     /**
      * Retrieves the logged in user's staff accounts
      *
