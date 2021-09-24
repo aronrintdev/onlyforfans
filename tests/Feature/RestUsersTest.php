@@ -124,7 +124,6 @@ class RestUsersTest extends TestCase
                 'email_verified',
                 'referral_code',
                 'created_at',
-                'about',
                 'is_verified',
                 'verifyrequest',
 
@@ -136,7 +135,6 @@ class RestUsersTest extends TestCase
                     'created_at', 
                     'is_creator', 
 
-                    'about',
                     'birthdate',
                     'city',
                     'country',

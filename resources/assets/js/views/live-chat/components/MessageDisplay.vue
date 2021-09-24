@@ -74,7 +74,7 @@ export default {
       this.$emit('updateMessage', message)
     },
 
-    unsend(data) {
+    unsend(data) { // note, server call to delete message is done elsewhere
       const index = this.items.findIndex(t => t.id === data.id)
       this.items.splice(index, 1)
       this.$forceUpdate()

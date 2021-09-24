@@ -38,7 +38,7 @@ class Chatmessagegroup extends JsonResource
                 'videos_count' => 0,
                 'audios_count' => 0,
             ];
-            $firstCM = $this->chatmessages[0];
+            $firstCM = $this->chatmessages[0] ?? null;
             foreach ($firstCM->mediafiles ?? [] as $a) {
                 if ($a->is_image) {
                     $result['images_count'] += 1;
