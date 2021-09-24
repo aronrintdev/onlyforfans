@@ -727,6 +727,8 @@ export default {
             })
           }
           this.description = e.target.innerHTML
+        } else {
+          this.description = html
         }
         if (this.newMatch) {
           this.lastMatches = matches;
@@ -735,6 +737,7 @@ export default {
           this.suggestions = [];
         }
       } else {
+        this.description = html;
         this.newMatch = null;
         this.suggestions = [];
       }
