@@ -80,12 +80,10 @@ class NotificationsController extends AppBaseController
             ->where('notifiable_type', 'users')
             ->where('notifiable_id', $sessionUser->id)
             ->get();
-        return response()->json(
-            [
+        return response()->json([
                 'total_unread_count' => $unreadNotifications->count(),
                 'unread_notifications' => $unreadNotifications,
-            ]
-        );
+            ]);
     }
 
 }

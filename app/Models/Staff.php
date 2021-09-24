@@ -13,6 +13,12 @@ class Staff extends Model
 
     protected $guarded = [ 'id', 'created_at', 'updated_at' ];
 
+    protected $attributes = [ 
+        'pending' => true, // default: new record typically starts off as an invitation
+        'active' => false, // default: new record typically starts off as inactive
+        // %FIXME: pending & active can be combined into a single enum 'state' or 'status' field
+    ];
+
     // -------------------- %%% Boot ----------------------
 
     public static function boot()
