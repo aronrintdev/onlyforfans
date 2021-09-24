@@ -28,7 +28,7 @@
           </div>
           <div v-if="!mobile" class="box-pagination d-flex align-items-center">
             <b-pagination v-model="currentPage" :total-rows="totalItems" :per-page="itemsPerPage" class="m-0" aria-controls="earnings-transactions-table" />
-            <div class="ml-3">({{ totalItems }})</div>
+            <!-- <div class="ml-3">({{ totalItems }})</div> -->
           </div>
         </section>
 
@@ -62,13 +62,13 @@
         
         <section v-if="!mobile" class="crate-pagination d-flex align-items-center my-3">
           <b-pagination v-model="currentPage" :total-rows="totalItems" :per-page="itemsPerPage" class="m-0" aria-controls="earnings-transactions-table" />
-          <div class="ml-3">({{ totalItems }})</div>
+          <!-- <div class="ml-3">({{ totalItems }})</div> -->
         </section>
 
         <section v-if="mobile" class="crate-as_cards"> <!-- responsive 'table' using cards -->
           <b-card v-for="(cmg,idx) in chatmessagegroups" :key="idx" v-observe-visibility="idx===chatmessagegroups.length-1 ? visibilityChanged : false" class="px-1 py-2 mb-3" no-body>
             <b-list-group flush>
-              <b-list-group-item class="d-flex"><div class="text-muted tag-label">Date</div> <div class="ml-auto">{{ cmg.created_at }}</div></b-list-group-item>
+              <b-list-group-item class="d-flex"><div class="text-muted tag-label">Date & Time</div> <div class="ml-auto">{{ cmg.created_at }}</div></b-list-group-item>
               <b-list-group-item class="d-flex"><div class="text-muted tag-label">Text</div> <div class="ml-auto" style="width: 80%;"><ContentViewer :str=cmg.mcontent /></div></b-list-group-item>
               <b-list-group-item class="d-flex"><div class="text-muted tag-label">Attachment</div>
                 <div class="ml-auto">
@@ -136,13 +136,13 @@ export default {
 
     fields() {
       return [
-        { key: 'created_at', label: 'Date', formatter: v => Vue.options.filters.niceDateTime(v, false), sortable: true },
+        { key: 'created_at', label: 'Date & Time', formatter: v => Vue.options.filters.niceDateTime(v, false), sortable: true },
         { key: 'mcontent', label: 'Text', tdClass: 'tag-col-mcontent', },
         { key: 'mediafile_counts', label: 'Attachment', },
         { key: 'price', label: 'Price', formatter: v => Vue.options.filters.niceCurrency(v), sortable: true },
         //{ key: 'deliver_at', label: 'Delivered At', formatter: v => Vue.options.filters.niceBool(v) },
         { key: 'sent_count', label: 'Sent', },
-        { key: 'read_count', label: 'Viewed (Read?)', },
+        { key: 'read_count', label: 'Viewed', },
         { key: 'purchased_count', label: 'Purchased', },
         { key: 'unsend_action', label: 'Unsend' },
       ]
@@ -322,7 +322,7 @@ export default {
     "table": {
       "label": {
         "id": "ID",
-        "date": "Date",
+        "date": "Date & Time",
         "gross": "Gross",
         "fees": "Fees",
         "net": "Net",
@@ -334,7 +334,7 @@ export default {
     },
     "unsend": {
       "title": "Unsend this message",
-      "description": "Unsend this message for everyone who has not purchased it yet"
+      "description": "Unsend this message for everyone who has not purchased it yet."
     }
   }
 }
