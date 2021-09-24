@@ -10,6 +10,11 @@
       :encodedQueryFilters="encodedQueryFilters"
       :busy="busy"
     >
+      <template #cell(timeline)="data">
+        <a target="_blank" :href="`/${data.value}`">
+          <span v-if="data.value" class="ml-2">@{{ data.value }}</span>
+        </a>
+      </template>
       <template #cell(email_verified_at)="data">
         <span>
           <BoolBadgeDisplay :value="!!data.value" />
@@ -100,8 +105,9 @@ export default {
       { key: 'id', label: 'ID', formatter: (v, k, i) => Vue.options.filters.niceGuid(v) },
       { key: 'email', label: 'Email', sortable: true, },
       { key: 'username', label: 'Username', sortable: true, },
-      { key: 'firstname', label: 'First', sortable: true, },
-      { key: 'lastname', label: 'Last', sortable: true, },
+      { key: 'timeline', label: 'Timeline Slug', sortable: true, formatter: (v, k, i) => v ? v.slug : '' },
+      // { key: 'firstname', label: 'First', sortable: true, },
+      // { key: 'lastname', label: 'Last', sortable: true, },
       { key: 'email_verified_at', label: 'Email Verified?', sortable: true,
         // formatter: (v, k, i) => {
         //   if ( v === null ) {
@@ -121,7 +127,6 @@ export default {
           return !v
         },
       },
-      { key: 'timeline', label: 'Timeline Slug', sortable: true, formatter: (v, k, i) => v ? v.slug : '' },
       { key: 'last_logged', label: 'Last Login', sortable: true, formatter: (v, k, i) => Vue.options.filters.niceDate(v, true) },
       { key: 'created_at', label: 'Joined', sortable: true, formatter: (v, k, i) => Vue.options.filters.niceDate(v, true) },
       { key: 'ctrls', label: '', sortable: false, },
