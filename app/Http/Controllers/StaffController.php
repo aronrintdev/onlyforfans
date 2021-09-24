@@ -51,7 +51,7 @@ class StaffController extends Controller
 
         // Add new staff user
         $inviteeEmail = $request->input('email'); // invitee's email
-        $invitee = User::where('email', $inviteeEmail)->first(); // ->makeVisible('email'); // invitee
+        $invitee = User::where('email', $inviteeEmail)->first(); // ->makeVisible('email'); // invitee: may or may not exist
         $inviter = $request->user(); // ->makeVisible('email');
 
         // Check if the same invite exists
@@ -60,14 +60,18 @@ class StaffController extends Controller
             return response()->json( [ 'message' => 'This user was already invited as a '.$request->input('role') ], 400);
         }
 
-        $staff = Staff::create([
+        $attrs = [
             'first_name' => $request->input('first_name'), // invitee
             'last_name' => $request->input('last_name'), // invitee
             'email' => $inviteeEmail, // invitee
             'role' => $request->input('role'),
             'owner_id' => $inviter->id,
             'creator_id' => $request->input('creator_id'), // inviter (?)
-        ]);
+        ];
+        if ( !empty($invitee->id??null) ) {
+            $attrs['user_id'] = $invitee->id;
+        }
+        $staff = Staff::create($attrs);
 
         if ($request->has('permissions')) {
             $permissions = $request->input('permissions');
