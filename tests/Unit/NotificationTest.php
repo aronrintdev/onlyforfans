@@ -3,7 +3,7 @@ namespace Tests\Unit;
 
 use DB;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Notification as NotificationFacade;
 use Illuminate\Support\Facades\Config;
 
 use Carbon\Carbon;
@@ -69,7 +69,7 @@ class NotificationTest extends TestCase
      */
     public function test_should_notify_new_message_received()
     {
-        Notification::fake();
+        NotificationFacade::fake();
         $receiver = User::has('chatthreads')->firstOrFail();
 
         $chatthread = $receiver->chatthreads->first();
@@ -82,8 +82,8 @@ class NotificationTest extends TestCase
 
         $sender = $chatmessage->sender;
 
-        $result = Notification::send( $receiver, new MessageReceived($chatmessage, $sender) );
-        Notification::assertSentTo( [$receiver], MessageReceived::class );
+        $result = NotificationFacade::send( $receiver, new MessageReceived($chatmessage, $sender) );
+        NotificationFacade::assertSentTo( [$receiver], MessageReceived::class );
     }
 
     // ----- %%% Referrals -----
@@ -97,9 +97,9 @@ class NotificationTest extends TestCase
     {
         $this->assertTrue(false, 'to-be-implemented');
         /*
-        Notification::fake();
-        $result = Notification::send( $receiver, new NewReferralReceived($referral, $sender) );
-        Notification::assertSentTo( [$receiver], NewReferralReceived::class );
+        NotificationFacade::fake();
+        $result = NotificationFacade::send( $receiver, new NewReferralReceived($referral, $sender) );
+        NotificationFacade::assertSentTo( [$receiver], NewReferralReceived::class );
          */
     }
 
@@ -113,7 +113,7 @@ class NotificationTest extends TestCase
      */
     public function test_should_notify_new_promotion_campaign_started()
     {
-        Notification::fake();
+        NotificationFacade::fake();
         $timeline = Timeline::has('followers', '>=', 1)->first(); // subscribable
         $creator = $timeline->user;
 
@@ -151,8 +151,8 @@ class NotificationTest extends TestCase
         $receiver = $campaign->creator; // creator
 
         $amount = CastsMoney::USD($subPrice);
-        $result = Notification::send( $receiver, new NewCampaignContributionReceived($campaign, $sender, ['amount'=>$amount]) );
-        Notification::assertSentTo( [$receiver], NewCampaignContributionReceived::class );
+        $result = NotificationFacade::send( $receiver, new NewCampaignContributionReceived($campaign, $sender, ['amount'=>$amount]) );
+        NotificationFacade::assertSentTo( [$receiver], NewCampaignContributionReceived::class );
     }
 
     /**
@@ -164,13 +164,13 @@ class NotificationTest extends TestCase
     {
         $this->assertTrue(false, 'to-be-implemented');
             /*
-        Notification::fake();
+        NotificationFacade::fake();
         $campaign = Campaign::first();
         $sender = $timeline->followers->first(); // fan
         $receiver = $campaign->creator; // creator
         $amount = Money::USD( $this->faker->numberBetween(1, 20) * 500 ); // %FIXME: should be associated with campaign?
-        $result = Notification::send( $receiver, new NewCampaignContributionReceived($campaign, $sender, ['amount'=>$amount]) );
-        Notification::assertSentTo( [$receiver], NewCampaignContributionReceived::class );
+        $result = NotificationFacade::send( $receiver, new NewCampaignContributionReceived($campaign, $sender, ['amount'=>$amount]) );
+        NotificationFacade::assertSentTo( [$receiver], NewCampaignContributionReceived::class );
              */
     }
 
@@ -183,13 +183,13 @@ class NotificationTest extends TestCase
     {
         $this->assertTrue(false, 'to-be-implemented');
             /*
-        Notification::fake();
+        NotificationFacade::fake();
         $campaign = Campaign::first();
         $sender = $timeline->followers->first(); // fan
         $receiver = $campaign->creator; // creator
         $amount = Money::USD( $this->faker->numberBetween(1, 20) * 500 ); // %FIXME: should be associated with campaign?
-        $result = Notification::send( $receiver, new NewCampaignContributionReceived($campaign, $sender, ['amount'=>$amount]) );
-        Notification::assertSentTo( [$receiver], NewCampaignContributionReceived::class );
+        $result = NotificationFacade::send( $receiver, new NewCampaignContributionReceived($campaign, $sender, ['amount'=>$amount]) );
+        NotificationFacade::assertSentTo( [$receiver], NewCampaignContributionReceived::class );
              */
     }
 
@@ -202,13 +202,13 @@ class NotificationTest extends TestCase
      */
     public function test_should_notify_sub_renewal_payment_received()
     {
-        Notification::fake();
+        NotificationFacade::fake();
         $timeline = Timeline::has('followers', '>=', 1)->first(); // subscribable
         $sender = $timeline->followers->first(); // fan
         $receiver = $timeline->user; // creator
         $amount = Money::USD( $this->faker->numberBetween(1, 20) * 500 );
-        $result = Notification::send( $receiver, new SubRenewalPaymentReceived($timeline, $sender, ['amount'=>$amount]) );
-        Notification::assertSentTo( [$receiver], SubRenewalPaymentReceived::class );
+        $result = NotificationFacade::send( $receiver, new SubRenewalPaymentReceived($timeline, $sender, ['amount'=>$amount]) );
+        NotificationFacade::assertSentTo( [$receiver], SubRenewalPaymentReceived::class );
     }
 
     /**
@@ -218,13 +218,13 @@ class NotificationTest extends TestCase
      */
     public function test_should_notify_sub_renewal_payment_received_returning_subscriber()
     {
-        Notification::fake();
+        NotificationFacade::fake();
         $timeline = Timeline::has('followers', '>=', 1)->first(); // subscribable
         $sender = $timeline->followers->first(); // fan
         $receiver = $timeline->user; // creator
         $amount = Money::USD( $this->faker->numberBetween(1, 20) * 500 );
-        $result = Notification::send( $receiver, new SubRenewalPaymentReceivedReturningSubscriber($timeline, $sender, ['amount'=>$amount]) );
-        Notification::assertSentTo( [$receiver], SubRenewalPaymentReceivedReturningSubscriber::class );
+        $result = NotificationFacade::send( $receiver, new SubRenewalPaymentReceivedReturningSubscriber($timeline, $sender, ['amount'=>$amount]) );
+        NotificationFacade::assertSentTo( [$receiver], SubRenewalPaymentReceivedReturningSubscriber::class );
     }
 
     /**
@@ -234,13 +234,13 @@ class NotificationTest extends TestCase
      */
     public function test_should_notify_new_sub_payment_received()
     {
-        Notification::fake();
+        NotificationFacade::fake();
         $timeline = Timeline::has('followers', '>=', 1)->first(); // subscribable
         $sender = $timeline->followers->first(); // fan
         $receiver = $timeline->user; // creator
         $amount = Money::USD( $this->faker->numberBetween(1, 20) * 500 );
-        $result = Notification::send( $receiver, new NewSubPaymentReceived($timeline, $sender, ['amount'=>$amount]) );
-        Notification::assertSentTo( [$receiver], NewSubPaymentReceived::class );
+        $result = NotificationFacade::send( $receiver, new NewSubPaymentReceived($timeline, $sender, ['amount'=>$amount]) );
+        NotificationFacade::assertSentTo( [$receiver], NewSubPaymentReceived::class );
     }
 
     /**
@@ -250,14 +250,14 @@ class NotificationTest extends TestCase
      */
     public function test_should_notify_tip_received()
     {
-        Notification::fake(); // this should bypass sending mail, even to SendGrid (?)
+        NotificationFacade::fake(); // this should bypass sending mail, even to SendGrid (?)
 
         $tip = Tip::where('tippable_type', 'posts')->first(); // the 'tip'
         $post = $tip->tippable; // the 'tippable'
         $sender = $tip->sender;
         $receiver = $tip->receiver;
-        $result = Notification::send( $receiver, new TipReceived($post, $sender, ['amount'=>$tip->amount]) );
-        Notification::assertSentTo( [$receiver], TipReceived::class );
+        $result = NotificationFacade::send( $receiver, new TipReceived($post, $sender, ['amount'=>$tip->amount]) );
+        NotificationFacade::assertSentTo( [$receiver], TipReceived::class );
     }
 
     /**
@@ -267,7 +267,7 @@ class NotificationTest extends TestCase
      */
     public function test_should_notify_paid_post_purchase()
     {
-        Notification::fake();
+        NotificationFacade::fake();
 
         $timeline = Timeline::has('posts','>=',5)->has('followers','>=',1)->firstOrFail();
         $post = $timeline->posts[0];
@@ -275,8 +275,8 @@ class NotificationTest extends TestCase
         $creator = $timeline->user;
         $fan = $timeline->followers[0];
 
-        Notification::send( $creator, new ResourcePurchased($post, $fan));
-        Notification::assertSentTo( [$creator], ResourcePurchased::class );
+        NotificationFacade::send( $creator, new ResourcePurchased($post, $fan));
+        NotificationFacade::assertSentTo( [$creator], ResourcePurchased::class );
     }
 
     // ----- %%% Timelines -----
@@ -288,15 +288,15 @@ class NotificationTest extends TestCase
      */
     public function test_should_notify_timeline_new_follower()
     {
-        Notification::fake();
+        NotificationFacade::fake();
 
         $timeline = Timeline::has('posts','>=',5)->has('followers','>=',1)->firstOrFail();
 
         $creator = $timeline->user;
         $fan = $timeline->followers[0];
 
-        Notification::send( $creator, new TimelineFollowed($timeline, $fan));
-        Notification::assertSentTo( [$creator], TimelineFollowed::class );
+        NotificationFacade::send( $creator, new TimelineFollowed($timeline, $fan));
+        NotificationFacade::assertSentTo( [$creator], TimelineFollowed::class );
     }
 
 
@@ -309,7 +309,7 @@ class NotificationTest extends TestCase
      */
     public function test_should_notify_post_like_received()
     {
-        Notification::fake();
+        NotificationFacade::fake();
 
         $timeline = Timeline::has('posts','>=',5)->has('followers','>=',1)->firstOrFail();
         $post = $timeline->posts[0];
@@ -317,8 +317,8 @@ class NotificationTest extends TestCase
         $creator = $timeline->user;
         $fan = $timeline->followers[0];
 
-        Notification::send( $creator, new LikeReceived($post, $fan));
-        Notification::assertSentTo( [$creator], LikeReceived::class );
+        NotificationFacade::send( $creator, new LikeReceived($post, $fan));
+        NotificationFacade::assertSentTo( [$creator], LikeReceived::class );
     }
 
     /**
@@ -328,13 +328,13 @@ class NotificationTest extends TestCase
      */
     public function test_should_notify_post_comment_received()
     {
-        Notification::fake();
+        NotificationFacade::fake();
 
         $comment = Comment::first();
         $sender = $comment->user;
         $receiver = $comment->post->timeline->user;
-        Notification::send( $receiver, new CommentReceived($comment, $sender));
-        Notification::assertSentTo( [$receiver], CommentReceived::class );
+        NotificationFacade::send( $receiver, new CommentReceived($comment, $sender));
+        NotificationFacade::assertSentTo( [$receiver], CommentReceived::class );
     }
 
     /**
@@ -345,7 +345,7 @@ class NotificationTest extends TestCase
      */
     public function test_should_notify_post_tag_received()
     {
-        Notification::fake();
+        NotificationFacade::fake();
 
         $timeline = Timeline::has('posts','>=',5)->has('followers','>=',1)->firstOrFail();
         $post = $timeline->posts[0];
@@ -353,8 +353,8 @@ class NotificationTest extends TestCase
         $creator = $timeline->user;
         $fan = $timeline->followers[0];
 
-        Notification::send( $creator, new TagReceived($post, $fan));
-        Notification::assertSentTo( [$creator], TagReceived::class );
+        NotificationFacade::send( $creator, new TagReceived($post, $fan));
+        NotificationFacade::assertSentTo( [$creator], TagReceived::class );
     }
 
     // ----- %%% Auth -----
@@ -366,11 +366,11 @@ class NotificationTest extends TestCase
      */
     public function test_should_notify_verify_email_sent_post_register()
     {
-        Notification::fake();
+        NotificationFacade::fake();
         $user = User::first();
         $url = url(route('verification.verify', ['id' => $user->id, 'hash' => 'foo-bar']));
-        $result = Notification::send( $user, new VerifyEmail($user, $url) );
-        Notification::assertSentTo( [$user], VerifyEmail::class );
+        $result = NotificationFacade::send( $user, new VerifyEmail($user, $url) );
+        NotificationFacade::assertSentTo( [$user], VerifyEmail::class );
     }
 
     /**
@@ -380,10 +380,10 @@ class NotificationTest extends TestCase
      */
     public function test_should_notify_email_verified()
     {
-        Notification::fake();
+        NotificationFacade::fake();
         $user = User::first();
-        $result = Notification::send( $user, new EmailVerified($user) );
-        Notification::assertSentTo( [$user], EmailVerified::class );
+        $result = NotificationFacade::send( $user, new EmailVerified($user) );
+        NotificationFacade::assertSentTo( [$user], EmailVerified::class );
     }
 
     /**
@@ -393,10 +393,10 @@ class NotificationTest extends TestCase
      */
     public function test_should_notify_password_changed()
     {
-        Notification::fake();
+        NotificationFacade::fake();
         $user = User::first();
-        $result = Notification::send( $user, new PasswordChanged($user) );
-        Notification::assertSentTo( [$user], PasswordChanged::class );
+        $result = NotificationFacade::send( $user, new PasswordChanged($user) );
+        NotificationFacade::assertSentTo( [$user], PasswordChanged::class );
     }
 
     /**
@@ -406,10 +406,10 @@ class NotificationTest extends TestCase
      */
     public function test_should_notify_password_reset()
     {
-        Notification::fake();
+        NotificationFacade::fake();
         $user = User::first();
-        $result = Notification::send( $user, new PasswordReset($user, ['token'=>$this->faker->uuid]) );
-        Notification::assertSentTo( [$user], PasswordReset::class );
+        $result = NotificationFacade::send( $user, new PasswordReset($user, ['token'=>$this->faker->uuid]) );
+        NotificationFacade::assertSentTo( [$user], PasswordReset::class );
     }
 
     /**
@@ -419,7 +419,7 @@ class NotificationTest extends TestCase
      */
     public function test_should_notify_id_verification_pending()
     {
-        Notification::fake();
+        NotificationFacade::fake();
         $user = User::first();
         $vr = Verifyrequest::create([
             'service_guid' => $this->faker->uuid,
@@ -428,8 +428,8 @@ class NotificationTest extends TestCase
             'requester_id' => $user->id,
             'last_checked_at' => '2021-07-17 01:48:49',
         ]);
-        Notification::send( $user, new IdentityVerificationRequestSent($vr, $user));
-        Notification::assertSentTo( [$user], IdentityVerificationRequestSent::class );
+        NotificationFacade::send( $user, new IdentityVerificationRequestSent($vr, $user));
+        NotificationFacade::assertSentTo( [$user], IdentityVerificationRequestSent::class );
     }
 
     /**
@@ -439,7 +439,7 @@ class NotificationTest extends TestCase
      */
     public function test_should_notify_id_verification_verified()
     {
-        Notification::fake();
+        NotificationFacade::fake();
         $user = User::first();
         $vr = Verifyrequest::create([
             'service_guid' => $this->faker->uuid,
@@ -448,8 +448,8 @@ class NotificationTest extends TestCase
             'requester_id' => $user->id,
             'last_checked_at' => '2021-07-17 01:48:49',
         ]);
-        Notification::send( $user, new IdentityVerificationVerified($vr, $user));
-        Notification::assertSentTo( [$user], IdentityVerificationVerified::class );
+        NotificationFacade::send( $user, new IdentityVerificationVerified($vr, $user));
+        NotificationFacade::assertSentTo( [$user], IdentityVerificationVerified::class );
     }
 
     /**
@@ -459,7 +459,7 @@ class NotificationTest extends TestCase
      */
     public function test_should_notify_id_verification_rejected()
     {
-        Notification::fake();
+        NotificationFacade::fake();
         $user = User::first();
         $vr = Verifyrequest::create([
             'service_guid' => $this->faker->uuid,
@@ -468,8 +468,8 @@ class NotificationTest extends TestCase
             'requester_id' => $user->id,
             'last_checked_at' => '2021-07-17 01:48:49',
         ]);
-        Notification::send( $user, new IdentityVerificationRejected($vr, $user));
-        Notification::assertSentTo( [$user], IdentityVerificationRejected::class );
+        NotificationFacade::send( $user, new IdentityVerificationRejected($vr, $user));
+        NotificationFacade::assertSentTo( [$user], IdentityVerificationRejected::class );
     }
 
     /**
@@ -477,9 +477,64 @@ class NotificationTest extends TestCase
      * @group regression
      * @group regression-unit
      */
-    public function test_should_notify_invite_staff_manager()
+    public function test_should_notify_invite_staff_manager_via_guest()
     {
-        //Notification::fake();
+        //NotificationFacade::fake();
+        $lPath = self::getLogPath();
+        $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
+        if( $isLogScanEnabled ) {
+            $fSizeBefore = $lPath ? filesize($lPath) : null;
+        }
+
+        $timeline = Timeline::has('posts','>=',1)->first(); 
+        $creator = $timeline->user;
+
+        $existingStaff = Staff::where('role', 'manager')->where('owner_id', $creator->id)->pluck('email')->toArray();
+        $notInA = $existingStaff;
+        $notInA[] = $creator->email;
+        $preManager = User::whereNotIn('email', $notInA)->first();
+        $this->assertNotNull($preManager->id??null);
+        $this->assertFalse( in_array($preManager->id, $existingStaff) );
+        $this->assertFalse( $preManager->id === $creator->id );
+
+        // Invite new staff user as manager
+        $payload = [
+            'first_name' => $preManager->real_firstname ?? $preManager->name,
+            'last_name' => $preManager->real_lastname ?? 'Smith',
+            'email' => $preManager->email,
+            'pending' => true, // %FIXME: this should be set in model default
+            'role' => 'manager',
+            'creator_id' => null, // %FIXME: what is this?
+        ];
+
+        $staff = Staff::create($attrs);
+        $to = $this->faker->safeEmail;
+        NotificationFacade::route('mail', $to)->notify(new InviteStaffManager($staff, $creator));
+
+        if ( $isLogScanEnabled && $lPath ) {
+            $fSizeAfter = filesize($lPath);
+            if ( $fSizeBefore && $fSizeAfter && ($fSizeAfter > $fSizeBefore) ) {
+                $fDiff = $fSizeAfter > $fSizeBefore;
+                $fcontents = file_get_contents($lPath, false, null, -($fDiff-2));
+                $this->assertStringContainsStringIgnoringCase('To: '.$to, $fcontents);
+                $this->assertStringContainsStringIgnoringCase('been invited to become a manager', $fcontents);
+                $this->assertStringContainsString('Subject: Invite Staff Manager', $fcontents);
+                $this->assertStringContainsString('From:', $fcontents);
+            }
+        }
+        //InviteStaffManager::sendGuestInvite($staff, $creator);
+        //NotificationFacade::send( $user, new InviteStaffManager($staff, $creator));
+        //NotificationFacade::assertSentTo( [$user], InviteStaffManager::class );
+    }
+
+    /**
+     * @group lib-notification-unit-fake
+     * @group regression
+     * @group regression-unit
+     */
+    public function test_should_notify_invite_staff_manager_via_user()
+    {
+        NotificationFacade::fake();
         $lPath = self::getLogPath();
         $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
         if( $isLogScanEnabled ) {
@@ -487,6 +542,7 @@ class NotificationTest extends TestCase
         }
 
         $creator = User::first();
+        $preManager = 
 
         // %TODO: 2 cases: invitee is a registered user, invitee is not a registered user
 
@@ -503,7 +559,7 @@ class NotificationTest extends TestCase
 
         $staff = Staff::create($attrs);
         $to = $this->faker->safeEmail;
-        Notification::route('mail', $to)->notify(new InviteStaffManager($staff, $creator));
+        NotificationFacade::route('mail', $to)->notify(new InviteStaffManager($staff, $creator));
 
         if ( $isLogScanEnabled && $lPath ) {
             $fSizeAfter = filesize($lPath);
@@ -517,8 +573,8 @@ class NotificationTest extends TestCase
             }
         }
         //InviteStaffManager::sendGuestInvite($staff, $creator);
-        //Notification::send( $user, new InviteStaffManager($staff, $creator));
-        //Notification::assertSentTo( [$user], InviteStaffManager::class );
+        //NotificationFacade::send( $user, new InviteStaffManager($staff, $creator));
+        //NotificationFacade::assertSentTo( [$user], InviteStaffManager::class );
     }
 
     /**
@@ -526,9 +582,9 @@ class NotificationTest extends TestCase
      * @group regression
      * @group regression-unit
      */
-    public function test_should_notify_invite_staff_member()
+    public function test_should_notify_invite_staff_member_via_guest()
     {
-        //Notification::fake();
+        //NotificationFacade::fake();
 
         $lPath = self::getLogPath();
         $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
@@ -552,7 +608,7 @@ class NotificationTest extends TestCase
         $staff = Staff::create($attrs);
 
         $to = $this->faker->safeEmail;
-        Notification::route('mail', $to)->notify(new InviteStaffManager($staff, $creator));
+        NotificationFacade::route('mail', $to)->notify(new InviteStaffMember($staff, $creator));
 
         if ( $isLogScanEnabled && $lPath ) {
             $fSizeAfter = filesize($lPath);
@@ -560,14 +616,14 @@ class NotificationTest extends TestCase
                 $fDiff = $fSizeAfter > $fSizeBefore;
                 $fcontents = file_get_contents($lPath, false, null, -($fDiff-2));
                 $this->assertStringContainsStringIgnoringCase('To: '.$to, $fcontents);
-                $this->assertStringContainsStringIgnoringCase('been invited to become a manager', $fcontents);
-                $this->assertStringContainsString('Subject: Invite Staff Manager', $fcontents);
+                $this->assertStringContainsStringIgnoringCase('been added as a staff member', $fcontents);
+                $this->assertStringContainsString('Subject: Invite Staff Member', $fcontents);
                 $this->assertStringContainsString('From:', $fcontents);
             }
         }
 
-        //Notification::send( $user, new InviteStaffMember($staff, $user));
-        //Notification::assertSentTo( [$user], InviteStaffMember::class );
+        //NotificationFacade::send( $user, new InviteStaffMember($staff, $user));
+        //NotificationFacade::assertSentTo( [$user], InviteStaffMember::class );
     }
 
 }
