@@ -2,11 +2,13 @@
   <div>
 
     <AdminTable
+      ref="table"
       :fields="fields"
       :tblFilters="userFilters"
-      indexRouteName="users.index"
+      indexRouteName="admin.users.index"
       @table-event="handleTableEvent"
       :encodedQueryFilters="encodedQueryFilters"
+      :busy="busy"
     >
       <template #cell(email_verified_at)="data">
         <span>
@@ -19,13 +21,26 @@
           <BoolBadgeDisplay :value="!!data.value" />
         </span>
       </template>
+      <template #cell(payments_disabled)="data">
+        <span class="text-nowrap">
+          <b-form-checkbox
+            button-variant="success"
+            :checked="data.value"
+            switch
+            :disabled="data.item.busy === 'payments_disabled'"
+            @input="(value) => transactionEnabledUpdate(value, data)"
+          >
+            <fa-icon v-if="data.item.busy === 'payments_disabled'" icon="spinner" spin fixed-width />
+          </b-form-checkbox>
+        </span>
+      </template>
     </AdminTable>
 
     <!-- Ellipsis Modal -->
     <b-modal v-model="isEllipsisModalVisible" id="modal-ellipsis" size="xl" title="User Details" body-class="">
       <section>
         <!-- <pre>{{ JSON.stringify(this.modalSelection, null, 2) }}</pre> -->
-        <table v-if="this.modalSelection!==null" class="table">
+        <table v-if="this.modalSelection !== null" class="table">
           <tr>
             <th>Username</th>
             <td>{{this.modalSelection.username}}</td>
@@ -99,6 +114,13 @@ export default {
       { key: 'is_verified', label: 'ID Verified?', sortable: true,
         // formatter: (v, k, i) => Vue.options.filters.niceBool(v)
       },
+      {
+        key: 'payments_disabled',
+        label: 'Transactions Enabled',
+        formatter: (v, k, i) => {
+          return !v
+        },
+      },
       { key: 'timeline', label: 'Timeline Slug', sortable: true, formatter: (v, k, i) => v ? v.slug : '' },
       { key: 'last_logged', label: 'Last Login', sortable: true, formatter: (v, k, i) => Vue.options.filters.niceDate(v, true) },
       { key: 'created_at', label: 'Joined', sortable: true, formatter: (v, k, i) => Vue.options.filters.niceDate(v, true) },
@@ -120,13 +142,45 @@ export default {
     },
 
     encodedQueryFilters: {},
+
+    busy: false, // Doing an update operation
   }),
 
   methods: {
 
+    transactionEnabledUpdate(value, slotData) {
+      if (value === slotData.value) {
+        return
+      }
+      console.log({value, slotData})
+      this.setItemBusy(slotData)
+      this.axios.post(this.$apiRoute('admin.user.disable-payment', { user: slotData.item }), { disable: !value })
+      .then(response => { this.updateItem(slotData, response.data.data) })
+      .catch(error => {
+        console.error(error)
+        alert('there was an error, see console')}
+      )
+      .finally(() => {
+        this.unsetItemBusy(slotData)
+      })
+    },
+
+    setItemBusy(slotData) {
+      this.$refs['table'].setItemBusy(slotData)
+    },
+
+    unsetItemBusy(slotData) {
+      this.$refs['table'].unsetItemBusy(slotData)
+    },
+
+    updateItem(slotData, newValue) {
+      console.log('updateItem', {slotData, newValue})
+      this.$refs['table'].updateItem(slotData, newValue)
+    },
+
     async loginAsUser() {
       this.renderError = false
-      try { 
+      try {
         await axios.post( this.$apiRoute('users.loginAsUser', this.modalSelection.id) )
         this.hideModal()
         window.location.href = '/'

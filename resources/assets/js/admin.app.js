@@ -4,8 +4,11 @@ import store from './store';
 
 import Vue from 'vue';
 
+// Bootstrapping
 require('./bootstrap');
 require('./bootstrap/fontAwesome');
+require('./bootstrap/copy');
+
 window.axios = require('axios');
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
