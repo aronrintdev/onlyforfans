@@ -3,6 +3,7 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
 
 use Tests\TestCase;
@@ -69,15 +70,22 @@ class RestStaffTest extends TestCase
      *  @group regression
      *  @group regression-base
      *  @group staff
-     *  @group here0920
+     *  @group here0923
      */
     public function test_can_send_manager_invitation()
     {
         //Mail::fake();
 
+        $lPath = self::getLogPath();
+        $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
+        if( $isLogScanEnabled ) {
+            $fSizeBefore = $lPath ? filesize($lPath) : null;
+        }
+
         // Find a creator account with managers
         $manager = Staff::where('role', 'manager')->firstOrFail();
         $sessionUser = User::where('id', $manager->owner_id)->firstOrFail();
+        //dump($manager->name, $sessionUser->name);
 
         $payload = [
             'first_name' => $this->faker->firstName,
@@ -89,15 +97,22 @@ class RestStaffTest extends TestCase
         ];
 
         $response = $this->actingAs($sessionUser)->ajaxJSON( 'POST', route('users.sendStaffInvite', $payload) );
-
         $response->assertStatus(200);
         $content = json_decode($response->content());
+        $response->assertJsonStructure([ 'status' ]);
 
-        $response->assertJsonStructure([
-            'status',
-        ]);
-
-        $this->assertEquals(200, $content->status);
+        if ( $isLogScanEnabled && $lPath ) {
+            $fSizeAfter = filesize($lPath);
+            if ( $fSizeBefore && $fSizeAfter && ($fSizeAfter > $fSizeBefore) ) {
+                $fDiff = $fSizeAfter > $fSizeBefore;
+                $fcontents = file_get_contents($lPath, false, null, -($fDiff-2));
+                $toStr = $payload['first_name'].' '.$payload['last_name'].' <'.$payload['email'].'>';
+                $this->assertStringContainsStringIgnoringCase('To: '.$toStr, $fcontents);
+                $this->assertStringContainsStringIgnoringCase('been invited to become a manager', $fcontents);
+                $this->assertStringContainsString('Subject: Invite Staff Manager', $fcontents);
+                $this->assertStringContainsString('From:', $fcontents);
+            }
+        }
     }
 
       

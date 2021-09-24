@@ -525,7 +525,6 @@ class NotificationTest extends TestCase
      * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
-     * @group here0923
      */
     public function test_should_notify_invite_staff_member()
     {

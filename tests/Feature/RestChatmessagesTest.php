@@ -124,7 +124,6 @@ class RestChatmessagesTest extends TestCase
      *  @group chatmessages
      *  @group regression
      *  @group regression-base
-     *  @group here0923
      */
     public function test_can_send_chatmessage_text_only_in_thread()
     {
@@ -219,7 +218,6 @@ class RestChatmessagesTest extends TestCase
      *  @group chatmessages
      *  @group regression
      *  @group regression-base
-     *  @group here0923
      */
     public function test_can_send_chatmessage_with_one_attachment()
     {
@@ -290,7 +288,6 @@ class RestChatmessagesTest extends TestCase
      *  @group chatmessages
      *  @group regression
      *  @group regression-base
-     *  @group here0923
      */
     public function test_can_send_chatmessage_with_multiple_attachments()
     {
@@ -377,7 +374,6 @@ class RestChatmessagesTest extends TestCase
      *  @group chatmessages
      *  @group regression
      *  @group regression-base
-     *  @group here0923
      */
     public function test_can_create_purchase_only_chatmessage()
     {
@@ -551,7 +547,6 @@ class RestChatmessagesTest extends TestCase
      *  @group chatmessages
      *  @group regression
      *  @group regression-base
-     *  @group here0923
      */
     public function test_create_purchase_only_chatmessage_must_have_attachments()
     {

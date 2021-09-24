@@ -99,8 +99,7 @@ class InviteStaffManager extends Notification
     {
         $notify = new InviteStaffManager($staff, $inviter);
 
-        $to = [ $inviter->email => $inviter->name ];
-
+        $to = [ $staff->email => $staff->first_name.' '.$staff->last_name ]; // invitee's email & name info (no user yet)
         $via = $notify->via(null);
 
         if ( in_array('mail', $via) ) {
