@@ -44,16 +44,20 @@
           class="text-left text-editor"
           contenteditable
           v-html="descriptionForEditor"
-          @keydown="editorChanged"
           @input="onInput"
           @click="editorClicked"
-        >
-        </div>
+        ></div>
 
       </div>
 
       <template #footer>
-
+        <b-row v-if="suggestions.length" class="mb-1">
+          <b-col cols="12" class="d-flex flex-wrap">
+            <div class="bg-secondary mr-2 mb-1 p-1 suggestion" @click="selectSuggestion(suggestion)" v-for="suggestion in suggestions" :key="suggestion.id">
+              {{ suggestion.label }}
+            </div>
+          </b-col>
+        </b-row>
         <b-row v-if="isTagFormVisible" class="mb-1">
           <b-col cols="12" class="d-flex align-items-center">
             <b-form-tags v-model="hashtags" no-outer-focus class="">
@@ -182,6 +186,10 @@ export default {
     isTagFormVisible: true,
     descriptionForEditor: '',
     isEmojiBoxVisible: false,
+    lastRange: null,
+    suggestions: [],
+    lastMatches: [],
+    newMatch: null,
   }),
 
   methods: {
@@ -239,71 +247,87 @@ export default {
       return s.endsWith('!')
     },
 
-    detectUsername(text) {
-      const regexp = /\B@[\w\-.]+/g
-      const htList = text.match(regexp) || [];
-      htList.forEach(item => {
-        text = text.replace(item, `</span><a href="/${item.slice(1)}" target="_blank">${item}</a><span>`);
-      })
-      return text;
+    async getMatches(text) {
+      const params = {
+        term: text,
+        field: 'slug',
+      }
+      const response = await axios.get( this.$apiRoute('users.match'), { params } )
+      this.suggestions = response.data;
     },
 
-    editorChanged(e) {
-      if (e.keyCode == 50 && e.shiftKey) {
-        e.preventDefault();
-        let content = e.target.innerHTML;
-        content += `<a>@`;
-        this.descriptionForEditor = content;
-        this.$nextTick(() => {
-          const p = e.target,
-              s = window.getSelection(),
-              r = document.createRange();
-          let ele = p.childElementCount > 0 ? p.lastChild : p;
-          if (p.lastChild.textContent == '') {
-            r.setStart(ele, 0);
-            r.setEnd(ele, 0);
-          } else {
-            r.setStart(ele, 1);
-            r.setEnd(ele, 1);
-          }
-    
-          s.removeAllRanges();
-          s.addRange(r);
-        })
-      } else if (e.keyCode == 32) {
-        let content = e.target.innerHTML;
-        if (content.slice(-4) == '</a>') {
-          e.preventDefault();
-          this.descriptionForEditor = content + '<span>&nbsp;';
-          this.$nextTick(() => {
-            const p = e.target,
-                s = window.getSelection(),
-                r = document.createRange();
-            let ele = p.childElementCount > 0 ? p.lastChild : p;
-            if (p.lastChild.textContent == '') {
-              r.setStart(ele, 0);
-              r.setEnd(ele, 0);
-            } else {
-              r.setStart(ele, 1);
-              r.setEnd(ele, 1);
-            }
-      
-            s.removeAllRanges();
-            s.addRange(r);
-          })
+    compareMatches(a, b) {
+      if (a.length >= b.length) {
+        let i = 0;
+        while(a[i] == b[i] && i < a.length) {
+          i++;
+        }
+        if (i < a.length) {
+          return a[i];
+        }
+      } else {
+        let i = 0;
+        while(a[i] == b[i] && i < b.length) {
+          i++;
+        }
+        if (i < b.length) {
+          return b[i];
         }
       }
     },
 
     onInput(e) {
-      const font = $(e.target).find('font');
-      if (font) {
-        const newEle = $('<span>' + font.text() + '</span>')
-        $(font).before(newEle);
-        $(font).remove();
-      }
       this.lastRange = this.saveSelection()
-      this.description = e.target.innerHTML
+      const cursorPos = this.lastRange.startOffset
+      const fontEle = e.target.querySelector('font')
+      if (fontEle) {
+        fontEle.outerHTML = `<span>${fontEle.innerText}</span>`;
+        this.restoreSelection(this.lastRange)
+      }
+      const anchors = e.target.querySelectorAll('a');
+      if (anchors.length > 0) {
+        anchors.forEach(anchor => {
+          if (anchor.innerText[0] != '@') {
+            anchor.outerHTML = `<span>${anchor.innerText}</span>`;
+            this.restoreSelection(this.lastRange)
+          }
+        })
+      }
+      let html = e.target.innerHTML
+      const matches = html.match(/\B(@[\w\-.]+)/g) || []
+      if (matches.length > 0) {
+        this.newMatch = this.compareMatches(matches, this.lastMatches);
+        if (html.search(`<a>${this.newMatch}</a>`) > -1) {
+          if (anchors.length > 0) {
+            anchors.forEach(anchor => {
+              if (anchor.innerText == this.newMatch) {
+                const randClass = `s${new Date().getTime()}`;
+                anchor.outerHTML = `<span class='${randClass}'>${this.newMatch.substring(0, cursorPos)}</span><span>${this.newMatch.substring(cursorPos)}</span>`;
+                this.setCursorPosition('.' + randClass)
+              }
+            })
+          }
+          this.description = e.target.innerHTML
+        }
+        if (this.newMatch) {
+          this.lastMatches = matches;
+          this.getMatches(this.newMatch.slice(1));
+        } else {
+          this.suggestions = [];
+        }
+      } else {
+        this.newMatch = null;
+        this.suggestions = [];
+      }
+    },
+
+    selectSuggestion(suggestion) {
+      this.restoreSelection(this.lastRange)
+      this.pasteHtmlAtCaret(`<a>@${suggestion.label}</a>&nbsp;`)
+      const ele = document.querySelector('.edit-post .text-editor')
+      this.description = ele.innerHTML
+      this.suggestions = []
+      this.lastMatches = this.description.match(/\B(@[\w\-.]+)/g) || []
     },
 
     editorClicked(e) {
@@ -315,62 +339,77 @@ export default {
     },
 
     saveSelection() {
-        if (window.getSelection) {
-            var sel = window.getSelection();
-            if (sel.getRangeAt && sel.rangeCount) {
-                return sel.getRangeAt(0);
-            }
-        } else if (document.selection && document.selection.createRange) {
-            return document.selection.createRange();
+      if (window.getSelection) {
+        let sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+          return sel.getRangeAt(0);
         }
-        return null;
+      } else if (document.selection && document.selection.createRange) {
+        return document.selection.createRange();
+      }
+      return null;
     },
 
     restoreSelection(range) {
-        if (range) {
-            if (window.getSelection) {
-                var sel = window.getSelection();
-                sel.removeAllRanges();
-                sel.addRange(range);
-            } else if (document.selection && range.select) {
-                range.select();
-            }
+      if (range) {
+        if (window.getSelection) {
+          let sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } else if (document.selection && range.select) {
+          range.select();
         }
+      }
+    },
+
+    setCursorPosition(ele) {
+      const p = document.querySelector(ele),
+          s = window.getSelection(),
+          r = document.createRange();
+      r.setStart(p, 1);
+      r.setEnd(p, 1);
+      s.removeAllRanges();
+      s.addRange(r);
     },
 
     pasteHtmlAtCaret(html) {
-        var sel, range;
-        if (window.getSelection) {
-            // IE9 and non-IE
-            sel = window.getSelection();
-            if (sel.getRangeAt && sel.rangeCount) {
-                range = sel.getRangeAt(0);
-                range.deleteContents();
+      let sel, range;
+      if (window.getSelection) {
+        // IE9 and non-IE
+        sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+          range = sel.getRangeAt(0);
+          range.deleteContents();
 
-                // Range.createContextualFragment() would be useful here but is
-                // non-standard and not supported in all browsers (IE9, for one)
-                var el = document.createElement("div");
-                el.innerHTML = html;
-                var frag = document.createDocumentFragment(), node, lastNode;
-                while ( (node = el.firstChild) ) {
-                    lastNode = frag.appendChild(node);
-                }
-                range.insertNode(frag);
-                
-                // Preserve the selection
-                if (lastNode) {
-                    range = range.cloneRange();
-                    range.setStartAfter(lastNode);
-                    range.collapse(true);
-                    sel.removeAllRanges();
-                    sel.addRange(range);
-                }
-            }
-        } else if (document.selection && document.selection.type != "Control") {
-            // IE < 9
-            document.selection.createRange().pasteHTML(html);
+          // Range.createContextualFragment() would be useful here but is
+          // non-standard and not supported in all browsers (IE9, for one)
+          const el = document.createElement("span");
+          el.innerHTML = html;
+          let frag = document.createDocumentFragment(), node, lastNode;
+          while ( (node = el.firstChild) ) {
+            lastNode = frag.appendChild(node);
+          }
+          range.insertNode(frag);
+
+          const text = range.startContainer.textContent
+          if (text && this.newMatch) {
+            range.startContainer.textContent = text.substring(0, text.length - this.newMatch.length)
+          }
+          
+          // Preserve the selection
+          if (lastNode) {
+            range = range.cloneRange();
+            range.setStartAfter(lastNode);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
         }
-        this.lastRange = this.saveSelection()
+      } else if (document.selection && document.selection.type != "Control") {
+        // IE < 9
+        document.selection.createRange().pasteHTML(html);
+      }
+      this.lastRange = this.saveSelection()
     },
 
 
@@ -397,11 +436,11 @@ export default {
       const str = this.post.contenttags_mgmt.map( ct => `#${ct}!`).join(' ')
       // embed private tags at end of post for editing (public tags are already in post body as saved in DB)
       this.description = this.post.description + ' ' + this.post.contenttags_mgmt.map( ct => `#${ct}!`).join(' ')
-      this.descriptionForEditor = this.detectUsername(this.description);
     } else {
       this.description = this.post.description
-      this.descriptionForEditor = this.detectUsername(this.description);
     }
+    this.descriptionForEditor = this.description;
+    this.lastMatches = this.description.match(/\B(@[\w\-.]+)/g) || []
   },
 
   mounted() {
