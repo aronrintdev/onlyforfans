@@ -4,6 +4,7 @@ namespace Tests\Unit;
 use DB;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Config;
 
 use Carbon\Carbon;
 use Money\Money;
@@ -475,11 +476,16 @@ class NotificationTest extends TestCase
      * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
-     * @group %TODO-here0920
      */
     public function test_should_notify_invite_staff_manager()
     {
-        Notification::fake();
+        //Notification::fake();
+        $lPath = self::getLogPath();
+        $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
+        if( $isLogScanEnabled ) {
+            $fSizeBefore = $lPath ? filesize($lPath) : null;
+        }
+
         $creator = User::first();
 
         // %TODO: 2 cases: invitee is a registered user, invitee is not a registered user
@@ -496,9 +502,21 @@ class NotificationTest extends TestCase
         ];
 
         $staff = Staff::create($attrs);
-        Notification::route('mail', ['peter@peltronic.com'=>'Peter G'])->notify(new InviteStaffManager($staff, $creator));
-        //InviteStaffManager::sendGuestInvite($staff, $creator);
+        $to = $this->faker->safeEmail;
+        Notification::route('mail', $to)->notify(new InviteStaffManager($staff, $creator));
 
+        if ( $isLogScanEnabled && $lPath ) {
+            $fSizeAfter = filesize($lPath);
+            if ( $fSizeBefore && $fSizeAfter && ($fSizeAfter > $fSizeBefore) ) {
+                $fDiff = $fSizeAfter > $fSizeBefore;
+                $fcontents = file_get_contents($lPath, false, null, -($fDiff-2));
+                $this->assertStringContainsStringIgnoringCase('To: '.$to, $fcontents);
+                $this->assertStringContainsStringIgnoringCase('been invited to become a manager', $fcontents);
+                $this->assertStringContainsString('Subject: Invite Staff Manager', $fcontents);
+                $this->assertStringContainsString('From:', $fcontents);
+            }
+        }
+        //InviteStaffManager::sendGuestInvite($staff, $creator);
         //Notification::send( $user, new InviteStaffManager($staff, $creator));
         //Notification::assertSentTo( [$user], InviteStaffManager::class );
     }
@@ -507,11 +525,18 @@ class NotificationTest extends TestCase
      * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
-     * @group %TODO-here0920
+     * @group here0923
      */
     public function test_should_notify_invite_staff_member()
     {
-        Notification::fake();
+        //Notification::fake();
+
+        $lPath = self::getLogPath();
+        $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
+        if( $isLogScanEnabled ) {
+            $fSizeBefore = $lPath ? filesize($lPath) : null;
+        }
+
         $creator = User::first();
 
         // Invite new staff user as member
@@ -527,8 +552,23 @@ class NotificationTest extends TestCase
 
         $staff = Staff::create($attrs);
 
-        Notification::send( $user, new InviteStaffMember($staff, $user));
-        Notification::assertSentTo( [$user], InviteStaffMember::class );
+        $to = $this->faker->safeEmail;
+        Notification::route('mail', $to)->notify(new InviteStaffManager($staff, $creator));
+
+        if ( $isLogScanEnabled && $lPath ) {
+            $fSizeAfter = filesize($lPath);
+            if ( $fSizeBefore && $fSizeAfter && ($fSizeAfter > $fSizeBefore) ) {
+                $fDiff = $fSizeAfter > $fSizeBefore;
+                $fcontents = file_get_contents($lPath, false, null, -($fDiff-2));
+                $this->assertStringContainsStringIgnoringCase('To: '.$to, $fcontents);
+                $this->assertStringContainsStringIgnoringCase('been invited to become a manager', $fcontents);
+                $this->assertStringContainsString('Subject: Invite Staff Manager', $fcontents);
+                $this->assertStringContainsString('From:', $fcontents);
+            }
+        }
+
+        //Notification::send( $user, new InviteStaffMember($staff, $user));
+        //Notification::assertSentTo( [$user], InviteStaffMember::class );
     }
 
 }
