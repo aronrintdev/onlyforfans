@@ -214,14 +214,14 @@ export default {
       return index > -1 && this.session_user.companies[index].permissions && this.session_user.companies[index].permissions.findIndex(permission => permission.name   == 'Post.delete') > -1
     },
     parsedDescription() {
-      let text = this.post && this.post.description;
-      text = `<span>${text}</span>`;
-      const regexp = /\B@[\w\-.]+/g
-      const htList = text.match(regexp) || [];
-      htList.forEach(item => {
-        text = text.replace(item, `</span><a href="/${item.slice(1)}">${item}</a><span>`);
+      let content = this.post && this.post.description;
+      const tempEle = document.createElement('div');
+      tempEle.innerHTML = content;
+      const anchors = tempEle.querySelectorAll('a');
+      anchors.forEach(item => {
+        item.href = item.innerText.slice(1)
       })
-      return text;
+      return tempEle.innerHTML;
     }
   },
 

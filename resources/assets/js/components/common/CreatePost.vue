@@ -85,7 +85,7 @@
 
           <template #footer>
             <b-row v-if="suggestions.length" class="mb-1">
-              <b-col cols="12" class="d-flex">
+              <b-col cols="12" class="d-flex flex-wrap">
                 <div class="bg-secondary mr-2 mb-1 p-1 suggestion" @click="selectSuggestion(suggestion)" v-for="suggestion in suggestions" :key="suggestion.id">
                   {{ suggestion.label }}
                 </div>
@@ -698,18 +698,36 @@ export default {
 
     onInput(e) {
       this.lastRange = this.saveSelection()
-      this.description = e.target.innerHTML
-      const matches = this.description.match(/\B(@[\w\-.]+)/g) || []
+      const cursorPos = this.lastRange.startOffset
+      const fontEle = e.target.querySelector('font')
+      if (fontEle) {
+        fontEle.outerHTML = `<span>${fontEle.innerText}</span>`;
+        this.restoreSelection(this.lastRange)
+      }
+      const anchors = e.target.querySelectorAll('a');
+      if (anchors.length > 0) {
+        anchors.forEach(anchor => {
+          if (anchor.innerText[0] != '@') {
+            anchor.outerHTML = `<span>${anchor.innerText}</span>`;
+            this.restoreSelection(this.lastRange)
+          }
+        })
+      }
+      let html = e.target.innerHTML
+      const matches = html.match(/\B(@[\w\-.]+)/g) || []
       if (matches.length > 0) {
         this.newMatch = this.compareMatches(matches, this.lastMatches);
-        console.log('-------this.newMatch:', this.newMatch)
-        if (this.description.search(`<a>${this.newMatch}</a>`) > -1) {
-          const randClass = new Date().getTime();
-          this.description = this.description.replace(`<a>${this.newMatch}</a>`, `<span class="s${randClass}">${this.newMatch}</span>`)
-          const ele = document.querySelector('.create_post-crate .text-editor')
-          ele.focus()
-          ele.innerHTML = this.description
-          this.setCursorPosition(`.s${randClass}`)
+        if (html.search(`<a>${this.newMatch}</a>`) > -1) {
+          if (anchors.length > 0) {
+            anchors.forEach(anchor => {
+              if (anchor.innerText == this.newMatch) {
+                const randClass = `s${new Date().getTime()}`;
+                anchor.outerHTML = `<span class='${randClass}'>${this.newMatch.substring(0, cursorPos)}</span><span>${this.newMatch.substring(cursorPos)}</span>`;
+                this.setCursorPosition('.' + randClass)
+              }
+            })
+          }
+          this.description = e.target.innerHTML
         }
         if (this.newMatch) {
           this.lastMatches = matches;
@@ -724,11 +742,10 @@ export default {
     },
 
     selectSuggestion(suggestion) {
-      const randClass = new Date().getTime();
-      this.description = this.description.replace(this.newMatch, `<a>@${suggestion.label}</a><span class="s${randClass}">&nbsp;</span>`)
+      this.restoreSelection(this.lastRange)
+      this.pasteHtmlAtCaret(`<a>@${suggestion.label}</a>&nbsp;`)
       const ele = document.querySelector('.create_post-crate .text-editor')
-      ele.innerHTML = this.description
-      this.setCursorPosition(`.s${randClass}`)
+      this.description = ele.innerHTML
       this.suggestions = []
       this.lastMatches = this.description.match(/\B(@[\w\-.]+)/g) || []
     },
@@ -793,6 +810,11 @@ export default {
                     lastNode = frag.appendChild(node);
                 }
                 range.insertNode(frag);
+
+                const text = range.startContainer.textContent
+                if (text && this.newMatch) {
+                  range.startContainer.textContent = text.substring(0, text.length - this.newMatch.length)
+                }
                 
                 // Preserve the selection
                 if (lastNode) {
