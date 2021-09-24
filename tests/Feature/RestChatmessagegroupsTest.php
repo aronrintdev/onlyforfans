@@ -10,8 +10,8 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 
 use Illuminate\Foundation\Testing\WithFaker;
@@ -23,9 +23,9 @@ use App\Events\ItemPurchased;
 use App\Events\PurchaseFailed;
 use App\Events\MessageSentEvent;
 
-use App\Models\Chatthread;
 use App\Models\Chatmessage;
 use App\Models\Chatmessagegroup;
+use App\Models\Chatthread;
 use App\Models\Mediafile;
 use App\Models\User;
 use App\Models\Timeline;
@@ -202,7 +202,7 @@ class RestChatmessagegroupsTest extends TestCase
      *  @group chatmessagegroups
      *  @group regression
      *  @group regression-base
-     *  @group here0923
+     *  @group OFF-here0923
      */
     public function test_can_analyze_mass_message_stats()
     {
@@ -210,12 +210,15 @@ class RestChatmessagegroupsTest extends TestCase
         $this->assertTrue(Config::get('segpay.fake'), 'Your SEGPAY_FAKE .env variable is not set to true.');
 
         $timeline = Timeline::has('followers', '>=', 3)->firstOrFail();
-        $originator = $timeline->user;
-        $fans = $timeline->followers;
+        $originator = $timeline->user; // aka creator
+        $fans = $timeline->followers; // aka receivers of mass message
 
         $this->assertGreaterThan(0, $fans->count());
 
-        // --- Send the mass message ---
+        // -------------------------------------------------------------------------------------------
+        // Need to simulate what Create Chatmessage form does, which is to upload mediafiles first
+        // to vault, *then* store the [chatmessages] record with the attachments passed in POST payload
+        // -------------------------------------------------------------------------------------------
 
         $filenames = [
             $this->faker->slug,
@@ -225,8 +228,6 @@ class RestChatmessagegroupsTest extends TestCase
             UploadedFile::fake()->image($filenames[0], 200, 200),
             UploadedFile::fake()->image($filenames[1], 200, 200),
         ];
-        //$mf = Mediafile::factory()->create();
-        //dd($mf);
 
         $primaryVault = Vault::primary($originator)->first();
         $vf = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
@@ -264,8 +265,10 @@ class RestChatmessagegroupsTest extends TestCase
         }
 
         $this->assertGreaterThan(0, count($attachments));
-        //dd('test', $attachments);
 
+        // --- Send the Group Chat Message ---
+
+        $cmgCountBefore = Chatmessagegroup::count();
         $payload = [
             'originator_id' => $originator->id,
             'participants' => $fans->pluck('id')->toArray(),
@@ -277,7 +280,7 @@ class RestChatmessagegroupsTest extends TestCase
         $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
         $content = json_decode($response->content());
         $response->assertStatus(201);
-
+        $cmgCountAfter = Chatmessagegroup::count();
         $msgCountAfterStore = Chatmessage::count();
 
         $response->assertJsonStructure([
@@ -300,12 +303,14 @@ class RestChatmessagegroupsTest extends TestCase
         $this->assertNotNull($ct);
         $this->assertNotNull($ct->id);
 
-        // --- Do some purchases ---
+        $this->assertEquals($cmgCountBefore+1, $cmgCountAfter);
+
+        // --- Do a purchase by one of the fans/msg-receivers ---
+
         $cm = Chatmessage::find($content->chatmessages[0]->id);
         $this->assertNotNull($cm->id??null);
         $this->assertNotNull($cm->price);
         $this->assertGreaterThan(0, $cm->price->getAmount());
-        //dd($cm->chatthread->participants);
         $receiver = $cm->chatthread->participants()->where('users.id', '<>', $originator->id)->first();
         $this->assertNotEquals($originator->id, $receiver->id);
 
@@ -345,7 +350,44 @@ class RestChatmessagegroupsTest extends TestCase
             'credit_amount' => $cm->price->getAmount(),
             'resource_id' => $cm->getKey(),
         ], 'financial');
-    }
+
+        $response = $this->actingAs($originator)->ajaxJSON('GET', route('chatmessagegroups.index'));
+        $response->assertStatus(200);
+        $content = json_decode($response->content());
+        $response->assertJsonStructure([
+            'data' => [
+                0 => [ 
+                    'id', 
+                    'sender_id', 
+                    'mgtype', 
+                    'price', 
+                    'currency', 
+                    'mcontent', 
+                    'sender_name', 
+                    'deliver_at', 
+                    'attachment_counts'=>[
+                        'images_count',
+                        'videos_count',
+                        'audios_count',
+                    ],
+                    'sent_count',
+                    'read_count',
+                    'purchased_count',
+                    'cattrs',
+                    'created_at',
+                ],
+            ],
+        ]);
+        //dd($content);
+
+        // Find the one we just created in the response
+        $mmaR = collect($content->data)->first( function($v) use(&$cmg) { // mass media analytics response
+            return $v->id === $cmg->id;
+        });
+        $this->assertNotNull($mmaR->id??null);
+        $this->assertEquals(1, $mmaR->purchased_count);
+
+    } // test_can_analyze_mass_message_stats()
 
     // ------------------------------
 
