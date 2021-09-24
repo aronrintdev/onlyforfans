@@ -805,7 +805,7 @@ class Account extends Model implements Ownable
 
         // Check price
         $payment = $this->asMoney($payment);
-        if ($subscribable->verifyPrice($payment) === false) {
+        if ($subscribable->verifyPrice($payment, SubscriptionPeriodEnum::DAILY, 30) === false) {
             throw new InvalidSubscriptionAmountException($this, $payment, $subscribable);
         }
 

@@ -343,7 +343,32 @@ class RestSettingTest extends TestCase
 
         $payload1 = [
             'weblinks' => [
-                'website' => 'http://www.lind.info', // %FIXME looks like laravel's validation domain rule doesn't accept .info (?)
+                'website' => 'http://www.lind.info',
+            ],
+        ];
+        $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSettingsBatch', [$user->id]), $payload1);
+        $content = json_decode($response->content());
+        $response->assertStatus(200);
+
+        $settings = $user->settings;
+        $settings->refresh();
+
+        $this->assertEquals($payload1['weblinks']['website'], $settings->weblinks['website'] ?? '');
+    }
+
+    /**
+     *  @group settings
+     *  @group regression
+     *  @group regression-base
+     */
+    public function test_can_batch_edit_settings_profile_set_website_to_up_to_six_character_suffix()
+    {
+        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
+        $user = $timeline->user;
+
+        $payload1 = [
+            'weblinks' => [
+                'website' => 'http://www.lind.travel', // %FIXME looks like laravel's validation domain rule doesn't accept .info (?)
             ],
         ];
         $response = $this->actingAs($user)->ajaxJSON('PATCH', route('users.updateSettingsBatch', [$user->id]), $payload1);
@@ -466,7 +491,6 @@ class RestSettingTest extends TestCase
                 'subscribe_price_3_month' => null,
                 'subscribe_price_6_month' => null,
                 'subscribe_price_year' => null,
-                'referral-rewards' =>  'disabled',
                 '_token' => csrf_token()
             ]);
 
@@ -479,31 +503,6 @@ class RestSettingTest extends TestCase
             'subscribe_price_3_month' => 50.00,
             'subscribe_price_6_month' => null,
             'subscribe_price_year' => null,
-            'referral-rewards' =>  'disabled',
-            '_token' => csrf_token()
-        ]);
-
-        $response->assertStatus(302);
-    }
-
-    /**
-     *  @group OFF-settings
-     *  @group OFF-regression
-     */
-    public function test_can_enable_referral_rewards()
-    {
-
-        $timeline = Timeline::has('posts', '>=', 1)->has('followers', '>=', 1)->first();
-        $creator = $timeline->user;
-
-        $response = $this->actingAs($creator)
-        ->json('POST', '/'.$creator->username.'/settings/subscription', [
-            'subscribe_price_month' => null,
-            'is_follow_for_free' => 'on',
-            'subscribe_price_3_month' => 50.00,
-            'subscribe_price_6_month' => null,
-            'subscribe_price_year' => null,
-            'referral-rewards' =>  '1-free-month',
             '_token' => csrf_token()
         ]);
 
@@ -528,7 +527,6 @@ class RestSettingTest extends TestCase
             'subscribe_price_3_month' => 50.00,
             'subscribe_price_6_month' => null,
             'subscribe_price_year' => null,
-            'referral-rewards' =>  '1-free-month',
             '_token' => csrf_token()
         ]);
         $response->assertStatus(302);
@@ -540,7 +538,6 @@ class RestSettingTest extends TestCase
             'subscribe_price_3_month' => 50.00,
             'subscribe_price_6_month' => null,
             'subscribe_price_year' => null,
-            'referral-rewards' =>  '1-free-month',
             '_token' => csrf_token()
         ]);
 

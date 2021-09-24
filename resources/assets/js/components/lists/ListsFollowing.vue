@@ -26,7 +26,7 @@
 
             <b-button @click="redirectToMessages(s)" class="mb-1" variant="primary">Message</b-button>
             <b-button class="mb-1" @click="renderTip(s.shareable, 'timelines')" variant="primary">Tip</b-button>
-            <b-button class="mb-1" v-if="s.access_level==='default' && s.shareable.userstats.subscriptions.price_per_1_months" @click="renderSubscribeModal(s.shareable)" variant="primary">Subscribe</b-button>
+            <b-button class="mb-1" v-if="s.access_level==='default' && s.shareable.userstats.prices['1_month']" @click="renderSubscribeModal(s.shareable)" variant="primary">Subscribe</b-button>
             <b-button class="mb-1" @click="showUnfollowConfirmation=true; selectedTimeline=s.shareable" variant="primary">
               Unfollow
             </b-button>
