@@ -61,7 +61,7 @@
         <hr />
 
         <!-- Details -->
-        <div class="m-0">
+        <div class="m-0" v-if="timeline.userstats && timeline.userstats.display_prices">
             Original Price {{ timeline.userstats.display_prices['1_month'] | niceCurrency }}
             - Discounted to {{ applyDiscount(timeline.userstats.display_prices['1_month'], discountPercent) | niceCurrency }}
         </div>
@@ -147,10 +147,13 @@ export default {
 
     discountPercentOptions() {
       const options = []
-      for ( let i = 5 ; i <= 95 ; i+= 5 ) {
-        const discounted = this.applyDiscount(this.timeline.userstats.prices['1_month'], i)
-        if (discounted >= 300) { // $3.00
-          options.push({ text: `${i}% discount`, value: i })
+      if (this.timeline.price) {
+        for ( let i = 5 ; i <= 95 ; i+= 5 ) {
+          const discounted = this.applyDiscount(this.timeline.price.amount, i)
+          if (discounted >= 300) { // $3.00
+            const niceDiscount = this.$options.filters.niceCurrency(Math.round(discounted), this.timeline.price.currency)
+            options.push({ text: `${i}% discount  ( ${niceDiscount} )`, value: i })
+          }
         }
       }
       return options
