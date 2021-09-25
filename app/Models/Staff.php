@@ -81,4 +81,13 @@ class Staff extends Model
     public function permissions() {
         return $this->morphToMany(Permission::class, 'permissibles');
     }
+
+    // -------------------- %%% Other  ----------------------
+
+    public function activate() {
+        $this->active = true;
+        $this->pending = false;
+        $this->save();
+    }
+
 }
