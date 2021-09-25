@@ -2,21 +2,24 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\WithFaker;
-//use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification as NotificationFacade;
 use DB;
 
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
+
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\Timeline;
 use App\Models\User;
+
 use App\Enums\PostTypeEnum;
+
+use App\Notifications\CommentReceived;
 
 class RestCommentsTest extends TestCase
 {
     use WithFaker;
-    //use RefreshDatabase;
 
     /**
      *  @group comments
@@ -263,6 +266,8 @@ class RestCommentsTest extends TestCase
      */
     public function test_follower_can_create_comment_on_timeline_post()
     {
+        NotificationFacade::fake();
+
         $timeline = Timeline::has('followers', '>=', 1)
             ->whereHas('posts', function($q1) {
                 $q1->where('type', PostTypeEnum::FREE)->has('comments', '>=', 1);
@@ -304,6 +309,8 @@ class RestCommentsTest extends TestCase
         $this->assertEquals(1, $commentsByFan->count());
         $this->assertEquals($payload['description'], $commentsByFan->first()->description);
         $this->assertEquals($commentsByFan->first()->id, $content->comment->id);
+
+        NotificationFacade::assertSentTo( [$creator], CommentReceived::class );
     }
 
     /**

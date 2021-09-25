@@ -341,7 +341,6 @@ class NotificationTest extends TestCase
      * @group lib-notification-unit-fake
      * @group regression
      * @group regression-unit
-     * @group here0915
      */
     public function test_should_notify_post_tag_received()
     {

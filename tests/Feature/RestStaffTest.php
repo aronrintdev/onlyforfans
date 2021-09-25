@@ -29,7 +29,7 @@ class RestStaffTest extends TestCase
      *  @group regression
      *  @group regression-base
      *  @group staff
-     *  @group here0924
+     *  @group OFF-here0924
      */
     public function test_can_index_staffaccounts()
     {
@@ -72,7 +72,6 @@ class RestStaffTest extends TestCase
      *  @group regression
      *  @group regression-base
      *  @group staff
-     *  @group here0924
      */
     public function test_can_not_fetch_manager_list_as_guest()
     {

@@ -3,8 +3,9 @@ namespace Tests\Feature;
 
 use DB;
 use Tests\TestCase;
-
 use Database\Seeders\TestDatabaseSeeder;
+
+use Illuminate\Support\Facades\Notification as NotificationFacade;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\File;
 use Illuminate\Support\Facades\Config;
@@ -12,17 +13,20 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
 
+use App\Notifications\ResourcePurchased;
+use App\Notifications\ResourceLiked;
+
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Comment;
 use App\Models\Likeable;
 use App\Models\Timeline;
-use App\Events\TipFailed;
 use App\Models\Mediafile;
 use App\Models\Financial\SegpayCard;
 use App\Models\Tip;
 use App\Models\Notification;
 
+use App\Events\TipFailed;
 use App\Events\ItemTipped;
 use App\Events\ItemPurchased;
 use App\Events\PurchaseFailed;
@@ -812,10 +816,13 @@ class RestPostsTest extends TestCase
      */
     public function test_timeline_follower_can_like_then_unlike_post()
     {
+
         $lPath = self::getLogPath();
         $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
         if( $isLogScanEnabled ) {
             $fSizeBefore = $lPath ? filesize($lPath) : null;
+        } else {
+            NotificationFacade::fake();
         }
 
         $timeline = Timeline::has('followers', '>=', 1)
@@ -847,7 +854,6 @@ class RestPostsTest extends TestCase
         $content = json_decode($response->content());
         $this->assertNotNull($content->likeable);
         $postR = $content->likeable;
-        //$this->assertInstanceOf(Post::class, $postR);
         $this->assertEquals($post->id, $postR->id);
 
         $likeable = DB::table('likeables')
@@ -860,24 +866,26 @@ class RestPostsTest extends TestCase
         $this->assertEquals('posts', $likeable->likeable_type);
         $this->assertEquals($postR->id, $likeable->likeable_id);
 
-        // Check that one notification was added...
         $notifyCountAfter = Notification::count();
-        $this->assertEquals($notifyCountBefore+1, $notifyCountAfter);
+        if( $isLogScanEnabled ) { // only if not faked
+            // Check that one notification was added...
+            $this->assertEquals($notifyCountBefore+1, $notifyCountAfter);
 
-        $n = Notification::where('notifiable_id', $creator->id)->orderBy('created_at', 'desc')->first();
-        $this->assertNotNull($n);
-        $this->assertNotNull($n->id);
+            $n = Notification::where('notifiable_id', $creator->id)->orderBy('created_at', 'desc')->first();
+            $this->assertNotNull($n);
+            $this->assertNotNull($n->id);
 
-        $this->assertEquals('App\Notifications\ResourceLiked', $n->type);
-        $this->assertEquals('users', $n->notifiable_type);
+            $this->assertEquals('App\Notifications\ResourceLiked', $n->type);
+            $this->assertEquals('users', $n->notifiable_type);
 
-        $this->assertNotNull($n->data);
-        $this->assertIsArray($n->data);
-        $this->assertArrayHasKey('resource_id', $n->data);
-        $this->assertArrayHasKey('resource_type', $n->data);
-        $this->assertArrayHasKey('actor', $n->data);
-        $this->assertEquals($post->id, $n->data['resource_id']);
-        $this->assertEquals('posts', $n->data['resource_type']);
+            $this->assertNotNull($n->data);
+            $this->assertIsArray($n->data);
+            $this->assertArrayHasKey('resource_id', $n->data);
+            $this->assertArrayHasKey('resource_type', $n->data);
+            $this->assertArrayHasKey('actor', $n->data);
+            $this->assertEquals($post->id, $n->data['resource_id']);
+            $this->assertEquals('posts', $n->data['resource_type']);
+        }
 
         if ( $isLogScanEnabled && $lPath ) {
             $fSizeAfter = filesize($lPath);
@@ -889,6 +897,10 @@ class RestPostsTest extends TestCase
                 $this->assertStringContainsString('Subject:', $fcontents);
                 $this->assertStringContainsString('From:', $fcontents);
             }
+        }
+
+        if( !$isLogScanEnabled ) {
+            NotificationFacade::assertSentTo( [$creator], ResourceLiked::class );
         }
 
         // UNLIKE the post
@@ -1046,11 +1058,13 @@ class RestPostsTest extends TestCase
      *  @group posts
      *  @group regression
      *  @group regression-base
-     *  @group erik
+     *  @group fixme
      */
     // tests purchase itself, plus before and after access
     public function test_can_purchase_post()
     {
+        NotificationFacade::fake();
+
         $this->assertTrue(Config::get('segpay.fake'), 'Your SEGPAY_FAKE .env variable is not set to true.');
 
         $timeline = Timeline::has('followers', '>=', 1)
@@ -1133,6 +1147,8 @@ class RestPostsTest extends TestCase
         $content = json_decode($response->content());
         $this->assertObjectHasAttribute('description', $content->data); // can see contents
         $this->assertObjectHasAttribute('mediafiles', $content->data);
+
+        NotificationFacade::assertSentTo( [$creator], ResourcePurchased::class );
     }
 
 

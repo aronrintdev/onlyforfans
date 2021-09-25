@@ -2,29 +2,35 @@
 namespace Tests\Feature;
 
 use DB;
-use App\Models\Tip;
 use Tests\TestCase;
+use Database\Seeders\TestDatabaseSeeder;
+
+use Illuminate\Support\Carbon;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Notification as NotificationFacade;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Config;
+
+use App\Notifications\TimelineFollowed;
+
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Timeline;
-use App\Events\TipFailed;
-use App\Models\Mediafile;
-use App\Events\ItemTipped;
-use App\Enums\PostTypeEnum;
 use App\Models\Diskmediafile;
 use App\Models\UserSetting;
-use App\Enums\PaymentTypeEnum;
-use App\Events\ItemSubscribed;
-use Illuminate\Support\Carbon;
-use App\Enums\MediafileTypeEnum;
-use App\Events\SubscriptionFailed;
 use App\Models\Financial\SegpayCard;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Config;
+use App\Models\Mediafile;
+use App\Models\Tip;
+
+use App\Events\TipFailed;
+use App\Events\ItemTipped;
+use App\Events\ItemSubscribed;
+use App\Events\SubscriptionFailed;
+
+use App\Enums\PostTypeEnum;
+use App\Enums\PaymentTypeEnum;
+use App\Enums\MediafileTypeEnum;
 use App\Enums\Financial\AccountTypeEnum;
-use Database\Seeders\TestDatabaseSeeder;
-use Illuminate\Foundation\Testing\WithFaker;
-//use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
  * @group feature
@@ -586,6 +592,7 @@ class RestTimelinesTest extends TestCase
      */
     public function test_can_follow_timeline()
     {
+        NotificationFacade::fake();
         $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first();
         $creator = $timeline->user;
 
@@ -616,6 +623,8 @@ class RestTimelinesTest extends TestCase
         $this->assertEquals('timelines', $timeline->followers->find($fan->id)->pivot->shareable_type);
         $this->assertTrue( $timeline->followers->contains( $fan->id ) );
         $this->assertTrue( $fan->followedtimelines->contains( $timeline->id ) );
+
+        NotificationFacade::assertSentTo( [$creator], TimelineFollowed::class );
     }
 
     /**
