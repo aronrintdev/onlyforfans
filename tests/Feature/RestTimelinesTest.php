@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Config;
 
 use App\Notifications\TimelineFollowed;
+use App\Notifications\TipReceived;
 
 use App\Models\Post;
 use App\Models\User;
@@ -527,10 +528,12 @@ class RestTimelinesTest extends TestCase
      *  @group timelines
      *  @group regression
      *  @group regression-base
-     *  @group erik
+     *  @group fixme
      */
     public function test_can_send_tip_to_timeline()
     {
+        NotificationFacade::fake();
+
         $timeline = Timeline::has('posts','>=',1)->has('followers','>=',1)->first(); // assume non-admin (%FIXME)
         $creator = $timeline->user;
         $fan = $timeline->followers[0];
@@ -583,6 +586,8 @@ class RestTimelinesTest extends TestCase
             'account_id'    => $creator->getEarningsAccount('segpay', 'USD')->getKey(),
             'credit_amount' => $payload['amount'],
         ], 'financial');
+
+        NotificationFacade::assertSentTo( [$creator], TipReceived::class );
     }
 
     /**

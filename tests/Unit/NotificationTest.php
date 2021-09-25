@@ -28,7 +28,6 @@ use App\Notifications\NewSubPaymentReceived;
 use App\Notifications\NotifyTraits;
 use App\Notifications\PasswordChanged;
 use App\Notifications\PasswordReset;
-use App\Notifications\PostTipped;
 use App\Notifications\ResourceLiked;
 use App\Notifications\ResourcePurchased;
 use App\Notifications\SubRenewalPaymentReceived;
