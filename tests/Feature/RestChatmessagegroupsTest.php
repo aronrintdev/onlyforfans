@@ -8,7 +8,7 @@ use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Facades\Notification as NotificationFacade;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
@@ -22,6 +22,8 @@ use Tests\TestCase;
 use App\Events\ItemPurchased;
 use App\Events\PurchaseFailed;
 use App\Events\MessageSentEvent;
+
+use App\Notifications\MessageReceived;
 
 use App\Models\Chatmessage;
 use App\Models\Chatmessagegroup;
@@ -46,6 +48,8 @@ class RestChatmessagegroupsTest extends TestCase
      */
     public function test_can_send_mass_message()
     {
+        NotificationFacade::fake();
+
         $timeline = Timeline::has('followers', '>=', 2)->firstOrFail();
         $originator = $timeline->user;
         $fans = $timeline->followers;
@@ -84,6 +88,8 @@ class RestChatmessagegroupsTest extends TestCase
         $this->assertNotNull($ct);
         $this->assertNotNull($ct->id);
         $this->assertEquals(2, $ct->participants->count()); // 2 participants *per thread*, one thread per fan
+
+        NotificationFacade::assertSentTo( $fans, MessageReceived::class );
 
         //$this->assertTrue( $ct->chatmessages->contains($content->chatthreads) );
 

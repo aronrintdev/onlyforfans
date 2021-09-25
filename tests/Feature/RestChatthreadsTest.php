@@ -3,6 +3,8 @@ namespace Tests\Feature;
 
 use DB;
 use Carbon\Carbon;
+
+use Illuminate\Support\Facades\Notification as NotificationFacade;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Config;
@@ -14,12 +16,13 @@ use Tests\TestCase;
 
 use Database\Seeders\TestDatabaseSeeder;
 
+use App\Notifications\MessageReceived;
+
 use App\Events\MessageSentEvent;
 use App\Models\Chatmessage;
 use App\Models\Chatthread;
 use App\Models\Timeline;
 use App\Models\User;
-
 
 class RestChatthreadsTest extends TestCase
 {
@@ -328,9 +331,12 @@ class RestChatthreadsTest extends TestCase
      *  @group chatthreads
      *  @group regression
      *  @group regression-base
+     *  @group fixme
      */
     public function test_can_create_direct_chat()
     {
+        NotificationFacade::fake();
+
         // (1) test the 'create new thread' case
         $creator = User::has('timeline.followers','>=',1)->doesntHave('chatthreads')->firstOrFail();
         $timeline = $creator->timeline;
@@ -358,6 +364,8 @@ class RestChatthreadsTest extends TestCase
         $response->assertStatus(201);
         $creator->refresh();
         $this->assertEquals(1, $creator->chatthreads->count());
+
+        NotificationFacade::assertSentTo( [$fan], MessageReceived::class );
     }
 
     /**
@@ -367,9 +375,8 @@ class RestChatthreadsTest extends TestCase
      */
     public function test_should_create_thread_with_originator_plus_single_recipient_and_send_message()
     {
-        Event::fake([
-            MessageSentEvent::class,
-        ]);
+        NotificationFacade::fake();
+        Event::fake([ MessageSentEvent::class, ]);
 
         // create chat
         // $originator = User::doesntHave('chatthreads')->firstOrFail();
@@ -434,6 +441,8 @@ class RestChatthreadsTest extends TestCase
         $this->assertTrue($chatthread->participants->contains($recipients[0]->id));
         $this->assertEquals($msgs[0], $chatthread->chatmessages[0]->mcontent);
         $this->assertEquals($msgs[1], $chatthread->chatmessages[1]->mcontent);
+
+        NotificationFacade::assertSentTo( $recipients, MessageReceived::class );
     }
 
     /**
@@ -443,6 +452,7 @@ class RestChatthreadsTest extends TestCase
      */
     public function test_should_create_multiple_threads_with_originator_on_all_and_single_recipient_per_and_send_message()
     {
+        NotificationFacade::fake();
         Event::fake([ MessageSentEvent::class, ]);
         $MAX = 3;
 
@@ -568,6 +578,7 @@ dd('msgs', $msgs, 'chatmessages.mcontent',
         $this->assertEquals($msgs[1], $thisCT->chatmessages[1]->mcontent);
         $this->assertEquals($msgs[2], $thisCT->chatmessages[2]->mcontent);
 
+        NotificationFacade::assertSentTo( $recipients, MessageReceived::class );
     }
 
     /**
@@ -577,9 +588,8 @@ dd('msgs', $msgs, 'chatmessages.mcontent',
      */
     public function test_should_create_thread_with_included_first_message_content()
     {
-        Event::fake([
-            MessageSentEvent::class,
-        ]);
+        NotificationFacade::fake();
+        Event::fake([ MessageSentEvent::class, ]);
 
         // create chat
         // $originator = User::doesntHave('chatthreads')->firstOrFail();
@@ -610,6 +620,8 @@ dd('msgs', $msgs, 'chatmessages.mcontent',
         $chatthread = Chatthread::find($chatthreadPKID);
         $this->assertNotNull($chatthread);
         $this->assertEquals($payload['mcontent'], $chatthread->chatmessages[0]->mcontent);
+
+        NotificationFacade::assertSentTo( $recipients, MessageReceived::class );
     }
 
     /**
@@ -619,9 +631,8 @@ dd('msgs', $msgs, 'chatmessages.mcontent',
      */
     public function test_should_create_thread_with_included_first_message_content_pre_scheduled()
     {
-        Event::fake([
-            MessageSentEvent::class,
-        ]);
+        NotificationFacade::fake();
+        Event::fake([ MessageSentEvent::class, ]);
 
         // create chat
         // $originator = User::doesntHave('chatthreads')->firstOrFail();
@@ -659,6 +670,8 @@ dd('msgs', $msgs, 'chatmessages.mcontent',
         $scheduledMsg = Chatmessage::where('chatthread_id', $chatthreadPKID)->first();
         $this->assertNotNull($scheduledMsg);
         $this->assertEquals($payload['mcontent'], $scheduledMsg->mcontent);
+
+        NotificationFacade::assertNothingSent( MessageReceived::class );
     }
 
     /**
@@ -711,10 +724,13 @@ dd('msgs', $msgs, 'chatmessages.mcontent',
      *  @group chatthreads
      *  @group regression
      *  @group regression-base
+     *  @group fixme
      */
     // Test returning messages by both chathreads.show + chatmessages.index w/ filter
     public function test_can_schedule_message()
     {
+        NotificationFacade::fake();
+
         // create chat
         // $originator = User::doesntHave('chatthreads')->firstOrFail();
         // $recipients = User::doesntHave('chatthreads')->where('id', '<>', $originator->id)->take(3)->get();
@@ -815,7 +831,10 @@ dd('msgs', $msgs, 'chatmessages.mcontent',
          */
         $this->assertTrue( $scheduledMessage->is_delivered );
         // $this->assertTrue( collect($content->data->chatmessages)->contains('id', '=', $scheduledMessage->id) );
-    }
+
+        NotificationFacade::assertNothingSent( MessageReceived::class );
+
+    } //  test_can_schedule_message()
 
     /**
      *  @group regression

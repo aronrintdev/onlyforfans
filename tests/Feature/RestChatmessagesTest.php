@@ -4,6 +4,7 @@ namespace Tests\Feature;
 use DB;
 use Tests\TestCase;
 
+use Illuminate\Support\Facades\Notification as NotificationFacade;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 
 use Database\Seeders\TestDatabaseSeeder;
+
+use App\Notifications\MessageReceived;
 
 use App\Models\Chatmessage;
 use App\Models\Chatthread;
@@ -127,8 +130,10 @@ class RestChatmessagesTest extends TestCase
      */
     public function test_can_send_chatmessage_text_only_in_thread()
     {
+        NotificationFacade::fake();
+
         $timeline = Timeline::has('followers', '>=', 2)->firstOrFail();
-        $originator = $timeline->user; // aka creator
+        $sender = $timeline->user; // aka creator
         $fans = $timeline->followers; // aka receivers
         $this->assertGreaterThan(0, $fans->count());
 
@@ -137,11 +142,11 @@ class RestChatmessagesTest extends TestCase
         $receiver = $fans[0];
 
         $payload = [
-            'originator_id' => $originator->id,
+            'originator_id' => $sender->id,
             'participants' => [$receiver->id],
             'mcontent' => $this->faker->realText,
         ];
-        $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
+        $response = $this->actingAs($sender)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
         $content = json_decode($response->content());
         $response->assertStatus(201);
         $response->assertJsonStructure([
@@ -196,7 +201,7 @@ class RestChatmessagesTest extends TestCase
         $this->assertIsArray($content->chatthreads);
         $this->assertEquals(1,  count($content->chatthreads) );
         $ctR = $content->chatthreads[0];
-        $this->assertEquals($originator->id, $ctR->originator_id);
+        //$this->assertEquals($sender->id, $ctR->originator_id); // %NOTE: not ness true if a thread already existed
         $this->assertEquals(2,  count($ctR->participants) );
         $this->assertTrue( collect($ctR->participants)->contains( function($v) use(&$receiver) {
             return $v->id === $receiver->id;
@@ -205,13 +210,14 @@ class RestChatmessagesTest extends TestCase
         $this->assertIsArray($content->chatmessages);
         $this->assertEquals(1,  count($content->chatmessages) );
         $cmR = $content->chatmessages[0];
-        $this->assertEquals($originator->id, $cmR->sender_id);
+        $this->assertEquals($sender->id, $cmR->sender_id);
         $this->assertEquals($payload['mcontent'], $cmR->mcontent);
         $this->assertTrue($cmR->is_delivered);
         $this->assertFalse(!!$cmR->is_read);
         $this->assertFalse($cmR->purchase_only);
         $this->assertEquals(0, $cmR->price);
 
+        NotificationFacade::assertSentTo( [$receiver], MessageReceived::class );
     }
 
     /**
@@ -221,10 +227,11 @@ class RestChatmessagesTest extends TestCase
      */
     public function test_can_send_chatmessage_with_one_attachment()
     {
+        NotificationFacade::fake();
         Storage::fake('s3');
 
         $timeline = Timeline::has('followers', '>=', 2)->firstOrFail();
-        $originator = $timeline->user; // aka creator
+        $sender = $timeline->user; // aka creator
         $fans = $timeline->followers; // aka receivers of mass message
         $this->assertGreaterThan(0, $fans->count());
 
@@ -240,7 +247,7 @@ class RestChatmessagesTest extends TestCase
             UploadedFile::fake()->image($filenames[0], 200, 200),
         ];
 
-        $primaryVault = Vault::primary($originator)->first();
+        $primaryVault = Vault::primary($sender)->first();
         $vf = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
 
         $attachments = [];
@@ -252,7 +259,7 @@ class RestChatmessagesTest extends TestCase
             'resource_type' => 'vaultfolders',
             'resource_id' => $vf->id,
         ];
-        $response = $this->actingAs($originator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response = $this->actingAs($sender)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
         $mf = Mediafile::find($content->mediafile->id);
@@ -267,12 +274,12 @@ class RestChatmessagesTest extends TestCase
         $receiver = $fans[0];
 
         $payload = [
-            'originator_id' => $originator->id,
+            'originator_id' => $sender->id,
             'participants' => [$receiver->id],
             'mcontent' => $this->faker->realText,
             'attachments' => $attachments,
         ];
-        $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
+        $response = $this->actingAs($sender)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
         $content = json_decode($response->content());
         $response->assertStatus(201);
         $response->assertJsonStructure([ 'chatthreads'=>[0=>['id']], 'chatmessages'=>[0=>['id']] ]); // see above for detailed check
@@ -282,6 +289,8 @@ class RestChatmessagesTest extends TestCase
         $mediafiles = Mediafile::where('resource_type', 'chatmessages')->where('resource_id', $content->chatmessages[0]->id)->get();
         $this->assertEquals(1, $mediafiles->count());
         $this->assertEquals($filenames[0], $mediafiles[0]->mfname);
+
+        NotificationFacade::assertSentTo( [$receiver], MessageReceived::class );
     }
 
     /**
@@ -291,10 +300,11 @@ class RestChatmessagesTest extends TestCase
      */
     public function test_can_send_chatmessage_with_multiple_attachments()
     {
+        NotificationFacade::fake();
         Storage::fake('s3');
 
         $timeline = Timeline::has('followers', '>=', 2)->firstOrFail();
-        $originator = $timeline->user; // aka creator
+        $sender = $timeline->user; // aka creator
         $fans = $timeline->followers; // aka receivers of mass message
         $this->assertGreaterThan(0, $fans->count());
 
@@ -312,7 +322,7 @@ class RestChatmessagesTest extends TestCase
             UploadedFile::fake()->image($filenames[1], 200, 200),
         ];
 
-        $primaryVault = Vault::primary($originator)->first();
+        $primaryVault = Vault::primary($sender)->first();
         $vf = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
 
         $attachments = [];
@@ -324,7 +334,7 @@ class RestChatmessagesTest extends TestCase
             'resource_type' => 'vaultfolders',
             'resource_id' => $vf->id,
         ];
-        $response = $this->actingAs($originator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response = $this->actingAs($sender)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
         $mf = Mediafile::find($content->mediafile->id);
@@ -339,7 +349,7 @@ class RestChatmessagesTest extends TestCase
             'resource_type' => 'vaultfolders',
             'resource_id' => $vf->id,
         ];
-        $response = $this->actingAs($originator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response = $this->actingAs($sender)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
         $mf = Mediafile::find($content->mediafile->id);
@@ -354,12 +364,12 @@ class RestChatmessagesTest extends TestCase
         $receiver = $fans[0];
 
         $payload = [
-            'originator_id' => $originator->id,
+            'originator_id' => $sender->id,
             'participants' => [$receiver->id],
             'mcontent' => $this->faker->realText,
             'attachments' => $attachments,
         ];
-        $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
+        $response = $this->actingAs($sender)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
         $content = json_decode($response->content());
         $response->assertStatus(201);
         $response->assertJsonStructure([ 'chatthreads'=>[0=>['id']], 'chatmessages'=>[0=>['id']] ]); // see above for detailed check
@@ -368,20 +378,24 @@ class RestChatmessagesTest extends TestCase
 
         $mediafiles = Mediafile::where('resource_type', 'chatmessages')->where('resource_id', $content->chatmessages[0]->id)->get();
         $this->assertEquals(2, $mediafiles->count());
+
+        NotificationFacade::assertSentTo( [$receiver], MessageReceived::class );
     }
 
     /**
      *  @group chatmessages
      *  @group regression
      *  @group regression-base
+     *  @group fixme
      */
     public function test_can_create_purchase_only_chatmessage()
     {
+        NotificationFacade::fake();
         Storage::fake('s3');
         $this->assertTrue(Config::get('segpay.fake'), 'Your SEGPAY_FAKE .env variable is not set to true.');
 
         $timeline = Timeline::has('followers', '>=', 2)->firstOrFail();
-        $originator = $timeline->user; // aka creator
+        $sender = $timeline->user; // aka creator
         $fans = $timeline->followers; // aka receivers of mass message
 
         $this->assertGreaterThan(0, $fans->count());
@@ -398,7 +412,7 @@ class RestChatmessagesTest extends TestCase
             UploadedFile::fake()->image($filenames[0], 200, 200),
         ];
 
-        $primaryVault = Vault::primary($originator)->first();
+        $primaryVault = Vault::primary($sender)->first();
         $vf = Vaultfolder::isRoot()->where('vault_id', $primaryVault->id)->first();
 
         $attachments = [];
@@ -410,7 +424,7 @@ class RestChatmessagesTest extends TestCase
             'resource_type' => 'vaultfolders',
             'resource_id' => $vf->id,
         ];
-        $response = $this->actingAs($originator)->ajaxJSON('POST', route('mediafiles.store'), $payload);
+        $response = $this->actingAs($sender)->ajaxJSON('POST', route('mediafiles.store'), $payload);
         $response->assertStatus(201);
         $content = json_decode($response->content());
         $mf = Mediafile::find($content->mediafile->id);
@@ -426,14 +440,14 @@ class RestChatmessagesTest extends TestCase
         $this->assertFalse($receiver->isAdmin());
 
         $payload = [
-            'originator_id' => $originator->id,
+            'originator_id' => $sender->id,
             'participants' => [$receiver->id],
             'mcontent' => $this->faker->realText,
             'attachments' => $attachments,
             'price' => 2132, // $21.32
             'currency' => 'USD',
         ];
-        $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
+        $response = $this->actingAs($sender)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
         $content = json_decode($response->content());
         $response->assertStatus(201);
         $response->assertJsonStructure([ 'chatthreads'=>[0=>['id']], 'chatmessages'=>[0=>['id']] ]); // see above for detailed check
@@ -441,7 +455,7 @@ class RestChatmessagesTest extends TestCase
         $this->assertNotNull($ct->id??null);
 
         $ctR = $content->chatthreads[0];
-        $this->assertEquals($originator->id, $ctR->originator_id);
+        //$this->assertEquals($sender->id, $ctR->originator_id); // %NOTE: not ness true if a thread already existed
         $this->assertEquals(2,  count($ctR->participants) );
         $this->assertTrue( collect($ctR->participants)->contains( function($v) use(&$receiver) {
             return $v->id === $receiver->id;
@@ -454,7 +468,7 @@ class RestChatmessagesTest extends TestCase
         $this->assertEquals(1,  count($content->chatmessages) );
         $chatmessagesR = $content->chatmessages;
         $cmR1 = $content->chatmessages[0];
-        $this->assertEquals($originator->id, $cmR1->sender_id);
+        $this->assertEquals($sender->id, $cmR1->sender_id);
         $this->assertTrue($cmR1->purchase_only);
         $this->assertEquals($payload['price'], $cmR1->price);
 
@@ -520,7 +534,7 @@ class RestChatmessagesTest extends TestCase
 
         // Amount to creator/originator from fan/msg-receiver
         $this->assertDatabaseHas('transactions', [
-            'account_id' => $originator->getEarningsAccount('segpay', 'USD')->getKey(),
+            'account_id' => $sender->getEarningsAccount('segpay', 'USD')->getKey(),
             'credit_amount' => $cm->price->getAmount(),
             'resource_id' => $cm->getKey(),
         ], 'financial');
@@ -541,6 +555,8 @@ class RestChatmessagesTest extends TestCase
         //$this->assertEquals($receiver_id, $cmR3->purchased_by);
         $this->assertIsArray($cmR2->attachments);
         $this->assertEquals(1, count($cmR2->attachments));
+
+        NotificationFacade::assertSentTo( [$receiver], MessageReceived::class );
     }
 
     /**
@@ -551,7 +567,7 @@ class RestChatmessagesTest extends TestCase
     public function test_create_purchase_only_chatmessage_must_have_attachments()
     {
         $timeline = Timeline::has('followers', '>=', 2)->firstOrFail();
-        $originator = $timeline->user; // aka creator
+        $sender = $timeline->user; // aka creator
         $fans = $timeline->followers; // aka receivers of mass message
 
         $this->assertGreaterThan(0, $fans->count());
@@ -561,13 +577,13 @@ class RestChatmessagesTest extends TestCase
         $receiver = $fans[0];
 
         $payload = [ // no attachments!
-            'originator_id' => $originator->id,
+            'originator_id' => $sender->id,
             'participants' => [$receiver->id],
             'mcontent' => $this->faker->realText,
             'price' => 2132, // $21.32
             'currency' => 'USD',
         ];
-        $response = $this->actingAs($originator)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
+        $response = $this->actingAs($sender)->ajaxJSON( 'POST', route('chatthreads.store', $payload) );
         $content = json_decode($response->content());
         $response->assertStatus(422);
     }
