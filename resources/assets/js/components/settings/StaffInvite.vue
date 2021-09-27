@@ -96,8 +96,7 @@
 
     data: () => ({
       isSubmitting: false,
-      formData: {
-      },
+      formData: {},
       permissionGroups: [],
       isLoading: true,
       isAllSelected: false,
@@ -114,12 +113,11 @@
         const formData = {
           ...this.formData,
           permissions: this.selectedPermissions,
-          pending: 1,
           role: this.creator_id ? 'staff' : 'manager',
           name: `${this.formData.first_name} ${this.formData.last_name}`,
           creator_id: this.creator_id,
         }
-        this.axios.post(this.$apiRoute('users.sendStaffInvite'), formData).then(() => {
+        this.axios.post(this.$apiRoute('staffaccounts.store'), formData).then(() => {
           this.$emit('send');
           this.isSubmitting = false;
         })

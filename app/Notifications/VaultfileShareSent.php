@@ -4,6 +4,7 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 
 use App\Models\Vault;
 use App\Models\Vaultfolder;
@@ -11,7 +12,7 @@ use App\Models\User;
 
 class VaultfileShareSent extends Notification
 {
-    use Queueable;
+    use NotifyTraits, Queueable;
 
     public $resource;
     public $sender;
@@ -34,6 +35,11 @@ class VaultfileShareSent extends Notification
         return (new MailMessage)
                     ->line($this->sender->name.' has shared files with you. Please visit your vault to accept the share')
                     ->action('Accept Share', route('vault.dashboard'));
+    }
+
+    public function toSendgrid($notifiable)
+    {
+        return []; // %TODO
     }
 
     public function toArray($notifiable)

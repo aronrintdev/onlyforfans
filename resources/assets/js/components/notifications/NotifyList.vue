@@ -68,6 +68,10 @@
             </template>
             <template v-else>changed your staff settings</template>
           </template>
+          <template v-if="n.type==='App\\Notifications\\InviteStaffManager'">
+            You've been invited to become a manager of {{ n.data.actor.name }}'s profile.
+            Click <a :href="n.data.invite_landing_url">HERE</a> to accept the invitation.
+          </template>
           <template v-if="n.type==='App\\Notifications\\UserTagged'">
             tagged you in a
             <template v-if="n.data.resource_slug">
@@ -133,7 +137,8 @@ export default {
         case 'messages':
           return 'MessageReceived'
         case 'staff':
-          return 'StaffSettingsChanged'
+          //return 'StaffSettingsChanged'
+          return 'InviteStaffManager'
         case 'tagged':
           return 'UserTagged'
         case 'none':
@@ -218,6 +223,7 @@ export default {
     text-transform: capitalize;
 }
  */
+/*
 .notify-message a {
   pointer-events: none;
   color: #212529;
@@ -226,4 +232,5 @@ export default {
     color: #212529;
   }
 }
+*/
 </style>

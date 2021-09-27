@@ -52,14 +52,15 @@ export default {
       newValue.splice(index, 1, v)
       this.$emit('input', newValue)
     },
-    submitComment(form) {
+
+    async submitComment(form) {
       form.post_id = this.postId
       form.user_id = this.session_user.id
       form.parent_id = null // %TODO
-      axios.post(this.$apiRoute('comments.store'), form)
-      .then(response => {
-        this.addComment(response.data.comment)
-      })
+
+      // Add comment to list
+      const response = await this.axios.post(this.$apiRoute('comments.store'), form)
+      this.addComment(response.data.comment)
     },
   },
 

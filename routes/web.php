@@ -28,7 +28,6 @@ Route::group(['middleware' => ['web']], function () {
 
     Route::post('/email/verification-notification', function (Request $request) {
         $request->user()->sendEmailVerificationNotification();
-
         return back()->with('message', 'Verification link sent!');
     })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
@@ -53,23 +52,10 @@ Route::get('account/google', 'Auth\RegisterController@google');
 Route::get('twitter', 'Auth\RegisterController@twitterRedirect');
 Route::get('account/twitter', 'Auth\RegisterController@twitter');
 
-/* ---------------------------------- Login --------------------------------- */
-// Route::get('/login', 'Auth\LoginController@getLogin');
-Route::post('/login', 'Auth\LoginController@login');
-// Route::get('/login2', 'Auth\LoginController@login');
-
 /* -------------------------------- Register -------------------------------- */
-// Route::get('/register', 'Auth\RegisterController@register')->name('auth.register');
-Route::post('/register', 'Auth\RegisterController@registerUser');
 Route::post('/forgot-password', 'Auth\ForgotPasswordController@store');
 Route::post('/password/reset/{token}', 'Auth\ForgotPasswordController@checkResetToken');
 Route::post('/password/reset', 'Auth\ForgotPasswordController@resetPass');
-// Route::get('email/verify', 'Auth\RegisterController@verifyEmail');
-
-//main project register
-// Route::get('/main-register', 'Auth\RegisterController@mainProjectRegister');
-// Route::post('/main-login', 'Auth\LoginController@mainProjectLogin');
-// Route::get('/main-user-update', 'Auth\RegisterController@mainUserUpdate');
 
 /*
 |--------------------------------------------------------------------------
@@ -205,6 +191,11 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/campaigns/stop', ['as'=>'campaigns.stop', 'uses' => 'CampaignsController@stop']);
     Route::resource('campaigns', 'CampaignsController', [ 'only' => [ 'store' ] ]);
 
+    /* ------------------------------ Staff ------------------------------ */
+    //Route::post('/users/send-staff-invite', ['as'=>'users.sendStaffInvite', 'uses' => 'UsersController@sendStaffInvite']);
+    //Route::get('/staff-members/managers', ['as'=>'staff.indexManagers', 'uses' => 'StaffController@indexManagers']);
+    Route::resource('staffaccounts', 'StaffController', [ 'only' => [ 'index', 'store', ] ]); // was sendStaffInvite, indexManagers
+
     /* ------------------------------ Stories ------------------------------ */
     Route::get('/stories/player', ['as' => 'stories.player', 'uses' => 'SpaController@index']);
     Route::get('/stories/match', ['as'=>'stories.match', 'uses' => 'StoriesController@match']);
@@ -275,7 +266,6 @@ Route::group(['middleware' => ['auth']], function () {
     ]);
     Route::post('/users/avatar', ['as' => 'users.updateAvatar', 'uses' => 'UsersController@updateAvatar']);
     Route::post('/users/cover', ['as' => 'users.updateCover', 'uses' => 'UsersController@updateCover']);
-    Route::post('/users/send-staff-invite', ['as'=>'users.sendStaffInvite', 'uses' => 'UsersController@sendStaffInvite']);
     Route::get('/users', ['as'=>'users.index', 'uses' => 'UsersController@index'])->middleware(['role:admin|super-admin']); // describe manually to add middleware for admin
     Route::resource('users', 'UsersController', [ 'except' => [ 'index', 'create', 'edit', 'store' ] ]);
 
@@ -397,10 +387,10 @@ Route::delete('/lists/{id}/pin', 'ListsController@removeFromPin')->name('lists.r
 /*
   Staff
  */
-Route::get('/staff-members/managers', ['as'=>'staff.indexManagers', 'uses' => 'StaffController@indexManagers']);
 Route::get('/staff-members/staff', ['as'=>'staff.indexStaffMembers', 'uses' => 'StaffController@indexStaffMembers']);
 Route::delete('/staff-members/{id}', ['as'=>'staff.remove', 'uses' => 'StaffController@remove']);
-Route::post('/staff-members/invitations/accept', ['as'=>'staff.acceptInvite', 'uses' => 'StaffController@acceptInvite']);
+//Route::get('/staff-members/invitations/accept', ['as'=>'staff.acceptInvite', 'uses' => 'StaffController@acceptInvite']);
+Route::post('/staff-members/invitations/accept', ['as'=>'staff.acceptInvite', 'uses' => 'StaffController@acceptInvite']); // %FIXME: use get only!
 Route::patch('/staff-members/{id}/status', ['as'=>'staff.changestatus', 'uses' => 'StaffController@changeStatus']);
 Route::get('/staff-members/permissions', ['as'=>'staff.permissions', 'uses' => 'StaffController@listPermissions']);
 Route::get('/staff-members/managers/{id}', ['as'=>'staff.getManager', 'uses' => 'StaffController@getManager']);

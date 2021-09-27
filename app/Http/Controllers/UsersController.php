@@ -15,10 +15,13 @@ use Illuminate\Support\Facades\Mail;
 use App\Notifications\IdentityVerificationRequestSent;
 use App\Notifications\IdentityVerificationVerified;
 use App\Notifications\IdentityVerificationRejected;
+use App\Notifications\PasswordChanged;
 
 use App\Http\Resources\UserSetting as UserSettingResource;
 use App\Http\Resources\User as UserResource;
 use App\Http\Resources\UserCollection;
+
+use App\Models\Staff;
 use App\Models\User;
 use App\Models\UserSetting;
 use App\Models\Timeline;
@@ -28,7 +31,6 @@ use App\Models\Verifyrequest;
 use App\Enums\MediafileTypeEnum;
 use App\Enums\PaymentTypeEnum;
 use App\Enums\VerifyStatusTypeEnum;
-use App\Models\Staff;
 use App\Apis\Sendgrid\Api as SendgridApi;
 use Money\Currency;
 use Money\Money;
@@ -100,7 +102,10 @@ class UsersController extends AppBaseController
         $sessionUser = $user ?? $request->user(); // $user param for reset by super-admin, TBD
         $sessionUser->password = Hash::make($request->newPassword);
         $sessionUser->save();
+
+        $sessionUser->notify(new PasswordChanged($sessionUser));
         //event(new PasswordReset($sessionUser));
+
         return response()->json([ ]);
     }
 
@@ -502,85 +507,6 @@ class UsersController extends AppBaseController
         return response()->json(
             ['referralCode' => $referral_code]
         );
-    }
-
-    // Add new staff account and send invitation email
-    public function sendStaffInvite(Request $request)
-    {
-        $sessionUser = $request->user();
-        $request->validate([
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
-            'email' => 'required|string',
-            'role' => 'required|string',
-        ]);
-
-        // Add new staff user
-        $token = str_random(60);
-        $email = $request->input('email');
-
-        // Check if the same invite exists
-        $existingStaff = Staff::where('role', $request->input('role'))->where('email', $email)->where('owner_id', $sessionUser->id)->get();
-        if (count($existingStaff) > 0) {
-            return response()->json( [ 'message' => 'This user was already invited as a '.$request->input('role') ], 400);
-        }
-
-        $staff = Staff::create([
-            'first_name' => $request->input('first_name'),
-            'last_name' => $request->input('last_name'),
-            'email' => $email,
-            'role' => $request->input('role'),
-            'owner_id' => $sessionUser->id,
-            'token' => $token,
-            'creator_id' => $request->input('creator_id'),
-        ]);
-
-        if ($request->has('permissions')) {
-            $permissions = $request->input('permissions');
-            $staff->permissions()->attach($permissions);
-        }
-
-        // Send Inviation email
-        $users = User::where('email', $email)->get();
-        $accept_link = url('/staff/invitations/accept?token='.$token.'&email='.$email.'&inviter='.$sessionUser->name.(count($users) == 0 ? '&is_new=true' : ''));
-
-        if ($request->input('role') == 'manager') {
-            $user = User::where('email', $email)->first();
-            SendgridApi::send('invite-staff-manager', [
-                'to' => [
-                    'email' => $email,
-                ],
-                'dtdata' => [
-                    'manager_name' => $request->input('first_name').' '.$request->input('last_name'),
-                    'username' => $sessionUser->name,
-                    'login_url' => $accept_link,
-                    'home_url' => url('/'),
-                    'referral_url' => url('/referrals'),
-                    'privacy_url' => url('/privacy'),
-                    'manage_preferences_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
-                    'unsubscribe_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
-                ],
-            ]);
-        } else {
-            $user = User::where('email', $email)->first();
-            SendgridApi::send('invite-staff-member', [
-                'to' => [
-                    'email' => $email,
-                ],
-                'dtdata' => [
-                    'staff_name' => $request->input('first_name').' '.$request->input('last_name'),
-                    'username' => $sessionUser->name,
-                    'login_url' => $accept_link,
-                    'home_url' => url('/'),
-                    'referral_url' => url('/referrals'),
-                    'privacy_url' => url('/privacy'),
-                    'manage_preferences_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
-                    'unsubscribe_url' => $user ? url( route('users.showSettings', $user->username)) : url('/'),
-                ],
-            ]);
-        }
-
-        return response()->json( ['status' => 200] );
     }
 
     public function loginAsUser(Request $request, User $user)

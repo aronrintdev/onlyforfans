@@ -3,12 +3,17 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Notification as NotificationFacade;
 
 use Tests\TestCase;
 
+use App\Notifications\InviteStaffMember;
+use App\Notifications\InviteStaffManager;
+
 use App\Models\User;
 use App\Models\Staff;
+use App\Models\Timeline;
 use App\Models\Permission;
 use App\Notifications\StaffSettingsChanged;
 
@@ -24,17 +29,16 @@ class RestStaffTest extends TestCase
      *  @group regression
      *  @group regression-base
      *  @group staff
+     *  @group OFF-here0924
      */
-    public function test_can_fetch_manager_list()
+    public function test_can_index_staffaccounts()
     {
         // Find a creator account with managers
         $manager = Staff::where('role', 'manager')->firstOrFail();
-        $sessionUser = User::where('id', $manager->owner_id)->firstOrFail();
+        $owner = User::where('id', $manager->owner_id)->firstOrFail();
 
-        $payload = [ 
-            'page' => 1,
-        ];
-        $response = $this->actingAs($sessionUser)->ajaxJSON( 'GET', route('staff.indexManagers', $payload) );
+        $payload = [ 'role' => 'manager', ];
+        $response = $this->actingAs($owner)->ajaxJSON( 'GET', route('staffaccounts.index', $payload) );
 
         $response->assertStatus(200);
         $content = json_decode($response->content());
@@ -60,43 +64,172 @@ class RestStaffTest extends TestCase
         foreach($managers as $manager) {
             $dt = Staff::find($manager->id);
             $this->assertNotNull($dt->owner_id);
-            $this->assertEquals($dt->owner_id, $sessionUser->id);
+            $this->assertEquals($dt->owner_id, $owner->id);
         }
     }
 
+    /**
+     *  @group regression
+     *  @group regression-base
+     *  @group staff
+     */
+    public function test_can_not_fetch_manager_list_as_guest()
+    {
+        $payload = [ 'role' => 'manager', ];
+        $response = $this->ajaxJSON( 'GET', route('staffaccounts.index', $payload) );
+        $response->assertUnauthorized();
+    }
     
     /**
      *  @group regression
      *  @group regression-base
      *  @group staff
      */
-    public function test_can_send_manager_invitation()
+    public function test_can_send_staff_manager_invitation_to_guest()
     {
-        Mail::fake();
+        $lPath = self::getLogPath();
+        $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
+        if( $isLogScanEnabled ) {
+            $fSizeBefore = $lPath ? filesize($lPath) : null;
+        } else {
+            //Mail::fake(); // -- not applicable for guest case
+        }
 
-        // Find a creator account with managers
-        $manager = Staff::where('role', 'manager')->firstOrFail();
-        $sessionUser = User::where('id', $manager->owner_id)->firstOrFail();
+        // Find a creator account with managers (?? %FIXME)
+        $staffAccountWithManagerRole = Staff::where('role', 'manager')->firstOrFail();
+        $sessionUser = User::where('id', $staffAccountWithManagerRole->owner_id)->firstOrFail();
 
         $payload = [
             'first_name' => $this->faker->firstName,
             'last_name' => $this->faker->lastName,
             'email' => $this->faker->email,
-            'pending' => true,
             'role' => 'manager',
-            'creator_id' => null,
         ];
 
-        $response = $this->actingAs($sessionUser)->ajaxJSON( 'POST', route('users.sendStaffInvite', $payload) );
-
-        $response->assertStatus(200);
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'POST', route('staffaccounts.store', $payload) );
+        $response->assertStatus(201);
         $content = json_decode($response->content());
-
         $response->assertJsonStructure([
-            'status',
+            'data' => [ 'id', 'name', 'first_name', 'last_name', 'email', 'role', 'active', 'pending', 'owner_id', 'creator_id', 'user_id', 'settings', 'last_login_at', 'created_at' ]
         ]);
 
-        $this->assertEquals(200, $content->status);
+        // Check response
+        $this->assertNotNull($content->data->id);
+        $this->assertEquals($payload['first_name'], $content->data->first_name);
+        $this->assertEquals($payload['last_name'], $content->data->last_name);
+        $this->assertEquals($payload['email'], $content->data->email);
+        $this->assertEquals('manager', $content->data->role);
+        $this->assertTrue($content->data->pending);
+        $this->assertFalse($content->data->active);
+        $this->assertNull($content->data->creator_id);
+        $this->assertNull($content->data->user_id);
+
+        // Check database
+        $sa = Staff::find($content->data->id);
+        $this->assertNotNull($sa->id??null);
+        $this->assertEquals($payload['first_name'], $sa->first_name);
+        $this->assertEquals($payload['last_name'], $sa->last_name);
+        $this->assertEquals($payload['email'], $sa->email);
+        $this->assertEquals('manager', $sa->role);
+        $this->assertTrue(!!$sa->pending);
+        $this->assertFalse(!!$sa->active);
+        $this->assertNull($sa->creator_id);
+        $this->assertNull($sa->user_id);
+
+        if ( $isLogScanEnabled && $lPath ) {
+            $fSizeAfter = filesize($lPath);
+            if ( $fSizeBefore && $fSizeAfter && ($fSizeAfter > $fSizeBefore) ) {
+                $fDiff = $fSizeAfter > $fSizeBefore;
+                $fcontents = file_get_contents($lPath, false, null, -($fDiff-2));
+                $toStr = $payload['first_name'].' '.$payload['last_name'].' <'.$payload['email'].'>';
+                $this->assertStringContainsStringIgnoringCase('To: '.$toStr, $fcontents);
+                $this->assertStringContainsStringIgnoringCase('been invited to become a manager', $fcontents);
+                $this->assertStringContainsString('Subject: Invite Staff Manager', $fcontents);
+                $this->assertStringContainsString('From:', $fcontents);
+            }
+        }
+    }
+
+    /**
+     *  @group regression
+     *  @group regression-base
+     *  @group staff
+     */
+    public function test_can_send_staff_manager_invitation_to_registered_user()
+    {
+        NotificationFacade::fake();
+
+        $lPath = self::getLogPath();
+        $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
+        if( $isLogScanEnabled ) {
+            $fSizeBefore = $lPath ? filesize($lPath) : null;
+        } else {
+            Mail::fake();
+        }
+
+        $timeline = Timeline::has('posts','>=',1)->first(); 
+        $creator = $timeline->user;
+
+        $existingStaff = Staff::where('role', 'manager')->where('owner_id', $creator->id)->pluck('email')->toArray();
+        $notInA = $existingStaff;
+        $notInA[] = $creator->email;
+        $preManager = User::whereNotIn('email', $notInA)->first();
+        $this->assertNotNull($preManager->id??null);
+        $this->assertFalse( in_array($preManager->id, $existingStaff) );
+        $this->assertFalse( $preManager->id === $creator->id );
+
+        $payload = [
+            'first_name' => $preManager->real_firstname ?? $preManager->name,
+            'last_name' => $preManager->real_lastname ?? 'Smith',
+            'email' => $preManager->email,
+            'role' => 'manager',
+        ];
+
+        $response = $this->actingAs($creator)->ajaxJSON( 'POST', route('staffaccounts.store', $payload) );
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $response->assertJsonStructure([
+            'data' => [ 'id', 'name', 'first_name', 'last_name', 'email', 'role', 'active', 'pending', 'owner_id', 'creator_id', 'user_id', 'settings', 'last_login_at', 'created_at' ]
+        ]);
+
+        // Check response
+        $this->assertNotNull($content->data->id);
+        $this->assertEquals($payload['first_name'], $content->data->first_name);
+        $this->assertEquals($payload['last_name'], $content->data->last_name);
+        $this->assertEquals($payload['email'], $content->data->email);
+        $this->assertEquals('manager', $content->data->role);
+        $this->assertTrue($content->data->pending);
+        $this->assertFalse($content->data->active);
+        $this->assertNull($content->data->creator_id);
+        $this->assertNull($content->data->user_id);
+
+        // Check database
+        $sa = Staff::find($content->data->id);
+        $this->assertNotNull($sa->id??null);
+        $this->assertEquals($payload['first_name'], $sa->first_name);
+        $this->assertEquals($payload['last_name'], $sa->last_name);
+        $this->assertEquals($payload['email'], $sa->email);
+        $this->assertEquals('manager', $sa->role);
+        $this->assertTrue(!!$sa->pending);
+        $this->assertFalse(!!$sa->active);
+        $this->assertNotNull($sa->creator_id); // %FIXME
+        $this->assertNotNull($sa->user_id); // %FIXME
+
+        if ( $isLogScanEnabled && $lPath ) {
+            $fSizeAfter = filesize($lPath);
+            if ( $fSizeBefore && $fSizeAfter && ($fSizeAfter > $fSizeBefore) ) {
+                $fDiff = $fSizeAfter > $fSizeBefore;
+                $fcontents = file_get_contents($lPath, false, null, -($fDiff-2));
+                //$toStr = $payload['first_name'].' '.$payload['last_name'].' <'.$payload['email'].'>';
+                $toStr = $payload['email'];
+                $this->assertStringContainsStringIgnoringCase('To: '.$toStr, $fcontents);
+                $this->assertStringContainsStringIgnoringCase('been invited to become a manager', $fcontents);
+                $this->assertStringContainsString('Subject: Invite Staff Manager', $fcontents);
+                $this->assertStringContainsString('From:', $fcontents);
+            }
+        }
+
+        NotificationFacade::assertSentTo( [$preManager], InviteStaffManager::class );
     }
 
       
@@ -250,45 +383,158 @@ class RestStaffTest extends TestCase
             }
         }
     }
-
-      
+    
     /**
      *  @group regression
      *  @group regression-base
      *  @group staff
      */
-    public function test_can_send_staff_member_invitation()
+    public function test_can_send_staff_member_invitation_to_guest()
     {
-        Mail::fake();
+        $lPath = self::getLogPath();
+        $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
+        if( $isLogScanEnabled ) {
+            $fSizeBefore = $lPath ? filesize($lPath) : null;
+        } else {
+            //Mail::fake(); // -- not applicable for guest case
+        }
 
-        // Find a staff manager
-        $manager = Staff::where('role', 'manager')->where('active', true)->firstOrFail();
-        $sessionUser = User::where('id', $manager->user_id)->firstOrFail();
-
-        $permissions = Permission::where('guard_name', 'staff')->pluck('id')->toArray();
+        // Find a creator account with managers (?? %FIXME)
+        $staffAccountWithManagerRole = Staff::where('role', 'manager')->firstOrFail();
+        $sessionUser = User::where('id', $staffAccountWithManagerRole->owner_id)->firstOrFail();
 
         $payload = [
             'first_name' => $this->faker->firstName,
             'last_name' => $this->faker->lastName,
             'email' => $this->faker->email,
-            'pending' => true,
-            'role' => 'staff',
-            'permissions' => array_slice($permissions, 0, 2),
-            'creator_id' => null,
+            'role' => 'member',
         ];
 
-        $response = $this->actingAs($sessionUser)->ajaxJSON( 'POST', route('users.sendStaffInvite', $payload) );
-
-        $response->assertStatus(200);
+        $response = $this->actingAs($sessionUser)->ajaxJSON( 'POST', route('staffaccounts.store', $payload) );
+        $response->assertStatus(201);
         $content = json_decode($response->content());
-
         $response->assertJsonStructure([
-            'status',
+            'data' => [ 'id', 'name', 'first_name', 'last_name', 'email', 'role', 'active', 'pending', 'owner_id', 'creator_id', 'user_id', 'settings', 'last_login_at', 'created_at' ]
         ]);
 
-        $this->assertEquals(200, $content->status);
+        // Check response
+        $this->assertNotNull($content->data->id);
+        $this->assertEquals($payload['first_name'], $content->data->first_name);
+        $this->assertEquals($payload['last_name'], $content->data->last_name);
+        $this->assertEquals($payload['email'], $content->data->email);
+        $this->assertEquals('member', $content->data->role);
+        $this->assertTrue($content->data->pending);
+        $this->assertFalse($content->data->active);
+        $this->assertNull($content->data->creator_id);
+        $this->assertNull($content->data->user_id);
+
+        // Check database
+        $sa = Staff::find($content->data->id);
+        $this->assertNotNull($sa->id??null);
+        $this->assertEquals($payload['first_name'], $sa->first_name);
+        $this->assertEquals($payload['last_name'], $sa->last_name);
+        $this->assertEquals($payload['email'], $sa->email);
+        $this->assertEquals('member', $sa->role);
+        $this->assertTrue(!!$sa->pending);
+        $this->assertFalse(!!$sa->active);
+        $this->assertNull($sa->creator_id);
+        $this->assertNull($sa->user_id);
+
+        if ( $isLogScanEnabled && $lPath ) {
+            $fSizeAfter = filesize($lPath);
+            if ( $fSizeBefore && $fSizeAfter && ($fSizeAfter > $fSizeBefore) ) {
+                $fDiff = $fSizeAfter > $fSizeBefore;
+                $fcontents = file_get_contents($lPath, false, null, -($fDiff-2));
+                $toStr = $payload['first_name'].' '.$payload['last_name'].' <'.$payload['email'].'>';
+                $this->assertStringContainsStringIgnoringCase('To: '.$toStr, $fcontents);
+                $this->assertStringContainsStringIgnoringCase('been added as a staff member', $fcontents);
+                $this->assertStringContainsString('Subject: Invite Staff Member', $fcontents);
+                $this->assertStringContainsString('From:', $fcontents);
+            }
+        }
     }
 
+    /**
+     *  @group regression
+     *  @group regression-base
+     *  @group staff
+     */
+    public function test_can_send_staff_member_invitation_to_registered_user()
+    {
+        NotificationFacade::fake();
+
+        $lPath = self::getLogPath();
+        $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
+        if( $isLogScanEnabled ) {
+            $fSizeBefore = $lPath ? filesize($lPath) : null;
+        } else {
+            Mail::fake();
+        }
+
+        $timeline = Timeline::has('posts','>=',1)->first(); 
+        $creator = $timeline->user;
+
+        $existingStaff = Staff::where('role', 'member')->where('owner_id', $creator->id)->pluck('email')->toArray();
+        $notInA = $existingStaff;
+        $notInA[] = $creator->email;
+        $preMember = User::whereNotIn('email', $notInA)->first();
+        $this->assertNotNull($preMember->id??null);
+        $this->assertFalse( in_array($preMember->id, $existingStaff) );
+        $this->assertFalse( $preMember->id === $creator->id );
+
+        $payload = [
+            'first_name' => $preMember->real_firstname ?? $preMember->name,
+            'last_name' => $preMember->real_lastname ?? 'Smith',
+            'email' => $preMember->email,
+            'role' => 'member',
+        ];
+
+        $response = $this->actingAs($creator)->ajaxJSON( 'POST', route('staffaccounts.store', $payload) );
+        $response->assertStatus(201);
+        $content = json_decode($response->content());
+        $response->assertJsonStructure([
+            'data' => [ 'id', 'name', 'first_name', 'last_name', 'email', 'role', 'active', 'pending', 'owner_id', 'creator_id', 'user_id', 'settings', 'last_login_at', 'created_at' ]
+        ]);
+
+        // Check response
+        $this->assertNotNull($content->data->id);
+        $this->assertEquals($payload['first_name'], $content->data->first_name);
+        $this->assertEquals($payload['last_name'], $content->data->last_name);
+        $this->assertEquals($payload['email'], $content->data->email);
+        $this->assertEquals('member', $content->data->role);
+        $this->assertTrue($content->data->pending);
+        $this->assertFalse($content->data->active);
+        $this->assertNull($content->data->creator_id);
+        $this->assertNull($content->data->user_id);
+
+        // Check database
+        $sa = Staff::find($content->data->id);
+        $this->assertNotNull($sa->id??null);
+        $this->assertEquals($payload['first_name'], $sa->first_name);
+        $this->assertEquals($payload['last_name'], $sa->last_name);
+        $this->assertEquals($payload['email'], $sa->email);
+        $this->assertEquals('member', $sa->role);
+        $this->assertTrue(!!$sa->pending);
+        $this->assertFalse(!!$sa->active);
+        $this->assertNotNull($sa->creator_id); // %FIXME
+        $this->assertNotNull($sa->user_id); // %FIXME
+
+        if ( $isLogScanEnabled && $lPath ) {
+            $fSizeAfter = filesize($lPath);
+            if ( $fSizeBefore && $fSizeAfter && ($fSizeAfter > $fSizeBefore) ) {
+                $fDiff = $fSizeAfter > $fSizeBefore;
+                $fcontents = file_get_contents($lPath, false, null, -($fDiff-2));
+                //$toStr = $payload['first_name'].' '.$payload['last_name'].' <'.$payload['email'].'>';
+                $toStr = $payload['email'];
+                $this->assertStringContainsStringIgnoringCase('To: '.$toStr, $fcontents);
+                $this->assertStringContainsStringIgnoringCase('been added as a staff member', $fcontents);
+                $this->assertStringContainsString('Subject: Invite Staff Member', $fcontents);
+                $this->assertStringContainsString('From:', $fcontents);
+            }
+        }
+
+        NotificationFacade::assertSentTo( [$preMember], InviteStaffMember::class );
+    }
 
     /**
      *  @group regression
@@ -309,7 +555,6 @@ class RestStaffTest extends TestCase
         $content = json_decode($response->content());
         $this->assertEquals(count($permissions), count($content));
     }
-
 
     /**
      *  @group regression

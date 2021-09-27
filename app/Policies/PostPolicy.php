@@ -17,7 +17,7 @@ class PostPolicy extends BasePolicy
         'like'        => 'isOwner:pass isBlockedByOwner:fail',
         'comment'     => 'isOwner:pass isBlockedByOwner:fail',
         //'indexComments' => 'isOwner:pass isBlockedByOwner:fail',
-        'indexComments' => '',
+        //'indexComments' => '',
         'purchase'    => 'isOwner:fail isBlockedByOwner:fail',
         'tip'         => 'isOwner:fail isBlockedByOwner:fail',
         'favorite'    => 'isOwner:pass isBlockedByOwner:fail',

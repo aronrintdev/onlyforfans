@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class AlterCharsetInCampaignsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         if ( !DB::Connection() instanceof \Illuminate\Database\SQLiteConnection ) {
@@ -19,11 +14,6 @@ class AlterCharsetInCampaignsTable extends Migration
         }
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         if ( !DB::Connection() instanceof \Illuminate\Database\SQLiteConnection ) {

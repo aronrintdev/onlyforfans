@@ -4,11 +4,13 @@ namespace Tests\Feature;
 use Auth;
 use DB;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Config;
 
 use Tests\TestCase;
 use Database\Seeders\TestDatabaseSeeder;
 use Lunaweb\RecaptchaV3\Facades\RecaptchaV3;
 
+use App\Models\Notification;
 use App\Models\Timeline;
 use App\Models\User;
 use App\Models\UserSetting;
@@ -102,6 +104,18 @@ class RestUsersTest extends TestCase
      */
     public function test_user_can_register()
     {
+        $lPath = self::getLogPath();
+        $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
+        if( $isLogScanEnabled ) {
+            $fSizeBefore = $lPath ? filesize($lPath) : null;
+        }
+
+        // Save the number of notify records to ensure we add one later...
+        $notifyCountBefore = Notification::count();
+
+        // ---------------------------------------------------------------
+        // %%% Register the user
+        // ---------------------------------------------------------------
         $testToken = 'test';
         RecaptchaV3::shouldReceive('verify')
             ->with($testToken, 'register')
@@ -223,6 +237,9 @@ class RestUsersTest extends TestCase
 
         $this->assertNotNull($newUser);
         $this->assertNotNull($newUser->id);
+        $this->assertNull($newUser->email_verified_at);
+        $this->assertFalse(!!$newUser->email_verified);
+        $this->assertNotNull($newUser->verification_code);
 
         $this->assertNotNull($newUser->timeline);
         $this->assertNotNull($newUser->timeline->id);
@@ -289,6 +306,92 @@ class RestUsersTest extends TestCase
         $this->assertNotNull($vault->vaultfolders);
         $this->assertNotNull($vault->vaultfolders);
         $this->assertEquals(1, $vault->vaultfolders->count());
+
+        // Check that one notification was added...
+        $notifyCountAfter = Notification::count();
+        $this->assertEquals($notifyCountBefore+1, $notifyCountAfter);
+        $notifyCountBefore = $notifyCountAfter;
+
+        $n = Notification::where('notifiable_id', $newUser->id)->orderBy('created_at', 'desc')->first();
+        $this->assertNotNull($n);
+        $this->assertNotNull($n->id);
+
+        // set the created_at back a bit so it's disambuguated from Notifications below...
+        $n->created_at = $n->created_at->subMinute();
+        $n->save();
+
+        // Check 'VerifyEmail' notification (the email with the link the user clicks to verify)
+        $this->assertEquals('App\Notifications\VerifyEmail', $n->type);
+        $this->assertEquals('users', $n->notifiable_type);
+
+        $this->assertNotNull($n->data);
+        $this->assertIsArray($n->data);
+        $this->assertArrayHasKey('actor', $n->data);
+        $this->assertArrayHasKey('username', $n->data['actor']);
+        $this->assertArrayHasKey('name', $n->data['actor']);
+        $this->assertEquals($newUser->username, $n->data['actor']['username']);
+
+        if ( $isLogScanEnabled && $lPath ) {
+            $fSizeAfter = filesize($lPath);
+            if ( $fSizeBefore && $fSizeAfter && ($fSizeAfter > $fSizeBefore) ) {
+                $fDiff = $fSizeAfter > $fSizeBefore;
+                $fcontents = file_get_contents($lPath, false, null, -($fDiff-2));
+                $this->assertStringContainsStringIgnoringCase('To: '.$newUser->email, $fcontents);
+                $this->assertStringContainsStringIgnoringCase('Verify Email', $fcontents);
+                $this->assertStringContainsString('Subject:', $fcontents);
+                $this->assertStringContainsString('From:', $fcontents);
+            }
+            $fSizeBefore = filesize($lPath);
+        }
+
+        // ---------------------------------------------------------------
+        // %%% Click on the link in the Verify Email to do the verification
+        // ---------------------------------------------------------------
+
+        $url = url( route('verification.verify', ['id' => $newUser->id, 'hash' => $newUser->verification_code]) );
+        //$response = $this->actingAs($newUser)->ajaxJSON('GET', $url);
+        $response = $this->ajaxJSON('GET', $url);
+        $response->assertStatus(302);
+        $newUser->refresh();
+        $this->assertNotNull($newUser->email_verified_at);
+        $this->assertTrue(!!$newUser->email_verified);
+
+        // Check that one notification was added...
+        $notifyCountAfter = Notification::count();
+        $this->assertEquals($notifyCountBefore+1, $notifyCountAfter);
+        $notifyCountBefore = $notifyCountAfter;
+
+        $n = Notification::where('notifiable_id', $newUser->id)->orderBy('created_at', 'desc')->first();
+        $this->assertNotNull($n);
+        $this->assertNotNull($n->id);
+
+        // set the created_at back a bit so it's disambuguated from Notifications below...
+        $n->created_at = $n->created_at->subMinute();
+        $n->save();
+
+        // Check 'EmailVerified' notification (the email the user receives after confirming/verifying their email)
+        $this->assertEquals('App\Notifications\EmailVerified', $n->type);
+        $this->assertEquals('users', $n->notifiable_type);
+
+        $this->assertNotNull($n->data);
+        $this->assertIsArray($n->data);
+        $this->assertArrayHasKey('actor', $n->data);
+        $this->assertArrayHasKey('username', $n->data['actor']);
+        $this->assertArrayHasKey('name', $n->data['actor']);
+        $this->assertEquals($newUser->username, $n->data['actor']['username']);
+
+        if ( $isLogScanEnabled && $lPath ) {
+            $fSizeAfter = filesize($lPath);
+            if ( $fSizeBefore && $fSizeAfter && ($fSizeAfter > $fSizeBefore) ) {
+                $fDiff = $fSizeAfter > $fSizeBefore;
+                $fcontents = file_get_contents($lPath, false, null, -($fDiff-2));
+                $this->assertStringContainsStringIgnoringCase('To: '.$newUser->email, $fcontents);
+                $this->assertStringContainsString('Subject: Email Verified', $fcontents);
+                $this->assertStringContainsString('From:', $fcontents);
+                $this->assertStringContainsStringIgnoringCase('Now that your email is verified', $fcontents);
+            }
+            $fSizeBefore = filesize($lPath);
+        }
     }
 
     /**
@@ -314,12 +417,90 @@ class RestUsersTest extends TestCase
      *  @group users
      *  @group regression
      *  @group regression-base
-     *  @group fujio
+     */
+    public function test_user_can_reset_password()
+    {
+        $lPath = self::getLogPath();
+        $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
+        if( $isLogScanEnabled ) {
+            $fSizeBefore = $lPath ? filesize($lPath) : null;
+        }
+
+        $user = User::first();
+
+        // Save the number of notify records to ensure we add one later...
+        $notifyCountBefore = Notification::count();
+
+        // Save the number of [password_resets] records to ensure we add one later...
+        $passwordResetsCountBefore = DB::table('password_resets')->count();
+
+        // Request to rest password
+        $payload = [ 'email' => $user->email ];
+        $response = $this->ajaxJSON('POST', '/forgot-password', $payload);
+        //$response = $this->actingAs($user)->ajaxJSON('POST', '/forgot-password', $payload);
+        //$content = json_decode($response->content());
+        $response->assertStatus(200);
+
+        if ( $isLogScanEnabled && $lPath ) {
+            $fSizeAfter = filesize($lPath);
+            if ( $fSizeBefore && $fSizeAfter && ($fSizeAfter > $fSizeBefore) ) {
+                $fDiff = $fSizeAfter > $fSizeBefore;
+                $fcontents = file_get_contents($lPath, false, null, -($fDiff-2));
+                $this->assertStringContainsStringIgnoringCase('To: '.$user->email, $fcontents);
+                $this->assertStringContainsStringIgnoringCase('Forgot Password', $fcontents);
+                $this->assertStringContainsStringIgnoringCase('To reset your password, please click', $fcontents);
+                $this->assertStringContainsString('Subject:', $fcontents);
+                $this->assertStringContainsString('From:', $fcontents);
+            }
+            $fSizeBefore = $lPath ? filesize($lPath) : null;
+        }
+        $passwordResetsCountAfter = DB::table('password_resets')->count();
+        $this->assertEquals($passwordResetsCountBefore+1, $passwordResetsCountAfter);
+
+        $pr = DB::table('password_resets')->orderBy('created_at', 'desc')->where('email', $user->email)->first();
+        $this->assertNotNull($pr);
+        $this->assertNotNull($pr->id);
+        $this->assertNotNull($pr->token);
+        $resetToken = $pr->token;
+
+        // This is not the correct implementation: AF-624
+        /*
+        $user->refresh();
+        $resetToken = $user->remember_token;
+        $verifyLink = config('base_url') . 'reset-password/' . $resetToken . '?email=' . urlencode($user->email);
+         */
+
+        //http://localhost:8000/reset-password/{token}?email=maybelle.macejkovic%40example.com
+
+        // "Click" confirmation button in email
+
+        // [ ] Submit new password form with token
+
+        // [ ] Test login with new password
+
+        // [ ] Check that one notification was added...
+
+        // [ ] Check email in log
+    }
+
+    /**
+     *  @group users
+     *  @group regression
+     *  @group regression-base
      */
     public function test_user_can_change_password()
     {
+        $lPath = self::getLogPath();
+        $isLogScanEnabled = Config::get('sendgrid.testing.scan_log_file_to_check_emails', false);
+        if( $isLogScanEnabled ) {
+            $fSizeBefore = $lPath ? filesize($lPath) : null;
+        }
+
         $timeline = Timeline::has('followers', '>=', 1)->firstOrFail();
         $creator = $timeline->user;
+
+        // Save the number of notify records to ensure we add one later...
+        $notifyCountBefore = Notification::count();
 
         $oldPassword = 'foo-123'; // yes, hardcoded from the seeders
         $newPassword = 'bar-123';
@@ -348,6 +529,41 @@ class RestUsersTest extends TestCase
         $payload = [ 'email' => $creator->email, 'password' => $newPassword, 'g-recaptcha-response' => $test_token ];
         $response = $this->ajaxJSON('POST', '/login', $payload);
         $response->assertStatus(200);
+
+        // Check that one notification was added...
+        $notifyCountAfter = Notification::count();
+        $this->assertEquals($notifyCountBefore+1, $notifyCountAfter);
+
+        $n = Notification::where('notifiable_id', $creator->id)->orderBy('created_at', 'desc')->first();
+        $this->assertNotNull($n);
+        $this->assertNotNull($n->id);
+
+        // set the created_at back a bit so it's disambuguated from Notifications below...
+        $n->created_at = $n->created_at->subMinute();
+        $n->save();
+
+        $this->assertEquals('App\Notifications\PasswordChanged', $n->type);
+        $this->assertEquals('users', $n->notifiable_type);
+
+        $this->assertNotNull($n->data);
+        $this->assertIsArray($n->data);
+        $this->assertArrayHasKey('actor', $n->data);
+        $this->assertArrayHasKey('username', $n->data['actor']);
+        $this->assertArrayHasKey('name', $n->data['actor']);
+        $this->assertArrayHasKey('avatar', $n->data['actor']);
+        $this->assertEquals($creator->username, $n->data['actor']['username']);
+
+        if ( $isLogScanEnabled && $lPath ) {
+            $fSizeAfter = filesize($lPath);
+            if ( $fSizeBefore && $fSizeAfter && ($fSizeAfter > $fSizeBefore) ) {
+                $fDiff = $fSizeAfter > $fSizeBefore;
+                $fcontents = file_get_contents($lPath, false, null, -($fDiff-2));
+                $this->assertStringContainsStringIgnoringCase('To: '.$creator->email, $fcontents);
+                $this->assertStringContainsStringIgnoringCase('Password Changed', $fcontents);
+                $this->assertStringContainsString('Subject:', $fcontents);
+                $this->assertStringContainsString('From:', $fcontents);
+            }
+        }
     }
 
     /**
@@ -403,6 +619,7 @@ class RestUsersTest extends TestCase
      *  @group NO-regression
      *  @group NO-regression-base
      */
+    // Not put in regression as it adds new data to devdashboard.idmvalidate.com/verifications each time (?)
     public function test_should_send_verify_request_for_user()
     {
         $timeline = Timeline::has('followers', '>=', 1)->firstOrFail();
@@ -415,7 +632,7 @@ class RestUsersTest extends TestCase
 	        'country' => 'US',
 	        'dob' => $faker->date($format='Y-m-d', $max='2000-01-15'),
         ];
-        $response = $this->actingAs($creator)->ajaxJSON('POST', route('users.verify-request', $payload));
+        $response = $this->actingAs($creator)->ajaxJSON('POST', route('users.requestVerify', $payload));
         $content = json_decode($response->content());
         $response->assertStatus(200);
         dd($content);

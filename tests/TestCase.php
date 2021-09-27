@@ -3,6 +3,7 @@ namespace Tests;
 
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\Config;
 //use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
@@ -78,6 +79,15 @@ abstract class TestCase extends BaseTestCase
         $admin->assignRole('admin'); // upgrade to admin!
         $admin->refresh();
         return $admin;
+    }
+
+    protected static function getLogPath() : ?string
+    {
+        $lConfig = Config::get('logging');
+        if ( ($lConfig['default']??null) === 'single' && $lConfig['channels']['single']['path']??null ) {
+            $lPath = $lConfig['channels']['single']['path'];
+        }
+        return $lPath ?? null;
     }
 
 }

@@ -4,13 +4,14 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 use App\Interfaces\Purchaseable;
 //use App\Models\Post;
 use App\Models\User;
 
 class ResourcePurchased extends Notification
 {
-    use Queueable;
+    use NotifyTraits, Queueable;
 
     public $resource;
     public $actor; // purchaser
@@ -34,6 +35,11 @@ class ResourcePurchased extends Notification
     {
         return (new MailMessage)
                     ->line($this->actor->name.' purchased your post');
+    }
+
+    public function toSendgrid($notifiable)
+    {
+        return []; // %TODO
     }
 
     public function toArray($notifiable)

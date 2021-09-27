@@ -34,10 +34,11 @@ trait NotifyTraits {
     protected function getMailChannel()
     {
         if ( Config('sendgrid.debug.bypass_sendgrid_mail_notify', false) ) {
-            // uses MAIL_DRIVER instead of SendGrid API for notify emails
+            // uses MAIL_DRIVER for notify emails
             return 'mail';
         } else {
-            return \App\Channels\SendgridChannel::class; // DEBUG only
+            // uses SendGrid API for notify emails
+            return \App\Channels\SendgridChannel::class;
         }
     }
 

@@ -46,20 +46,21 @@ export default {
   },
 
   methods: {
+
     inviteSent() {
       this.isNewManager = false;
       this.loadPage(1);
     },
-    loadPage(page) {
-      axios.get(this.$apiRoute('staff.indexManagers'), {
+
+    async loadPage(page) {
+      const response = await axios.get( this.$apiRoute('staffaccounts.index'), {
         params: {
           page: page ? page : this.metadata.current_page,
+          role: 'manager'
         }
       })
-        .then(response => {
-          this.managers = response.data.data;
-          this.metadata = response.data.meta;
-        })
+      this.managers = response.data.data;
+      this.metadata = response.data.meta;
     }
   },
 

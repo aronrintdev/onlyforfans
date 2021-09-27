@@ -109,6 +109,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
     public static function boot()
     {
         parent::boot();
+
         self::creating(function ($model) {
             $model->checkUsername();
             $model->remember_token = str_random(10);
@@ -125,6 +126,7 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
                 $model->real_lastname = $last;
             }
         });
+
         self::created(function ($model) {
             UserSetting::create([
                 'user_id' => $model->id,
@@ -134,19 +136,18 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
                 'name'    => $model->real_firstname,
                 'about'   => '',
             ]);
-        });
-        self::updating(function ($model) {
-            $model->checkUsername();
-        });
-        self::saving(function ($model) {
-            $model->checkUsername();
-        });
-
-        static::created(function ($model) {
             $vault = Vault::create([
                 'vname' => 'My Media',
                 'user_id' => $model->id,
             ]);
+        });
+
+        self::updating(function ($model) {
+            $model->checkUsername();
+        });
+
+        self::saving(function ($model) {
+            $model->checkUsername();
         });
 
         static::deleting(function ($model) {
@@ -332,18 +333,15 @@ class User extends Authenticatable implements Blockable, HasFinancialAccounts, M
         return $this->hasOne(Verifyrequest::class, 'requester_id')->latestOfMany();
     }
 
-    public function campaign()
-    {
+    public function campaign() {
         return $this->hasOne(Campaign::class, 'creator_id')->where('active', true);
     }
 
-    public function staffMembers()
-    {
+    public function staffaccounts() { // includes managers and members
         return $this->hasMany(Staff::class, 'owner_id');
     }
 
-    public function staff()
-    {
+    public function staff() {
         return $this->hasOne(Staff::class, 'user_id');
     }
 

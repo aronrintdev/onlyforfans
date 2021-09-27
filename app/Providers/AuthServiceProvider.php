@@ -53,10 +53,10 @@ class AuthServiceProvider extends ServiceProvider
             return $user->can('admin.websockets.dashboard.view');
         });
 
-        IlluminateVerifyEmail::toMailUsing(function ($notifiable, $url) {
-            \Log::debug('Verify Email', ['notifiable->email' => $notifiable->email, 'url' => $url ]);
-            return $notifiable->notify(new VerifyEmail($notifiable, $url));
-        });
+        //IlluminateVerifyEmail::toMailUsing(function ($notifiable, $url) {
+        //    \Log::debug('Verify Email', ['notifiable->email' => $notifiable->email, 'url' => $url ]);
+        //    return $notifiable->notify(new VerifyEmail($notifiable, $url));
+        //});
 
         //
     }
